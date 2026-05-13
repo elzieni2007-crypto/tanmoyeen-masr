@@ -1688,7 +1688,7 @@ let jFilt='all', tFilt='all', cFilt='all', sFilt='all';
 let logoTaps=0, logoTimer=null;
 
 // ============ NAVIGATION ============
-const navMap={home:'n-home',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers'};
+const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers'};
 function go(id){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
@@ -2947,7 +2947,13 @@ function submitVolunteer(){
       spec: interests.join(' / '),
       phone: vol.phone,
       email: vol.email,
-      notes: 'مهارات: ' + vol.skills + ' | ساعات: ' + vol.hours + ' | نوع: ' + vol.worktype,
+      skills: vol.skills,
+      hours: vol.hours,
+      worktype: vol.worktype,
+      days: (vol.days||[]).join(' - '),
+      travel: vol.travel,
+      langs: vol.langs,
+      badges: (vol.badges||[]).join(' / '),
     })
   }).catch(function(){});
 

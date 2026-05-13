@@ -466,6 +466,31 @@ textarea.fi{resize:none}
   }
 }
 
+
+/* HERO SHRINK ANIMATION */
+.dash-hero{
+  transition: all .4s cubic-bezier(.4,0,.2,1);
+}
+.dash-hero.shrunk{
+  padding: 8px 14px !important;
+  margin: 4px 12px 0 !important;
+}
+.dash-hero.shrunk .dh-title{
+  font-size:11px !important;
+  margin-bottom:5px !important;
+}
+.dash-hero.shrunk .dh-greet{
+  display:none;
+}
+.dash-hero.shrunk .ds-n{font-size:12px !important}
+.dash-hero.shrunk .ds-l{font-size:7px !important}
+.dash-hero.shrunk .dh-stats{padding:4px 0 !important}
+.dash-hero.shrunk .dh-logo{
+  width:28px !important;
+  height:28px !important;
+}
+
+#home{overflow-y:auto;-webkit-overflow-scrolling:touch}
 </style>
 </head>
 <body>
@@ -476,7 +501,7 @@ textarea.fi{resize:none}
   <div class="sp-logo"><img id="logo-img" src="" alt="تنمويين مصر"></div>
   <div class="sp-t">تنمويين مصر</div>
   <div class="sp-s">لكل تنموي في مصر</div>
-  <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:4px;position:relative;z-index:1;animation:su .6s ease 1s both">🌐 luminous-pasca-edd061.netlify.app</div>
+  <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:4px;position:relative;z-index:1;animation:su .6s ease 1s both">🌐 elzieni2007-crypto.github.io/tanmoyeen-masr</div>
   <div class="sp-bar"><div class="sp-track"><div class="sp-fill"></div></div></div>
 </div>
 
@@ -518,9 +543,8 @@ textarea.fi{resize:none}
     <div class="dg-card" onclick="go('tenders')"><div class="dg-icon" style="background:#fef3e8">📋</div><div class="dg-t">المناقصات</div><div class="dg-c">٣٨ مناقصة</div></div>
     <div class="dg-card" onclick="go('consultants')"><div class="dg-icon" style="background:#e7faf3">👨‍💼</div><div class="dg-t">الاستشاريون</div><div class="dg-c">301 مسجّل</div></div>
     <div class="dg-card" onclick="go('suppliers')"><div class="dg-icon" style="background:#f0e8fe">🏭</div><div class="dg-t">الموردون</div><div class="dg-c">73 مورد</div></div>
-    <div class="dg-card" onclick="go('register')"><div class="dg-icon" style="background:#feeaea">📝</div><div class="dg-t">سجّل ملفك</div><div class="dg-c">مجاناً</div></div>
-
-    <div class="dg-card" onclick="window.open('https://www.facebook.com/groups/346107035759429/?ref=share&mibextid=NSMWBT','_blank')"><div class="dg-icon" style="background:#e8f4fd">📘</div><div class="dg-t">المجموعة</div><div class="dg-c">٢٥K عضو</div></div>
+    <div class="dg-card" onclick="go('volunteers')"><div class="dg-icon" style="background:#e7faf3">🤝</div><div class="dg-t">متطوعون</div><div class="dg-c" id="vol-dash-count">انضم الآن</div></div>
+    <div class="dg-card" onclick="go('register')" style="border:2px solid var(--a);background:linear-gradient(135deg,#e8f0fe,#f0f7ff)"><div class="dg-icon" style="background:var(--a)">📝</div><div class="dg-t" style="color:var(--p);font-weight:900">سجّل ملفك</div><div class="dg-c" style="color:var(--a);font-weight:800">مجاناً ✨</div></div>
   </div>
   <!-- أزرار المشاركة -->
   <div style="display:flex;gap:6px;padding:4px 10px 2px;direction:ltr">
@@ -678,6 +702,13 @@ textarea.fi{resize:none}
     <div class="tab" onclick="setVolFilter(this,'مجتمع')" style="flex-shrink:0">🤝 مجتمع</div>
     <div class="tab" onclick="setVolFilter(this,'تكنولوجيا')" style="flex-shrink:0">💻 تكنولوجيا</div>
     <div class="tab" onclick="setVolFilter(this,'فنون')" style="flex-shrink:0">🎨 فنون</div>
+    <div class="tab" onclick="setVolFilter(this,'رياضة')" style="flex-shrink:0">⚽ رياضة</div>
+    <div class="tab" onclick="setVolFilter(this,'إغاثة')" style="flex-shrink:0">🆘 إغاثة</div>
+    <div class="tab" onclick="setVolFilter(this,'أطعام')" style="flex-shrink:0">🍱 أطعام</div>
+    <div class="tab" onclick="setVolFilter(this,'تنظيم مؤتمرات')" style="flex-shrink:0">🎪 مؤتمرات</div>
+    <div class="tab" onclick="setVolFilter(this,'متاح الآن')" style="flex-shrink:0">🟢 متاح الآن</div>
+    <div class="tab" onclick="setVolFilter(this,'لديه خبرة')" style="flex-shrink:0">💼 لديه خبرة</div>
+    <div class="tab" onclick="setVolFilter(this,'متطوع مميز')" style="flex-shrink:0">⭐ مميز</div>
   </div>
 
   <!-- قائمة المتطوعين -->
@@ -1558,7 +1589,7 @@ function enterApp(){
   document.getElementById('splash').style.display='none';
   document.getElementById('app').style.display='block';
   setAllLogos();
-  loadCustomContent();renderDash();renderJobs();renderTenders();updateJobseekersList();loadVolunteers();
+  loadCustomContent();renderDash();renderJobs();renderTenders();updateJobseekersList();loadVolunteers();setTimeout(setupHeroShrink,100);
   // URL params handled separately after load
 }
 
@@ -1657,7 +1688,7 @@ let jFilt='all', tFilt='all', cFilt='all', sFilt='all';
 let logoTaps=0, logoTimer=null;
 
 // ============ NAVIGATION ============
-const navMap={home:'n-home',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register'};
+const navMap={home:'n-home',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers'};
 function go(id){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
@@ -1669,6 +1700,8 @@ function go(id){
   if(id==='suppliers')renderSups();
   if(id==='tenders')renderTenders();
   if(id==='notifs')renderNotifs();
+  if(id==='volunteers')loadVolunteers();
+  if(id==='home')setupHeroShrink();
 }
 
 // ============ LOGO TAP (admin access) ============
@@ -2231,7 +2264,7 @@ function shareSuccessWA(){
     'لأكثر من 25,000 تنموي من كل محافظات مصر 🌟',
     '',
     'سجّل أنت كمان:',
-    'https://luminous-pasca-edd061.netlify.app',
+    'https://elzieni2007-crypto.github.io/tanmoyeen-masr',
   ];
   window.open('https://wa.me/?text=' + encodeURIComponent(parts.join('\n')), '_blank');
   document.getElementById('success-overlay').classList.remove('on');
@@ -2603,14 +2636,14 @@ function getTenderFormData(){
 
 // مشاركة وظيفة مباشرة
 function shareJobWA(){
-  var appUrl = 'luminous-pasca-edd061.netlify.app?form=job';
+  var appUrl = 'elzieni2007-crypto.github.io/tanmoyeen-masr?form=job';
   var msg = [
     'الان يمكنك مشاركة اعلانات الوظائف الخاصة بك',
     '',
     'شاركها مع 25,000 تنموي على منصة تنمويين مصر!',
     '',
     'اضغط الرابط واكمل البيانات في دقيقتين:',
-    'luminous-pasca-edd061.netlify.app?form=job',
+    'elzieni2007-crypto.github.io/tanmoyeen-masr?form=job',
     '',
     'الاعلان بيوصل لكل المهتمين بالعمل التنموي',
     'مجاني 100%',
@@ -2621,7 +2654,7 @@ function shareJobWA(){
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 function shareJobFB(){
-  var appUrl = 'https://luminous-pasca-edd061.netlify.app';
+  var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
   var msg = 'عارف عن وظيفة تنموية؟ شاركها على تنمويين مصر! اضغط: ' + appUrl + '?form=job';
   window.open(
     'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(appUrl + '?form=job') +
@@ -2637,7 +2670,7 @@ function shareTenderWA(){
     'شاركها مع 25,000 تنموي على منصة تنمويين مصر!',
     '',
     'اضغط الرابط واكمل البيانات في دقيقتين:',
-    'luminous-pasca-edd061.netlify.app?form=tender',
+    'elzieni2007-crypto.github.io/tanmoyeen-masr?form=tender',
     '',
     'الاعلان بيوصل لكل المهتمين بالعمل التنموي',
     'مجاني 100%',
@@ -2648,7 +2681,7 @@ function shareTenderWA(){
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 function shareTenderFB(){
-  var appUrl = 'https://luminous-pasca-edd061.netlify.app';
+  var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
   var msg = 'عندك مناقصة تنموية؟ شاركها على تنمويين مصر! اضغط: ' + appUrl + '?form=tender';
   window.open(
     'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(appUrl + '?form=tender') +
@@ -2772,7 +2805,9 @@ function renderVolunteers(){
   if(!list) return;
   var search = (document.getElementById('vol-search')||{}).value || '';
   var data = VOLUNTEERS_DATA.filter(function(v){
-    var matchFilter = volFilter === 'all' || (v.interests && v.interests.includes(volFilter));
+    var matchFilter = volFilter === 'all' ||
+      (v.interests && v.interests.includes(volFilter)) ||
+      (v.badges && v.badges.includes(volFilter));
     var matchSearch = !search ||
       (v.name && v.name.includes(search)) ||
       (v.skills && v.skills.includes(search)) ||
@@ -2956,7 +2991,7 @@ function submitVolunteer(){
 }
 // ============ SHARE FUNCTIONS ============
 const FB_GROUP_URL = 'https://www.facebook.com/groups/346107035759429/?ref=share&mibextid=NSMWBT';
-const APP_SHARE_URL = 'https://luminous-pasca-edd061.netlify.app';
+const APP_SHARE_URL = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
 const APP_SHARE_TEXT = 'تنمويين مصر - منصة العمل التنموي في مصر\n301 استشاري | 73 مورد | وظائف ومناقصات يومياً\n\nانضم دلوقتي:';
 
 function shareWA(){
@@ -3559,6 +3594,22 @@ function toggleStrip(type){
     wrap.style.maxHeight  = '0px';
     if(arrow) arrow.style.transform = 'rotate(0deg)';
   }
+}
+
+function setupHeroShrink(){
+  var home = document.getElementById('home');
+  if(!home) return;
+  // Remove old listener
+  home.onscroll = null;
+  home.addEventListener('scroll', function(){
+    var hero = home.querySelector('.dash-hero');
+    if(!hero) return;
+    if(home.scrollTop > 30){
+      hero.classList.add('shrunk');
+    } else {
+      hero.classList.remove('shrunk');
+    }
+  }, {passive:true});
 }
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),2500);}

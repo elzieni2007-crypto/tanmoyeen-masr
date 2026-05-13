@@ -571,7 +571,7 @@ textarea.fi{resize:none}
     <div class="dg-card" onclick="go('jobs')"><div class="dg-icon" style="background:#e8f0fe">💼</div><div class="dg-t">الوظائف</div><div class="dg-c">جديد يومياً</div></div>
     <div class="dg-card" onclick="go('tenders')"><div class="dg-icon" style="background:#fef3e8">📋</div><div class="dg-t">المناقصات</div><div class="dg-c">٣٨ مناقصة</div></div>
     <div class="dg-card" onclick="go('consultants')"><div class="dg-icon" style="background:#e7faf3">👨‍💼</div><div class="dg-t">الاستشاريون</div><div class="dg-c" id="cons-dg-count">243 مسجّل</div></div>
-    <div class="dg-card" onclick="go('orgs-screen')"><div class="dg-icon" style="background:#e8f4fd">🏢</div><div class="dg-t">المؤسسات</div><div class="dg-c">52 مؤسسة</div></div>
+    <div class="dg-card" onclick="go('orgs-screen')"><div class="dg-icon" style="background:#e8f4fd">🏢</div><div class="dg-t">المؤسسات</div><div class="dg-c">46 مؤسسة</div></div>
     <div class="dg-card" onclick="go('suppliers')"><div class="dg-icon" style="background:#f0e8fe">🏭</div><div class="dg-t">الموردون</div><div class="dg-c" id="sups-dg-count">87 مورد</div></div>
     <div class="dg-card" onclick="go('volunteers')"><div class="dg-icon" style="background:#e7faf3">🤝</div><div class="dg-t">متطوعون</div><div class="dg-c" id="vol-dash-count">انضم الآن</div></div>
     <div class="dg-card" onclick="go('register')" style="border:2px solid var(--a);background:linear-gradient(135deg,#e8f0fe,#f0f7ff)"><div class="dg-icon" style="background:var(--a)">📝</div><div class="dg-t" style="color:var(--p);font-weight:900">سجّل ملفك</div><div class="dg-c" style="color:var(--a);font-weight:800">مجاناً ✨</div></div>
@@ -702,7 +702,7 @@ textarea.fi{resize:none}
   <div style="background:linear-gradient(135deg,#1a3a6e,#0094cc);padding:20px 16px 16px;color:white">
     <div style="font-size:28px;margin-bottom:6px">🏢</div>
     <div style="font-size:18px;font-weight:900;margin-bottom:4px">المؤسسات والجمعيات</div>
-    <div style="font-size:12px;opacity:.85">52 مؤسسة وجمعية مسجّلة</div>
+    <div style="font-size:12px;opacity:.85">46 مؤسسة وجمعية مسجّلة</div>
   </div>
   <div class="search-wrap">
     <div class="sbar">
@@ -1984,58 +1984,52 @@ const SUPS = [
 ];
 
 const ORGS = [
-{id:1,name:'هيئة إنقاذ الطفولة',type:'هيئة دولية',gov:'كل المحافظات',field:'حماية الطفل / التعليم',phone:'',email:'',notes:'',logo:'🌍'},
-{id:2,name:'هيئة بلان إنترناشيونال',type:'هيئة دولية',gov:'كل المحافظات',field:'الطفولة / النوع الاجتماعي',phone:'',email:'',notes:'',logo:'🌍'},
-{id:3,name:'هيئة كير الدولية',type:'هيئة دولية',gov:'كل المحافظات',field:'التنمية المجتمعية',phone:'',email:'',notes:'',logo:'🌍'},
-{id:4,name:'UNICEF مصر',type:'أمم متحدة',gov:'القاهرة',field:'الطفولة / الصحة / التعليم',phone:'',email:'',notes:'',logo:'🌐'},
-{id:5,name:'GIZ مصر',type:'تعاون دولي',gov:'القاهرة',field:'التنمية الاقتصادية',phone:'',email:'',notes:'',logo:'🏢'},
-{id:6,name:'USAID مصر',type:'هيئة أمريكية',gov:'القاهرة',field:'التنمية الشاملة',phone:'',email:'',notes:'',logo:'⚖️'},
-{id:7,name:'جمعية الصعيد للتربية والتنمية',type:'جمعية أهلية',gov:'أسيوط',field:'التعليم / التنمية',phone:'',email:'',notes:'',logo:'🤝'},
-{id:8,name:'جمعية تحسين أوضاع المرأة والطفل',type:'جمعية أهلية',gov:'سوهاج',field:'المرأة / الطفل',phone:'',email:'',notes:'',logo:'🤝'},
-{id:9,name:'مؤسسة مصر الخير',type:'مؤسسة وطنية',gov:'القاهرة',field:'التنمية الشاملة',phone:'',email:'',notes:'',logo:'🏢'},
-{id:10,name:'جمعية كاريتاس مصر',type:'جمعية أهلية',gov:'أسيوط / القاهرة',field:'الخدمات الاجتماعية',phone:'',email:'',notes:'',logo:'🤝'},
-{id:11,name:'جمعيه عطاء السماء للتنميه الشامله',type:'تمكين . صحه . تعليم',gov:'',field:'',phone:'',email:'1011942004',notes:'attaa9070@gmail.com',logo:'🏢'},
-{id:12,name:'جمعيه بدر للتنمية والمشروعات ببنى هلال مركز المراغه محافظة سوهاج',type:'تعليم حمايه اجتماعية تمكين اقتصادى',gov:'',field:'',phone:'',email:'1140117111',notes:'smahabwjblabwjbl@gmail.com',logo:'🏢'},
-{id:13,name:'جمعية الاصدقاء لذوى الاعاقه وتنمية المجتمع بصدفا',type:'',gov:'',field:'',phone:'',email:'01020820903-01010982410',notes:'society_offrinds@yahoo.com',logo:'🏠'},
-{id:14,name:'جمعية لقاء للتضامن والعمل الاجتماعي',type:'تعليم شباب اطفال تبادل ثقافي تطوع',gov:'',field:'',phone:'',email:'1222256399',notes:'networking@lekaa.org',logo:'🏠'},
-{id:15,name:'جمعيه ابناء زرنيخ مركز اسنا القاهره مسجله رقم٥٨٦',type:'جمعيه خيريه',gov:'',field:'',phone:'',email:'1157988742',notes:'mahmoud.777.world@gmail.com',logo:'🏢'},
-{id:16,name:'جمعية الاصدقاء لذوى الاعاقه وتنمية المجتمع بصدفا',type:'1-	المساعدات الاجتماعية  2-	الدفاع الاجتماعي  3-	حماية البيئة والمحافظة عليها  4-	اصحاب المعاشات  5-	التنظيم والإدارة  6-	تنظيم الأسرة  7-	الفئات الخاصة والمعاقين  8-	الخدمات التعليمية  9-	رعاية الطفولة والأمومة  10-	الخدمات الثقافية والعلمية والدينية  11-	الصداقة بين الشعوب  12-	التنمية الاقتصادية  13-	الخدمات الصحية  14-	حماية المستهلك  15-	النشاط الأدبي  16-	حقوق الانسان  17-	رعاية المسجونين واسرهم  18-	رعاية الشيخوخة  19-	رعاية الأسرة',gov:'',field:'',phone:'',email:'01020820903-01010982410',notes:'society_offrinds@yahoo.com',logo:'🏠'},
-{id:17,name:'مؤسسة  كير مصر للتنمية',type:'تمرين المرأة - تعليم- بناء قدرات الجمعيات الأهليه- الزراعة وتغييرات المناخ.',gov:'',field:'',phone:'',email:'1009728004',notes:'recruit.CEF@cef-eg.org',logo:'🏢'},
-{id:18,name:'جمعية أم القرى لتنمية المجتمع',type:'1-	التنمية والتمكين الاقتصادي 2-	حماية البيئة والمحافظة عليها 3-	خدمات الرعاية الصحية.  4-	المساعدات والخدمات الاجتماعية. 5-	الخدمات الصحية 6-	تنظيم الأسرة 7-	الخدمات التعليمية 8-	الخدمات الثقافية والعلمية والدينية',gov:'',field:'',phone:'',email:'1127772624',notes:'omalkora2004@yahoo.com',logo:'🏠'},
-{id:19,name:'جمعية اهل بلدي بقنا',type:'تمكين االشباب  - صحة انجابية وجنسية - دمح ذوي الاعاقة',gov:'',field:'',phone:'',email:'1000508123',notes:'ahlbldy@gmail.com',logo:'🏠'},
-{id:20,name:'مؤسسة معانا في الخير للتنمية',type:'تعليم صحة تمكين اقتصادي',gov:'',field:'',phone:'',email:'1119796982',notes:'manafyalkhyr@gmail.com',logo:'🏢'},
-{id:21,name:'جمعية تنمية المجتمع بالعركي',type:'تعليم - صحة- تمكين اقتصادي- دعم المرأة',gov:'',field:'',phone:'',email:'1009494281',notes:'alaamsadek3@gmail.com',logo:'🏠'},
-{id:22,name:'جمعية بلدى لتنمية المجتمع',type:'مساعدات انسانية - تعليم - صحة - بيئة - تمكين اقتصادى - زراعة - تنظيم أسرة.',gov:'',field:'',phone:'',email:'1033241977',notes:'balady.eg@gmail.com',logo:'🏠'},
-{id:23,name:'شباب الشرقيه للتنميه',type:'تمكين اقتصادي -البيئه ـ التعليم -',gov:'',field:'',phone:'',email:'1273008583',notes:'shababelsharkia112005@gmail.com',logo:'🏢'},
-{id:24,name:'جمعية بلدى لتنمية المجتمع',type:'مساعدات انسانية - تعليم - صحة - بيئة - زراعة - تنظيم أسرة و صحة انجابية - تمكين اقتصادى.',gov:'',field:'',phone:'',email:'1033241977',notes:'balady.eg@gmail.com',logo:'🏠'},
-{id:25,name:'جمعية الرواد لخدمة المجتمع',type:'تمكين اقتصادي ، تعليم  صحة، تدريب',gov:'',field:'',phone:'',email:'1227145256',notes:'alrowadngo@gmail.com',logo:'🏠'},
-{id:26,name:'النور الساطع لتنمية المجتمع بالمنيا',type:'تنمية شاملة',gov:'',field:'',phone:'',email:'',notes:'nourelsatea@gmail.com',logo:'🏢'},
-{id:27,name:'النور الساطع لتنمية المجتمع بالمنيا',type:'تنمية شاملة',gov:'',field:'',phone:'',email:'1033968343',notes:'nourelsatea@gmail.com',logo:'🏢'},
-{id:28,name:'مؤسسة الفارس النبيل للتنمية',type:'احياء وتطوير الحرف التراثية . تعليم . تمكين اجتماعي واقتصادي',gov:'',field:'',phone:'',email:'1225471155',notes:'nobleknight9383@yahoo.com',logo:'🏢'},
-{id:29,name:'النور الساطع لتنمية المجتمع بالمنيا',type:'تنمية شاملة',gov:'',field:'',phone:'',email:'1033968343',notes:'nourelsatea@gmail.com',logo:'🏢'},
-{id:30,name:'جمعية الجيل المنتج  لتنمية المجتمع وحماية البيئة باسيوط',type:'تعليم . صحة . تمكين اقتصادى.حقوق انسان.',gov:'',field:'',phone:'',email:'1007575093',notes:'Norhanalkady.gelmonteg@gmail.com',logo:'🏠'},
-{id:31,name:'مؤسسة ضي للتنمية بسوهاج',type:'ثقافي',gov:'',field:'',phone:'',email:'201515248831',notes:'daifoundation25@gmail.com',logo:'🏢'},
-{id:32,name:'مؤسسة أبواب مصر للتنمية الشاملة',type:'تمكين اقتصادي  تنمية مجتمع   تعليم',gov:'',field:'',phone:'',email:'1111679040',notes:'abwabmisr24@gmail.com',logo:'🏢'},
-{id:33,name:'جمعية عطاء مستمر للتنميه بالبلايزه',type:'التعليم ـ الصحه ـ الاقتصاد ـ الزراعه ـ المراه ـ الطفل ـ الشباب ـ النشئ ـ ذوى الاعاقه ـ الفئات المهمشه والاكثر احتياجا',gov:'',field:'',phone:'',email:'1286065512',notes:'rashed5515788@gmail.com',logo:'🏠'},
-{id:34,name:'جمعيه ابناء زرنيخ',type:'جمعيه خيريه',gov:'',field:'',phone:'',email:'1123303186',notes:'mahmoud.777.world@gmail.com',logo:'🏢'},
-{id:35,name:'جمعية خطوة لتنمية المجتمع المحلى',type:'تمكين اقتصادى /تدريب وتعليم/رعاية اجتماعية',gov:'',field:'',phone:'',email:'01013238634-01287082826',notes:'khatwahfordevelobment@yahoo.com',logo:'🏠'},
-{id:36,name:'جمعيه الفتح للتنميه بسوهاج',type:'تعليم. صحة.حماية البيئه. دعم المرأة. تنميه مستدامة.مساعدات اجتماعيه. تدريبات. تنميه اقتصادية واجتماعية وثقافية.',gov:'',field:'',phone:'',email:'01121800531-01144947019-01271209715',notes:'mohmdokash@gmail.com',logo:'🏢'},
-{id:37,name:'املنا هي مصر لتنميه المجتمع',type:'مجالات عمل المؤسسة  .١- التنميه الاقتصاديه ٢. المساعدات الاجتماعية - ٣٠ - الخدمات التعليمية - - - الدفاع الاجتماعي - ٥- الخدمات الصحية - ٦ - التنمية  الاقتصادية - 7 - تنظيم الأسرة - - الخدمات الثقافية والعلمية والدينية - ٩ - رعاية الطفولة والأمومة - ١٠ - رعاية  الأسرة',gov:'',field:'',phone:'',email:'#ERROR!',notes:'info@heyamasr.org',logo:'🏢'},
-{id:38,name:'جمعية صناع الجيل لاطفال الشوارع والتنمية',type:'تمكين اقتصادي _توعية _',gov:'',field:'',phone:'',email:'1006367192',notes:'san3aelgel@gmail.com',logo:'🏠'},
-{id:39,name:'الافاق العليا لتنمية المجتمع وخدمة البيئة بالفيوم',type:'تمكين المرأة وذوي الإعاقة  والصحه والتعليم  والبيئة والعماله الغير منتظمه',gov:'',field:'',phone:'',email:'1014788577',notes:'eosdalafaqalolia@gmail.com',logo:'🏢'},
-{id:40,name:'مؤسسة تمكين للتنمية والتدريب',type:'تمكين اقتصادي . تنمية مجتمع . تدريب .ذوي همم',gov:'',field:'',phone:'',email:'1100666668',notes:'tamkeenfoundition1@gmail.com',logo:'🏢'},
-{id:41,name:'جمعية الإمام النووي لخدمة العلوم والثقافة والتنمية',type:'التعليم التمكين الاقتصادي  السلام المجتمعي المساعدات',gov:'',field:'',phone:'',email:'1142396828',notes:'elemamelnawwy@gmail.com',logo:'🏠'},
-{id:42,name:'جمعيه شباب الديمقراط للتنمية والتدريب',type:'صحه تمكين اقتصادي إغاثة تنموي',gov:'',field:'',phone:'',email:'1100328294',notes:'',logo:'🏢'},
-{id:43,name:'مؤسسة أكون لتنمية الطفل والمجتمع',type:'الطفوله والأمومه',gov:'',field:'',phone:'',email:'1277369388',notes:'akonfoundation35@gmail.com',logo:'🏢'},
-{id:44,name:'جمعية القديس منصور بأرمنت - الأقصر',type:'تمكين الفئات المهمشة، تأهيل ودمج ذوي الإعاقة، التمكين الاقتصادي للنساء والشباب، حماية الأطفال المعرضين للخطر، دعم المساواة في النوع والحماية من العنف، التعليم الشامل، بناء قدرات الجمعيات الأهلية',gov:'',field:'',phone:'',email:'201283569479',notes:'svdp.armant@gmail.com',logo:'🤝'},
-{id:45,name:'مؤسسه مصر بلا مرض',type:'الرعايه الصحيه',gov:'',field:'',phone:'',email:'1206866664',notes:'mernabolbol24ewd@gmail.com',logo:'🏢'},
-{id:46,name:'مؤسسة شباب ٢٠٣٠ للتنمية',type:'تدريب وتأهيل وإعداد الكوادر الشبابية - تمكين اقتصادي للمرأة - رعاية وتأهيل ذوي الاعاقة - حقوق الإنسان - ملف اللاجئين',gov:'',field:'',phone:'',email:'1201094651',notes:'youth2030foundationfd@gmail.com',logo:'🏢'},
-{id:47,name:'جمعية المستقبل للتنمية ودعم الحقوق والحريات',type:'تنمية ، صحة ، تعليم ، تمكين إقتصادي ، تمكين المرأة والطفل والشباب ، حقوق الإنسان',gov:'',field:'',phone:'',email:'1140067070',notes:'eaboelliel@gmail.com',logo:'🏠'},
-{id:48,name:'المكتب العربي للعدالة والقانون',type:'محاماه ، إستشارات ، خدمات قانونية',gov:'',field:'',phone:'',email:'1140067070',notes:'EAboElliel@gmail.com',logo:'🏢'},
-{id:49,name:'جمعية تنمية المجتمع لرعاية الأيتام بأبنوب',type:'تعليم - صحة - تمكين اقتصادي - بيئة وغيرها من المجالات المتعدده',gov:'',field:'',phone:'',email:'1097907519',notes:'aytam.abnob@yahoo.com',logo:'🏠'},
-{id:50,name:'الجمعيه الخيريه لتنمية المجتمع بالسوالم البحريه',type:'تمكين اقتصادي تعليم صحه. نشئ  تنمية المجتمع',gov:'',field:'',phone:'',email:'1006634003',notes:'sawallem.cda@gmail.com',logo:'🏢'},
-{id:51,name:'مؤسسة اهل الخير الخيرية لتنمية المجتمع',type:'جميع المجالات',gov:'',field:'',phone:'',email:'1111900754',notes:'ahl.alkhir2022@gmail.com',logo:'🏢'},
-{id:52,name:'جمعية شموع للتنمية المستدامة',type:'',gov:'',field:'',phone:'',email:'1206622065',notes:'casd.shmoo@yahoo.co',logo:'🏠'}
+{id:1,name:'جمعية الصعيد للتربية والتنمية',type:'جمعية أهلية',gov:'أسيوط',field:'التعليم / التنمية',phone:'',email:'',notes:'',logo:'🤝'},
+{id:2,name:'جمعية تحسين أوضاع المرأة والطفل',type:'جمعية أهلية',gov:'سوهاج',field:'المرأة / الطفل',phone:'',email:'',notes:'',logo:'🤝'},
+{id:3,name:'مؤسسة مصر الخير',type:'مؤسسة وطنية',gov:'القاهرة',field:'التنمية الشاملة',phone:'',email:'',notes:'',logo:'🏢'},
+{id:4,name:'جمعية كاريتاس مصر',type:'جمعية أهلية',gov:'أسيوط / القاهرة',field:'الخدمات الاجتماعية',phone:'',email:'',notes:'',logo:'🤝'},
+{id:5,name:'جمعيه عطاء السماء للتنميه الشامله',type:'تمكين . صحه . تعليم',gov:'',field:'',phone:'',email:'1011942004',notes:'attaa9070@gmail.com',logo:'🏢'},
+{id:6,name:'جمعيه بدر للتنمية والمشروعات ببنى هلال مركز المراغه محافظة سوهاج',type:'تعليم حمايه اجتماعية تمكين اقتصادى',gov:'',field:'',phone:'',email:'1140117111',notes:'smahabwjblabwjbl@gmail.com',logo:'🏢'},
+{id:7,name:'جمعية الاصدقاء لذوى الاعاقه وتنمية المجتمع بصدفا',type:'',gov:'',field:'',phone:'',email:'01020820903-01010982410',notes:'society_offrinds@yahoo.com',logo:'🏠'},
+{id:8,name:'جمعية لقاء للتضامن والعمل الاجتماعي',type:'تعليم شباب اطفال تبادل ثقافي تطوع',gov:'',field:'',phone:'',email:'1222256399',notes:'networking@lekaa.org',logo:'🏠'},
+{id:9,name:'جمعيه ابناء زرنيخ مركز اسنا القاهره مسجله رقم٥٨٦',type:'جمعيه خيريه',gov:'',field:'',phone:'',email:'1157988742',notes:'mahmoud.777.world@gmail.com',logo:'🏢'},
+{id:10,name:'جمعية الاصدقاء لذوى الاعاقه وتنمية المجتمع بصدفا',type:'1-	المساعدات الاجتماعية  2-	الدفاع الاجتماعي  3-	حماية البيئة والمحافظة عليها  4-	اصحاب المعاشات  5-	التنظيم والإدارة  6-	تنظيم الأسرة  7-	الفئات الخاصة والمعاقين  8-	الخدمات التعليمية  9-	رعاية الطفولة والأمومة  10-	الخدمات الثقافية والعلمية والدينية  11-	الصداقة بين الشعوب  12-	التنمية الاقتصادية  13-	الخدمات الصحية  14-	حماية المستهلك  15-	النشاط الأدبي  16-	حقوق الانسان  17-	رعاية المسجونين واسرهم  18-	رعاية الشيخوخة  19-	رعاية الأسرة',gov:'',field:'',phone:'',email:'01020820903-01010982410',notes:'society_offrinds@yahoo.com',logo:'🏠'},
+{id:11,name:'مؤسسة  كير مصر للتنمية',type:'تمرين المرأة - تعليم- بناء قدرات الجمعيات الأهليه- الزراعة وتغييرات المناخ.',gov:'',field:'',phone:'',email:'1009728004',notes:'recruit.CEF@cef-eg.org',logo:'🏢'},
+{id:12,name:'جمعية أم القرى لتنمية المجتمع',type:'1-	التنمية والتمكين الاقتصادي 2-	حماية البيئة والمحافظة عليها 3-	خدمات الرعاية الصحية.  4-	المساعدات والخدمات الاجتماعية. 5-	الخدمات الصحية 6-	تنظيم الأسرة 7-	الخدمات التعليمية 8-	الخدمات الثقافية والعلمية والدينية',gov:'',field:'',phone:'',email:'1127772624',notes:'omalkora2004@yahoo.com',logo:'🏠'},
+{id:13,name:'جمعية اهل بلدي بقنا',type:'تمكين االشباب  - صحة انجابية وجنسية - دمح ذوي الاعاقة',gov:'',field:'',phone:'',email:'1000508123',notes:'ahlbldy@gmail.com',logo:'🏠'},
+{id:14,name:'مؤسسة معانا في الخير للتنمية',type:'تعليم صحة تمكين اقتصادي',gov:'',field:'',phone:'',email:'1119796982',notes:'manafyalkhyr@gmail.com',logo:'🏢'},
+{id:15,name:'جمعية تنمية المجتمع بالعركي',type:'تعليم - صحة- تمكين اقتصادي- دعم المرأة',gov:'',field:'',phone:'',email:'1009494281',notes:'alaamsadek3@gmail.com',logo:'🏠'},
+{id:16,name:'جمعية بلدى لتنمية المجتمع',type:'مساعدات انسانية - تعليم - صحة - بيئة - تمكين اقتصادى - زراعة - تنظيم أسرة.',gov:'',field:'',phone:'',email:'1033241977',notes:'balady.eg@gmail.com',logo:'🏠'},
+{id:17,name:'شباب الشرقيه للتنميه',type:'تمكين اقتصادي -البيئه ـ التعليم -',gov:'',field:'',phone:'',email:'1273008583',notes:'shababelsharkia112005@gmail.com',logo:'🏢'},
+{id:18,name:'جمعية بلدى لتنمية المجتمع',type:'مساعدات انسانية - تعليم - صحة - بيئة - زراعة - تنظيم أسرة و صحة انجابية - تمكين اقتصادى.',gov:'',field:'',phone:'',email:'1033241977',notes:'balady.eg@gmail.com',logo:'🏠'},
+{id:19,name:'جمعية الرواد لخدمة المجتمع',type:'تمكين اقتصادي ، تعليم  صحة، تدريب',gov:'',field:'',phone:'',email:'1227145256',notes:'alrowadngo@gmail.com',logo:'🏠'},
+{id:20,name:'النور الساطع لتنمية المجتمع بالمنيا',type:'تنمية شاملة',gov:'',field:'',phone:'',email:'',notes:'nourelsatea@gmail.com',logo:'🏢'},
+{id:21,name:'النور الساطع لتنمية المجتمع بالمنيا',type:'تنمية شاملة',gov:'',field:'',phone:'',email:'1033968343',notes:'nourelsatea@gmail.com',logo:'🏢'},
+{id:22,name:'مؤسسة الفارس النبيل للتنمية',type:'احياء وتطوير الحرف التراثية . تعليم . تمكين اجتماعي واقتصادي',gov:'',field:'',phone:'',email:'1225471155',notes:'nobleknight9383@yahoo.com',logo:'🏢'},
+{id:23,name:'النور الساطع لتنمية المجتمع بالمنيا',type:'تنمية شاملة',gov:'',field:'',phone:'',email:'1033968343',notes:'nourelsatea@gmail.com',logo:'🏢'},
+{id:24,name:'جمعية الجيل المنتج  لتنمية المجتمع وحماية البيئة باسيوط',type:'تعليم . صحة . تمكين اقتصادى.حقوق انسان.',gov:'',field:'',phone:'',email:'1007575093',notes:'Norhanalkady.gelmonteg@gmail.com',logo:'🏠'},
+{id:25,name:'مؤسسة ضي للتنمية بسوهاج',type:'ثقافي',gov:'',field:'',phone:'',email:'201515248831',notes:'daifoundation25@gmail.com',logo:'🏢'},
+{id:26,name:'مؤسسة أبواب مصر للتنمية الشاملة',type:'تمكين اقتصادي  تنمية مجتمع   تعليم',gov:'',field:'',phone:'',email:'1111679040',notes:'abwabmisr24@gmail.com',logo:'🏢'},
+{id:27,name:'جمعية عطاء مستمر للتنميه بالبلايزه',type:'التعليم ـ الصحه ـ الاقتصاد ـ الزراعه ـ المراه ـ الطفل ـ الشباب ـ النشئ ـ ذوى الاعاقه ـ الفئات المهمشه والاكثر احتياجا',gov:'',field:'',phone:'',email:'1286065512',notes:'rashed5515788@gmail.com',logo:'🏠'},
+{id:28,name:'جمعيه ابناء زرنيخ',type:'جمعيه خيريه',gov:'',field:'',phone:'',email:'1123303186',notes:'mahmoud.777.world@gmail.com',logo:'🏢'},
+{id:29,name:'جمعية خطوة لتنمية المجتمع المحلى',type:'تمكين اقتصادى /تدريب وتعليم/رعاية اجتماعية',gov:'',field:'',phone:'',email:'01013238634-01287082826',notes:'khatwahfordevelobment@yahoo.com',logo:'🏠'},
+{id:30,name:'جمعيه الفتح للتنميه بسوهاج',type:'تعليم. صحة.حماية البيئه. دعم المرأة. تنميه مستدامة.مساعدات اجتماعيه. تدريبات. تنميه اقتصادية واجتماعية وثقافية.',gov:'',field:'',phone:'',email:'01121800531-01144947019-01271209715',notes:'mohmdokash@gmail.com',logo:'🏢'},
+{id:31,name:'املنا هي مصر لتنميه المجتمع',type:'مجالات عمل المؤسسة  .١- التنميه الاقتصاديه ٢. المساعدات الاجتماعية - ٣٠ - الخدمات التعليمية - - - الدفاع الاجتماعي - ٥- الخدمات الصحية - ٦ - التنمية  الاقتصادية - 7 - تنظيم الأسرة - - الخدمات الثقافية والعلمية والدينية - ٩ - رعاية الطفولة والأمومة - ١٠ - رعاية  الأسرة',gov:'',field:'',phone:'',email:'#ERROR!',notes:'info@heyamasr.org',logo:'🏢'},
+{id:32,name:'جمعية صناع الجيل لاطفال الشوارع والتنمية',type:'تمكين اقتصادي _توعية _',gov:'',field:'',phone:'',email:'1006367192',notes:'san3aelgel@gmail.com',logo:'🏠'},
+{id:33,name:'الافاق العليا لتنمية المجتمع وخدمة البيئة بالفيوم',type:'تمكين المرأة وذوي الإعاقة  والصحه والتعليم  والبيئة والعماله الغير منتظمه',gov:'',field:'',phone:'',email:'1014788577',notes:'eosdalafaqalolia@gmail.com',logo:'🏢'},
+{id:34,name:'مؤسسة تمكين للتنمية والتدريب',type:'تمكين اقتصادي . تنمية مجتمع . تدريب .ذوي همم',gov:'',field:'',phone:'',email:'1100666668',notes:'tamkeenfoundition1@gmail.com',logo:'🏢'},
+{id:35,name:'جمعية الإمام النووي لخدمة العلوم والثقافة والتنمية',type:'التعليم التمكين الاقتصادي  السلام المجتمعي المساعدات',gov:'',field:'',phone:'',email:'1142396828',notes:'elemamelnawwy@gmail.com',logo:'🏠'},
+{id:36,name:'جمعيه شباب الديمقراط للتنمية والتدريب',type:'صحه تمكين اقتصادي إغاثة تنموي',gov:'',field:'',phone:'',email:'1100328294',notes:'',logo:'🏢'},
+{id:37,name:'مؤسسة أكون لتنمية الطفل والمجتمع',type:'الطفوله والأمومه',gov:'',field:'',phone:'',email:'1277369388',notes:'akonfoundation35@gmail.com',logo:'🏢'},
+{id:38,name:'جمعية القديس منصور بأرمنت - الأقصر',type:'تمكين الفئات المهمشة، تأهيل ودمج ذوي الإعاقة، التمكين الاقتصادي للنساء والشباب، حماية الأطفال المعرضين للخطر، دعم المساواة في النوع والحماية من العنف، التعليم الشامل، بناء قدرات الجمعيات الأهلية',gov:'',field:'',phone:'',email:'201283569479',notes:'svdp.armant@gmail.com',logo:'🤝'},
+{id:39,name:'مؤسسه مصر بلا مرض',type:'الرعايه الصحيه',gov:'',field:'',phone:'',email:'1206866664',notes:'mernabolbol24ewd@gmail.com',logo:'🏢'},
+{id:40,name:'مؤسسة شباب ٢٠٣٠ للتنمية',type:'تدريب وتأهيل وإعداد الكوادر الشبابية - تمكين اقتصادي للمرأة - رعاية وتأهيل ذوي الاعاقة - حقوق الإنسان - ملف اللاجئين',gov:'',field:'',phone:'',email:'1201094651',notes:'youth2030foundationfd@gmail.com',logo:'🏢'},
+{id:41,name:'جمعية المستقبل للتنمية ودعم الحقوق والحريات',type:'تنمية ، صحة ، تعليم ، تمكين إقتصادي ، تمكين المرأة والطفل والشباب ، حقوق الإنسان',gov:'',field:'',phone:'',email:'1140067070',notes:'eaboelliel@gmail.com',logo:'🏠'},
+{id:42,name:'المكتب العربي للعدالة والقانون',type:'محاماه ، إستشارات ، خدمات قانونية',gov:'',field:'',phone:'',email:'1140067070',notes:'EAboElliel@gmail.com',logo:'🏢'},
+{id:43,name:'جمعية تنمية المجتمع لرعاية الأيتام بأبنوب',type:'تعليم - صحة - تمكين اقتصادي - بيئة وغيرها من المجالات المتعدده',gov:'',field:'',phone:'',email:'1097907519',notes:'aytam.abnob@yahoo.com',logo:'🏠'},
+{id:44,name:'الجمعيه الخيريه لتنمية المجتمع بالسوالم البحريه',type:'تمكين اقتصادي تعليم صحه. نشئ  تنمية المجتمع',gov:'',field:'',phone:'',email:'1006634003',notes:'sawallem.cda@gmail.com',logo:'🏢'},
+{id:45,name:'مؤسسة اهل الخير الخيرية لتنمية المجتمع',type:'جميع المجالات',gov:'',field:'',phone:'',email:'1111900754',notes:'ahl.alkhir2022@gmail.com',logo:'🏢'},
+{id:46,name:'جمعية شموع للتنمية المستدامة',type:'',gov:'',field:'',phone:'',email:'1206622065',notes:'casd.shmoo@yahoo.co',logo:'🏠'}
 ];
 
 const TENDERS = [

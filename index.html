@@ -2,6 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<!-- Security Headers via Meta -->
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https: data: blob:; connect-src 'self' https:; font-src 'self' https://fonts.gstatic.com;">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>تنمويين مصر</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -550,6 +556,63 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <!-- URL -->
   <div style="color:rgba(255,255,255,.35);font-size:10px;margin-top:8px;position:relative;z-index:1;animation:su .6s ease 1.2s both">
     🌐 elzieni2007-crypto.github.io/tanmoyeen-masr
+  </div>
+  <div style="position:relative;z-index:1;margin-top:6px;display:flex;gap:12px;justify-content:center">
+    <button onclick="showPrivacy()" style="background:transparent;border:none;color:rgba(255,255,255,.4);font-size:9px;font-family:Cairo,sans-serif;cursor:pointer;text-decoration:underline">سياسة الخصوصية</button>
+    <span style="color:rgba(255,255,255,.2);font-size:9px">|</span>
+    <button onclick="showTerms()" style="background:transparent;border:none;color:rgba(255,255,255,.4);font-size:9px;font-family:Cairo,sans-serif;cursor:pointer;text-decoration:underline">شروط الاستخدام</button>
+  </div>
+</div>
+
+<!-- Privacy Policy Modal -->
+<div class="moverlay" id="privacy-modal" onclick="closePrivacy(event)">
+  <div class="msheet" style="max-height:85vh">
+    <div class="mhandle"></div>
+    <div class="mcon" style="padding-bottom:40px">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:32px">🔒</div>
+        <div style="font-size:17px;font-weight:900;color:var(--p)">سياسة الخصوصية</div>
+        <div style="font-size:10px;color:var(--muted)">آخر تحديث: مايو 2026</div>
+      </div>
+      <div style="font-size:12px;line-height:2;color:var(--txt)">
+        <p style="font-weight:700;color:var(--p);margin-bottom:8px">١. البيانات التي نجمعها</p>
+        <p style="margin-bottom:12px">نجمع البيانات التي تقدمها طوعاً عند التسجيل: الاسم، المحافظة، التخصص، رقم الموبايل، والإيميل.</p>
+        <p style="font-weight:700;color:var(--p);margin-bottom:8px">٢. كيف نستخدم البيانات</p>
+        <p style="margin-bottom:12px">تُستخدم البيانات فقط لعرض ملفك المهني للأطراف المهتمة في القطاع التنموي. لا نبيع بياناتك لأي جهة خارجية.</p>
+        <p style="font-weight:700;color:var(--p);margin-bottom:8px">٣. تخزين البيانات</p>
+        <p style="margin-bottom:12px">تُحفظ البيانات في Google Firebase وGoogle Sheets بأنظمة أمان عالية المستوى.</p>
+        <p style="font-weight:700;color:var(--p);margin-bottom:8px">٤. حقوقك</p>
+        <p style="margin-bottom:12px">يحق لك طلب حذف بياناتك في أي وقت بالتواصل معنا عبر: elzieni2007@gmail.com</p>
+        <p style="font-weight:700;color:var(--p);margin-bottom:8px">٥. التواصل</p>
+        <p>تنمويين مصر | elzieni2007@gmail.com</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="moverlay" id="terms-modal" onclick="closeTerms(event)">
+  <div class="msheet" style="max-height:85vh">
+    <div class="mhandle"></div>
+    <div class="mcon" style="padding-bottom:40px">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:32px">📋</div>
+        <div style="font-size:17px;font-weight:900;color:var(--p)">شروط الاستخدام</div>
+        <div style="font-size:10px;color:var(--muted)">آخر تحديث: مايو 2026</div>
+      </div>
+      <div style="font-size:12px;line-height:2;color:var(--txt)">
+        <p style="font-weight:700;color:var(--p);margin-bottom:8px">١. قبول الشروط</p>
+        <p style="margin-bottom:12px">باستخدام منصة تنمويين مصر، فأنت توافق على هذه الشروط والأحكام.</p>
+        <p style="font-weight:700;color:var(--p);margin-bottom:8px">٢. استخدام المنصة</p>
+        <p style="margin-bottom:12px">المنصة مخصصة للعمل التنموي فقط. يُحظر نشر محتوى مضلل أو بيانات وهمية.</p>
+        <p style="font-weight:700;color:var(--p);margin-bottom:8px">٣. صحة البيانات</p>
+        <p style="margin-bottom:12px">أنت مسؤول عن صحة البيانات التي تقدمها. تنمويين مصر غير مسؤولة عن أي بيانات غير دقيقة.</p>
+        <p style="font-weight:700;color:var(--p);margin-bottom:8px">٤. الملكية الفكرية</p>
+        <p style="margin-bottom:12px">جميع محتويات المنصة محمية بحقوق الملكية الفكرية لتنمويين مصر.</p>
+        <p style="font-weight:700;color:var(--p);margin-bottom:8px">٥. التعديلات</p>
+        <p>نحتفظ بحق تعديل هذه الشروط في أي وقت مع إشعار المستخدمين.</p>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -4112,7 +4175,7 @@ async function loadAdminData(){
     suppliers:'موردين', organizations:'مؤسسات', volunteers:'متطوعين'
   };
 
-  if(typeof db !== 'undefined'){
+  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
     try {
       for(var i=0; i<collections.length; i++){
         var col = collections[i];
@@ -4859,6 +4922,21 @@ function testFirebase(){
     if(btn) btn.textContent = '🔥 اختبار';
     toast('❌ ' + msg);
   });
+}
+
+function showPrivacy(){
+  document.getElementById('privacy-modal').classList.add('op');
+}
+function closePrivacy(e){
+  if(e.target===document.getElementById('privacy-modal'))
+    document.getElementById('privacy-modal').classList.remove('op');
+}
+function showTerms(){
+  document.getElementById('terms-modal').classList.add('op');
+}
+function closeTerms(e){
+  if(e.target===document.getElementById('terms-modal'))
+    document.getElementById('terms-modal').classList.remove('op');
 }
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),2500);}

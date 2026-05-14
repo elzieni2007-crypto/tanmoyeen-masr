@@ -1659,11 +1659,11 @@ console.log('✅ Firebase initialized');
 async function saveToFirebase(type, data){
   try {
     var collections = {
-      jobseeker: 'باحثين_عمل',
-      expert:    'استشاريين',
-      sup:       'موردين',
-      org:       'مؤسسات',
-      volunteer: 'متطوعين'
+      jobseeker: 'jobseekers',
+      expert:    'consultants',
+      sup:       'suppliers',
+      org:       'organizations',
+      volunteer: 'volunteers'
     };
     var col = collections[type] || type;
     await db.collection(col).add({

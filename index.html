@@ -3788,24 +3788,57 @@ let admTab = 'jobseeker';
 let isLoggedIn = false;
 
 function doLogin(){
-  const user = document.getElementById('adm-user').value.trim();
-  const pass = document.getElementById('adm-pass').value.trim();
-  const err  = document.getElementById('login-err');
+  var email = document.getElementById('adm-user').value.trim();
+  var pass  = document.getElementById('adm-pass').value.trim();
+  var err   = document.getElementById('login-err');
+  var btn   = document.getElementById('login-btn');
 
-  if(ADMIN_USERS[user] && ADMIN_USERS[user] === pass){
-    isLoggedIn = true;
-    err.classList.remove('on');
-    document.getElementById('admin-login-screen').style.display = 'none';
-    document.getElementById('admin-dashboard').style.display = 'block';
-    loadAdminData();
+  if(!email || !pass){ err.classList.add('on'); return; }
+
+  // Try Firebase Auth first
+  if(typeof auth !== 'undefined'){
+    if(btn) btn.textContent = '⏳ جاري الدخول...';
+    auth.signInWithEmailAndPassword(email, pass)
+      .then(function(cred){
+        isLoggedIn = true;
+        err.classList.remove('on');
+        if(btn) btn.textContent = 'دخول';
+        document.getElementById('admin-login-screen').style.display = 'none';
+        document.getElementById('admin-panel').style.display = 'block';
+        loadAdminData();
+        toast('✅ مرحباً ' + (cred.user.email||''));
+      })
+      .catch(function(e){
+        // Fallback to local users
+        if(ADMIN_USERS[email] && ADMIN_USERS[email] === pass){
+          isLoggedIn = true;
+          err.classList.remove('on');
+          document.getElementById('admin-login-screen').style.display = 'none';
+          document.getElementById('admin-panel').style.display = 'block';
+          loadAdminData();
+        } else {
+          err.classList.add('on');
+          if(btn) btn.textContent = 'دخول';
+          toast('❌ بيانات غلط');
+        }
+      });
   } else {
-    err.classList.add('on');
-    document.getElementById('adm-pass').value = '';
+    // Fallback to local
+    if(ADMIN_USERS[email] && ADMIN_USERS[email] === pass){
+      isLoggedIn = true;
+      err.classList.remove('on');
+      document.getElementById('admin-login-screen').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      loadAdminData();
+    } else {
+      err.classList.add('on');
+    }
   }
 }
 
 function doLogout(){
   isLoggedIn = false;
+  if(typeof auth !== 'undefined') auth.signOut().catch(function(){});
   document.getElementById('admin-login-screen').style.display = 'block';
   document.getElementById('admin-dashboard').style.display = 'none';
   document.getElementById('adm-user').value = '';

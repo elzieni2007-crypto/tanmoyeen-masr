@@ -2,6 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0094cc">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="تنمويين مصر">
 <!-- Security Headers via Meta -->
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="X-Frame-Options" content="DENY">
@@ -1326,6 +1332,8 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
         ⏳ انتظار مراجعة
         <span id="pending-count-badge" style="position:absolute;top:-6px;left:-6px;background:#e05050;color:white;border-radius:50%;width:18px;height:18px;font-size:9px;display:none;align-items:center;justify-content:center;font-weight:700"></span>
       </div>
+      <div class="adm-tab" style="background:#e7faf3;color:#00703a;border-color:#00b894" onclick="setAdmTab(this,'volunteers-adm')">🤝 متطوعين</div>
+      <div class="adm-tab" style="background:#dcfce7;color:#00703a;border-color:#00703a" onclick="setAdmTab(this,'broadcast')">💬 واتساب</div>
     </div>
     <div style="font-size:10px;color:var(--muted);padding:0 12px 8px;text-align:left">← اسحب للمزيد من التبويبات</div>
 
@@ -1552,7 +1560,15 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
 
     <!-- فورم الإيميل الجماعي -->
-    <div id="adm-form-broadcast" style="display:none;padding:0 16px;padding-bottom:100px">
+    <div id="adm-form-volunteers-adm" style="display:none;padding:0 16px;padding-bottom:100px">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px">
+    <div style="font-size:15px;font-weight:800;color:var(--p)">🤝 المتطوعون المسجلون</div>
+    <span id="adm-vols-count" style="background:var(--a);color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
+  </div>
+  <div id="adm-vols-list"></div>
+</div>
+
+<div id="adm-form-broadcast" style="display:none;padding:0 16px;padding-bottom:100px">
   <div style="margin-top:16px">
 
     <div style="background:linear-gradient(135deg,#00703a,#00b894);border-radius:14px;padding:16px;color:white;margin-bottom:16px;text-align:center">
@@ -2030,16 +2046,18 @@ function enterApp(){
   setAllLogos();
   initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);renderJobs();renderTenders();updateJobseekersList();
   // Load live data from sheets
-  Promise.all([
-    loadConsFromSheet(),
-    loadSupsFromSheet(),
-    loadVolsFromSheet(),
-    loadOrgsFromSheet()
-  ]).then(function(){
-    renderDash();
-    loadVolunteers();
-    console.log('✅ All sheets loaded');
-  });
+  setTimeout(function(){
+    Promise.all([
+      loadConsFromSheet(),
+      loadSupsFromSheet(),
+      loadVolsFromSheet(),
+      loadOrgsFromSheet()
+    ]).then(function(){
+      renderDash();
+      loadVolunteers();
+      console.log('All sheets loaded');
+    });
+  }, 500);
   setTimeout(setupHeroShrink,100);
   // URL params handled separately after load
 }
@@ -4770,6 +4788,39 @@ function sendWAMain(){
 
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
   toast('✅ تم فتح واتساب - ابعت للجروب!');
+}
+
+async function loadAdminVols(){
+  var list = document.getElementById("adm-vols-list");
+  var countEl = document.getElementById("adm-vols-count");
+  if(!list) return;
+  list.innerHTML = "<div style='text-align:center;padding:20px;color:var(--muted)'>⏳ جاري التحميل...</div>";
+  var vols = [];
+  if(typeof db !== "undefined" && auth && auth.currentUser){
+    try {
+      var snap = await db.collection("volunteers").orderBy("timestamp","desc").limit(100).get();
+      snap.docs.forEach(function(d){ vols.push(Object.assign({},d.data(),{fbId:d.id,src:"firebase"})); });
+    } catch(e){ console.log("Firebase vols:",e); }
+  }
+  var local = (typeof VOLUNTEERS_DATA!=="undefined"&&VOLUNTEERS_DATA.length)?VOLUNTEERS_DATA:(VOLUNTEERS_PRELOAD||[]);
+  local.forEach(function(v){
+    var exists = vols.some(function(fv){ return fv.phone===v.phone; });
+    if(!exists) vols.push(Object.assign({},v,{src:"local"}));
+  });
+  if(countEl) countEl.textContent = vols.length;
+  if(!vols.length){ list.innerHTML = "<div style='text-align:center;padding:30px;color:var(--muted)'>لا يوجد متطوعون</div>"; return; }
+  list.innerHTML = vols.map(function(v){
+    var interests = Array.isArray(v.interests)?v.interests.join(" / "):(v.interests||"—");
+    var src = v.src==="firebase"?"🔥 Firebase":"💾 محلي";
+    return "<div class='adm-row' style='margin-bottom:8px;border-right:3px solid #00703a'>" +
+      "<div style='font-weight:700;font-size:13px'>" + (v.name||"—") + " <small style='color:#00703a'>" + src + "</small></div>" +
+      "<div style='font-size:11px;color:var(--muted)'>" + (v.gov||"—") + "</div>" +
+      "<div style='font-size:11px;color:var(--a)'>" + interests + "</div>" +
+      "<div style='display:flex;gap:6px;margin-top:8px'>" +
+        (v.phone?"<a href='tel:"+v.phone+"' style='flex:1;padding:6px;background:#e8f0fe;color:var(--p);border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700'>📞 اتصال</a>":"") +
+        (v.phone?"<a href='https://wa.me/2"+v.phone+"' target='_blank' style='flex:1;padding:6px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700'>💬 واتساب</a>":"") +
+      "</div></div>";
+  }).join("");
 }
 
 async function loadBroadcastHistory(){

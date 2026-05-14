@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://elzieni2007-crypto.github.io/tanmoyeen-masr/sitemap.xml

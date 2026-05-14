@@ -1655,9 +1655,10 @@ const firebaseConfig = {
 if(!firebase.apps.length){
   firebase.initializeApp(firebaseConfig);
 }
+// Use named database 'my-database'
 const db = firebase.firestore();
 const auth = firebase.auth();
-console.log('✅ Firebase initialized');
+console.log('✅ Firebase initialized - using default database');
 
 // ============ FIREBASE SAVE REGISTRATION ============
 async function saveToFirebase(type, data){
@@ -4380,17 +4381,29 @@ function testFirebase(){
   }
 
   // Test 2: Firestore write
-  db.collection('test').add({
-    msg: 'test from tanmoyeen',
-    time: new Date().toISOString()
-  }).then(function(doc){
-    if(result) result.textContent = '✅ Firebase شغال! ID: ' + doc.id.substring(0,8);
+  var testData = {
+    msg: 'test from tanmoyeen masr',
+    time: new Date().toISOString(),
+    url: window.location.hostname
+  };
+  
+  // Set timeout
+  var timeout = setTimeout(function(){
+    if(result) result.textContent = '❌ Timeout - تحقق من الإنترنت';
+    if(btn) btn.textContent = '🔥 اختبار Firebase';
+  }, 10000);
+  
+  db.collection('test').add(testData).then(function(doc){
+    clearTimeout(timeout);
+    if(result) result.textContent = '✅ شغال! ' + doc.id.substring(0,8);
     if(btn) btn.textContent = '✅ نجح';
     toast('✅ Firebase شغال بنجاح!');
   }).catch(function(err){
-    if(result) result.textContent = '❌ ' + err.message.substring(0,50);
-    if(btn) btn.textContent = '🔥 اختبار Firebase';
-    toast('❌ خطأ: ' + err.message.substring(0,60));
+    clearTimeout(timeout);
+    var msg = err.code + ': ' + err.message.substring(0,40);
+    if(result) result.textContent = '❌ ' + msg;
+    if(btn) btn.textContent = '🔥 اختبار';
+    toast('❌ ' + msg);
   });
 }
 

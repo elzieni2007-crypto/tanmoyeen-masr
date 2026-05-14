@@ -491,6 +491,21 @@ textarea.fi{resize:none}
 }
 
 #home{overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* DARK MODE */
+body.dark-mode {
+  --bg: #1a1a2e;
+  --card: #16213e;
+  --txt: #e0e0e0;
+  --muted: #8892a4;
+  --border: #2d3748;
+  --p: #4a9eda;
+  --a: #63b3ed;
+}
+body.dark-mode .bnav { background: #16213e; border-color: #2d3748; }
+body.dark-mode .jcard { background: #16213e; }
+body.dark-mode .modal-sheet { background: #16213e; }
+body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e0; border-color: #2d3748; }
 </style>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -1474,7 +1489,54 @@ textarea.fi{resize:none}
     </div>
 
     <!-- فورم الإيميل الجماعي -->
-    <div id="adm-form-email" style="display:none;padding:0 16px;padding-bottom:100px">
+    <div id="adm-form-broadcast" style="display:none;padding:0 16px;padding-bottom:100px">
+  <div style="margin-top:16px">
+
+    <div style="background:linear-gradient(135deg,#00703a,#00b894);border-radius:14px;padding:16px;color:white;margin-bottom:16px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">💬</div>
+      <div style="font-size:16px;font-weight:900">إشعار واتساب للأعضاء</div>
+      <div style="font-size:11px;opacity:.8;margin-top:4px">ابعت إشعار لـ 25,000 عضو في المجموعة</div>
+    </div>
+
+    <div class="fg"><label class="fl">عنوان الإشعار *</label>
+      <input class="fi" id="wa-title-main" type="text" placeholder="مثال: 🔥 وظيفة جديدة في القاهرة">
+    </div>
+    <div class="fg"><label class="fl">نص الإشعار *</label>
+      <textarea class="fi" id="wa-body-main" rows="4" placeholder="اكتب تفاصيل الإشعار..." style="resize:vertical"></textarea>
+    </div>
+    <div class="fg"><label class="fl">رابط (اختياري)</label>
+      <input class="fi" id="wa-link-main" type="url" placeholder="https://..." style="direction:ltr;text-align:left" value="https://elzieni2007-crypto.github.io/tanmoyeen-masr/">
+    </div>
+
+    <!-- قوالب جاهزة -->
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:8px">📋 قوالب جاهزة:</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="useWATemplate('job')" style="padding:6px 12px;background:#e8f0fe;color:#1a3a6e;border:none;border-radius:8px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">💼 وظيفة جديدة</button>
+        <button onclick="useWATemplate('tender')" style="padding:6px 12px;background:#fff3cd;color:#c06010;border:none;border-radius:8px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">📋 مناقصة جديدة</button>
+        <button onclick="useWATemplate('update')" style="padding:6px 12px;background:#e7faf3;color:#00703a;border:none;border-radius:8px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🔄 تحديث المنصة</button>
+        <button onclick="useWATemplate('event')" style="padding:6px 12px;background:#fde8f0;color:#c03060;border:none;border-radius:8px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🎯 فعالية</button>
+      </div>
+    </div>
+
+    <!-- معاينة -->
+    <div id="wa-preview-main" style="display:none;background:#e7faf3;border-radius:10px;padding:12px;font-size:11px;color:#333;border:1px solid #00703a;white-space:pre-wrap;direction:rtl;margin-bottom:12px;line-height:1.7"></div>
+
+    <div style="display:flex;gap:8px">
+      <button onclick="previewWAMain()" style="flex:1;padding:12px;background:white;color:#00703a;border:2px solid #00703a;border-radius:12px;font-size:13px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">👁️ معاينة</button>
+      <button onclick="sendWAMain()" style="flex:2;padding:12px;background:linear-gradient(135deg,#00703a,#00b894);color:white;border:none;border-radius:12px;font-size:13px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,112,58,.3)">💬 إرسال للمجموعة</button>
+    </div>
+
+    <!-- سجل الإشعارات -->
+    <div style="margin-top:20px">
+      <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:8px">📜 سجل الإشعارات السابقة</div>
+      <div id="broadcast-history"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="adm-form-email" style="display:none;padding:0 16px;padding-bottom:100px">
 
       <!-- إحصائيات المشتركين -->
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px">
@@ -1547,6 +1609,25 @@ textarea.fi{resize:none}
           style="background:linear-gradient(135deg,#c03030,#e05050);flex:2">
           📧 إرسال الآن
         </button>
+
+      <!-- واتساب Broadcast -->
+      <div style="margin-top:20px;background:#e7faf3;border-radius:14px;padding:14px;border:1.5px solid #00703a">
+        <div style="font-size:13px;font-weight:800;color:#00703a;margin-bottom:10px">💬 إشعار واتساب</div>
+        <div class="fg"><label class="fl">عنوان الإشعار</label>
+          <input class="fi" id="wa-title" type="text" placeholder="مثال: وظيفة جديدة في القاهرة 🔥">
+        </div>
+        <div class="fg"><label class="fl">نص الإشعار</label>
+          <textarea class="fi" id="wa-body" rows="3" placeholder="اكتب تفاصيل الإشعار هنا..." style="resize:vertical"></textarea>
+        </div>
+        <div class="fg"><label class="fl">رابط (اختياري)</label>
+          <input class="fi" id="wa-link" type="url" placeholder="https://..." style="direction:ltr;text-align:left" value="https://elzieni2007-crypto.github.io/tanmoyeen-masr/">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button onclick="previewWABroadcast()" style="flex:1;padding:10px;background:white;color:#00703a;border:2px solid #00703a;border-radius:10px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">👁️ معاينة</button>
+          <button onclick="sendWABroadcast()" style="flex:2;padding:10px;background:linear-gradient(135deg,#00703a,#00b894);color:white;border:none;border-radius:10px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">💬 إرسال عبر واتساب</button>
+        </div>
+        <div id="wa-preview" style="display:none;margin-top:10px;background:white;border-radius:10px;padding:10px;font-size:11px;color:#333;border:1px solid #ddd;white-space:pre-wrap;direction:rtl"></div>
+      </div>
       </div>
 
       <!-- قائمة الإيميلات -->
@@ -1671,12 +1752,40 @@ async function saveToFirebase(type, data){
       volunteer: 'volunteers'
     };
     var col = collections[type] || type;
+
+    // Data validation + XSS protection
+    function sanitize(str){
+      if(typeof str !== 'string') return str;
+      return str.trim()
+        .replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#x27;')
+        .replace(/\//g,'&#x2F;')
+        .substring(0, 500);
+    }
+    var cleanData = {};
+    Object.keys(data).forEach(function(k){
+      var val = data[k];
+      if(Array.isArray(val)){
+        val = val.map(function(v){ return typeof v==='string'?sanitize(v):v; });
+      } else if(typeof val === 'string'){
+        val = sanitize(val);
+      }
+      if(val !== '' && val !== null && val !== undefined){
+        cleanData[k] = val;
+      }
+    });
+
     await db.collection(col).add({
-      ...data,
+      ...cleanData,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      type: type
+      type: type,
+      source: 'tanmoyeen-app'
     });
     console.log('✅ Saved to Firebase:', col);
+    // Request notification permission for future use
+    if('Notification' in window && Notification.permission === 'default'){
+      Notification.requestPermission();
+    }
     return true;
   } catch(e) {
     console.log('Firebase save failed:', e);
@@ -1761,6 +1870,7 @@ async function loadConsFromSheet(){
       var dg = document.getElementById('cons-dg-count');
       if(dg) dg.textContent = newCons.length + ' مسجّل';
       console.log('✅ Loaded ' + newCons.length + ' consultants from sheet');
+      setTimeout(updateAllCounts, 100);
     }
   } catch(e) {
     console.log('Sheet load failed, using local data:', e);
@@ -1791,6 +1901,7 @@ async function loadSupsFromSheet(){
       var el=document.getElementById('dash-sups-n'); if(el) el.textContent=newSups.length;
       var dg=document.getElementById('sups-dg-count'); if(dg) dg.textContent=newSups.length+' مورد';
       console.log('✅ Loaded '+newSups.length+' suppliers');
+      setTimeout(updateAllCounts, 100);
     }
   } catch(e){ console.log('Sups sheet failed:',e); }
 }
@@ -1854,7 +1965,7 @@ function enterApp(){
   document.getElementById('splash').style.display='none';
   document.getElementById('app').style.display='block';
   setAllLogos();
-  loadCustomContent();renderDash();renderJobs();renderTenders();updateJobseekersList();
+  initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);renderJobs();renderTenders();updateJobseekersList();
   // Load live data from sheets
   Promise.all([
     loadConsFromSheet(),
@@ -2361,6 +2472,97 @@ function openJobseekerById(idx){
   if(!js) return;
   openJobseeker(js);
 }
+function updateAllCounts(){
+  // ============ Local data counts ============
+  var uniqueCons = deduplicateArray(CONS||[], ['phone','email','name']);
+  var uniqueSups = deduplicateArray(SUPS||[], ['phone','email','name']);
+  var orgsCount  = (ORGS||[]).length;
+  var volsCount  = (VOLUNTEERS_DATA&&VOLUNTEERS_DATA.length>0) ?
+                    VOLUNTEERS_DATA.length : (VOLUNTEERS_PRELOAD||[]).length;
+
+  // Hero stats
+  var e;
+  e=document.getElementById('dash-cons-n'); if(e) e.textContent=uniqueCons.length;
+  e=document.getElementById('dash-sups-n'); if(e) e.textContent=uniqueSups.length;
+  e=document.getElementById('dash-vols-n'); if(e) e.textContent=volsCount;
+
+  // Grid cards
+  e=document.getElementById('cons-dg-count'); if(e) e.textContent=uniqueCons.length+' مسجّل';
+  e=document.getElementById('sups-dg-count'); if(e) e.textContent=uniqueSups.length+' مورد';
+  e=document.getElementById('vol-dash-count'); if(e) e.textContent=volsCount+' متطوع';
+
+  // Consultants screen
+  e=document.getElementById('con-cnt'); if(e) e.textContent=uniqueCons.length;
+
+  // Suppliers screen
+  e=document.getElementById('sup-cnt'); if(e) e.textContent=uniqueSups.length;
+
+  // Volunteers badge
+  e=document.getElementById('vol-count-badge'); if(e) e.textContent=volsCount+' متطوع';
+
+  // Update page titles with counts
+  e=document.querySelector('#consultants .section-count');
+  if(e) e.textContent=uniqueCons.length;
+  e=document.querySelector('#suppliers .section-count');
+  if(e) e.textContent=uniqueSups.length;
+
+  // Firebase live registrations
+  if(typeof db !== 'undefined'){
+    var fbCollections = [
+      {col:'jobseekers',  el:'adm-n-js'},
+      {col:'consultants', el:'adm-n-exp'},
+      {col:'suppliers',   el:'adm-n-sup'},
+      {col:'organizations',el:'adm-n-org'},
+      {col:'volunteers',  el:null},
+      {col:'pending_jobs',el:'pending-count-badge'},
+    ];
+    var totalNew = 0;
+    var promises = fbCollections.map(function(item){
+      return db.collection(item.col).get()
+        .then(function(snap){
+          totalNew += snap.size;
+          if(item.el){
+            var el2 = document.getElementById(item.el);
+            if(el2) el2.textContent = snap.size;
+          }
+          window['_fb_'+item.col] = snap.size;
+        })
+        .catch(function(){});
+    });
+    Promise.all(promises).then(function(){
+      updateFBStats();
+    });
+  }
+}
+
+function updateFBStats(){
+  // New registrations from Firebase
+  var newCons = window._fb_consultants || 0;
+  var newSups = window._fb_suppliers || 0;
+  var newVols = window._fb_volunteers || 0;
+  var newJobs = window._fb_jobseekers || 0;
+  var newOrgs = window._fb_organizations || 0;
+
+  if(newCons > 0){
+    var el = document.getElementById('fb-new-regs');
+    if(!el){
+      // Add new registrations badge to dashboard
+      var hero = document.querySelector('.dash-hero');
+      if(hero){
+        var badge = document.createElement('div');
+        badge.id = 'fb-new-regs';
+        badge.style.cssText = 'position:relative;z-index:1;padding:6px 14px;background:rgba(0,184,148,.2);border-radius:10px;margin:6px 54px 0;font-size:10px;color:rgba(255,255,255,.9)';
+        hero.appendChild(badge);
+        el = badge;
+      }
+    }
+    if(el){
+      var total = newCons + newSups + newVols + newJobs + newOrgs;
+      el.textContent = '🔥 ' + total + ' تسجيل جديد عبر التطبيق';
+    }
+  }
+}
+
 function deduplicateArray(arr, fields){
   var seen = new Set();
   return arr.filter(function(item){
@@ -3470,6 +3672,7 @@ function loadVolunteers(){
   if(badge) badge.textContent = merged.length + ' متطوع';
   var dashCount = document.getElementById('vol-dash-count');
   if(dashCount) dashCount.textContent = merged.length + ' متطوع';
+  updateAllCounts();
 }
 
 function previewVolPhoto(url){
@@ -3759,6 +3962,46 @@ function shareFB(){
   window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(FB_GROUP_URL), '_blank');
 }
 
+// ============ PWA INSTALL ============
+var _deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  _deferredPrompt = e;
+  var btn = document.getElementById('pwa-install-btn');
+  if(btn) btn.style.display = 'inline-block';
+});
+
+function installPWA(){
+  if(_deferredPrompt){
+    _deferredPrompt.prompt();
+    _deferredPrompt.userChoice.then(function(r){
+      if(r.outcome === 'accepted') toast('✅ تم تثبيت التطبيق!');
+      _deferredPrompt = null;
+      var btn = document.getElementById('pwa-install-btn');
+      if(btn) btn.style.display = 'none';
+    });
+  } else {
+    toast('📲 افتح المتصفح واضغط "إضافة للشاشة الرئيسية"');
+  }
+}
+
+// ============ DARK MODE ============
+function toggleDarkMode(){
+  document.body.classList.toggle('dark-mode');
+  var btn = document.getElementById('dark-btn');
+  var isDark = document.body.classList.contains('dark-mode');
+  if(btn) btn.textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('darkMode', isDark ? '1' : '0');
+}
+
+function initDarkMode(){
+  if(localStorage.getItem('darkMode') === '1'){
+    document.body.classList.add('dark-mode');
+    var btn = document.getElementById('dark-btn');
+    if(btn) btn.textContent = '☀️';
+  }
+}
+
 function shareApp(){
   const shareData = {
     title: 'تنمويين مصر',
@@ -3780,12 +4023,15 @@ function shareApp(){
 // ============ ADMIN SYSTEM ============
 // غيّر البيانات دي
 const ADMIN_USERS = {
-  'admin':   'tanmoyeen2025',   // المستخدم الرئيسي
-  'manger':  'masr@2025',       // مستخدم تاني
+  // تم نقل الصلاحيات لـ Firebase Authentication
+  // لا توجد كلمات مرور محفوظة في الكود
 };
 const SHEETS_LINK = 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit';
 let admTab = 'jobseeker';
 let isLoggedIn = false;
+
+var _loginAttempts = 0;
+var _loginLocked = false;
 
 function doLogin(){
   var email = document.getElementById('adm-user').value.trim();
@@ -3794,6 +4040,19 @@ function doLogin(){
   var btn   = document.getElementById('login-btn');
 
   if(!email || !pass){ err.classList.add('on'); return; }
+
+  // Rate limiting - max 5 attempts
+  if(_loginLocked){
+    toast('⚠️ تم تجاوز عدد المحاولات - انتظر دقيقة');
+    return;
+  }
+  _loginAttempts++;
+  if(_loginAttempts >= 5){
+    _loginLocked = true;
+    toast('⚠️ تم قفل الدخول لمدة دقيقة');
+    setTimeout(function(){ _loginLocked=false; _loginAttempts=0; }, 60000);
+    return;
+  }
 
   // Try Firebase Auth first
   if(typeof auth !== 'undefined'){
@@ -3845,30 +4104,49 @@ function doLogout(){
   document.getElementById('adm-pass').value = '';
 }
 
-function loadAdminData(){
-  // اقرأ من localStorage
-  let all = [];
-  try{ all = JSON.parse(localStorage.getItem('registrations') || '[]'); }catch(e){}
+async function loadAdminData(){
+  var allData = [];
+  var collections = ['jobseekers','consultants','suppliers','organizations','volunteers'];
+  var labels = {
+    jobseekers:'باحثين عمل', consultants:'استشاريين',
+    suppliers:'موردين', organizations:'مؤسسات', volunteers:'متطوعين'
+  };
 
-  // حدّث الإحصائيات
-  const counts = {jobseeker:0, expert:0, sup:0, org:0};
-  all.forEach(r => { if(counts[r.type] !== undefined) counts[r.type]++; });
-  document.getElementById('adm-n-js').textContent  = counts.jobseeker;
-  document.getElementById('adm-n-exp').textContent = counts.expert;
-  document.getElementById('adm-n-sup').textContent = counts.sup;
-  document.getElementById('adm-n-org').textContent = counts.org;
+  if(typeof db !== 'undefined'){
+    try {
+      for(var i=0; i<collections.length; i++){
+        var col = collections[i];
+        try {
+          var snap = await db.collection(col).orderBy('timestamp','desc').limit(100).get();
+          snap.docs.forEach(function(d){
+            allData.push({...d.data(), fbId:d.id, _type:col, _label:labels[col]||col});
+          });
+        } catch(colErr){ console.log('Skip', col, colErr.code); }
+      }
+      // Also load from localStorage as backup
+      var localData = loadAdminFromLocal();
+      localData.forEach(function(r){
+        var exists = allData.some(function(a){ return a.phone && a.phone===r.phone; });
+        if(!exists) allData.push(r);
+      });
+      console.log('✅ Admin total:', allData.length);
+    } catch(e) {
+      console.log('Firebase admin failed:', e);
+      allData = loadAdminFromLocal();
+    }
+  } else {
+    allData = loadAdminFromLocal();
+  }
 
-  // حدّث لينك Sheets
-  const sl = document.getElementById('adm-sheet-link');
-  if(sl) sl.href = SHEETS_LINK;
+  window._adminData = allData;
+  renderAdmList(allData);
+  updateAdmCounts(allData);
+}
 
-  renderAdmList();
-  updatePendingBadge();
-  // حدّث عداد الإيميل
-  const eca = document.getElementById('email-count-all');
-  const ecj = document.getElementById('email-count-js');
-  if(eca) eca.textContent = all.filter(r=>r.email&&r.email.includes('@')).length;
-  if(ecj) ecj.textContent = all.filter(r=>r.type==='jobseeker'&&r.email&&r.email.includes('@')).length;
+function loadAdminFromLocal(){
+  var all = [];
+  try{ all = JSON.parse(localStorage.getItem('registrations')||'[]'); }catch(e){}
+  return all;
 }
 
 function setAdmTab(el, tab){
@@ -4313,6 +4591,149 @@ function previewEmail(){
   document.getElementById('prev-subject').textContent = subject;
   document.getElementById('prev-body').textContent    = body;
   document.getElementById('email-preview-box').style.display = 'block';
+}
+
+function buildWAMessage(){
+  var title = (document.getElementById('wa-title')||{}).value || '';
+  var body  = (document.getElementById('wa-body')||{}).value || '';
+  var link  = (document.getElementById('wa-link')||{}).value || '';
+
+  var msg = '';
+  if(title) msg += '🔔 *' + title + '*\n\n';
+  if(body)  msg += body + '\n\n';
+  msg += '━━━━━━━━━━━━━━━\n';
+  msg += '🌟 *تنمويين مصر* - لكل تنموي في مصر\n';
+  if(link) msg += '🔗 ' + link;
+  return msg;
+}
+
+function previewWABroadcast(){
+  var msg = buildWAMessage();
+  var preview = document.getElementById('wa-preview');
+  if(!msg.trim()){ toast('⚠️ اكتب الإشعار الأول'); return; }
+  if(preview){
+    preview.style.display = 'block';
+    preview.textContent = msg;
+  }
+}
+
+function sendWABroadcast(){
+  var title = (document.getElementById('wa-title')||{}).value || '';
+  var body  = (document.getElementById('wa-body')||{}).value || '';
+  if(!title && !body){ toast('⚠️ اكتب الإشعار الأول'); return; }
+
+  var msg = buildWAMessage();
+
+  // Save to Firebase for history
+  if(typeof db !== 'undefined'){
+    db.collection('broadcasts').add({
+      title: title,
+      body: body,
+      msg: msg,
+      channel: 'whatsapp',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(function(){});
+  }
+
+  // Open WhatsApp
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  toast('✅ تم فتح واتساب - ابعت للجروب!');
+}
+
+function useWATemplate(type){
+  var templates = {
+    job: {
+      title: '💼 وظيفة جديدة على منصة تنمويين مصر!',
+      body: 'تم نشر وظيفة جديدة في قطاع التنمية\n📍 المحافظة: \n🏢 الجهة: \n📅 آخر موعد: \n\nسجّل الآن وابعت CV على الرابط:'
+    },
+    tender: {
+      title: '📋 مناقصة جديدة على منصة تنمويين مصر!',
+      body: 'تم نشر مناقصة جديدة\n📍 المحافظة: \n🏢 الجهة: \n💰 القيمة التقديرية: \n📅 آخر موعد: \n\nشوف التفاصيل على الرابط:'
+    },
+    update: {
+      title: '🔄 تحديث جديد على منصة تنمويين مصر!',
+      body: 'تم تحديث قاعدة البيانات:\n👨‍💼 استشاريين جدد\n🏭 موردين جدد\n🤝 متطوعين جدد\n\nاستكشف المنصة الآن:'
+    },
+    event: {
+      title: '🎯 فعالية تنموية قادمة!',
+      body: 'ندعوكم للمشاركة في:\n📌 الفعالية: \n📅 التاريخ: \n📍 المكان: \n\nسجّل مشاركتك على الرابط:'
+    }
+  };
+  var t = templates[type];
+  if(!t) return;
+  var title = document.getElementById('wa-title-main');
+  var body = document.getElementById('wa-body-main');
+  if(title) title.value = t.title;
+  if(body) body.value = t.body;
+  document.getElementById('wa-preview-main').style.display = 'none';
+}
+
+function buildWAMainMessage(){
+  var title = (document.getElementById('wa-title-main')||{}).value || '';
+  var body  = (document.getElementById('wa-body-main')||{}).value || '';
+  var link  = (document.getElementById('wa-link-main')||{}).value || '';
+  var msg = '';
+  if(title) msg += '🔔 *' + title + '*\n\n';
+  if(body)  msg += body + '\n\n';
+  msg += '━━━━━━━━━━━━━━━\n';
+  msg += '🌟 *تنمويين مصر* - لكل تنموي في مصر\n';
+  if(link) msg += '🔗 ' + link;
+  return msg;
+}
+
+function previewWAMain(){
+  var msg = buildWAMainMessage();
+  var preview = document.getElementById('wa-preview-main');
+  if(!msg.trim()){ toast('⚠️ اكتب الإشعار الأول'); return; }
+  if(preview){ preview.style.display='block'; preview.textContent=msg; }
+}
+
+function sendWAMain(){
+  var title = (document.getElementById('wa-title-main')||{}).value || '';
+  var body  = (document.getElementById('wa-body-main')||{}).value || '';
+  if(!title && !body){ toast('⚠️ اكتب الإشعار الأول'); return; }
+  var msg = buildWAMainMessage();
+
+  // Save to Firebase history
+  if(typeof db !== 'undefined'){
+    db.collection('broadcasts').add({
+      title: title, body: body, msg: msg,
+      channel: 'whatsapp',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function(){
+      loadBroadcastHistory();
+    }).catch(function(){});
+  }
+
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  toast('✅ تم فتح واتساب - ابعت للجروب!');
+}
+
+async function loadBroadcastHistory(){
+  var hist = document.getElementById('broadcast-history');
+  if(!hist || typeof db === 'undefined') return;
+  try {
+    var snap = await db.collection('broadcasts')
+      .orderBy('timestamp','desc').limit(10).get();
+    if(snap.empty){
+      hist.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center;padding:20px">لا توجد إشعارات سابقة</div>';
+      return;
+    }
+    hist.innerHTML = snap.docs.map(function(d){
+      var data = d.data();
+      var date = data.timestamp ? new Date(data.timestamp.seconds*1000).toLocaleDateString('ar-EG') : '—';
+      return '<div style="background:var(--bg);border-radius:10px;padding:10px;margin-bottom:8px;border:1px solid var(--border)">' +
+        '<div style="font-size:12px;font-weight:700;color:var(--p)">' + (data.title||'—') + '</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:3px">📅 ' + date + ' · 💬 واتساب</div>' +
+        '<a href="https://wa.me/?text=" style="margin-top:6px;padding:4px 10px;background:#e7faf3;color:#00703a;border-radius:6px;font-size:10px;font-weight:700;display:inline-block;text-decoration:none">🔄 إعادة إرسال</a>' +
+      '</div>';
+    }).join('');
+  } catch(e){ console.log('History load failed:', e); }
+}
+
+function resendWA(encodedMsg){
+  var msg = decodeURIComponent(encodedMsg);
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 
 function sendBulkEmail(){

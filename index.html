@@ -1247,7 +1247,7 @@ textarea.fi{resize:none}
     <div class="adm-list" id="adm-list" style="display:flex;flex-direction:column;gap:8px"></div>
 
     <!-- فورم إضافة وظيفة -->
-    <div id="adm-form-job" style="display:none;padding:0 16px">
+    <div id="adm-form-job" style="display:none;padding:0 16px;padding-bottom:100px">
 
       <!-- هيدر -->
       <div style="background:linear-gradient(135deg,var(--p),var(--p2));border-radius:14px;padding:14px;margin-bottom:16px;color:white;text-align:center">
@@ -1420,7 +1420,7 @@ textarea.fi{resize:none}
     </div>
 
     <!-- فورم إضافة مناقصة -->
-    <div id="adm-form-tender" style="display:none;padding:0 16px">
+    <div id="adm-form-tender" style="display:none;padding:0 16px;padding-bottom:100px">
       <div style="background:#fef3e8;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-right:3px solid var(--orange);font-size:12px;color:#7a4010">
         📋 <strong>إضافة مناقصة جديدة:</strong> ستظهر فوراً في قسم المناقصات للمستخدمين
       </div>
@@ -1466,7 +1466,7 @@ textarea.fi{resize:none}
     </div>
 
     <!-- فورم الإيميل الجماعي -->
-    <div id="adm-form-email" style="display:none;padding:0 16px">
+    <div id="adm-form-email" style="display:none;padding:0 16px;padding-bottom:100px">
 
       <!-- إحصائيات المشتركين -->
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px">
@@ -1562,9 +1562,10 @@ textarea.fi{resize:none}
       <button onclick="saveFeatured()" style="width:100%;padding:13px;background:linear-gradient(135deg,var(--green),#009974);color:white;border:none;border-radius:12px;font-size:13px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
         💾 حفظ وتطبيق
       </button>
+      <div style="height:80px"></div>
     </div>
     <!-- وظائف في انتظار المراجعة -->
-    <div id="adm-form-pending" style="display:none;padding:0 16px">
+    <div id="adm-form-pending" style="display:none;padding:0 16px;padding-bottom:100px">
       <div style="background:#fff3cd;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-right:3px solid #ffc107;font-size:12px;color:#856404">
         ⏳ <strong>وظائف في انتظار المراجعة:</strong> راجع كل وظيفة واضغط نشر أو رفض
       </div>
@@ -1630,11 +1631,159 @@ function setAllLogos(){
 }
 setAllLogos();
 
+// ============ LIVE CSV LOADER ============
+async function loadConsFromSheet(){
+  try {
+    var url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnv-TMZ2XXxDcStCOZqIHWnLdlyrgynC-lVxiAbQ6Zb4guphDnKjBa2H5iYgMsIUScdLJQmzPovMdm/pub?gid=856889725&single=true&output=csv';
+    var resp = await fetch(url);
+    var text = await resp.text();
+    var rows = text.split('\n').map(function(r){ return r.split(','); });
+    
+    // Skip first 3 rows (headers)
+    var data = rows.slice(3).filter(function(r){ return r[2] && r[2].trim(); });
+    
+    var avatars = {
+      'تمكين':'💼','اقتصاد':'📊','تدريب':'🎓','صحة':'🏥',
+      'تعليم':'📚','بيئة':'🌿','مرأة':'👩','طفل':'👶',
+      'مسرح':'🎭','زراعة':'🌾','مشاريع':'📋','مالي':'💰',
+      'إعلام':'📡','تكنولوجيا':'💻','نفسي':'🧠','اجتماعي':'🤝'
+    };
+    var bgs = ['#e8f0fe','#e7faf3','#fff3cd','#fde8f0','#e8fef3','#f0e8fe'];
+    var femaleNames = ['داليا','ماير','إيمان','سمر','نهى','هناء','دينا','رانيا','مريم','نور','هبة','شيماء','رشا','حنان','سارة','منى'];
+
+    var newCons = data.map(function(r, i){
+      var name = (r[2]||'').trim();
+      var gov  = (r[3]||'').trim();
+      var bio  = (r[4]||'').trim().substring(0,150);
+      var email= (r[5]||'').trim();
+      var phone= (r[6]||'').trim().replace(/[^\d]/g,'');
+      var spec = (r[7]||'').trim();
+      
+      if(phone.startsWith('20')) phone = '0' + phone.substring(2);
+      
+      var av = '👨‍💼';
+      for(var k in avatars){ if(spec.includes(k)||bio.includes(k)){ av=avatars[k]; break; } }
+      for(var j=0; j<femaleNames.length; j++){ if(name.includes(femaleNames[j])){ av='👩‍💼'; break; } }
+      
+      return { id:i+1, name:name, spec:spec||'استشاري', spec2:'', gov:gov, bio:bio,
+               email:email, phone:phone, orgs:'', av:av, bg:bgs[i%bgs.length] };
+    });
+
+    if(newCons.length > 10){
+      // Replace CONS with live data
+      window.CONS = newCons;
+      // Update count
+      var el = document.getElementById('dash-cons-n');
+      if(el) el.textContent = newCons.length;
+      var dg = document.getElementById('cons-dg-count');
+      if(dg) dg.textContent = newCons.length + ' مسجّل';
+      console.log('✅ Loaded ' + newCons.length + ' consultants from sheet');
+    }
+  } catch(e) {
+    console.log('Sheet load failed, using local data:', e);
+  }
+}
+
+async function loadSupsFromSheet(){
+  try {
+    var resp = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQnv-TMZ2XXxDcStCOZqIHWnLdlyrgynC-lVxiAbQ6Zb4guphDnKjBa2H5iYgMsIUScdLJQmzPovMdm/pub?gid=43853626&single=true&output=csv');
+    var text = await resp.text();
+    var rows = text.split('\n').map(function(r){ return r.split(','); });
+    var data = rows.slice(3).filter(function(r){ return r[2] && r[2].trim(); });
+    var logos = {'مقاولات':'🏗️','توريد':'📦','أجهزة':'💻','طباعة':'🖨️','تدريب':'🎓','صحة':'🏥','أغذية':'🍱','زراعة':'🌾','نقل':'🚚','نظافة':'🧹','استشار':'💼','خدمات':'🏢'};
+    var newSups = data.map(function(r,i){
+      var name = (r[2]||'').trim();
+      var cat  = (r[3]||'').trim();
+      var gov  = (r[4]||'').trim();
+      var addr = (r[5]||'').trim();
+      var phone= (r[6]||'').trim().replace(/[^\d]/g,'');
+      var email= (r[7]||'').trim();
+      if(phone.startsWith('20')) phone='0'+phone.substring(2);
+      var logo='🏭';
+      for(var k in logos){ if(cat.includes(k)||name.includes(k)){logo=logos[k];break;} }
+      return {id:i+1,name:name,cat:cat||'توريدات',gov:gov,address:addr,phone:phone,email:email,delivery:'',clients:'',logo:logo,cert:''};
+    });
+    if(newSups.length > 5){
+      window.SUPS = newSups;
+      var el=document.getElementById('dash-sups-n'); if(el) el.textContent=newSups.length;
+      var dg=document.getElementById('sups-dg-count'); if(dg) dg.textContent=newSups.length+' مورد';
+      console.log('✅ Loaded '+newSups.length+' suppliers');
+    }
+  } catch(e){ console.log('Sups sheet failed:',e); }
+}
+
+async function loadVolsFromSheet(){
+  try {
+    var resp = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQnv-TMZ2XXxDcStCOZqIHWnLdlyrgynC-lVxiAbQ6Zb4guphDnKjBa2H5iYgMsIUScdLJQmzPovMdm/pub?gid=518168763&single=true&output=csv');
+    var text = await resp.text();
+    var rows = text.split('\n').map(function(r){ return r.split(','); });
+    var data = rows.slice(3).filter(function(r){ return r[2] && r[2].trim(); });
+    var newVols = data.map(function(r,i){
+      var name    = (r[2]||'').trim();
+      var gov     = (r[3]||'').trim();
+      var interests= (r[4]||'').trim().split('/').map(function(x){return x.trim();}).filter(Boolean);
+      var phone   = (r[5]||'').trim().replace(/[^\d]/g,'');
+      var email   = (r[6]||'').trim();
+      var skills  = (r[7]||'').trim();
+      var hours   = (r[8]||'').trim();
+      var worktype= (r[9]||'').trim();
+      var days    = (r[10]||'').trim();
+      var travel  = (r[11]||'').trim();
+      var langs   = (r[12]||'').trim();
+      var badges  = (r[13]||'').trim().split('/').map(function(x){return x.trim();}).filter(Boolean);
+      if(phone.startsWith('20')) phone='0'+phone.substring(2);
+      return {id:i+1,name:name,gov:gov,interests:interests,phone:phone,email:email,skills:skills,hours:hours,worktype:worktype,days:days,travel:travel,langs:langs,badges:badges,photo:''};
+    });
+    if(newVols.length > 0){
+      window.VOLUNTEERS_PRELOAD = newVols;
+      console.log('✅ Loaded '+newVols.length+' volunteers');
+    }
+  } catch(e){ console.log('Vols sheet failed:',e); }
+}
+
+async function loadOrgsFromSheet(){
+  try {
+    var resp = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQnv-TMZ2XXxDcStCOZqIHWnLdlyrgynC-lVxiAbQ6Zb4guphDnKjBa2H5iYgMsIUScdLJQmzPovMdm/pub?gid=960598300&single=true&output=csv');
+    var text = await resp.text();
+    var rows = text.split('\n').map(function(r){ return r.split(','); });
+    var data = rows.slice(3).filter(function(r){ return r[2] && r[2].trim(); });
+    var logos = {'دولية':'🌍','أمم':'🌐','حكومية':'🏛️','أهلية':'🤝','جمعية':'🏠','مؤسسة':'🏢','شركة':'🏭','هيئة':'⚖️'};
+    var newOrgs = data.map(function(r,i){
+      var name  = (r[2]||'').trim();
+      var type  = (r[3]||'').trim();
+      var gov   = (r[4]||'').trim();
+      var field = (r[5]||'').trim();
+      var phone = (r[6]||'').trim().replace(/[^\d]/g,'');
+      var email = (r[7]||'').trim();
+      if(phone.startsWith('20')) phone='0'+phone.substring(2);
+      var logo='🏢';
+      for(var k in logos){ if(type.includes(k)||name.includes(k)){logo=logos[k];break;} }
+      return {id:i+1,name:name,type:type,gov:gov,field:field,phone:phone,email:email,notes:'',logo:logo};
+    });
+    if(newOrgs.length > 5){
+      window.ORGS = newOrgs;
+      console.log('✅ Loaded '+newOrgs.length+' orgs');
+    }
+  } catch(e){ console.log('Orgs sheet failed:',e); }
+}
+
 function enterApp(){
   document.getElementById('splash').style.display='none';
   document.getElementById('app').style.display='block';
   setAllLogos();
-  loadCustomContent();renderDash();renderJobs();renderTenders();updateJobseekersList();loadVolunteers();setTimeout(setupHeroShrink,100);
+  loadCustomContent();renderDash();renderJobs();renderTenders();updateJobseekersList();
+  // Load live data from sheets
+  Promise.all([
+    loadConsFromSheet(),
+    loadSupsFromSheet(),
+    loadVolsFromSheet(),
+    loadOrgsFromSheet()
+  ]).then(function(){
+    renderDash();
+    loadVolunteers();
+    console.log('✅ All sheets loaded');
+  });
+  setTimeout(setupHeroShrink,100);
   // URL params handled separately after load
 }
 
@@ -2065,12 +2214,12 @@ function go(id){
   const nid=navMap[id];
   if(nid){const nel=document.getElementById(nid);if(nel)nel.classList.add('on');}
   window.scrollTo(0,0);
-  if(id==='consultants')renderCons();
-  if(id==='suppliers')renderSups();
+  if(id==='consultants'){ loadConsFromSheet().then(renderCons); }
+  if(id==='suppliers'){ loadSupsFromSheet().then(renderSups); }
   if(id==='tenders')renderTenders();
   if(id==='notifs')renderNotifs();
-  if(id==='volunteers')loadVolunteers();
-  if(id==='orgs-screen')setTimeout(renderOrgs, 50);
+  if(id==='volunteers'){ loadVolsFromSheet().then(loadVolunteers); }
+  if(id==='orgs-screen'){ loadOrgsFromSheet().then(function(){ setTimeout(renderOrgs,50); }); }
   if(id==='home')setupHeroShrink();
 }
 

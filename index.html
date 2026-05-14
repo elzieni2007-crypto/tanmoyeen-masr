@@ -492,6 +492,10 @@ textarea.fi{resize:none}
 
 #home{overflow-y:auto;-webkit-overflow-scrolling:touch}
 </style>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -1630,6 +1634,80 @@ function setAllLogos(){
   });
 }
 setAllLogos();
+
+// ============ FIREBASE CONFIG ============
+const firebaseConfig = {
+  apiKey: "AIzaSyDHfDy-MIfumDCQkJNGRs64jZ1uXfV48JQ",
+  authDomain: "tanmween-masr.firebaseapp.com",
+  databaseURL: "https://tanmween-masr-default-rtdb.firebaseio.com",
+  projectId: "tanmween-masr",
+  storageBucket: "tanmween-masr.firebasestorage.app",
+  messagingSenderId: "956865516310",
+  appId: "1:956865516310:web:11e1d66989af9e227bb637",
+  measurementId: "G-6JN7CKMKMY"
+};
+
+// Initialize Firebase
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+const auth = firebase.auth();
+console.log('✅ Firebase initialized');
+
+// ============ FIREBASE SAVE REGISTRATION ============
+async function saveToFirebase(type, data){
+  try {
+    var collections = {
+      jobseeker: 'باحثين_عمل',
+      expert:    'استشاريين',
+      sup:       'موردين',
+      org:       'مؤسسات',
+      volunteer: 'متطوعين'
+    };
+    var col = collections[type] || type;
+    await db.collection(col).add({
+      ...data,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      type: type
+    });
+    console.log('✅ Saved to Firebase:', col);
+    return true;
+  } catch(e) {
+    console.log('Firebase save failed:', e);
+    return false;
+  }
+}
+
+// ============ FIREBASE LOAD PENDING JOBS ============
+async function loadPendingFromFirebase(){
+  try {
+    var snap = await db.collection('pending_jobs')
+      .where('status','==','pending')
+      .orderBy('timestamp','desc')
+      .get();
+    return snap.docs.map(function(d){ return {...d.data(), fbId: d.id}; });
+  } catch(e) {
+    console.log('Load pending failed:', e);
+    return [];
+  }
+}
+
+async function approveJobFirebase(fbId, jobData){
+  try {
+    await db.collection('pending_jobs').doc(fbId).update({ status: 'approved' });
+    await db.collection('jobs').add({ ...jobData, status: 'approved',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+    console.log('✅ Job approved');
+  } catch(e) { console.log('Approve failed:', e); }
+}
+
+async function rejectJobFirebase(fbId){
+  try {
+    await db.collection('pending_jobs').doc(fbId).update({ status: 'rejected' });
+    console.log('✅ Job rejected');
+  } catch(e) { console.log('Reject failed:', e); }
+}
 
 // ============ LIVE CSV LOADER ============
 async function loadConsFromSheet(){
@@ -3546,6 +3624,14 @@ function submitVolunteer(){
   try{ stored = JSON.parse(localStorage.getItem('volunteers')||'[]'); }catch(e){}
   stored.unshift(vol);
   localStorage.setItem('volunteers', JSON.stringify(stored));
+
+  // حفظ في Firebase
+  saveToFirebase('volunteer', {
+    name: vol.name, gov: vol.gov, interests: vol.interests,
+    phone: vol.phone, email: vol.email, skills: vol.skills,
+    hours: vol.hours, worktype: vol.worktype, days: vol.days,
+    travel: vol.travel, langs: vol.langs, badges: vol.badges,
+  });
 
   // ارسال للـ Sheets
   fetch('https://script.google.com/macros/s/AKfycbzM09ySPqw6b7Oc922YZs_5grSbBuPVV9PW5zLy0MG2EddSR76r_aNxcRhs_0YjejjoUQ/exec',{

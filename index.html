@@ -4393,7 +4393,7 @@ function testFirebase(){
     if(btn) btn.textContent = '🔥 اختبار Firebase';
   }, 10000);
   
-  db.collection('test').add(testData).then(function(doc){
+  db.collection('volunteers').add({test: true, msg: 'test', time: new Date().toISOString()}).then(function(doc){
     clearTimeout(timeout);
     if(result) result.textContent = '✅ شغال! ' + doc.id.substring(0,8);
     if(btn) btn.textContent = '✅ نجح';

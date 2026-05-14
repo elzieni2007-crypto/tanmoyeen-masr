@@ -562,6 +562,10 @@ textarea.fi{resize:none}
     <div class="dh-c1"></div><div class="dh-c2"></div>
     <div class="dh-logo"><img id="logo-dh" src="" alt="logo"></div>
     <div class="dh-greet" style="padding-right:54px;font-size:11px;margin-bottom:2px">مرحباً بك في تنمويين مصر 👋</div>
+  <div style="padding-right:54px;position:relative;z-index:1">
+    <button onclick="testFirebase()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:4px 12px;border-radius:10px;font-size:10px;font-family:Cairo,sans-serif;cursor:pointer" id="fb-test-btn">🔥 اختبار Firebase</button>
+    <span id="fb-test-result" style="font-size:10px;color:rgba(255,255,255,.8);margin-right:8px"></span>
+  </div>
     <div class="dh-title" style="padding-right:54px;font-size:13px;margin-bottom:8px">منصتك الشاملة للعمل التنموي في مصر</div>
     <div class="dh-stats">
       <div class="ds"><div class="ds-n" id="dash-cons-n">243</div><div class="ds-l">استشاري</div></div>
@@ -4360,6 +4364,34 @@ function setupHeroShrink(){
       hero.classList.remove('shrunk');
     }
   }, {passive:true});
+}
+
+function testFirebase(){
+  var btn = document.getElementById('fb-test-btn');
+  var result = document.getElementById('fb-test-result');
+  if(btn) btn.textContent = '⏳ جاري الاختبار...';
+  if(result) result.textContent = '';
+
+  // Test 1: Firebase initialized?
+  if(typeof firebase === 'undefined'){
+    if(result) result.textContent = '❌ Firebase SDK مش موجود';
+    if(btn) btn.textContent = '🔥 اختبار Firebase';
+    return;
+  }
+
+  // Test 2: Firestore write
+  db.collection('test').add({
+    msg: 'test from tanmoyeen',
+    time: new Date().toISOString()
+  }).then(function(doc){
+    if(result) result.textContent = '✅ Firebase شغال! ID: ' + doc.id.substring(0,8);
+    if(btn) btn.textContent = '✅ نجح';
+    toast('✅ Firebase شغال بنجاح!');
+  }).catch(function(err){
+    if(result) result.textContent = '❌ ' + err.message.substring(0,50);
+    if(btn) btn.textContent = '🔥 اختبار Firebase';
+    toast('❌ خطأ: ' + err.message.substring(0,60));
+  });
 }
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),2500);}

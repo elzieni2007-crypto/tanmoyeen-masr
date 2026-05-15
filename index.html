@@ -669,6 +669,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="dg-card" onclick="go('volunteers')"><div class="dg-icon" style="background:#e7faf3">🤝</div><div class="dg-t">متطوعون</div><div class="dg-c" id="vol-dash-count">انضم الآن</div></div>
     <div class="dg-card" onclick="go('register')" style="border:2px solid var(--a);background:linear-gradient(135deg,#e8f0fe,#f0f7ff)"><div class="dg-icon" style="background:var(--a)">📝</div><div class="dg-t" style="color:var(--p);font-weight:900">سجّل ملفك</div><div class="dg-c" style="color:var(--a);font-weight:800">مجاناً ✨</div></div>
     <div class="dg-card" onclick="go('consult-screen')" style="border:2px solid #c06010;background:linear-gradient(135deg,#fef3e8,#fff8f0)"><div class="dg-icon" style="background:#c06010">📋</div><div class="dg-t" style="color:#c06010;font-weight:900">استشارة</div><div class="dg-c" style="color:#c06010;font-weight:700">ضريبية / تأمينية</div></div>
+    <div class="dg-card" onclick="go('nexus-screen')" style="border:2px solid #0d1b2a;background:linear-gradient(135deg,#f0f4f8,#e8f0fe)"><div class="dg-icon" style="background:#0d1b2a;padding:0;overflow:hidden"><img src="''' + NEXUS_LOGO + '''" style="width:100%;height:100%;object-fit:contain" onerror="this.parentNode.innerHTML='🎯'"></div><div class="dg-t" style="color:#0d1b2a;font-weight:900">Nexus</div><div class="dg-c" style="color:#f59e0b;font-weight:700">قريباً ✨</div></div>
   </div>
   <!-- أزرار المشاركة -->
   <div style="display:flex;gap:6px;padding:4px 10px 2px;direction:ltr">
@@ -805,6 +806,100 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
   </div>
   <div id="orgs-list" style="padding:0 12px 12px"></div>
+</div>
+
+<div id="nexus-screen" class="scr">
+
+  <!-- هيدر -->
+  <div style="background:linear-gradient(135deg,#0d1b2a,#1a2f4a,#0d3b5e);padding:24px 16px 20px;color:white;position:relative;overflow:hidden;text-align:center">
+    <div style="position:absolute;top:-30px;right:-30px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
+    <div style="position:absolute;bottom:-20px;left:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
+    <div style="position:relative;z-index:1">
+      <div style="font-size:11px;letter-spacing:3px;opacity:.6;margin-bottom:12px;font-weight:600">COMING SOON</div>
+      <div style="font-size:22px;font-weight:900;margin-bottom:6px">شراكات استراتيجية</div>
+      <div style="font-size:12px;opacity:.75;line-height:1.7">تنمويين مصر تبني شبكة شراكات<br>لخدمة القطاع التنموي</div>
+    </div>
+  </div>
+
+  <div style="padding:20px 16px">
+
+    <!-- Nexus Talent Card -->
+    <div style="background:white;border-radius:20px;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,.1);border:2px solid #e8f0fe;margin-bottom:16px;position:relative;overflow:hidden">
+
+      <!-- Coming Soon Badge -->
+      <div style="position:absolute;top:14px;left:14px;background:linear-gradient(135deg,#f59e0b,#d97706);color:white;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:1px">
+        قريباً ✨
+      </div>
+
+      <!-- Logo -->
+      <div style="text-align:center;margin-bottom:16px;margin-top:8px">
+        <img src="https://i.ibb.co/Lz1cNZZQ/file-00000000c47c720aa2b32868309a3136.png" alt="Nexus Talent"
+          style="width:120px;height:120px;object-fit:contain;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.1)"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div style="display:none;width:120px;height:120px;background:#e8f0fe;border-radius:16px;align-items:center;justify-content:center;margin:0 auto;font-size:40px">🎯</div>
+      </div>
+
+      <!-- Name -->
+      <div style="text-align:center;margin-bottom:12px">
+        <div style="font-size:20px;font-weight:900;color:#0d1b2a;margin-bottom:4px">Nexus Talent</div>
+        <div style="font-size:12px;color:#6b7a8d;font-weight:600">شريك استراتيجي في التوظيف والتطوير المهني</div>
+      </div>
+
+      <!-- Divider -->
+      <div style="height:1px;background:#e8f0fe;margin:14px 0"></div>
+
+      <!-- Description -->
+      <div style="font-size:13px;color:#374151;line-height:1.9;text-align:center;margin-bottom:16px">
+        تعاون استراتيجي بين <strong style="color:#1a3a6e">تنمويين مصر</strong> و<strong style="color:#0d1b2a">Nexus Talent</strong>
+        لتقديم خدمات التوظيف والتطوير المهني لكوادر القطاع التنموي في مصر
+      </div>
+
+      <!-- Features -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="background:#f0f7ff;border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">💼</div>
+          <div style="font-size:11px;font-weight:700;color:#1a3a6e">فرص التوظيف</div>
+          <div style="font-size:10px;color:#6b7a8d;margin-top:3px">مطابقة دقيقة للكفاءات</div>
+        </div>
+        <div style="background:#f0f7ff;border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">🎯</div>
+          <div style="font-size:11px;font-weight:700;color:#1a3a6e">تطوير مهني</div>
+          <div style="font-size:10px;color:#6b7a8d;margin-top:3px">برامج تدريب متخصصة</div>
+        </div>
+        <div style="background:#f0f7ff;border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">🤝</div>
+          <div style="font-size:11px;font-weight:700;color:#1a3a6e">استشارات HR</div>
+          <div style="font-size:10px;color:#6b7a8d;margin-top:3px">للمؤسسات التنموية</div>
+        </div>
+        <div style="background:#f0f7ff;border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">📊</div>
+          <div style="font-size:11px;font-weight:700;color:#1a3a6e">تقييم الكفاءات</div>
+          <div style="font-size:10px;color:#6b7a8d;margin-top:3px">أدوات تقييم متقدمة</div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;padding:14px;text-align:center;border:1.5px solid #f59e0b">
+        <div style="font-size:14px;font-weight:800;color:#92400e;margin-bottom:4px">🚀 قريباً جداً!</div>
+        <div style="font-size:11px;color:#78350f;line-height:1.6">
+          نعمل على إطلاق هذه الشراكة قريباً<br>
+          ترقّب الإعلان الرسمي على منصة تنمويين مصر
+        </div>
+      </div>
+
+    </div>
+
+    <!-- More partnerships coming -->
+    <div style="background:linear-gradient(135deg,#f8fafc,#e8f0fe);border-radius:16px;padding:18px;text-align:center;border:1.5px dashed #94a3b8">
+      <div style="font-size:24px;margin-bottom:8px">🌟</div>
+      <div style="font-size:14px;font-weight:800;color:#1a3a6e;margin-bottom:6px">المزيد قادم!</div>
+      <div style="font-size:12px;color:#6b7a8d;line-height:1.7">
+        تنمويين مصر تعمل على بناء شبكة شراكات<br>
+        متنوعة لخدمة المجتمع التنموي
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <div id="consult-screen" class="scr">
@@ -1766,6 +1861,18 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div style="font-size:15px;font-weight:800;color:var(--p)">📋 طلبات الاستشارات</div>
     <span id="adm-consult-count" style="background:#c06010;color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
   </div>
+
+  <!-- رسائل واتساب مخصصة -->
+  <div style="background:#e7faf3;border-radius:14px;padding:14px;margin-bottom:14px;border:1.5px solid #00703a">
+    <div style="font-size:13px;font-weight:800;color:#00703a;margin-bottom:10px">💬 رسالة دعوة للاستشارة</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <button onclick="sendConsultWA('tax')" style="padding:8px 14px;background:#1a3a6e;color:white;border:none;border-radius:10px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🧾 دعوة ضريبية</button>
+      <button onclick="sendConsultWA('ins')" style="padding:8px 14px;background:#00703a;color:white;border:none;border-radius:10px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🛡 دعوة تأمينية</button>
+      <button onclick="sendConsultWA('link')" style="padding:8px 14px;background:#c06010;color:white;border:none;border-radius:10px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🔗 رابط الفورم</button>
+    </div>
+    <div id="consult-wa-preview" style="display:none;background:white;border-radius:10px;padding:10px;font-size:11px;color:#333;border:1px solid #00703a;white-space:pre-wrap;direction:rtl;line-height:1.8;margin-bottom:8px"></div>
+  </div>
+
   <div id="adm-consult-list"></div>
 </div>
 
@@ -2770,7 +2877,7 @@ let jFilt='all', tFilt='all', cFilt='all', sFilt='all';
 let logoTaps=0, logoTimer=null;
 
 // ============ NAVIGATION ============
-const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult'};
+const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus'};
 function go(id){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
@@ -5217,6 +5324,46 @@ function sendWAMain(){
   }
 }
 
+function sendConsultWA(type){
+  var msgs = {
+    tax: '🧾 *استشارة ضريبية مجانية لجمعيتك!*\n\n' +
+      'تنمويين مصر تقدم خدمة الاستشارات الضريبية للجمعيات والمؤسسات الأهلية\n\n' +
+      '✅ ما تشمله الاستشارة:\n' +
+      '• الإقرارات الضريبية\n' +
+      '• ضريبة القيمة المضافة\n' +
+      '• الإعفاءات الضريبية للجمعيات\n' +
+      '• تسوية المتأخرات الضريبية\n\n' +
+      '📋 سجّل طلبك الآن:\n' +
+      'https://elzieni2007-crypto.github.io/tanmoyeen-masr/\n\n' +
+      'تنمويين مصر 🌟 لكل تنموي في مصر',
+
+    ins: '🛡 *استشارة تأمينية مجانية لجمعيتك!*\n\n' +
+      'تنمويين مصر تقدم خدمة الاستشارات التأمينية للجمعيات والمؤسسات الأهلية\n\n' +
+      '✅ ما تشمله الاستشارة:\n' +
+      '• التأمينات الاجتماعية للعاملين\n' +
+      '• تسوية مستحقات التأمينات\n' +
+      '• تسجيل العمالة في التأمينات\n' +
+      '• الاستفسار عن الاشتراكات\n\n' +
+      '📋 سجّل طلبك الآن:\n' +
+      'https://elzieni2007-crypto.github.io/tanmoyeen-masr/\n\n' +
+      'تنمويين مصر 🌟 لكل تنموي في مصر',
+
+    link: '📋 *اطلب استشارتك الضريبية أو التأمينية الآن!*\n\n' +
+      'منصة تنمويين مصر تقدم استشارات مجانية للجمعيات والمؤسسات في:\n' +
+      '🧾 الضرائب | 🛡 التأمينات\n\n' +
+      '👇 افتح الرابط وسجّل طلبك:\n' +
+      'https://elzieni2007-crypto.github.io/tanmoyeen-masr/\n\n' +
+      '⏱ سيتم التواصل معك خلال 48 ساعة\n\n' +
+      'تنمويين مصر 🌟 لكل تنموي في مصر'
+  };
+
+  var msg = msgs[type];
+  var preview = document.getElementById('consult-wa-preview');
+  if(preview){ preview.style.display='block'; preview.textContent=msg; }
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  toast('✅ تم فتح واتساب!');
+}
+
 async function loadAdminConsultations(){
   var list = document.getElementById('adm-consult-list');
   var countEl = document.getElementById('adm-consult-count');
@@ -5489,16 +5636,7 @@ window.addEventListener('load',()=>{
 </script>
 
 <!-- SUCCESS MODAL -->
-<div class="success-overlay" id="success-overlay">
-  <div class="success-box">
-    <div class="success-icon" id="success-icon">✅</div>
-    <div class="success-title" id="success-title">تم التسجيل بنجاح!</div>
-    <div class="success-sub" id="success-sub">تم حفظ بياناتك في قاعدة بيانات تنمويين مصر</div>
-    <div class="success-info" id="success-info"></div>
-    <button class="success-btn" onclick="closeSuccess()">🏠 العودة للرئيسية</button>
-    <button class="success-btn-wa" onclick="shareSuccessWA()">💬 شارك تسجيلك على واتساب</button>
-  </div>
-</div>
+
 
 
 <!-- SUBMIT JOB MODAL -->
@@ -5761,5 +5899,16 @@ window.addEventListener('load',()=>{
   </div>
 </div>
 
+
+<div class="success-overlay" id="success-overlay">
+  <div class="success-box">
+    <div class="success-icon" id="success-icon">✅</div>
+    <div class="success-title" id="success-title">تم التسجيل بنجاح!</div>
+    <div class="success-sub" id="success-sub">تم حفظ بياناتك في قاعدة بيانات تنمويين مصر</div>
+    <div class="success-info" id="success-info"></div>
+    <button class="success-btn" onclick="closeSuccess()">🏠 العودة للرئيسية</button>
+    <button class="success-btn-wa" onclick="shareSuccessWA()">💬 شارك تسجيلك على واتساب</button>
+  </div>
+</div>
 </body>
 </html>

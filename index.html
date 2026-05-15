@@ -2088,10 +2088,12 @@ function enterApp(){
     });
   }, 5 * 60 * 1000);
 
-  // Firebase real-time listener for new registrations
-  if(typeof db !== 'undefined'){
-    // Listen for new volunteers
-    db.collection('volunteers')
+  // Firebase real-time listener - only when admin logged in
+  if(typeof db !== 'undefined' && typeof auth !== 'undefined'){
+    auth.onAuthStateChanged(function(user){
+      if(user){
+        // Admin logged in - start listeners
+        db.collection('volunteers')
       .orderBy('timestamp','desc')
       .limit(50)
       .onSnapshot(function(snap){
@@ -2148,6 +2150,8 @@ function enterApp(){
           }
         });
       }, function(err){ console.log('Cons listener:', err.code); });
+      } // end if(user)
+    }); // end onAuthStateChanged
   }
   setTimeout(setupHeroShrink,100);
   // URL params handled separately after load
@@ -5052,7 +5056,7 @@ function testFirebase(){
     if(btn) btn.textContent = '🔥 اختبار Firebase';
   }, 10000);
   
-  db.collection('volunteers').add({test: true, msg: 'test', time: new Date().toISOString()}).then(function(doc){
+  db.collection('jobseekers').add({test: true, msg: 'test', time: new Date().toISOString()}).then(function(doc){
     clearTimeout(timeout);
     if(result) result.textContent = '✅ شغال! ' + doc.id.substring(0,8);
     if(btn) btn.textContent = '✅ نجح';

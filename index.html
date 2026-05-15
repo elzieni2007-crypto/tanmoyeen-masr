@@ -1817,10 +1817,9 @@ const firebaseConfig = {
 if(!firebase.apps.length){
   firebase.initializeApp(firebaseConfig);
 }
-// Use named database 'my-database'
 const db = firebase.firestore();
 const auth = firebase.auth();
-console.log('✅ Firebase initialized - using default database');
+console.log('✅ Firebase ready - project:', firebaseConfig.projectId);
 
 // ============ FIREBASE SAVE REGISTRATION ============
 async function saveToFirebase(type, data){
@@ -5036,37 +5035,31 @@ function testFirebase(){
   if(btn) btn.textContent = '⏳ جاري الاختبار...';
   if(result) result.textContent = '';
 
-  // Test 1: Firebase initialized?
   if(typeof firebase === 'undefined'){
     if(result) result.textContent = '❌ Firebase SDK مش موجود';
     if(btn) btn.textContent = '🔥 اختبار Firebase';
     return;
   }
 
-  // Test 2: Firestore write
-  var testData = {
-    msg: 'test from tanmoyeen masr',
-    time: new Date().toISOString(),
-    url: window.location.hostname
-  };
-  
-  // Set timeout
   var timeout = setTimeout(function(){
     if(result) result.textContent = '❌ Timeout - تحقق من الإنترنت';
     if(btn) btn.textContent = '🔥 اختبار Firebase';
   }, 10000);
-  
-  db.collection('jobseekers').add({test: true, msg: 'test', time: new Date().toISOString()}).then(function(doc){
+
+  db.collection('volunteers').add({
+    test: true,
+    time: new Date().toISOString()
+  }).then(function(doc){
     clearTimeout(timeout);
+    doc.delete().catch(function(){});
     if(result) result.textContent = '✅ شغال! ' + doc.id.substring(0,8);
     if(btn) btn.textContent = '✅ نجح';
     toast('✅ Firebase شغال بنجاح!');
   }).catch(function(err){
     clearTimeout(timeout);
-    var msg = err.code + ': ' + err.message.substring(0,40);
-    if(result) result.textContent = '❌ ' + msg;
-    if(btn) btn.textContent = '🔥 اختبار';
-    toast('❌ ' + msg);
+    if(result) result.textContent = '❌ ' + err.code + ': ' + err.message.substring(0,40);
+    if(btn) btn.textContent = '🔥 اختبار Firebase';
+    toast('❌ ' + err.message.substring(0,60));
   });
 }
 

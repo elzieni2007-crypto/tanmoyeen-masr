@@ -649,7 +649,6 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="dh-logo"><img id="logo-dh" src="" alt="logo"></div>
     <div class="dh-greet" style="padding-right:54px;font-size:11px;margin-bottom:2px">مرحباً بك في تنمويين مصر 👋</div>
   <div style="padding-right:54px;position:relative;z-index:1">
-    <button onclick="testFirebase()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:4px 12px;border-radius:10px;font-size:10px;font-family:Cairo,sans-serif;cursor:pointer" id="fb-test-btn">🔥 اختبار Firebase</button>
     <span id="fb-test-result" style="font-size:10px;color:rgba(255,255,255,.8);margin-right:8px"></span>
   </div>
     <div class="dh-title" style="padding-right:54px;font-size:13px;margin-bottom:8px">منصتك الشاملة للعمل التنموي في مصر</div>
@@ -4335,11 +4334,9 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  const formEmail2 = document.getElementById('adm-form-email');
-  if(formEmail2) formEmail2.style.display = 'none';
-  const formPending2 = document.getElementById('adm-form-pending');
-  if(formPending2) formPending2.style.display = 'none';
-  var _fh=document.getElementById('adm-form-featured');if(_fh)_fh.style.display='none';
+  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display='none';
+  });
 
   if(tab === 'add-job'){
     listEl.style.display   = 'none';
@@ -4376,12 +4373,24 @@ function setAdmTab(el, tab){
     if(formPending){ formPending.style.display = 'block'; formPending.style.visibility = 'visible'; }
     renderPendingJobs();
     updatePendingBadge();
+  } else if(tab === 'broadcast'){
+    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    var bEl=document.getElementById('adm-form-broadcast');
+    if(bEl){bEl.style.display='block';}
+    loadBroadcastHistory();
+  } else if(tab === 'volunteers-adm'){
+    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    var vEl=document.getElementById('adm-form-volunteers-adm');
+    if(vEl){vEl.style.display='block';}
+    loadAdminVols();
   } else {
     listEl.style.display   = 'flex';
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
-    const formEmail = document.getElementById('adm-form-email');
-    if(formEmail) formEmail.style.display = 'none';
+    // Hide all special forms
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.style.display='none';
+    });
     renderAdmList();
   }
 }
@@ -4865,15 +4874,24 @@ function previewWAMain(){
 }
 
 function sendWAMain(){
-  var title = (document.getElementById('wa-title-main')||{}).value || '';
-  var body  = (document.getElementById('wa-body-main')||{}).value || '';
+  var titleEl = document.getElementById('wa-title-main');
+  var bodyEl  = document.getElementById('wa-body-main');
+  
+  if(!titleEl || !bodyEl){ 
+    toast('⚠️ حدث خطأ - جرّب تاني'); 
+    console.log('WA elements not found');
+    return; 
+  }
+  
+  var title = titleEl.value || '';
+  var body  = bodyEl.value || '';
   if(!title && !body){ toast('⚠️ اكتب الإشعار الأول'); return; }
   var msg = buildWAMainMessage();
 
   // Open WhatsApp directly
   var waUrl = 'https://wa.me/?text=' + encodeURIComponent(msg);
   window.open(waUrl, '_blank');
-  toast('✅ تم فتح واتساب - ابعت للجروب!');
+  toast('✅ تم فتح واتساب!');
 
   // Save to Firebase if admin logged in
   if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
@@ -4893,11 +4911,12 @@ async function loadAdminVols(){
   if(!list) return;
   list.innerHTML = "<div style='text-align:center;padding:20px;color:var(--muted)'>⏳ جاري التحميل...</div>";
   var vols = [];
-  if(typeof db !== "undefined" && auth && auth.currentUser){
+  // Try Firebase (works if logged in)
+  if(typeof db !== "undefined"){
     try {
       var snap = await db.collection("volunteers").orderBy("timestamp","desc").limit(100).get();
       snap.docs.forEach(function(d){ vols.push(Object.assign({},d.data(),{fbId:d.id,src:"firebase"})); });
-    } catch(e){ console.log("Firebase vols:",e); }
+    } catch(e){ console.log("Firebase vols:",e.code); }
   }
   var local = (typeof VOLUNTEERS_DATA!=="undefined"&&VOLUNTEERS_DATA.length)?VOLUNTEERS_DATA:(VOLUNTEERS_PRELOAD||[]);
   local.forEach(function(v){

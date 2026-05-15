@@ -4827,9 +4827,29 @@ function setAdmTab(el, tab){
 }
 
 function renderAdmList(){
-  let all = [];
-  try{ all = JSON.parse(localStorage.getItem('registrations') || '[]'); }catch(e){}
-  const list = all.filter(r => r.type === admTab);
+  // Use Firebase data if available, fallback to localStorage
+  var fbData = window._adminData || [];
+  var typeMap = {
+    jobseeker: ['jobseeker','jobseekers'],
+    expert:    ['expert','consultants'],
+    sup:       ['sup','suppliers'],
+    org:       ['org','organizations']
+  };
+  var validTypes = typeMap[admTab] || [admTab];
+
+  var list = fbData.filter(function(r){
+    return validTypes.indexOf(r.type) > -1 ||
+           validTypes.indexOf(r._type) > -1;
+  });
+
+  // Also add from localStorage
+  var local = [];
+  try{ local = JSON.parse(localStorage.getItem('registrations') || '[]'); }catch(e){}
+  local.filter(function(r){ return r.type === admTab; }).forEach(function(r){
+    var exists = list.some(function(f){ return f.phone && f.phone === r.phone; });
+    if(!exists) list.push(r);
+  });
+
   const container = document.getElementById('adm-list');
 
   const typeColors = {

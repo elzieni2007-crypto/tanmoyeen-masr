@@ -1823,6 +1823,7 @@ console.log('✅ Firebase ready - project:', firebaseConfig.projectId);
 
 // ============ FIREBASE SAVE REGISTRATION ============
 async function saveToFirebase(type, data){
+  if(typeof db === 'undefined'){ console.log('Firebase not ready'); return false; }
   try {
     var collections = {
       jobseeker: 'jobseekers',
@@ -4869,19 +4870,21 @@ function sendWAMain(){
   if(!title && !body){ toast('⚠️ اكتب الإشعار الأول'); return; }
   var msg = buildWAMainMessage();
 
-  // Save to Firebase history
-  if(typeof db !== 'undefined'){
+  // Open WhatsApp directly
+  var waUrl = 'https://wa.me/?text=' + encodeURIComponent(msg);
+  window.open(waUrl, '_blank');
+  toast('✅ تم فتح واتساب - ابعت للجروب!');
+
+  // Save to Firebase if admin logged in
+  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
     db.collection('broadcasts').add({
-      title: title, body: body, msg: msg,
+      title: title, body: body,
       channel: 'whatsapp',
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function(){
       loadBroadcastHistory();
     }).catch(function(){});
   }
-
-  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-  toast('✅ تم فتح واتساب - ابعت للجروب!');
 }
 
 async function loadAdminVols(){

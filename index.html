@@ -868,7 +868,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="fg"><label class="fl">الإيميل (للرد عليك)</label>
       <input class="fi" id="consult-email" type="email" placeholder="example@gmail.com" style="direction:ltr;text-align:left">
     </div>
-    <button onclick="submitConsultation()" style="width:100%;padding:15px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;border:none;border-radius:13px;font-size:14px;font-weight:800;font-family:Cairo,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(26,58,110,.3)">
+    <button id="consult-submit-btn" onclick="submitConsultation()" style="width:100%;padding:15px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;border:none;border-radius:13px;font-size:14px;font-weight:800;font-family:Cairo,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(26,58,110,.3)">
       📋 إرسال طلب الاستشارة
     </button>
     <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--muted)">سيتم التواصل معك خلال 48 ساعة عمل</div>
@@ -4391,6 +4391,11 @@ function selectConsultType(radio){
 }
 
 async function submitConsultation(){
+  // Prevent double submit
+  var btn = document.getElementById('consult-submit-btn');
+  if(btn && btn.disabled) return;
+  if(btn){ btn.disabled=true; btn.textContent='⏳ جاري الإرسال...'; }
+
   var typeEl  = document.querySelector('input[name="consult-type"]:checked');
   var orgName = document.getElementById('consult-org-name').value.trim();
   var regNum  = document.getElementById('consult-reg-num').value.trim();
@@ -4401,13 +4406,14 @@ async function submitConsultation(){
   var desc    = document.getElementById('consult-desc').value.trim();
   var email   = document.getElementById('consult-email').value.trim();
 
-  if(!typeEl)   { toast('⚠️ اختر نوع الاستشارة');     return; }
-  if(!orgName)  { toast('⚠️ أدخل اسم الجمعية');       return; }
-  if(!regNum)   { toast('⚠️ أدخل رقم الإشهار');       return; }
-  if(!gov)      { toast('⚠️ اختر المحافظة');           return; }
-  if(!phone)    { toast('⚠️ أدخل رقم التليفون');       return; }
-  if(!delegate) { toast('⚠️ أدخل اسم المفوض');        return; }
-  if(!desc)     { toast('⚠️ اشرح موضوع الاستشارة');   return; }
+  function reEnable(){ if(btn){ btn.disabled=false; btn.textContent='📋 إرسال طلب الاستشارة'; } }
+  if(!typeEl)   { toast('⚠️ اختر نوع الاستشارة');     reEnable(); return; }
+  if(!orgName)  { toast('⚠️ أدخل اسم الجمعية');       reEnable(); return; }
+  if(!regNum)   { toast('⚠️ أدخل رقم الإشهار');       reEnable(); return; }
+  if(!gov)      { toast('⚠️ اختر المحافظة');           reEnable(); return; }
+  if(!phone)    { toast('⚠️ أدخل رقم التليفون');       reEnable(); return; }
+  if(!delegate) { toast('⚠️ أدخل اسم المفوض');        reEnable(); return; }
+  if(!desc)     { toast('⚠️ اشرح موضوع الاستشارة');   reEnable(); return; }
 
   var data = {
     type: 'consultation',
@@ -4456,27 +4462,25 @@ async function submitConsultation(){
   if(taxLbl){ taxLbl.style.borderColor='var(--border)'; taxLbl.style.background='white'; }
   if(insLbl){ insLbl.style.borderColor='var(--border)'; insLbl.style.background='white'; }
 
-  // Show success message
-  toast('✅ تم إرسال طلب الاستشارة بنجاح!');
+  // Re-enable button
+  if(btn){ btn.disabled=false; btn.textContent='📋 إرسال طلب الاستشارة'; }
 
-  // Show success overlay
-  var successOverlay = document.getElementById('success-overlay');
-  var successIcon    = document.getElementById('success-icon');
-  var successTitle   = document.getElementById('success-title');
-  var successSub     = document.getElementById('success-sub');
-  var successInfo    = document.getElementById('success-info');
+  // Show success screen
+  var so = document.getElementById('success-overlay');
+  var si = document.getElementById('success-icon');
+  var st = document.getElementById('success-title');
+  var ss = document.getElementById('success-sub');
+  var sf = document.getElementById('success-info');
 
-  if(successOverlay){
-    if(successIcon)  successIcon.textContent = '📋';
-    if(successTitle) successTitle.textContent = 'تم استلام طلبك!';
-    if(successSub)   successSub.textContent = 'شكراً لك - سيتم التواصل معك خلال 48 ساعة عمل';
-    if(successInfo) successInfo.innerHTML =
-      '<div class="success-info-row"><span class="success-info-lbl">الجمعية</span><span class="success-info-val">'+orgName+'</span></div>' +
-      '<div class="success-info-row"><span class="success-info-lbl">نوع الاستشارة</span><span class="success-info-val">'+typeEl.value+'</span></div>' +
-      '<div class="success-info-row"><span class="success-info-lbl">المحافظة</span><span class="success-info-val">'+gov+'</span></div>' +
-      '<div class="success-info-row"><span class="success-info-lbl">التليفون</span><span class="success-info-val" style="direction:ltr">'+phone+'</span></div>';
-    successOverlay.classList.add('on');
-  }
+  if(si) si.textContent = '📋';
+  if(st) st.textContent = 'تم استلام طلبك!';
+  if(ss) ss.textContent = 'سيتم التواصل معك خلال 48 ساعة عمل';
+  if(sf) sf.innerHTML =
+    '<div class="success-info-row"><span class="success-info-lbl">الجمعية</span><span class="success-info-val">'+orgName+'</span></div>' +
+    '<div class="success-info-row"><span class="success-info-lbl">نوع الاستشارة</span><span class="success-info-val">'+typeEl.value+'</span></div>' +
+    '<div class="success-info-row"><span class="success-info-lbl">المحافظة</span><span class="success-info-val">'+gov+'</span></div>' +
+    '<div class="success-info-row"><span class="success-info-lbl">التليفون</span><span class="success-info-val" style="direction:ltr">'+phone+'</span></div>';
+  if(so) so.classList.add('on');
 }
 
 function shareApp(){

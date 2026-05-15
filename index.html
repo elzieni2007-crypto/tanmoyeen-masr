@@ -665,7 +665,8 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="dg-card" onclick="go('tenders')"><div class="dg-icon" style="background:#fef3e8">📋</div><div class="dg-t">المناقصات</div><div class="dg-c">٣٨ مناقصة</div></div>
     <div class="dg-card" onclick="go('consultants')"><div class="dg-icon" style="background:#e7faf3">👨‍💼</div><div class="dg-t">الاستشاريون</div><div class="dg-c" id="cons-dg-count">243 مسجّل</div></div>
     <div class="dg-card" onclick="go('orgs-screen')"><div class="dg-icon" style="background:#e8f4fd">🏢</div><div class="dg-t">المؤسسات</div><div class="dg-c">46 مؤسسة</div></div>
-    <div class="dg-card" onclick="go('suppliers')"><div class="dg-icon" style="background:#f0e8fe">🏭</div><div class="dg-t">الموردون</div><div class="dg-c" id="sups-dg-count">87 مورد</div></div>
+    <div class="dg-card" onclick="go('suppliers')"><div class="dg-icon" style="background:#f0e8fe">🏭</div><div class="dg-t">الموردون</div><div class="dg-c" id="sups-dg-count">87 مورد</div>
+    <div class="dg-card" onclick="go('consult-screen')"><div class="dg-icon" style="background:#e8f0fe">📋</div><div class="dg-t">استشارة</div><div class="dg-c">ضريبية / تأمينية</div></div></div>
     <div class="dg-card" onclick="go('volunteers')"><div class="dg-icon" style="background:#e7faf3">🤝</div><div class="dg-t">متطوعون</div><div class="dg-c" id="vol-dash-count">انضم الآن</div></div>
     <div class="dg-card" onclick="go('register')" style="border:2px solid var(--a);background:linear-gradient(135deg,#e8f0fe,#f0f7ff)"><div class="dg-icon" style="background:var(--a)">📝</div><div class="dg-t" style="color:var(--p);font-weight:900">سجّل ملفك</div><div class="dg-c" style="color:var(--a);font-weight:800">مجاناً ✨</div></div>
   </div>
@@ -806,6 +807,74 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div id="orgs-list" style="padding:0 12px 12px"></div>
 </div>
 
+<div id="consult-screen" class="scr">
+  <div style="background:linear-gradient(135deg,#1a3a6e,#0094cc);padding:20px 16px 16px;color:white;position:relative;overflow:hidden">
+    <div style="position:relative;z-index:1">
+      <div style="font-size:28px;margin-bottom:6px">📋</div>
+      <div style="font-size:18px;font-weight:900;margin-bottom:4px">طلب استشارة</div>
+      <div style="font-size:12px;opacity:.85">استشارات ضريبية وتأمينية للجمعيات والمؤسسات</div>
+    </div>
+  </div>
+  <div style="padding:16px">
+    <div class="fg"><label class="fl">نوع الخدمة *</label>
+      <div style="display:flex;gap:10px">
+        <label style="flex:1;display:flex;align-items:center;gap:8px;background:white;border:2px solid var(--border);border-radius:12px;padding:12px;cursor:pointer" id="consult-tax-lbl">
+          <input type="radio" name="consult-type" id="consult-tax" value="ضريبية" onchange="selectConsultType(this)">
+          <div><div style="font-size:13px;font-weight:700">🧾 ضريبية</div><div style="font-size:10px;color:var(--muted)">استشارة ضريبية</div></div>
+        </label>
+        <label style="flex:1;display:flex;align-items:center;gap:8px;background:white;border:2px solid var(--border);border-radius:12px;padding:12px;cursor:pointer" id="consult-ins-lbl">
+          <input type="radio" name="consult-type" id="consult-ins" value="تأمينية" onchange="selectConsultType(this)">
+          <div><div style="font-size:13px;font-weight:700">🛡 تأمينية</div><div style="font-size:10px;color:var(--muted)">استشارة تأمينية</div></div>
+        </label>
+      </div>
+    </div>
+    <div style="background:var(--bg);border-radius:14px;padding:14px;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:800;color:var(--p);margin-bottom:12px">بيانات الجمعية / المؤسسة</div>
+      <div class="fg"><label class="fl">اسم الجمعية / المؤسسة *</label>
+        <input class="fi" id="consult-org-name" type="text" placeholder="اسم الجمعية أو المؤسسة">
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">رقم الإشهار *</label>
+          <input class="fi" id="consult-reg-num" type="text" placeholder="رقم الإشهار">
+        </div>
+        <div class="fg"><label class="fl">الرقم الموحد</label>
+          <input class="fi" id="consult-unified-num" type="text" placeholder="الرقم الموحد">
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">المحافظة *</label>
+          <select class="fi" id="consult-gov"><option value="">اختر المحافظة...</option>
+              <option>القاهرة</option><option>الإسكندرية</option><option>الجيزة</option>
+              <option>القليوبية</option><option>الشرقية</option><option>الدقهلية</option>
+              <option>البحيرة</option><option>الغربية</option><option>المنوفية</option>
+              <option>كفر الشيخ</option><option>دمياط</option><option>بورسعيد</option>
+              <option>الإسماعيلية</option><option>السويس</option><option>شمال سيناء</option>
+              <option>جنوب سيناء</option><option>الفيوم</option><option>بني سويف</option>
+              <option>المنيا</option><option>أسيوط</option><option>سوهاج</option>
+              <option>قنا</option><option>الأقصر</option><option>أسوان</option>
+              <option>البحر الأحمر</option><option>الوادي الجديد</option><option>مطروح</option></select>
+        </div>
+        <div class="fg"><label class="fl">رقم التليفون *</label>
+          <input class="fi" id="consult-phone" type="tel" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right">
+        </div>
+      </div>
+      <div class="fg"><label class="fl">اسم المفوض *</label>
+        <input class="fi" id="consult-delegate" type="text" placeholder="اسم المفوض المسؤول">
+      </div>
+    </div>
+    <div class="fg"><label class="fl">وصف الموضوع *</label>
+      <textarea class="fi" id="consult-desc" rows="4" placeholder="اشرح موضوع الاستشارة بالتفصيل..." style="resize:vertical"></textarea>
+    </div>
+    <div class="fg"><label class="fl">الإيميل (للرد عليك)</label>
+      <input class="fi" id="consult-email" type="email" placeholder="example@gmail.com" style="direction:ltr;text-align:left">
+    </div>
+    <button onclick="submitConsultation()" style="width:100%;padding:15px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;border:none;border-radius:13px;font-size:14px;font-weight:800;font-family:Cairo,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(26,58,110,.3)">
+      📋 إرسال طلب الاستشارة
+    </button>
+    <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--muted)">سيتم التواصل معك خلال 48 ساعة عمل</div>
+  </div>
+</div>
+
 <div id="volunteers" class="scr">
 
   <!-- هيدر -->
@@ -873,16 +942,34 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="fr">
         <div class="fg"><label class="fl">المحافظة *</label>
           <select class="fi" id="vol-gov">
-            <option value="">اختر...</option>
-            <option>القاهرة</option><option>الإسكندرية</option><option>الجيزة</option>
-            <option>الإسماعيلية</option><option>بورسعيد</option><option>السويس</option>
-            <option>الشرقية</option><option>الدقهلية</option><option>الغربية</option>
-            <option>المنوفية</option><option>القليوبية</option><option>كفر الشيخ</option>
-            <option>البحيرة</option><option>الفيوم</option><option>بني سويف</option>
-            <option>المنيا</option><option>أسيوط</option><option>سوهاج</option>
-            <option>قنا</option><option>الأقصر</option><option>أسوان</option>
-            <option>البحر الأحمر</option><option>الوادي الجديد</option><option>مطروح</option>
-            <option>شمال سيناء</option><option>جنوب سيناء</option><option>دمياط</option>
+<option value="">اختر المحافظة...</option>
+            <option>القاهرة</option>
+            <option>الإسكندرية</option>
+            <option>الجيزة</option>
+            <option>القليوبية</option>
+            <option>الشرقية</option>
+            <option>الدقهلية</option>
+            <option>البحيرة</option>
+            <option>الغربية</option>
+            <option>المنوفية</option>
+            <option>كفر الشيخ</option>
+            <option>دمياط</option>
+            <option>بورسعيد</option>
+            <option>الإسماعيلية</option>
+            <option>السويس</option>
+            <option>شمال سيناء</option>
+            <option>جنوب سيناء</option>
+            <option>الفيوم</option>
+            <option>بني سويف</option>
+            <option>المنيا</option>
+            <option>أسيوط</option>
+            <option>سوهاج</option>
+            <option>قنا</option>
+            <option>الأقصر</option>
+            <option>أسوان</option>
+            <option>البحر الأحمر</option>
+            <option>الوادي الجديد</option>
+            <option>مطروح</option>
           </select>
         </div>
         <div class="fg"><label class="fl">العمر</label>
@@ -1076,13 +1163,36 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
         </select>
       </div>
       <div class="fg"><label class="fl">المحافظة *</label>
-        <select id="njs-gov" class="fi"><option value="">اختر...</option>
-          <option>القاهرة</option><option>الإسكندرية</option><option>الجيزة</option>
-          <option>أسيوط</option><option>سوهاج</option><option>قنا</option><option>الأقصر</option>
-          <option>المنيا</option><option>بني سويف</option><option>الفيوم</option>
-          <option>الشرقية</option><option>الدقهلية</option><option>أسوان</option>
-          <option>الغربية</option><option>دمياط</option><option>بورسعيد</option>
-        </select>
+        <select id="njs-gov" class="fi">
+<option value="">اختر المحافظة...</option>
+            <option>القاهرة</option>
+            <option>الإسكندرية</option>
+            <option>الجيزة</option>
+            <option>القليوبية</option>
+            <option>الشرقية</option>
+            <option>الدقهلية</option>
+            <option>البحيرة</option>
+            <option>الغربية</option>
+            <option>المنوفية</option>
+            <option>كفر الشيخ</option>
+            <option>دمياط</option>
+            <option>بورسعيد</option>
+            <option>الإسماعيلية</option>
+            <option>السويس</option>
+            <option>شمال سيناء</option>
+            <option>جنوب سيناء</option>
+            <option>الفيوم</option>
+            <option>بني سويف</option>
+            <option>المنيا</option>
+            <option>أسيوط</option>
+            <option>سوهاج</option>
+            <option>قنا</option>
+            <option>الأقصر</option>
+            <option>أسوان</option>
+            <option>البحر الأحمر</option>
+            <option>الوادي الجديد</option>
+            <option>مطروح</option>
+          </select>
       </div>
     </div>
     <div class="fg"><label class="fl">هل تقبل العمل خارج محافظتك؟</label>
@@ -1135,13 +1245,36 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       </div>
     </div>
     <div class="fg"><label class="fl">المحافظة *</label>
-      <select id="exp-gov" class="fi"><option value="">اختر...</option>
-        <option>القاهرة</option><option>الإسكندرية</option><option>الجيزة</option>
-        <option>أسيوط</option><option>سوهاج</option><option>قنا</option><option>الأقصر</option>
-        <option>المنيا</option><option>بني سويف</option><option>الفيوم</option>
-        <option>الشرقية</option><option>الدقهلية</option><option>أسوان</option>
-        <option>الغربية</option><option>دمياط</option><option>بورسعيد</option>
-      </select>
+      <select id="exp-gov" class="fi">
+<option value="">اختر المحافظة...</option>
+            <option>القاهرة</option>
+            <option>الإسكندرية</option>
+            <option>الجيزة</option>
+            <option>القليوبية</option>
+            <option>الشرقية</option>
+            <option>الدقهلية</option>
+            <option>البحيرة</option>
+            <option>الغربية</option>
+            <option>المنوفية</option>
+            <option>كفر الشيخ</option>
+            <option>دمياط</option>
+            <option>بورسعيد</option>
+            <option>الإسماعيلية</option>
+            <option>السويس</option>
+            <option>شمال سيناء</option>
+            <option>جنوب سيناء</option>
+            <option>الفيوم</option>
+            <option>بني سويف</option>
+            <option>المنيا</option>
+            <option>أسيوط</option>
+            <option>سوهاج</option>
+            <option>قنا</option>
+            <option>الأقصر</option>
+            <option>أسوان</option>
+            <option>البحر الأحمر</option>
+            <option>الوادي الجديد</option>
+            <option>مطروح</option>
+          </select>
     </div>
     <div class="fg"><label class="fl">رقم الهاتف *</label><input id="exp-phone" class="fi" type="tel" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:left"></div>
     <div class="fg"><label class="fl">البريد الإلكتروني *</label><input id="exp-email" class="fi" type="email" placeholder="example@email.com" style="direction:ltr;text-align:left"></div>
@@ -1195,12 +1328,36 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
         </select>
       </div>
       <div class="fg"><label class="fl">المحافظة *</label>
-        <select id="sup-gov" class="fi"><option value="">اختر...</option>
-          <option>القاهرة</option><option>الإسكندرية</option><option>الجيزة</option>
-          <option>أسيوط</option><option>سوهاج</option><option>قنا</option>
-          <option>المنيا</option><option>بني سويف</option><option>الأقصر</option>
-          <option>أسوان</option><option>الشرقية</option><option>الدقهلية</option>
-        </select>
+        <select id="sup-gov" class="fi">
+<option value="">اختر المحافظة...</option>
+            <option>القاهرة</option>
+            <option>الإسكندرية</option>
+            <option>الجيزة</option>
+            <option>القليوبية</option>
+            <option>الشرقية</option>
+            <option>الدقهلية</option>
+            <option>البحيرة</option>
+            <option>الغربية</option>
+            <option>المنوفية</option>
+            <option>كفر الشيخ</option>
+            <option>دمياط</option>
+            <option>بورسعيد</option>
+            <option>الإسماعيلية</option>
+            <option>السويس</option>
+            <option>شمال سيناء</option>
+            <option>جنوب سيناء</option>
+            <option>الفيوم</option>
+            <option>بني سويف</option>
+            <option>المنيا</option>
+            <option>أسيوط</option>
+            <option>سوهاج</option>
+            <option>قنا</option>
+            <option>الأقصر</option>
+            <option>أسوان</option>
+            <option>البحر الأحمر</option>
+            <option>الوادي الجديد</option>
+            <option>مطروح</option>
+          </select>
       </div>
     </div>
     <div class="fg"><label class="fl">عنوان المورد *</label><input class="fi" type="text" id="sup-address" placeholder="العنوان التفصيلي"></div>
@@ -1421,18 +1578,35 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
         <div class="fr">
           <div class="fg"><label class="fl">المحافظة *</label>
             <select class="fi" id="nj-gov">
-              <option value="">اختر...</option>
-            <option>القاهرة</option><option>الإسكندرية</option><option>الجيزة</option>
-            <option>الإسماعيلية</option><option>بورسعيد</option><option>السويس</option>
-            <option>الشرقية</option><option>الدقهلية</option><option>الغربية</option>
-            <option>المنوفية</option><option>القليوبية</option><option>كفر الشيخ</option>
-            <option>البحيرة</option><option>الفيوم</option><option>بني سويف</option>
-            <option>المنيا</option><option>أسيوط</option><option>سوهاج</option>
-            <option>قنا</option><option>الأقصر</option><option>أسوان</option>
-            <option>البحر الأحمر</option><option>الوادي الجديد</option><option>مطروح</option>
-            <option>شمال سيناء</option><option>جنوب سيناء</option><option>دمياط</option>
-            <option>عن بُعد</option><option>متعددة المحافظات</option>
-            </select>
+<option value="">اختر المحافظة...</option>
+            <option>القاهرة</option>
+            <option>الإسكندرية</option>
+            <option>الجيزة</option>
+            <option>القليوبية</option>
+            <option>الشرقية</option>
+            <option>الدقهلية</option>
+            <option>البحيرة</option>
+            <option>الغربية</option>
+            <option>المنوفية</option>
+            <option>كفر الشيخ</option>
+            <option>دمياط</option>
+            <option>بورسعيد</option>
+            <option>الإسماعيلية</option>
+            <option>السويس</option>
+            <option>شمال سيناء</option>
+            <option>جنوب سيناء</option>
+            <option>الفيوم</option>
+            <option>بني سويف</option>
+            <option>المنيا</option>
+            <option>أسيوط</option>
+            <option>سوهاج</option>
+            <option>قنا</option>
+            <option>الأقصر</option>
+            <option>أسوان</option>
+            <option>البحر الأحمر</option>
+            <option>الوادي الجديد</option>
+            <option>مطروح</option>
+          </select>
           </div>
           <div class="fg"><label class="fl">مدة العقد</label>
             <select class="fi" id="nj-duration">
@@ -2570,7 +2744,7 @@ let jFilt='all', tFilt='all', cFilt='all', sFilt='all';
 let logoTaps=0, logoTimer=null;
 
 // ============ NAVIGATION ============
-const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register'};
+const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult'};
 function go(id){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
@@ -5178,17 +5352,34 @@ window.addEventListener('load',()=>{
       <div class="fr">
         <div class="fg"><label class="fl">المحافظة *</label>
           <select class="fi" id="sj-gov">
-            <option value="">اختر...</option>
-            <option>القاهرة</option><option>الإسكندرية</option><option>الجيزة</option>
-            <option>الإسماعيلية</option><option>بورسعيد</option><option>السويس</option>
-            <option>الشرقية</option><option>الدقهلية</option><option>الغربية</option>
-            <option>المنوفية</option><option>القليوبية</option><option>كفر الشيخ</option>
-            <option>البحيرة</option><option>الفيوم</option><option>بني سويف</option>
-            <option>المنيا</option><option>أسيوط</option><option>سوهاج</option>
-            <option>قنا</option><option>الأقصر</option><option>أسوان</option>
-            <option>البحر الأحمر</option><option>الوادي الجديد</option><option>مطروح</option>
-            <option>شمال سيناء</option><option>جنوب سيناء</option><option>دمياط</option>
-            <option>عن بُعد</option><option>متعددة المحافظات</option>
+<option value="">اختر المحافظة...</option>
+            <option>القاهرة</option>
+            <option>الإسكندرية</option>
+            <option>الجيزة</option>
+            <option>القليوبية</option>
+            <option>الشرقية</option>
+            <option>الدقهلية</option>
+            <option>البحيرة</option>
+            <option>الغربية</option>
+            <option>المنوفية</option>
+            <option>كفر الشيخ</option>
+            <option>دمياط</option>
+            <option>بورسعيد</option>
+            <option>الإسماعيلية</option>
+            <option>السويس</option>
+            <option>شمال سيناء</option>
+            <option>جنوب سيناء</option>
+            <option>الفيوم</option>
+            <option>بني سويف</option>
+            <option>المنيا</option>
+            <option>أسيوط</option>
+            <option>سوهاج</option>
+            <option>قنا</option>
+            <option>الأقصر</option>
+            <option>أسوان</option>
+            <option>البحر الأحمر</option>
+            <option>الوادي الجديد</option>
+            <option>مطروح</option>
           </select>
         </div>
         <div class="fg"><label class="fl">نوع العمل *</label>
@@ -5313,17 +5504,34 @@ window.addEventListener('load',()=>{
         </div>
         <div class="fg"><label class="fl">المحافظة / الموقع</label>
           <select class="fi" id="st-gov">
-            <option value="">اختر...</option>
-            <option>القاهرة</option><option>الإسكندرية</option><option>الجيزة</option>
-            <option>الإسماعيلية</option><option>بورسعيد</option><option>السويس</option>
-            <option>الشرقية</option><option>الدقهلية</option><option>الغربية</option>
-            <option>المنوفية</option><option>القليوبية</option><option>كفر الشيخ</option>
-            <option>البحيرة</option><option>الفيوم</option><option>بني سويف</option>
-            <option>المنيا</option><option>أسيوط</option><option>سوهاج</option>
-            <option>قنا</option><option>الأقصر</option><option>أسوان</option>
-            <option>البحر الأحمر</option><option>الوادي الجديد</option><option>مطروح</option>
-            <option>شمال سيناء</option><option>جنوب سيناء</option><option>دمياط</option>
-            <option>عن بُعد</option><option>متعددة المحافظات</option>
+<option value="">اختر المحافظة...</option>
+            <option>القاهرة</option>
+            <option>الإسكندرية</option>
+            <option>الجيزة</option>
+            <option>القليوبية</option>
+            <option>الشرقية</option>
+            <option>الدقهلية</option>
+            <option>البحيرة</option>
+            <option>الغربية</option>
+            <option>المنوفية</option>
+            <option>كفر الشيخ</option>
+            <option>دمياط</option>
+            <option>بورسعيد</option>
+            <option>الإسماعيلية</option>
+            <option>السويس</option>
+            <option>شمال سيناء</option>
+            <option>جنوب سيناء</option>
+            <option>الفيوم</option>
+            <option>بني سويف</option>
+            <option>المنيا</option>
+            <option>أسيوط</option>
+            <option>سوهاج</option>
+            <option>قنا</option>
+            <option>الأقصر</option>
+            <option>أسوان</option>
+            <option>البحر الأحمر</option>
+            <option>الوادي الجديد</option>
+            <option>مطروح</option>
           </select>
         </div>
       </div>

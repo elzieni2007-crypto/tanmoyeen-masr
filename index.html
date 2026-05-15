@@ -358,11 +358,11 @@ textarea.fi{resize:none}
 
 /* SUCCESS MODAL */
 .success-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.6);
-  z-index:500;display:none;align-items:center;justify-content:center;
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  z-index:9999;display:none;align-items:center;justify-content:center;
   backdrop-filter:blur(4px);padding:20px;
 }
-.success-overlay.on{display:flex}
+.success-overlay.on{display:flex !important}
 .success-box{
   background:white;border-radius:24px;padding:32px 24px;
   text-align:center;max-width:320px;width:100%;
@@ -3556,7 +3556,12 @@ function showSuccess(type, data){
 }
 
 function closeSuccess(){
-  document.getElementById('success-overlay').classList.remove('on');
+  var so = document.getElementById('success-overlay');
+  if(so){
+    so.classList.remove('on');
+    so.style.display = '';
+    so.style.cssText = '';
+  }
   go('home');
 }
 
@@ -4587,7 +4592,14 @@ async function submitConsultation(){
     '<div class="success-info-row"><span class="success-info-lbl">نوع الاستشارة</span><span class="success-info-val">'+typeEl.value+'</span></div>' +
     '<div class="success-info-row"><span class="success-info-lbl">المحافظة</span><span class="success-info-val">'+gov+'</span></div>' +
     '<div class="success-info-row"><span class="success-info-lbl">التليفون</span><span class="success-info-val" style="direction:ltr">'+phone+'</span></div>';
-  if(so) so.classList.add('on');
+  // Show success with multiple fallbacks
+  if(so){
+    so.style.cssText = 'display:flex !important;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)';
+    so.classList.add('on');
+  } else {
+    // Fallback if overlay not found
+    toast('✅ تم استلام طلبك! سيتم التواصل معك خلال 48 ساعة');
+  }
 }
 
 function shareApp(){

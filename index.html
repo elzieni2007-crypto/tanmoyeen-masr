@@ -632,9 +632,9 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div><div class="tb-t">تنمويين مصر</div><div class="tb-s">لكل تنموي في مصر</div></div>
   </div>
   <div class="tb-acts">
-    <button class="ib" onclick="go('notifs')" style="position:relative">
+    <button class="ib" id="notif-bell-btn" onclick="go('notifs')" style="position:relative">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <div class="nd"></div>
+      <div class="nd" id="notif-dot" style="display:none"></div>
     </button>
     <button class="ib" onclick="go('profile')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1497,7 +1497,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 <div id="notifs" class="scr" style="padding-bottom:0">
   <div style="padding:14px 14px 8px;display:flex;justify-content:space-between;align-items:center">
     <div style="font-size:15px;font-weight:700">الإشعارات</div>
-    <div style="font-size:11px;color:var(--a);font-weight:600;cursor:pointer">تحديد الكل كمقروء</div>
+    <div style="font-size:11px;color:var(--a);font-weight:600;cursor:pointer" onclick="NOTIFS.forEach(function(n){n.unr=false;});var d=document.getElementById('notif-dot');if(d)d.style.display='none';renderNotifs();">تحديد الكل كمقروء</div>
   </div>
   <div id="nilist"></div>
 </div>
@@ -2863,13 +2863,7 @@ const TENDERS = [
   {id:8,type:'استشارة مؤسسية',title:'بناء نظام قاعدة بيانات ورصد إلكتروني',org:'وزارة التخطيط',budget:'٣٠٠٠٠٠ - ٥٠٠٠٠٠ جنيه',dl:'٢٢ يوليو ٢٠٢٥',loc:'القاهرة',cat:'استشارة مؤسسية',color:'#e07a2f',desc:'تطوير نظام معلوماتي متكامل لرصد وتقييم مشاريع التنمية المحلية.',req:'خبرة في تطوير أنظمة المعلومات، فريق متكامل'},
 ];
 
-const NOTIFS = [
-  {ico:'👨‍💼',title:'استشاري جديد انضم للقاعدة',body:'انضم 301 استشاري لقاعدة بيانات تنمويين مصر - تصفح الأسماء الجديدة',time:'منذ ساعتين',unr:true,bg:'#e8f0fe'},
-  {ico:'📋',title:'مناقصة جديدة في مجالك',body:'GIZ مصر تبحث عن مؤسسة تدريب - الميزانية 120 ألف جنيه',time:'منذ 5 ساعات',unr:true,bg:'#e7faf3'},
-  {ico:'🏭',title:'مورد جديد في قاعدة الموردين',body:'شركة ليرنخانة انضمت لقاعدة الموردين - حلول التعلم الذكي',time:'منذ يوم',unr:true,bg:'#fef3e8'},
-  {ico:'✅',title:'تم تسجيل ملفك بنجاح',body:'تم إضافة ملفك لقاعدة البيانات. ستصلك فرص مناسبة لخبرتك.',time:'منذ 3 أيام',unr:false,bg:'#e7faf3'},
-  {ico:'👥',title:'نمو مجموعة فيسبوك',body:'انضم 230 عضو جديد هذا الأسبوع! أنت الآن جزء من 25,000 تنموي مصري.',time:'منذ أسبوع',unr:false,bg:'#e8f0fe'},
-];
+const NOTIFS = [];  // Real notifications only
 
 // ============ STATE ============
 const saved = new Set();
@@ -2888,7 +2882,13 @@ function go(id){
   if(id==='consultants'){ loadConsFromSheet().then(renderCons); }
   if(id==='suppliers'){ loadSupsFromSheet().then(renderSups); }
   if(id==='tenders')renderTenders();
-  if(id==='notifs')renderNotifs();
+  if(id==='notifs'){
+    renderNotifs();
+    // Mark all as read
+    NOTIFS.forEach(function(n){ n.unr=false; });
+    var dot = document.getElementById('notif-dot');
+    if(dot) dot.style.display = 'none';
+  }
   if(id==='volunteers'){ loadVolsFromSheet().then(loadVolunteers); }
   if(id==='orgs-screen'){ loadOrgsFromSheet().then(function(){ setTimeout(renderOrgs,50); }); }
   if(id==='home')setupHeroShrink();
@@ -3369,12 +3369,59 @@ function tog(id,btn){
 }
 
 function renderNotifs(){
-  document.getElementById('nilist').innerHTML=NOTIFS.map(n=>`
-    <div class="ni-item ${n.unr?'unr':''}">
-      <div class="ni-ico" style="background:${n.bg}">${n.ico}</div>
-      <div class="ni-con"><div class="ni-tt">${n.title}</div><div class="ni-bd">${n.body}</div><div class="ni-tm">${n.time}</div></div>
-    </div>`).join('');
+  var list = document.getElementById('nilist');
+  if(!list) return;
+
+  // Get real notifications from Firebase broadcasts + new registrations
+  var realNotifs = [];
+
+  // Add from NOTIFS array (real ones added programmatically)
+  NOTIFS.forEach(function(n){ realNotifs.push(n); });
+
+  if(realNotifs.length === 0){
+    list.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--muted)">' +
+      '<div style="font-size:48px;margin-bottom:12px">🔔</div>' +
+      '<div style="font-size:15px;font-weight:700;margin-bottom:8px">لا توجد إشعارات</div>' +
+      '<div style="font-size:12px;line-height:1.7">ستظهر هنا الإشعارات الجديدة<br>عند نشر وظائف أو مناقصات جديدة</div>' +
+    '</div>';
+    // Hide dot
+    var dot = document.getElementById('notif-dot');
+    if(dot) dot.style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = realNotifs.map(function(n){
+    return '<div class="ni-item ' + (n.unr?'unr':'') + '">' +
+      '<div class="ni-ico" style="background:' + (n.bg||'#e8f0fe') + '">' + (n.ico||'🔔') + '</div>' +
+      '<div class="ni-con">' +
+        '<div class="ni-title">' + n.title + '</div>' +
+        '<div class="ni-body">' + n.body + '</div>' +
+        '<div class="ni-time">' + n.time + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // Show/hide dot based on unread
+  var hasUnread = realNotifs.some(function(n){ return n.unr; });
+  var dot = document.getElementById('notif-dot');
+  if(dot) dot.style.display = hasUnread ? 'block' : 'none';
 }
+
+// Add real notification (called when admin publishes job/tender)
+function addNotification(ico, title, body, bg){
+  NOTIFS.unshift({
+    ico: ico,
+    title: title,
+    body: body,
+    time: 'الآن',
+    unr: true,
+    bg: bg || '#e8f0fe'
+  });
+  // Show dot
+  var dot = document.getElementById('notif-dot');
+  if(dot) dot.style.display = 'block';
+}
+
 
 function setRT(t,el){document.querySelectorAll('.rtype-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
 
@@ -4981,6 +5028,7 @@ function publishJob(){
   document.getElementById('nj-urg').checked = false;
 
   toast('✅ تم نشر الوظيفة! ظهرت في قسم الوظائف');
+  addNotification('💼', 'تم نشر وظيفة جديدة', title + ' - ' + org, '#e8f0fe');
   renderPublishedJobs();
   renderJobs();
 }
@@ -5024,6 +5072,7 @@ function publishTender(){
   document.getElementById('nt-type').selectedIndex = 0;
 
   toast('✅ تم نشر المناقصة! ظهرت في قسم المناقصات');
+  addNotification('📋', 'تم نشر مناقصة جديدة', title + ' - ' + org, '#fef3e8');
   renderPublishedTenders();
   renderTenders();
 }

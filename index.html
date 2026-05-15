@@ -1802,14 +1802,13 @@ setAllLogos();
 
 // ============ FIREBASE CONFIG ============
 const firebaseConfig = {
-  apiKey: "AIzaSyDHfDy-MIfumDCQkJNGRs64jZ1uXfV48JQ",
-  authDomain: "tanmoyeen-masr.firebaseapp.com",
-  databaseURL: "https://tanmoyeen-masr-default-rtdb.firebaseio.com",
-  projectId: "tanmoyeen-masr",
-  storageBucket: "tanmoyeen-masr.firebasestorage.app",
-  messagingSenderId: "956865516310",
-  appId: "1:956865516310:web:11e1d66989af9e227bb637",
-  measurementId: "G-6JN7CKMKMY"
+  apiKey: "AIzaSyCk98_i0ozMuQumsO4PUDpXGRga5aWI4C8",
+  authDomain: "tanmoyeen-masr26.firebaseapp.com",
+  projectId: "tanmoyeen-masr26",
+  storageBucket: "tanmoyeen-masr26.firebasestorage.app",
+  messagingSenderId: "335780209700",
+  appId: "1:335780209700:web:c2839bb31364b5b18664b1",
+  measurementId: "G-WV6C05WHS1"
 };
 
 // Initialize Firebase
@@ -1862,13 +1861,9 @@ async function saveToFirebase(type, data){
       source: 'tanmoyeen-app'
     });
     console.log('✅ Saved to Firebase:', col);
-    // Request notification permission for future use
-    if('Notification' in window && Notification.permission === 'default'){
-      Notification.requestPermission();
-    }
     return true;
   } catch(e) {
-    console.log('Firebase save failed:', e);
+    console.log('Firebase save failed - code:', e.code, 'msg:', e.message);
     return false;
   }
 }
@@ -4009,6 +4004,7 @@ function submitVolunteer(){
   localStorage.setItem('volunteers', JSON.stringify(stored));
 
   // حفظ في Firebase
+  console.log('Saving volunteer to Firebase...');
   saveToFirebase('volunteer', {
     name: vol.name, gov: vol.gov, interests: vol.interests,
     phone: vol.phone, email: vol.email, skills: vol.skills,

@@ -3190,6 +3190,9 @@ function doReg(type){
   if(!data.name){ toast('⚠️ من فضلك أدخل اسمك الكامل'); return; }
   if(!data.phone){ toast('⚠️ من فضلك أدخل رقم الهاتف'); return; }
 
+  // حفظ في Firebase
+  saveToFirebase(type, data);
+
   // إظهار شاشة النجاح
   window._lastRegType = type;
   window._lastRegData = data;

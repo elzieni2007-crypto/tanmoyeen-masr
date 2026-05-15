@@ -5032,35 +5032,33 @@ function setupHeroShrink(){
 function testFirebase(){
   var btn = document.getElementById('fb-test-btn');
   var result = document.getElementById('fb-test-result');
-  if(btn) btn.textContent = '⏳ جاري الاختبار...';
-  if(result) result.textContent = '';
+  if(btn) btn.textContent = '⏳';
+  if(result) result.textContent = 'جاري...';
 
+  // Check Firebase
   if(typeof firebase === 'undefined'){
-    if(result) result.textContent = '❌ Firebase SDK مش موجود';
-    if(btn) btn.textContent = '🔥 اختبار Firebase';
+    if(result) result.textContent = '❌ SDK مش موجود';
+    return;
+  }
+  if(typeof db === 'undefined'){
+    if(result) result.textContent = '❌ db مش موجود';
     return;
   }
 
-  var timeout = setTimeout(function(){
-    if(result) result.textContent = '❌ Timeout - تحقق من الإنترنت';
-    if(btn) btn.textContent = '🔥 اختبار Firebase';
-  }, 10000);
+  result.textContent = 'project: ' + firebaseConfig.projectId;
 
-  db.collection('volunteers').add({
-    test: true,
-    time: new Date().toISOString()
-  }).then(function(doc){
-    clearTimeout(timeout);
-    doc.delete().catch(function(){});
-    if(result) result.textContent = '✅ شغال! ' + doc.id.substring(0,8);
-    if(btn) btn.textContent = '✅ نجح';
-    toast('✅ Firebase شغال بنجاح!');
-  }).catch(function(err){
-    clearTimeout(timeout);
-    if(result) result.textContent = '❌ ' + err.code + ': ' + err.message.substring(0,40);
-    if(btn) btn.textContent = '🔥 اختبار Firebase';
-    toast('❌ ' + err.message.substring(0,60));
-  });
+  firebase.firestore()
+    .collection('test')
+    .add({ t: Date.now() })
+    .then(function(ref){
+      if(result) result.textContent = '✅ ' + ref.id.substring(0,8);
+      if(btn) btn.textContent = '✅';
+      ref.delete();
+    })
+    .catch(function(e){
+      if(result) result.textContent = '❌ ' + e.code;
+      if(btn) btn.textContent = '🔥';
+    });
 }
 
 function showPrivacy(){

@@ -2366,8 +2366,15 @@ function enterApp(){
     db.collection('volunteers').orderBy('timestamp','desc').limit(300).get().then(function(snap){
       if(snap.empty) return;
       var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[]}));});
-      if(fresh.length){window.VOLUNTEERS_PRELOAD=fresh;loadVolunteers();updateAllCounts();}
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[],photo:r.photo||''}));});
+      if(fresh.length){
+        window.VOLUNTEERS_PRELOAD=fresh;
+        // مسح localStorage القديم عشان Firebase يبقى المصدر الوحيد
+        localStorage.removeItem('volunteers');
+        loadVolunteers();
+        updateAllCounts();
+        console.log('✅ Volunteers from Firebase:',fresh.length);
+      }
     }).catch(function(){});
     db.collection('organizations').orderBy('timestamp','desc').limit(300).get().then(function(snap){
       if(snap.empty) return;
@@ -4201,13 +4208,17 @@ var volFilter = 'all';
 function loadVolunteers(){
   var stored = [];
   try{ stored = JSON.parse(localStorage.getItem('volunteers') || '[]'); }catch(e){}
-  // Merge preloaded data with new registrations
-  var preIds = stored.map(function(v){ return v.phone; });
-  var merged = stored.concat(
-    (VOLUNTEERS_PRELOAD||[]).filter(function(v){
-      return !preIds.includes(v.phone);
-    })
-  );
+  // Firebase data takes priority
+  var fbData = window.VOLUNTEERS_PRELOAD || [];
+  var merged;
+  if(fbData.length > 0){
+    // Firebase هو المصدر الرئيسي — نضيف التسجيلات الجديدة من localStorage فقط لو مش موجودة
+    var fbPhones = fbData.map(function(v){ return v.phone; });
+    var newOnly = stored.filter(function(v){ return v.phone && !fbPhones.includes(v.phone); });
+    merged = fbData.concat(newOnly);
+  } else {
+    merged = stored;
+  }
   VOLUNTEERS_DATA = merged;
   renderVolunteers();
   var badge = document.getElementById('vol-count-badge');

@@ -22,7 +22,7 @@
   --p:#1a3a6e;--p2:#2557a7;--a:#00aeef;--a2:#4dc8f7;
   --bg:#eef3f9;--card:#fff;--txt:#1a2a3a;--muted:#6b7a8d;
   --border:#dde6f0;--green:#00b894;--orange:#e07a2f;--red:#e05050;
-  --nav:64px;--bot:72px;--r:16px;
+  --nav:64px;--bot:68px;--r:16px;
   --sh:0 2px 16px rgba(26,58,110,.09);--shd:0 6px 32px rgba(26,58,110,.15);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -79,7 +79,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 .ni.on .ni-dot{display:block}
 
 /* DASHBOARD */
-.dash-hero{margin:6px 12px 0;border-radius:var(--r);background:linear-gradient(135deg,var(--p) 0%,var(--p2) 60%,#0c6fad 100%);padding:8px 14px;color:white;position:relative;overflow:hidden;box-shadow:var(--shd)}
+.dash-hero{margin:6px 12px 0;border-radius:var(--r);background:linear-gradient(135deg,var(--p) 0%,var(--p2) 60%,#0c6fad 100%);padding:10px 14px;color:white;position:relative;overflow:hidden;box-shadow:var(--shd)}
 .dh-c1{position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(0,174,239,.18);top:-60px;left:-60px}
 .dh-c2{position:absolute;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.07);bottom:-30px;right:20px}
 .dh-logo{position:absolute;top:10px;left:10px;width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -520,16 +520,11 @@ body.dark-mode .modal-sheet { background: #16213e; }
 body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e0; border-color: #2d3748; }
 
 @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-@keyframes bounce {
-  0%,100%{transform:translateX(50%) translateY(0)}
-  50%{transform:translateX(50%) translateY(4px)}
-}
 </style>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <!-- AdMob -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-6878879950296426~9515315987" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -1618,7 +1613,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="adm-list" id="adm-list" style="display:flex;flex-direction:column;gap:8px"></div>
 
     <!-- فورم إضافة وظيفة -->
-    <div id="adm-form-job" style="display:none;padding:0 16px;padding-bottom:130px">
+    <div id="adm-form-job" style="display:none;padding:0 16px;padding-bottom:100px">
 
       <!-- هيدر -->
       <div style="background:linear-gradient(135deg,var(--p),var(--p2));border-radius:14px;padding:14px;margin-bottom:16px;color:white;text-align:center">
@@ -1808,7 +1803,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
 
     <!-- فورم إضافة مناقصة -->
-    <div id="adm-form-tender" style="display:none;padding:0 16px;padding-bottom:130px">
+    <div id="adm-form-tender" style="display:none;padding:0 16px;padding-bottom:100px">
       <div style="background:#fef3e8;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-right:3px solid var(--orange);font-size:12px;color:#7a4010">
         📋 <strong>إضافة مناقصة جديدة:</strong> ستظهر فوراً في قسم المناقصات للمستخدمين
       </div>
@@ -1854,7 +1849,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
 
     <!-- فورم الإيميل الجماعي -->
-    <div id="adm-form-volunteers-adm" style="display:none;padding:0 16px;padding-bottom:130px">
+    <div id="adm-form-volunteers-adm" style="display:none;padding:0 16px;padding-bottom:100px">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px">
     <div style="font-size:15px;font-weight:800;color:var(--p)">🤝 المتطوعون المسجلون</div>
     <span id="adm-vols-count" style="background:var(--a);color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
@@ -1862,7 +1857,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div id="adm-vols-list"></div>
 </div>
 
-<div id="adm-form-consultations-adm" style="display:none;padding:0 16px;padding-bottom:130px">
+<div id="adm-form-consultations-adm" style="display:none;padding:0 16px;padding-bottom:100px">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px">
     <div style="font-size:15px;font-weight:800;color:var(--p)">📋 طلبات الاستشارات</div>
     <span id="adm-consult-count" style="background:#c06010;color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
@@ -1882,7 +1877,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div id="adm-consult-list"></div>
 </div>
 
-<div id="adm-form-broadcast" style="display:none;padding:0 16px;padding-bottom:130px">
+<div id="adm-form-broadcast" style="display:none;padding:0 16px;padding-bottom:100px">
   <div style="margin-top:16px">
 
     <div style="background:linear-gradient(135deg,#00703a,#00b894);border-radius:14px;padding:16px;color:white;margin-bottom:16px;text-align:center">
@@ -1929,7 +1924,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   </div>
 </div>
 
-<div id="adm-form-email" style="display:none;padding:0 16px;padding-bottom:130px">
+<div id="adm-form-email" style="display:none;padding:0 16px;padding-bottom:100px">
 
       <!-- إحصائيات المشتركين -->
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px">
@@ -2047,7 +2042,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div style="height:80px"></div>
     </div>
     <!-- وظائف في انتظار المراجعة -->
-    <div id="adm-form-pending" style="display:none;padding:0 16px;padding-bottom:130px">
+    <div id="adm-form-pending" style="display:none;padding:0 16px;padding-bottom:100px">
       <div style="background:#fff3cd;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-right:3px solid #ffc107;font-size:12px;color:#856404">
         ⏳ <strong>وظائف في انتظار المراجعة:</strong> راجع كل وظيفة واضغط نشر أو رفض
       </div>
@@ -2369,8 +2364,6 @@ function enterApp(){
       console.log('All sheets loaded');
     });
   }, 500);
-
-
 
   // Auto refresh sheets every 5 minutes
   setInterval(function(){
@@ -2883,7 +2876,6 @@ const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',supplie
 function go(id){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  window.scrollTo({top:0, behavior:'instant'});
   document.getElementById(id).classList.add('on');
   const nid=navMap[id];
   if(nid){const nel=document.getElementById(nid);if(nel)nel.classList.add('on');}
@@ -6014,7 +6006,6 @@ window.addEventListener('load',()=>{
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
 import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js';
-
 const firebaseConfig = {
   apiKey: "AIzaSyCk98_i0ozMuQumsO4PUDpXGRga5aWI4C8",
   authDomain: "tanmoyeen-masr26.firebaseapp.com",
@@ -6023,62 +6014,31 @@ const firebaseConfig = {
   messagingSenderId: "335780209700",
   appId: "1:335780209700:web:c2839bb31364b5b18664b1"
 };
-
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
-
 async function initNotifications() {
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      const token = await getToken(messaging, {
-        vapidKey: 'BEBdJZAvob4KzcDxRsR1ABhQMQ9r2o8OJf3A0SMNe4yHOn35IaJNzBVMtckRqQNIXx5baxZkpaehIQsD8kM31yw'
-      });
-      if (token) {
-        console.log('FCM Token:', token);
-        // Save token to Firebase
-        if(typeof window.db !== 'undefined'){
-          window.db.collection('fcm_tokens').doc(token.substring(0,20)).set({
-            token: token,
-            timestamp: new Date().toISOString(),
-            platform: navigator.platform
-          }).catch(function(){});
-        }
-      }
+      const token = await getToken(messaging, {vapidKey: 'BEBdJZAvob4KzcDxRsR1ABhQMQ9r2o8OJf3A0SMNe4yHOn35IaJNzBVMtckRqQNIXx5baxZkpaehIQsD8kM31yw'});
+      if (token) { console.log('FCM Token:', token); }
     }
-  } catch(e) {
-    console.log('Notification error:', e);
-  }
+  } catch(e) { console.log('Notification error:', e); }
 }
-
-// Show notification in app
 onMessage(messaging, (payload) => {
   const {title, body} = payload.notification || {};
-
-  // Add to NOTIFS array
-  if(typeof window.NOTIFS !== 'undefined' && typeof window.addNotification === 'function'){
-    window.addNotification('🔔', title || 'تنمويين مصر', body || '', '#e8f0fe');
-    if(typeof window.renderNotifs === 'function') window.renderNotifs();
-  }
-
-  // Show floating notification
   const d = document.createElement('div');
-  d.style.cssText = 'position:fixed;top:80px;right:12px;left:12px;z-index:99999;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;padding:14px 16px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.3);font-family:Cairo,sans-serif;direction:rtl;text-align:right;animation:fadeIn .3s ease;cursor:pointer';
+  d.style.cssText = 'position:fixed;top:80px;right:12px;left:12px;z-index:99999;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;padding:14px 16px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.3);font-family:Cairo,sans-serif;direction:rtl;text-align:right;cursor:pointer';
   d.innerHTML = '<div style="font-weight:700;font-size:14px;margin-bottom:4px">🔔 ' + (title||'تنمويين مصر') + '</div><div style="font-size:12px;opacity:0.9">' + (body||'') + '</div>';
   d.onclick = function(){ d.remove(); };
   document.body.appendChild(d);
   setTimeout(function(){ if(d.parentNode) d.remove(); }, 5000);
 });
-
-// Register service worker
 window.addEventListener('load', function() {
   if('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/tanmoyeen-masr/firebase-messaging-sw.js')
-      .then(function(reg){
-        console.log('SW registered:', reg.scope);
-        initNotifications();
-      })
-      .catch(function(e){ console.log('SW error:', e); });
+      .then(function(){ initNotifications(); })
+      .catch(function(e){ console.log('SW:', e); });
   }
 });
 </script>

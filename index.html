@@ -31,7 +31,7 @@ button{font-family:'Cairo',sans-serif;cursor:pointer}
 input,select,textarea{font-family:'Cairo',sans-serif}
 
 /* SCREENS */
-.scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+100px)}
+.scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+150px)}
 .scr.on{display:block;animation:fi .28s ease}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
@@ -525,7 +525,6 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-6878879950296426~9515315987" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -2364,29 +2363,6 @@ function enterApp(){
       console.log('All sheets loaded');
     });
   }, 500);
-
-  // Firebase refresh every 3 min (uses existing db)
-  setTimeout(function(){
-    function fbRefresh(){
-      if(typeof db==='undefined') return;
-      db.collection('consultants').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.CONS&&!(CONS).some(function(c){return c.phone===r.phone;})){CONS.unshift({id:Date.now()+Math.random(),name:r.name,spec:r.spec||'استشاري',spec2:'',gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',orgs:'',av:'👨‍💼',bg:'#e8f0fe'});if(typeof addNotification==='function')addNotification('👨‍💼','استشاري جديد انضم!',r.name+' - '+(r.spec||''),'#e8f0fe');}});updateAllCounts();}).catch(function(){});
-      db.collection('suppliers').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.SUPS&&!(SUPS).some(function(c){return c.phone===r.phone;})){SUPS.unshift({id:Date.now()+Math.random(),name:r.name,cat:r.cat||'توريدات',gov:r.gov||'',phone:r.phone||'',email:r.email||'',logo:'🏭'});if(typeof addNotification==='function')addNotification('🏭','مورد جديد انضم!',r.name+' - '+(r.cat||''),'#f0e8fe');}});updateAllCounts();}).catch(function(){});
-      db.collection('volunteers').get().then(function(s){var a=false;s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(!(VOLUNTEERS_PRELOAD||[]).some(function(v){return v.phone===r.phone;})){if(!window.VOLUNTEERS_PRELOAD)window.VOLUNTEERS_PRELOAD=[];VOLUNTEERS_PRELOAD.unshift({id:Date.now()+Math.random(),name:r.name,gov:r.gov||'',interests:r.interests||[],phone:r.phone||'',email:r.email||'',skills:r.skills||'',hours:r.hours||'',worktype:r.worktype||'',days:r.days||'',travel:r.travel||'',langs:r.langs||'',badges:r.badges||[],photo:''});if(typeof addNotification==='function')addNotification('🤝','متطوع جديد انضم!',r.name+' - '+(r.gov||''),'#e7faf3');a=true;}});if(a){loadVolunteers();updateAllCounts();}}).catch(function(){});
-      db.collection('organizations').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.ORGS&&!(ORGS).some(function(o){return o.name===r.name;}))ORGS.unshift({id:Date.now()+Math.random(),name:r.name,type:r.orgtype||'مؤسسة',gov:r.gov||'',field:r.field||'',phone:r.phone||'',email:r.email||'',logo:'🏢'});if(typeof addNotification==='function')addNotification('🏢','مؤسسة جديدة انضمت!',r.name+' - '+(r.gov||''),'#fff3cd');});updateAllCounts();}).catch(function(){});
-      // Re-render current screen
-      var cur = document.querySelector('.scr.on');
-      if(cur){
-        var cid = cur.id;
-        if(cid==='consultants') renderCons();
-        if(cid==='suppliers') renderSups();
-        if(cid==='volunteers') renderVolunteers ? renderVolunteers() : loadVolunteers();
-        if(cid==='orgs-screen') renderOrgs();
-        if(cid==='home') renderDash();
-      }
-      updateAllCounts();
-    }
-    // fbRefresh called after sheets load
-  }, 5000);
 
   // Auto refresh sheets every 5 minutes
   setInterval(function(){
@@ -6015,13 +5991,5 @@ window.addEventListener('load',()=>{
     <button class="success-btn-wa" onclick="shareSuccessWA()">💬 شارك تسجيلك على واتساب</button>
   </div>
 </div>
-<!-- AdMob -->
-<ins class="adsbygoogle"
-  style="display:block;position:fixed;bottom:72px;width:100%;z-index:98"
-  data-ad-client="ca-app-pub-6878879950296426"
-  data-ad-slot="7975003606"
-  data-ad-format="auto"
-  data-full-width-responsive="true"></ins>
-<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </body>
 </html>

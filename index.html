@@ -2372,6 +2372,17 @@ function enterApp(){
       db.collection('suppliers').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.SUPS&&!(SUPS).some(function(c){return c.phone===r.phone;}))SUPS.unshift({id:Date.now()+Math.random(),name:r.name,cat:r.cat||'توريدات',gov:r.gov||'',phone:r.phone||'',email:r.email||'',logo:'🏭'});});updateAllCounts();}).catch(function(){});
       db.collection('volunteers').get().then(function(s){var a=false;s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(!(VOLUNTEERS_PRELOAD||[]).some(function(v){return v.phone===r.phone;})){if(!window.VOLUNTEERS_PRELOAD)window.VOLUNTEERS_PRELOAD=[];VOLUNTEERS_PRELOAD.unshift({id:Date.now()+Math.random(),name:r.name,gov:r.gov||'',interests:r.interests||[],phone:r.phone||'',email:r.email||'',skills:r.skills||'',hours:r.hours||'',worktype:r.worktype||'',days:r.days||'',travel:r.travel||'',langs:r.langs||'',badges:r.badges||[],photo:''});a=true;}});if(a){loadVolunteers();updateAllCounts();}}).catch(function(){});
       db.collection('organizations').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.ORGS&&!(ORGS).some(function(o){return o.name===r.name;}))ORGS.unshift({id:Date.now()+Math.random(),name:r.name,type:r.orgtype||'مؤسسة',gov:r.gov||'',field:r.field||'',phone:r.phone||'',email:r.email||'',logo:'🏢'});});updateAllCounts();}).catch(function(){});
+      // Re-render current screen
+      var cur = document.querySelector('.scr.on');
+      if(cur){
+        var cid = cur.id;
+        if(cid==='consultants') renderCons();
+        if(cid==='suppliers') renderSups();
+        if(cid==='volunteers') renderVolunteers ? renderVolunteers() : loadVolunteers();
+        if(cid==='orgs-screen') renderOrgs();
+        if(cid==='home') renderDash();
+      }
+      updateAllCounts();
     }
     fbRefresh();
     setInterval(fbRefresh, 3*60*1000);

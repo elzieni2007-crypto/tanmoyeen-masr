@@ -2373,6 +2373,127 @@ function enterApp(){
     });
   }, 500);
 
+  // Real-time Firebase listeners for users
+  if(typeof db !== 'undefined'){
+
+    // Listen for new consultants
+    db.collection('consultants')
+      .orderBy('timestamp','desc').limit(20)
+      .onSnapshot(function(snap){
+        snap.docChanges().forEach(function(change){
+          if(change.type === 'added'){
+            var data = change.doc.data();
+            if(data.name && !data.test){
+              var exists = (CONS||[]).some(function(c){
+                return c.phone === data.phone || c.email === data.email;
+              });
+              if(!exists){
+                var newCon = {
+                  id: (CONS||[]).length + 900 + Math.random(),
+                  name: data.name, spec: data.spec||'استشاري',
+                  spec2: data.spec2||'', gov: data.gov||'',
+                  phone: data.phone||'', email: data.email||'',
+                  bio: data.bio||'', orgs: data.orgs||'',
+                  av: '👨‍💼', bg: '#e8f0fe'
+                };
+                if(window.CONS) CONS.unshift(newCon);
+                updateAllCounts();
+                addNotification('👨‍💼', 'استشاري جديد انضم!', data.name + ' - ' + (data.spec||''), '#e8f0fe');
+              }
+            }
+          }
+        });
+      }, function(e){ console.log('Cons listener:', e.code); });
+
+    // Listen for new suppliers
+    db.collection('suppliers')
+      .orderBy('timestamp','desc').limit(20)
+      .onSnapshot(function(snap){
+        snap.docChanges().forEach(function(change){
+          if(change.type === 'added'){
+            var data = change.doc.data();
+            if(data.name && !data.test){
+              var exists = (SUPS||[]).some(function(s){
+                return s.phone === data.phone || s.email === data.email;
+              });
+              if(!exists){
+                var newSup = {
+                  id: (SUPS||[]).length + 900 + Math.random(),
+                  name: data.name, cat: data.cat||'توريدات',
+                  gov: data.gov||'', phone: data.phone||'',
+                  email: data.email||'', logo: '🏭'
+                };
+                if(window.SUPS) SUPS.unshift(newSup);
+                updateAllCounts();
+                addNotification('🏭', 'مورد جديد انضم!', data.name + ' - ' + (data.cat||''), '#f0e8fe');
+              }
+            }
+          }
+        });
+      }, function(e){ console.log('Sups listener:', e.code); });
+
+    // Listen for new volunteers
+    db.collection('volunteers')
+      .orderBy('timestamp','desc').limit(20)
+      .onSnapshot(function(snap){
+        snap.docChanges().forEach(function(change){
+          if(change.type === 'added'){
+            var data = change.doc.data();
+            if(data.name && !data.test){
+              var exists = (VOLUNTEERS_PRELOAD||[]).some(function(v){
+                return v.phone === data.phone;
+              });
+              if(!exists){
+                if(!window.VOLUNTEERS_PRELOAD) window.VOLUNTEERS_PRELOAD = [];
+                VOLUNTEERS_PRELOAD.unshift({
+                  id: Date.now() + Math.random(),
+                  name: data.name, gov: data.gov||'',
+                  interests: data.interests||[],
+                  phone: data.phone||'', email: data.email||'',
+                  skills: data.skills||'', hours: data.hours||'',
+                  worktype: data.worktype||'', days: data.days||'',
+                  travel: data.travel||'', langs: data.langs||'',
+                  badges: data.badges||[], photo: ''
+                });
+                loadVolunteers();
+                updateAllCounts();
+                addNotification('🤝', 'متطوع جديد انضم!', data.name + ' - ' + (data.gov||''), '#e7faf3');
+              }
+            }
+          }
+        });
+      }, function(e){ console.log('Vols listener:', e.code); });
+
+    // Listen for new organizations
+    db.collection('organizations')
+      .orderBy('timestamp','desc').limit(20)
+      .onSnapshot(function(snap){
+        snap.docChanges().forEach(function(change){
+          if(change.type === 'added'){
+            var data = change.doc.data();
+            if(data.name && !data.test){
+              var exists = (ORGS||[]).some(function(o){
+                return o.phone === data.phone || o.name === data.name;
+              });
+              if(!exists){
+                if(!window.ORGS) window.ORGS = [];
+                ORGS.unshift({
+                  id: Date.now() + Math.random(),
+                  name: data.name, type: data.orgtype||'مؤسسة',
+                  gov: data.gov||'', field: data.field||'',
+                  phone: data.phone||'', email: data.email||'',
+                  logo: '🏢'
+                });
+                updateAllCounts();
+                addNotification('🏢', 'مؤسسة جديدة انضمت!', data.name + ' - ' + (data.gov||''), '#fff3cd');
+              }
+            }
+          }
+        });
+      }, function(e){ console.log('Orgs listener:', e.code); });
+
+  }
+
   // Auto refresh sheets every 5 minutes
   setInterval(function(){
     console.log('Auto refreshing data...');

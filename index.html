@@ -31,7 +31,7 @@ button{font-family:'Cairo',sans-serif;cursor:pointer}
 input,select,textarea{font-family:'Cairo',sans-serif}
 
 /* SCREENS */
-.scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+200px)}
+.scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
 .scr.on{display:block;animation:fi .28s ease}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
@@ -3112,7 +3112,7 @@ function renderCons(){
         <div class="con-spec">${c.spec}</div>
         <div class="con-meta">
           <div class="con-mi">📍 ${c.gov}</div>
-          <div class="con-mi">⭐ ${c.exp||"خبرة"}</div>
+          <div class="con-mi">⭐ ${c.exp && c.exp!=='undefined' ? c.exp : "خبرة"}</div>
         </div>
         <div class="con-tags">${(c.specs||[c.spec2||c.spec||""]).map(s=>`<span class="tag tt">${s}</span>`).join('')}</div>
       </div>
@@ -5712,7 +5712,7 @@ window.addEventListener('load',()=>{
   setTimeout(()=>{
     enterApp();
     handleUrlParams();
-  }, 2500);
+  }, 800);
 });
 </script>
 

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كاشف المكررات - تنمويين مصر</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--p:#1a3a6e;--a:#0094cc;--green:#00b894;--red:#e05050;--orange:#e07a2f;--bg:#eef3f9;--card:#fff;--txt:#1a2a3a;--muted:#6b7a8d;--border:#dde6f0}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding:16px;max-width:600px;margin:0 auto}
+.header{background:linear-gradient(135deg,var(--p),var(--a));border-radius:18px;padding:20px 18px;margin-bottom:16px;color:white;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07);top:-60px;left:-60px}
+.header h1{font-size:18px;font-weight:900;position:relative;z-index:1}
+.header p{font-size:12px;opacity:.8;margin-top:4px;position:relative;z-index:1}
+.card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 16px rgba(26,58,110,.08)}
+.card-title{font-size:13px;font-weight:800;color:var(--p);margin-bottom:12px}
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.upload-zone:hover{border-color:var(--a);background:#f0f8ff}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:36px;margin-bottom:8px}
+.upload-text{font-size:13px;color:var(--muted)}
+.upload-text span{color:var(--a);font-weight:700}
+.file-name{margin-top:8px;font-size:12px;color:var(--green);font-weight:600;display:none}
+.col-select{margin-top:12px;display:none}
+.col-label{font-size:12px;font-weight:700;color:var(--txt);margin-bottom:8px}
+.col-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.col-item{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:10px;padding:10px 12px;cursor:pointer;border:2px solid transparent;transition:.2s}
+.col-item.on{border-color:var(--a);background:#e8f4fd}
+.col-check{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;transition:.2s}
+.col-item.on .col-check{background:var(--a);border-color:var(--a);color:white}
+.col-name{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.match-opts{display:flex;gap:8px;margin-top:10px}
+.match-opt{flex:1;padding:8px;border:2px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;transition:.2s;background:white}
+.match-opt.on{border-color:var(--a);background:#e8f4fd;color:var(--p)}
+.btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--p),var(--a));color:white;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;transition:.2s}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-green{background:linear-gradient(135deg,#00703a,var(--green))}
+.progress{background:var(--bg);border-radius:8px;height:8px;overflow:hidden;margin-top:10px;display:none}
+.pbar{height:100%;background:linear-gradient(135deg,var(--a),var(--green));border-radius:8px;transition:width .4s;width:0%}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--bg);border-radius:10px;padding:10px;text-align:center}
+.stat-n{font-size:20px;font-weight:900;color:var(--a)}
+.stat-n.red{color:var(--red)}
+.stat-l{font-size:9px;color:var(--muted);margin-top:2px}
+.filter-bar{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.chip{padding:5px 12px;border-radius:20px;border:2px solid var(--border);background:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.2s}
+.chip.on{border-color:var(--a);background:var(--a);color:white}
+.dup-group{background:#fff8e1;border:1px solid #f0c040;border-radius:12px;padding:12px;margin-bottom:10px;animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+.dup-badge{font-size:10px;font-weight:800;background:#fff3cd;color:var(--orange);padding:3px 10px;border-radius:10px;display:inline-block;margin-bottom:8px}
+.dup-row{background:white;border-radius:8px;padding:10px 12px;margin-bottom:6px;border-right:3px solid #f0c040}
+.dup-row:last-child{margin-bottom:0}
+.dup-name{font-size:13px;font-weight:800;margin-bottom:4px}
+.dup-meta{font-size:11px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px}
+.hl{background:#fff3cd;padding:1px 4px;border-radius:4px;font-weight:700;color:var(--orange)}
+.row-num{font-size:10px;color:var(--muted);margin-bottom:2px}
+.no-dups{text-align:center;padding:30px;color:var(--green);font-weight:700;font-size:14px}
+.sheet-tabs{display:flex;gap:6px;margin-top:10px;overflow-x:auto;padding-bottom:4px}
+.sheet-tab{padding:5px 14px;border-radius:20px;border:2px solid var(--border);background:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s;flex-shrink:0}
+.sheet-tab.on{border-color:var(--p);background:var(--p);color:white}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🔍 كاشف المكررات المتطور</h1>
+  <p>ارفع Excel أو CSV واختار الأعمدة للفحص</p>
+</div>
+
+<!-- UPLOAD -->
+<div class="card">
+  <div class="card-title">📂 ارفع الملف</div>
+  <div class="upload-zone">
+    <input type="file" accept=".xlsx,.xls,.csv" onchange="handleFile(this)">
+    <div class="upload-icon">📊</div>
+    <div class="upload-text">اضغط لرفع ملف <span>Excel أو CSV</span></div>
+    <div class="upload-text" style="font-size:11px;margin-top:4px;opacity:.7">يدعم .xlsx • .xls • .csv</div>
+    <div class="file-name" id="file-name"></div>
+  </div>
+
+  <div id="sheet-wrap" style="display:none">
+    <div class="col-label" style="margin-top:12px">📋 اختار الشيت:</div>
+    <div class="sheet-tabs" id="sheet-tabs"></div>
+  </div>
+
+  <div class="col-select" id="col-select">
+    <div class="col-label">📌 اختار الأعمدة للفحص:</div>
+    <div class="col-grid" id="col-grid"></div>
+
+    <div style="margin-top:12px">
+      <div class="col-label">🎯 نوع المطابقة:</div>
+      <div class="match-opts">
+        <div class="match-opt on" data-v="exact" onclick="setMatch(this)">مطابقة تامة</div>
+        <div class="match-opt" data-v="partial" onclick="setMatch(this)">تشابه جزئي</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" id="scan-btn" onclick="startScan()" disabled>🔍 ابدأ الفحص</button>
+  <div class="progress" id="progress"><div class="pbar" id="pbar"></div></div>
+</div>
+
+<!-- RESULTS -->
+<div id="res-wrap" style="display:none">
+  <div class="card">
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l">إجمالي</div></div>
+      <div class="stat"><div class="stat-n red" id="s-groups">0</div><div class="stat-l">مجموعات</div></div>
+      <div class="stat"><div class="stat-n red" id="s-rows">0</div><div class="stat-l">سجلات مكررة</div></div>
+    </div>
+    <div class="filter-bar" id="filter-bar"></div>
+    <button class="btn btn-green" onclick="exportXLS()">📥 تحميل التقرير Excel</button>
+  </div>
+  <div id="results"></div>
+</div>
+
+<script>
+var wb=null, curSheet=null, data=[], hdrs=[], selCols=[], matchType='exact', groups=[], activeF='all';
+
+function handleFile(inp){
+  var f=inp.files[0]; if(!f) return;
+  document.getElementById('file-name').style.display='block';
+  document.getElementById('file-name').textContent='✅ '+f.name;
+  var r=new FileReader();
+  r.onload=function(e){
+    var bytes=new Uint8Array(e.target.result);
+    wb=XLSX.read(bytes,{type:'array'});
+    var names=wb.SheetNames;
+    if(names.length>1){
+      document.getElementById('sheet-wrap').style.display='block';
+      document.getElementById('sheet-tabs').innerHTML=names.map(function(n,i){
+        return '<div class="sheet-tab'+(i===0?' on':'')+'" onclick="pickSheet(this,\''+n.replace(/'/g,"\\'")+'\')" >'+n+'</div>';
+      }).join('');
+    }
+    pickSheet(null, names[0]);
+  };
+  r.readAsArrayBuffer(f);
+}
+
+function pickSheet(el, name){
+  if(el){ document.querySelectorAll('.sheet-tab').forEach(function(t){t.classList.remove('on');}); el.classList.add('on'); }
+  curSheet=name;
+  var ws=wb.Sheets[name];
+  var raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  var hRow=0;
+  for(var i=0;i<Math.min(5,raw.length);i++){
+    if(raw[i].filter(function(c){return c&&String(c).trim();}).length>2){hRow=i;break;}
+  }
+  hdrs=raw[hRow].map(function(h){return String(h||'').trim();});
+  data=raw.slice(hRow+1).filter(function(r){return r.some(function(c){return c&&String(c).trim();});});
+  selCols=[];
+  var grid=document.getElementById('col-grid');
+  grid.innerHTML=hdrs.map(function(h,i){
+    if(!h) return '';
+    return '<div class="col-item" data-i="'+i+'" onclick="toggleCol(this)"><div class="col-check">✓</div><div class="col-name" title="'+h+'">'+h+'</div></div>';
+  }).filter(Boolean).join('');
+  document.getElementById('col-select').style.display='block';
+  document.getElementById('scan-btn').disabled=true;
+}
+
+function toggleCol(el){
+  el.classList.toggle('on');
+  var i=parseInt(el.dataset.i);
+  if(el.classList.contains('on')) selCols.push(i);
+  else selCols=selCols.filter(function(x){return x!==i;});
+  document.getElementById('scan-btn').disabled=selCols.length===0;
+}
+
+function setMatch(el){
+  document.querySelectorAll('.match-opt').forEach(function(o){o.classList.remove('on');});
+  el.classList.add('on'); matchType=el.dataset.v;
+}
+
+function norm(v){
+  if(!v) return '';
+  return String(v).trim().toLowerCase().replace(/\s+/g,' ').replace(/^0+/,'').replace(/^\+?2/,'');
+}
+
+function startScan(){
+  document.getElementById('scan-btn').disabled=true;
+  document.getElementById('progress').style.display='block';
+  document.getElementById('pbar').style.width='30%';
+  setTimeout(function(){
+    groups=[];
+    var colGroups=[];
+    selCols.forEach(function(ci){
+      var map={};
+      data.forEach(function(row,ri){
+        var v=norm(row[ci]);
+        if(!v||v.length<2) return;
+        var key=matchType==='partial'?v.substring(0,Math.min(6,v.length)):v;
+        if(!map[key]) map[key]=[];
+        map[key].push({ri:ri,v:v,row:row});
+      });
+      Object.values(map).forEach(function(items){
+        if(items.length<2) return;
+        colGroups.push({col:hdrs[ci],ci:ci,items:items});
+      });
+    });
+    // Merge by same rows
+    colGroups.forEach(function(g){
+      var key=g.items.map(function(i){return i.ri;}).sort().join('|');
+      var ex=groups.find(function(x){return x.key===key;});
+      if(ex) ex.reasons.push(g.col);
+      else groups.push({key:key,reasons:[g.col],items:g.items});
+    });
+    document.getElementById('pbar').style.width='100%';
+    renderRes();
+    document.getElementById('scan-btn').disabled=false;
+  },150);
+}
+
+function renderRes(){
+  var dupSet=new Set();
+  groups.forEach(function(g){g.items.forEach(function(i){dupSet.add(i.ri);});});
+  document.getElementById('s-total').textContent=data.length;
+  document.getElementById('s-groups').textContent=groups.length;
+  document.getElementById('s-rows').textContent=dupSet.size;
+  document.getElementById('res-wrap').style.display='block';
+  var reasons=[];
+  groups.forEach(function(g){g.reasons.forEach(function(r){if(!reasons.includes(r))reasons.push(r);});});
+  document.getElementById('filter-bar').innerHTML=
+    '<div class="chip on" data-v="all" onclick="setF(this)">الكل ('+groups.length+')</div>'+
+    reasons.map(function(r){
+      var c=groups.filter(function(g){return g.reasons.includes(r);}).length;
+      return '<div class="chip" data-v="'+r+'" onclick="setF(this)">'+r+' ('+c+')</div>';
+    }).join('');
+  renderList();
+}
+
+function setF(el){
+  document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on'); activeF=el.dataset.v; renderList();
+}
+
+function renderList(){
+  var filtered=activeF==='all'?groups:groups.filter(function(g){return g.reasons.includes(activeF);});
+  if(filtered.length===0){
+    document.getElementById('results').innerHTML='<div class="card"><div class="no-dups">✅ لا توجد مكررات!</div></div>';
+    return;
+  }
+  var nameCol=selCols[0];
+  document.getElementById('results').innerHTML=filtered.map(function(g){
+    return '<div class="dup-group">'+
+      '<div class="dup-badge">⚠️ تكرار في: '+g.reasons.join(' + ')+'</div>'+
+      g.items.map(function(item){
+        var name=item.row[nameCol]||'—';
+        var meta=selCols.filter(function(c){return c!==nameCol&&item.row[c];}).map(function(c){
+          return '<span>'+hdrs[c]+': <span class="hl">'+item.row[c]+'</span></span>';
+        });
+        hdrs.forEach(function(h,ci){
+          if(!selCols.includes(ci)&&item.row[ci]&&meta.length<4)
+            meta.push('<span>'+h+': '+item.row[ci]+'</span>');
+        });
+        return '<div class="dup-row">'+
+          '<div class="row-num">📍 سطر '+(item.ri+2)+'</div>'+
+          '<div class="dup-name">'+name+'</div>'+
+          '<div class="dup-meta">'+meta.slice(0,4).join('')+'</div>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }).join('');
+}
+
+function exportXLS(){
+  if(!groups.length){alert('مفيش مكررات!');return;}
+  var rows=[['رقم المجموعة','سبب التكرار','رقم السطر'].concat(hdrs)];
+  var gi=1;
+  groups.forEach(function(g){
+    g.items.forEach(function(item){rows.push([gi,g.reasons.join('+'),item.ri+2].concat(item.row));});
+    rows.push(['—','—','—']);gi++;
+  });
+  var ws=XLSX.utils.aoa_to_sheet(rows);
+  var newWb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(newWb,ws,'المكررات');
+  XLSX.writeFile(newWb,'تقرير_المكررات.xlsx');
+}
+</script>
+</body>
+</html>

@@ -31,7 +31,7 @@ button{font-family:'Cairo',sans-serif;cursor:pointer}
 input,select,textarea{font-family:'Cairo',sans-serif}
 
 /* SCREENS */
-.scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+100px)}
+.scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+130px)}
 .scr.on{display:block;animation:fi .28s ease}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
@@ -525,6 +525,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-6878879950296426~9515315987" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -2363,6 +2364,107 @@ function enterApp(){
       console.log('All sheets loaded');
     });
   }, 500);
+
+  // Auto refresh from Firebase every 2 minutes
+  setTimeout(function(){
+    function refreshFromFirebase(){
+      if(typeof db === 'undefined') return;
+
+      // Load consultants from Firebase
+      db.collection('consultants').get().then(function(snap){
+        var fbCons = [];
+        snap.docs.forEach(function(d){
+          var data = d.data();
+          if(data.name && !data.test) fbCons.push(data);
+        });
+        if(fbCons.length > 0){
+          fbCons.forEach(function(data){
+            var exists = (CONS||[]).some(function(c){
+              return c.phone === data.phone || c.email === data.email;
+            });
+            if(!exists && window.CONS){
+              CONS.unshift({
+                id: Date.now()+Math.random(),
+                name:data.name, spec:data.spec||'استشاري',
+                spec2:'', gov:data.gov||'',
+                phone:data.phone||'', email:data.email||'',
+                bio:data.bio||'', orgs:'',
+                av:'👨‍💼', bg:'#e8f0fe'
+              });
+            }
+          });
+          updateAllCounts();
+        }
+      }).catch(function(e){ console.log('FB cons:', e.code); });
+
+      // Load suppliers from Firebase
+      db.collection('suppliers').get().then(function(snap){
+        snap.docs.forEach(function(d){
+          var data = d.data();
+          if(data.name && !data.test){
+            var exists = (SUPS||[]).some(function(s){ return s.phone===data.phone; });
+            if(!exists && window.SUPS){
+              SUPS.unshift({
+                id:Date.now()+Math.random(),
+                name:data.name, cat:data.cat||'توريدات',
+                gov:data.gov||'', phone:data.phone||'',
+                email:data.email||'', logo:'🏭'
+              });
+            }
+          }
+        });
+        updateAllCounts();
+      }).catch(function(e){ console.log('FB sups:', e.code); });
+
+      // Load volunteers from Firebase
+      db.collection('volunteers').get().then(function(snap){
+        snap.docs.forEach(function(d){
+          var data = d.data();
+          if(data.name && !data.test){
+            var exists = (VOLUNTEERS_PRELOAD||[]).some(function(v){ return v.phone===data.phone; });
+            if(!exists){
+              if(!window.VOLUNTEERS_PRELOAD) window.VOLUNTEERS_PRELOAD=[];
+              VOLUNTEERS_PRELOAD.unshift({
+                id:Date.now()+Math.random(),
+                name:data.name, gov:data.gov||'',
+                interests:data.interests||[], phone:data.phone||'',
+                email:data.email||'', skills:data.skills||'',
+                hours:data.hours||'', worktype:data.worktype||'',
+                days:data.days||'', travel:data.travel||'',
+                langs:data.langs||'', badges:data.badges||[], photo:''
+              });
+            }
+          }
+        });
+        loadVolunteers();
+        updateAllCounts();
+      }).catch(function(e){ console.log('FB vols:', e.code); });
+
+      // Load organizations from Firebase
+      db.collection('organizations').get().then(function(snap){
+        snap.docs.forEach(function(d){
+          var data = d.data();
+          if(data.name && !data.test){
+            var exists = (ORGS||[]).some(function(o){ return o.name===data.name; });
+            if(!exists && window.ORGS){
+              ORGS.unshift({
+                id:Date.now()+Math.random(),
+                name:data.name, type:data.orgtype||'مؤسسة',
+                gov:data.gov||'', field:data.field||'',
+                phone:data.phone||'', email:data.email||'', logo:'🏢'
+              });
+            }
+          }
+        });
+        updateAllCounts();
+      }).catch(function(e){ console.log('FB orgs:', e.code); });
+    }
+
+    // Run immediately then every 2 minutes
+    refreshFromFirebase();
+    setInterval(refreshFromFirebase, 2 * 60 * 1000);
+
+  }, 3000); // Wait 3 seconds after app loads
 
   // Auto refresh sheets every 5 minutes
   setInterval(function(){
@@ -5991,5 +6093,13 @@ window.addEventListener('load',()=>{
     <button class="success-btn-wa" onclick="shareSuccessWA()">💬 شارك تسجيلك على واتساب</button>
   </div>
 </div>
+<!-- AdMob -->
+<ins class="adsbygoogle"
+  style="display:block;position:fixed;bottom:72px;width:100%;z-index:98"
+  data-ad-client="ca-app-pub-6878879950296426"
+  data-ad-slot="7975003606"
+  data-ad-format="auto"
+  data-full-width-responsive="true"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </body>
 </html>

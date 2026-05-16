@@ -658,10 +658,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <span id="fb-test-result" style="font-size:10px;color:rgba(255,255,255,.8);margin-right:8px"></span>
   </div>
     <div class="dh-title" style="padding-right:54px;font-size:13px;margin-bottom:8px">منصتك الشاملة للعمل التنموي في مصر</div>
-    <div style="position:absolute;bottom:6px;right:50%;transform:translateX(50%);z-index:1;animation:bounce 1.5s infinite">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-  </div>
-  <div class="dh-stats">
+    <div class="dh-stats">
       <div class="ds"><div class="ds-n" id="dash-cons-n">243</div><div class="ds-l">استشاري</div></div>
       <div class="ds"><div class="ds-n" id="dash-sups-n">87</div><div class="ds-l">مورد</div></div>
       <div class="ds"><div class="ds-n" id="dash-vols-n">17</div><div class="ds-l">متطوع</div></div>
@@ -669,6 +666,10 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
   </div>
   <div class="sh" style="margin-top:4px;padding:4px 14px 2px"><div class="sh-t" style="font-size:12px">🧭 الأقسام الرئيسية</div></div>
+  <!-- Scroll hint -->
+  <div style="text-align:center;padding:6px 0 0;animation:bounce 1.5s infinite">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0094cc" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
   <div class="dash-grid">
     <div class="dg-card" onclick="go('jobs')"><div class="dg-icon" style="background:#e8f0fe">💼</div><div class="dg-t">الوظائف</div><div class="dg-c">جديد يومياً</div></div>
     <div class="dg-card" onclick="go('tenders')"><div class="dg-icon" style="background:#fef3e8">📋</div><div class="dg-t">المناقصات</div><div class="dg-c">٣٨ مناقصة</div></div>
@@ -2378,7 +2379,7 @@ function enterApp(){
 
     // Listen for new consultants
     db.collection('consultants')
-      .orderBy('timestamp','desc').limit(20)
+      .limit(20)
       .onSnapshot(function(snap){
         snap.docChanges().forEach(function(change){
           if(change.type === 'added'){
@@ -2407,7 +2408,7 @@ function enterApp(){
 
     // Listen for new suppliers
     db.collection('suppliers')
-      .orderBy('timestamp','desc').limit(20)
+      .limit(20)
       .onSnapshot(function(snap){
         snap.docChanges().forEach(function(change){
           if(change.type === 'added'){
@@ -2434,7 +2435,7 @@ function enterApp(){
 
     // Listen for new volunteers
     db.collection('volunteers')
-      .orderBy('timestamp','desc').limit(20)
+      .limit(20)
       .onSnapshot(function(snap){
         snap.docChanges().forEach(function(change){
           if(change.type === 'added'){
@@ -2466,7 +2467,7 @@ function enterApp(){
 
     // Listen for new organizations
     db.collection('organizations')
-      .orderBy('timestamp','desc').limit(20)
+      .limit(20)
       .onSnapshot(function(snap){
         snap.docChanges().forEach(function(change){
           if(change.type === 'added'){

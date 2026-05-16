@@ -635,7 +635,6 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <button class="ib" id="notif-bell-btn" onclick="go('notifs')" style="position:relative">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <div class="nd" id="notif-dot" style="display:none"></div>
-      <div id="notif-badge" style="display:none;position:absolute;top:-4px;left:-4px;background:#e05050;color:white;font-size:9px;font-weight:900;font-family:Cairo,sans-serif;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--p)">0</div>
     </button>
     <button class="ib" onclick="go('profile')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1498,12 +1497,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 <div id="notifs" class="scr" style="padding-bottom:0">
   <div style="padding:14px 14px 8px;display:flex;justify-content:space-between;align-items:center">
     <div style="font-size:15px;font-weight:700">الإشعارات</div>
-    <div style="font-size:11px;color:var(--a);font-weight:600;cursor:pointer" onclick="clearNewRegs()">تحديد الكل كمقروء</div>
-  </div>
-  <!-- تسجيلات جديدة -->
-  <div id="new-regs-section" style="display:none;padding:0 12px 8px">
-    <div style="font-size:12px;font-weight:800;color:var(--p);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--border)">🔔 تسجيلات جديدة</div>
-    <div id="new-regs-list"></div>
+    <div style="font-size:11px;color:var(--a);font-weight:600;cursor:pointer" onclick="NOTIFS.forEach(function(n){n.unr=false;});var d=document.getElementById('notif-dot');if(d)d.style.display='none';renderNotifs();">تحديد الكل كمقروء</div>
   </div>
   <div id="nilist"></div>
 </div>
@@ -2354,8 +2348,34 @@ function enterApp(){
   document.getElementById('app').style.display='block';
   setAllLogos();
   initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);renderJobs();renderTenders();updateJobseekersList();
-  // Load public data from Firebase
-  setTimeout(loadPublicDataFromFirebase, 800);
+  // Load from Firebase (public data)
+  setTimeout(function(){
+    if(typeof db === 'undefined') return;
+    db.collection('consultants').orderBy('timestamp','desc').limit(500).get().then(function(snap){
+      if(snap.empty) return;
+      var fresh=[];
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',exp:r.exp||'',orgs:r.orgs||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||''});});
+      if(fresh.length){window.CONS=fresh;renderCons();renderDash();updateAllCounts();}
+    }).catch(function(){});
+    db.collection('suppliers').orderBy('timestamp','desc').limit(500).get().then(function(snap){
+      if(snap.empty) return;
+      var fresh=[];
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',cat:r.cat||'عام',gov:r.gov||'',phone:r.phone||'',email:r.email||'',cert:r.cert||'مسجّل',logo:r.logo||'🏭',items:r.items||[r.cat||''],desc:r.desc||''});});
+      if(fresh.length){window.SUPS=fresh;renderSups();renderDash();updateAllCounts();}
+    }).catch(function(){});
+    db.collection('volunteers').orderBy('timestamp','desc').limit(300).get().then(function(snap){
+      if(snap.empty) return;
+      var fresh=[];
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[]}));});
+      if(fresh.length){window.VOLUNTEERS_PRELOAD=fresh;loadVolunteers();updateAllCounts();}
+    }).catch(function(){});
+    db.collection('organizations').orderBy('timestamp','desc').limit(300).get().then(function(snap){
+      if(snap.empty) return;
+      var fresh=[];
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id}));});
+      if(fresh.length){window.ORGS=fresh;renderOrgs();updateAllCounts();}
+    }).catch(function(){});
+  }, 1500);
   // Load live data from sheets
   // Load sheets on start
   setTimeout(function(){
@@ -2397,175 +2417,70 @@ function enterApp(){
     });
   }, 5 * 60 * 1000);
 
-  // ============ REAL-TIME FIREBASE LISTENERS (بدون حاجة لـ admin) ============
-  if(typeof db !== 'undefined'){
-
-    // 1. VOLUNTEERS - real-time
-    db.collection('volunteers').orderBy('timestamp','desc').limit(100)
-    .onSnapshot(function(snap){
-      var fresh = [];
-      snap.forEach(function(doc){
-        var d = doc.data();
-        if(d.name) fresh.push(Object.assign({}, d, {
-          id: doc.id,
-          interests: d.interests || [],
-          badges: d.badges || []
-        }));
-      });
-      if(fresh.length > 0){
-        window.VOLUNTEERS_PRELOAD = fresh;
-        loadVolunteers();
-        updateAllCounts();
-        console.log('✅ Volunteers loaded:', fresh.length);
-      }
-    }, function(err){ console.log('Volunteers listener err:', err.code); });
-
-    // 2. CONSULTANTS - real-time
-    db.collection('consultants').orderBy('timestamp','desc').limit(500)
-    .onSnapshot(function(snap){
-      var fresh = [];
-      snap.forEach(function(doc){
-        var d = doc.data();
-        if(d.name && d.spec){
-          fresh.push({
-            id: doc.id,
-            name: d.name,
-            spec: d.spec || '',
-            specs: d.specs || [d.spec || ''],
-            gov: d.gov || '',
-            phone: d.phone || '',
-            email: d.email || '',
-            bio: d.bio || '',
-            exp: d.exp || '',
-            av: '👨‍💼', bg: '#e8f0fe',
-            spec2: d.spec2 || '', orgs: d.orgs || ''
+  // Firebase real-time listener - only when admin logged in
+  if(typeof db !== 'undefined' && typeof auth !== 'undefined'){
+    auth.onAuthStateChanged(function(user){
+      if(user){
+        // Admin logged in - start listeners
+        db.collection('volunteers')
+      .orderBy('timestamp','desc')
+      .limit(50)
+      .onSnapshot(function(snap){
+        if(snap.docChanges().length > 0){
+          snap.docChanges().forEach(function(change){
+            if(change.type === 'added'){
+              var data = change.doc.data();
+              // Add to VOLUNTEERS_PRELOAD if not exists
+              var exists = (VOLUNTEERS_PRELOAD||[]).some(function(v){
+                return v.phone === data.phone;
+              });
+              if(!exists && data.name){
+                if(!window.VOLUNTEERS_PRELOAD) window.VOLUNTEERS_PRELOAD = [];
+                VOLUNTEERS_PRELOAD.unshift(Object.assign({}, data, {
+                  id: Date.now(),
+                  interests: data.interests || [],
+                  badges: data.badges || []
+                }));
+                loadVolunteers();
+                updateAllCounts();
+                console.log('New volunteer added:', data.name);
+              }
+            }
           });
         }
-      });
-      if(fresh.length > 0){
-        window.CONS = fresh;
-        renderCons();
-        renderDash();
-        updateAllCounts();
-        console.log('✅ Consultants loaded:', fresh.length);
-      }
-    }, function(err){ console.log('Consultants listener err:', err.code); });
+      }, function(err){ console.log('Volunteer listener:', err.code); });
 
-    // 3. SUPPLIERS - real-time
-    db.collection('suppliers').orderBy('timestamp','desc').limit(500)
-    .onSnapshot(function(snap){
-      var fresh = [];
-      snap.forEach(function(doc){
-        var d = doc.data();
-        if(d.name){
-          fresh.push({
-            id: doc.id,
-            name: d.name,
-            cat: d.cat || d.type || 'عام',
-            gov: d.gov || '',
-            phone: d.phone || '',
-            email: d.email || '',
-            cert: d.cert || 'مسجّل',
-            logo: d.logo || '🏭',
-            items: d.items || [d.cat || ''],
-            desc: d.desc || ''
-          });
-        }
-      });
-      if(fresh.length > 0){
-        window.SUPS = fresh;
-        renderSups();
-        renderDash();
-        updateAllCounts();
-        console.log('✅ Suppliers loaded:', fresh.length);
-      }
-    }, function(err){ console.log('Suppliers listener err:', err.code); });
-
-    // 4. ORGANIZATIONS - real-time
-    db.collection('organizations').orderBy('timestamp','desc').limit(200)
-    .onSnapshot(function(snap){
-      var fresh = [];
-      snap.forEach(function(doc){
-        var d = doc.data();
-        if(d.name) fresh.push(Object.assign({}, d, { id: doc.id }));
-      });
-      if(fresh.length > 0){
-        window.ORGS = fresh;
-        renderOrgs();
-        updateAllCounts();
-        console.log('✅ Organizations loaded:', fresh.length);
-      }
-    }, function(err){ console.log('Organizations listener err:', err.code); });
-
-    // 5. JOBS - real-time من Firebase
-    db.collection('jobs').orderBy('timestamp','desc').limit(200)
-    .onSnapshot(function(snap){
-      var fresh = [];
-      snap.forEach(function(doc){
-        var d = doc.data();
-        if(d.title && d.status !== 'rejected'){
-          fresh.push({
-            id: doc.id,
-            title: d.title || '',
-            org: d.org || '',
-            gov: d.gov || '',
-            type: d.type || 'وظيفة',
-            sec: d.sec || '',
-            dl: d.dl || '',
-            logo: d.logo || '💼',
-            urg: d.urg || false,
-            sal: d.sal || 'تنافسي',
-            desc: d.desc || '',
-            req: d.req || '',
-            skills: d.skills || ''
-          });
-        }
-      });
-      if(fresh.length > 0){
-        window.JOBS_FB = fresh;
-        // دمج مع الوظائف الثابتة
-        window.JOBS = fresh.concat((window.JOBS_STATIC||[]));
-        renderJobs();
-        console.log('✅ Jobs loaded from Firebase:', fresh.length);
-      }
-    }, function(err){ console.log('Jobs listener err:', err.code); });
-
-    // 6. TENDERS - real-time من Firebase
-    db.collection('tenders').orderBy('timestamp','desc').limit(200)
-    .onSnapshot(function(snap){
-      var fresh = [];
-      snap.forEach(function(doc){
-        var d = doc.data();
-        if(d.title){
-          fresh.push({
-            id: doc.id,
-            title: d.title || '',
-            org: d.org || '',
-            type: d.type || 'مناقصة',
-            cat: d.cat || '',
-            budget: d.budget || '',
-            dl: d.dl || '',
-            loc: d.loc || '',
-            color: d.color || '#0094cc',
-            desc: d.desc || '',
-            req: d.req || ''
-          });
-        }
-      });
-      if(fresh.length > 0){
-        window.TENDERS_FB = fresh;
-        window.TENDERS = fresh.concat((window.TENDERS_STATIC||[]));
-        renderTenders();
-        console.log('✅ Tenders loaded from Firebase:', fresh.length);
-      }
-    }, function(err){ console.log('Tenders listener err:', err.code); });
-
-    // Admin listener للـ pending jobs
-    if(typeof auth !== 'undefined'){
-      auth.onAuthStateChanged(function(user){
-        if(user){ console.log('Admin logged in'); }
-      });
-    }
+    // Listen for new consultants
+    db.collection('consultants')
+      .orderBy('timestamp','desc')
+      .limit(20)
+      .onSnapshot(function(snap){
+        snap.docChanges().forEach(function(change){
+          if(change.type === 'added'){
+            var data = change.doc.data();
+            if(data.name && data.spec){
+              var exists = (CONS||[]).some(function(c){ return c.phone===data.phone; });
+              if(!exists){
+                var newCon = {
+                  id: (CONS||[]).length + 1,
+                  name: data.name,
+                  spec: data.spec || '',
+                  gov: data.gov || '',
+                  phone: data.phone || '',
+                  email: data.email || '',
+                  bio: data.bio || '',
+                  av: '👨‍💼', bg: '#e8f0fe',
+                  spec2: '', orgs: ''
+                };
+                if(window.CONS) CONS.unshift(newCon);
+                updateAllCounts();
+              }
+            }
+          }
+        });
+      }, function(err){ console.log('Cons listener:', err.code); });
+      } // end if(user)
+    }); // end onAuthStateChanged
   }
   setTimeout(setupHeroShrink,100);
   // URL params handled separately after load
@@ -2975,8 +2890,6 @@ const TENDERS = [
   {id:7,type:'توريد',title:'توريد أدوات وأجهزة قياس لمشاريع الزراعة',org:'FAO Egypt',budget:'١٥٠٠٠٠ - ٢٢٠٠٠٠ جنيه',dl:'١٥ يوليو ٢٠٢٥',loc:'المنيا وبني سويف',cat:'توريد',color:'#00b894',desc:'توريد أدوات قياس التربة والمياه لمشروع التكيف مع تغير المناخ.',req:'موزع معتمد، ضمان سارٍ، صيانة بعد البيع'},
   {id:8,type:'استشارة مؤسسية',title:'بناء نظام قاعدة بيانات ورصد إلكتروني',org:'وزارة التخطيط',budget:'٣٠٠٠٠٠ - ٥٠٠٠٠٠ جنيه',dl:'٢٢ يوليو ٢٠٢٥',loc:'القاهرة',cat:'استشارة مؤسسية',color:'#e07a2f',desc:'تطوير نظام معلوماتي متكامل لرصد وتقييم مشاريع التنمية المحلية.',req:'خبرة في تطوير أنظمة المعلومات، فريق متكامل'},
 ];
-// احتفظ بنسخة ثابتة للدمج مع Firebase
-window.TENDERS_STATIC = TENDERS.slice();
 
 const NOTIFS = [];  // Real notifications only
 
@@ -3298,8 +3211,6 @@ const JOBS=[
   {id:11,title:'مسؤول مشتريات وتوريدات',org:'WFP مصر',gov:'أسيوط',type:'دوام كامل',sec:'المشتريات',dl:'٢٥ يوليو ٢٠٢٥',logo:'📦',urg:false,sal:'٨٠٠٠ - ١٢٠٠٠ جنيه',desc:'إدارة عمليات المشتريات والتوريدات لمشاريع WFP بصعيد مصر.',req:'خبرة 4 سنوات في المشتريات، إجادة الإنجليزية'},
   {id:12,title:'معالج نفسي دعم اجتماعي',org:'TDH مصر',gov:'الإسكندرية',type:'دوام كامل',sec:'الصحة النفسية',dl:'٢٨ يوليو ٢٠٢٥',logo:'🧠',urg:true,sal:'٧٠٠٠ - ١٠٠٠٠ جنيه',desc:'تقديم خدمات الدعم النفسي الاجتماعي للفئات المستهدفة بالإسكندرية.',req:'شهادة علم نفس أو طب نفسي، خبرة 2 سنة'},
 ];
-// احتفظ بنسخة ثابتة للدمج مع Firebase
-window.JOBS_STATIC = JOBS.slice();
 
 function renderJobs(){
   const q=(document.getElementById('ji')||{}).value||'';
@@ -4868,113 +4779,7 @@ function doLogout(){
   document.getElementById('adm-pass').value = '';
 }
 
-// ============ LOAD PUBLIC DATA FROM FIREBASE ============
-async function loadPublicDataFromFirebase(){
-  if(typeof db === 'undefined') return;
-  try {
-    // استشاريين
-    var consSnap = await db.collection('consultants').orderBy('timestamp','desc').limit(500).get();
-    if(!consSnap.empty){
-      var freshCons = [];
-      consSnap.docs.forEach(function(d){
-        var data = d.data();
-        if(data.name){
-          freshCons.push({
-            id: d.id,
-            name: data.name || '',
-            spec: data.spec || data.تخصص || '',
-            specs: data.specs || [data.spec || ''],
-            gov: data.gov || data.المحافظة || '',
-            phone: data.phone || data.موبايل || '',
-            email: data.email || data.إيميل || '',
-            bio: data.bio || data.نبذة || '',
-            exp: data.exp || data.خبرة || '',
-            orgs: data.orgs || '',
-            av: '👨‍💼', bg: '#e8f0fe',
-            spec2: data.spec2 || ''
-          });
-        }
-      });
-      if(freshCons.length > 0){
-        window.CONS = freshCons;
-        renderCons();
-        renderDash();
-        updateAllCounts();
-        console.log('✅ Consultants from Firebase:', freshCons.length);
-      }
-    }
-
-    // موردين
-    var supSnap = await db.collection('suppliers').orderBy('timestamp','desc').limit(500).get();
-    if(!supSnap.empty){
-      var freshSups = [];
-      supSnap.docs.forEach(function(d){
-        var data = d.data();
-        if(data.name){
-          freshSups.push({
-            id: d.id,
-            name: data.name || '',
-            cat: data.cat || data.نشاط || 'عام',
-            gov: data.gov || data.المحافظة || '',
-            phone: data.phone || data.موبايل || '',
-            email: data.email || data.إيميل || '',
-            cert: data.cert || data.أوراق || 'مسجّل',
-            logo: data.logo || '🏭',
-            items: data.items || [data.cat || ''],
-            desc: data.desc || data.نبذة || ''
-          });
-        }
-      });
-      if(freshSups.length > 0){
-        window.SUPS = freshSups;
-        renderSups();
-        renderDash();
-        updateAllCounts();
-        console.log('✅ Suppliers from Firebase:', freshSups.length);
-      }
-    }
-
-    // متطوعين
-    var volSnap = await db.collection('volunteers').orderBy('timestamp','desc').limit(300).get();
-    if(!volSnap.empty){
-      var freshVols = [];
-      volSnap.docs.forEach(function(d){
-        var data = d.data();
-        if(data.name){
-          freshVols.push(Object.assign({}, data, {
-            id: d.id,
-            interests: data.interests || (data.مجالات ? data.مجالات.split('/').map(s=>s.trim()) : []),
-            badges: data.badges || []
-          }));
-        }
-      });
-      if(freshVols.length > 0){
-        window.VOLUNTEERS_PRELOAD = freshVols;
-        loadVolunteers();
-        updateAllCounts();
-        console.log('✅ Volunteers from Firebase:', freshVols.length);
-      }
-    }
-
-    // مؤسسات
-    var orgSnap = await db.collection('organizations').orderBy('timestamp','desc').limit(300).get();
-    if(!orgSnap.empty){
-      var freshOrgs = [];
-      orgSnap.docs.forEach(function(d){
-        var data = d.data();
-        if(data.name) freshOrgs.push(Object.assign({}, data, { id: d.id }));
-      });
-      if(freshOrgs.length > 0){
-        window.ORGS = freshOrgs;
-        renderOrgs();
-        updateAllCounts();
-        console.log('✅ Organizations from Firebase:', freshOrgs.length);
-      }
-    }
-
-  } catch(e){ console.log('loadPublicData error:', e); }
-}
-
+async function loadAdminData(){
   var allData = [];
   var collections = ['jobseekers','consultants','suppliers','organizations','volunteers'];
   var labels = {
@@ -5928,122 +5733,7 @@ function manualRefresh(){
   });
 }
 
-// ============ NEW REGISTRATIONS TRACKER ============
-var _newRegs = [];
-var _lastSeenTime = parseInt(localStorage.getItem('lastSeenRegTime') || '0');
-
-function updateBellBadge(){
-  var badge = document.getElementById('notif-badge');
-  var dot = document.getElementById('notif-dot');
-  var count = _newRegs.filter(function(r){ return r.ts > _lastSeenTime; }).length;
-  if(badge){
-    if(count > 0){
-      badge.style.display = 'flex';
-      badge.textContent = count > 9 ? '9+' : count;
-      if(dot) dot.style.display = 'block';
-    } else {
-      badge.style.display = 'none';
-      if(dot) dot.style.display = 'none';
-    }
-  }
-}
-
-function renderNewRegs(){
-  var section = document.getElementById('new-regs-section');
-  var list = document.getElementById('new-regs-list');
-  if(!section || !list) return;
-  if(_newRegs.length === 0){ section.style.display='none'; return; }
-  section.style.display = 'block';
-  list.innerHTML = _newRegs.slice(0,20).map(function(r){
-    var isNew = r.ts > _lastSeenTime;
-    var d = new Date(r.ts);
-    var time = d.toLocaleDateString('ar-EG') + ' ' + d.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'});
-    return `<div style="background:${isNew?'#e8f4fd':'white'};border-radius:10px;padding:10px 12px;margin-bottom:6px;border:1px solid ${isNew?'var(--a)':'var(--border)'}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-        <div style="font-size:12px;font-weight:700">${r.icon} ${r.name}</div>
-        ${isNew ? '<span style="font-size:9px;background:var(--a);color:white;padding:2px 6px;border-radius:6px;font-weight:700">جديد</span>' : ''}
-      </div>
-      <div style="font-size:11px;color:var(--muted)">${r.type} • ${r.gov||''}</div>
-      <div style="font-size:10px;color:var(--muted);margin-top:2px">🕐 ${time}</div>
-    </div>`;
-  }).join('');
-  updateBellBadge();
-}
-
-function clearNewRegs(){
-  _lastSeenTime = Date.now();
-  localStorage.setItem('lastSeenRegTime', _lastSeenTime);
-  updateBellBadge();
-  renderNewRegs();
-}
-
-function addNewReg(data, type, icon){
-  var ts = data.timestamp ? (data.timestamp.toMillis ? data.timestamp.toMillis() : Date.now()) : Date.now();
-  _newRegs.unshift({ name: data.name || 'مستخدم جديد', type: type, gov: data.gov || '', ts: ts, icon: icon });
-  if(_newRegs.length > 50) _newRegs = _newRegs.slice(0,50);
-  renderNewRegs();
-}
-
-// مراقبة التسجيلات الجديدة من كل الـ collections
-if(typeof db !== 'undefined'){
-  var _startTime = new Date();
-
-  // متطوعين جدد
-  db.collection('volunteers').orderBy('timestamp','desc').limit(1)
-  .onSnapshot(function(snap){
-    snap.docChanges().forEach(function(change){
-      if(change.type==='added'){
-        var d = change.doc.data();
-        if(d.timestamp && d.timestamp.toDate && d.timestamp.toDate() > _startTime){
-          addNewReg(d, 'متطوع جديد', '🙋');
-        }
-      }
-    });
-  });
-
-  // استشاريين جدد
-  db.collection('consultants').orderBy('timestamp','desc').limit(1)
-  .onSnapshot(function(snap){
-    snap.docChanges().forEach(function(change){
-      if(change.type==='added'){
-        var d = change.doc.data();
-        if(d.timestamp && d.timestamp.toDate && d.timestamp.toDate() > _startTime){
-          addNewReg(d, 'استشاري جديد', '👨‍💼');
-        }
-      }
-    });
-  });
-
-  // موردين جدد
-  db.collection('suppliers').orderBy('timestamp','desc').limit(1)
-  .onSnapshot(function(snap){
-    snap.docChanges().forEach(function(change){
-      if(change.type==='added'){
-        var d = change.doc.data();
-        if(d.timestamp && d.timestamp.toDate && d.timestamp.toDate() > _startTime){
-          addNewReg(d, 'مورد جديد', '🏭');
-        }
-      }
-    });
-  });
-
-  // مؤسسات جديدة
-  db.collection('organizations').orderBy('timestamp','desc').limit(1)
-  .onSnapshot(function(snap){
-    snap.docChanges().forEach(function(change){
-      if(change.type==='added'){
-        var d = change.doc.data();
-        if(d.timestamp && d.timestamp.toDate && d.timestamp.toDate() > _startTime){
-          addNewReg(d, 'مؤسسة جديدة', '🏢');
-        }
-      }
-    });
-  });
-}
-
-window.addEventListener('load', function(){ setTimeout(renderNewRegs, 1000); });
-
-
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),2500);}
 
 window.addEventListener('load',()=>{
   // Auto enter after 2.5 seconds

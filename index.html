@@ -2389,70 +2389,175 @@ function enterApp(){
     });
   }, 5 * 60 * 1000);
 
-  // Firebase real-time listener - only when admin logged in
-  if(typeof db !== 'undefined' && typeof auth !== 'undefined'){
-    auth.onAuthStateChanged(function(user){
-      if(user){
-        // Admin logged in - start listeners
-        db.collection('volunteers')
-      .orderBy('timestamp','desc')
-      .limit(50)
-      .onSnapshot(function(snap){
-        if(snap.docChanges().length > 0){
-          snap.docChanges().forEach(function(change){
-            if(change.type === 'added'){
-              var data = change.doc.data();
-              // Add to VOLUNTEERS_PRELOAD if not exists
-              var exists = (VOLUNTEERS_PRELOAD||[]).some(function(v){
-                return v.phone === data.phone;
-              });
-              if(!exists && data.name){
-                if(!window.VOLUNTEERS_PRELOAD) window.VOLUNTEERS_PRELOAD = [];
-                VOLUNTEERS_PRELOAD.unshift(Object.assign({}, data, {
-                  id: Date.now(),
-                  interests: data.interests || [],
-                  badges: data.badges || []
-                }));
-                loadVolunteers();
-                updateAllCounts();
-                console.log('New volunteer added:', data.name);
-              }
-            }
+  // ============ REAL-TIME FIREBASE LISTENERS (بدون حاجة لـ admin) ============
+  if(typeof db !== 'undefined'){
+
+    // 1. VOLUNTEERS - real-time
+    db.collection('volunteers').orderBy('timestamp','desc').limit(100)
+    .onSnapshot(function(snap){
+      var fresh = [];
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if(d.name) fresh.push(Object.assign({}, d, {
+          id: doc.id,
+          interests: d.interests || [],
+          badges: d.badges || []
+        }));
+      });
+      if(fresh.length > 0){
+        window.VOLUNTEERS_PRELOAD = fresh;
+        loadVolunteers();
+        updateAllCounts();
+        console.log('✅ Volunteers loaded:', fresh.length);
+      }
+    }, function(err){ console.log('Volunteers listener err:', err.code); });
+
+    // 2. CONSULTANTS - real-time
+    db.collection('consultants').orderBy('timestamp','desc').limit(500)
+    .onSnapshot(function(snap){
+      var fresh = [];
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if(d.name && d.spec){
+          fresh.push({
+            id: doc.id,
+            name: d.name,
+            spec: d.spec || '',
+            specs: d.specs || [d.spec || ''],
+            gov: d.gov || '',
+            phone: d.phone || '',
+            email: d.email || '',
+            bio: d.bio || '',
+            exp: d.exp || '',
+            av: '👨‍💼', bg: '#e8f0fe',
+            spec2: d.spec2 || '', orgs: d.orgs || ''
           });
         }
-      }, function(err){ console.log('Volunteer listener:', err.code); });
+      });
+      if(fresh.length > 0){
+        window.CONS = fresh;
+        renderCons();
+        renderDash();
+        updateAllCounts();
+        console.log('✅ Consultants loaded:', fresh.length);
+      }
+    }, function(err){ console.log('Consultants listener err:', err.code); });
 
-    // Listen for new consultants
-    db.collection('consultants')
-      .orderBy('timestamp','desc')
-      .limit(20)
-      .onSnapshot(function(snap){
-        snap.docChanges().forEach(function(change){
-          if(change.type === 'added'){
-            var data = change.doc.data();
-            if(data.name && data.spec){
-              var exists = (CONS||[]).some(function(c){ return c.phone===data.phone; });
-              if(!exists){
-                var newCon = {
-                  id: (CONS||[]).length + 1,
-                  name: data.name,
-                  spec: data.spec || '',
-                  gov: data.gov || '',
-                  phone: data.phone || '',
-                  email: data.email || '',
-                  bio: data.bio || '',
-                  av: '👨‍💼', bg: '#e8f0fe',
-                  spec2: '', orgs: ''
-                };
-                if(window.CONS) CONS.unshift(newCon);
-                updateAllCounts();
-              }
-            }
-          }
-        });
-      }, function(err){ console.log('Cons listener:', err.code); });
-      } // end if(user)
-    }); // end onAuthStateChanged
+    // 3. SUPPLIERS - real-time
+    db.collection('suppliers').orderBy('timestamp','desc').limit(500)
+    .onSnapshot(function(snap){
+      var fresh = [];
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if(d.name){
+          fresh.push({
+            id: doc.id,
+            name: d.name,
+            cat: d.cat || d.type || 'عام',
+            gov: d.gov || '',
+            phone: d.phone || '',
+            email: d.email || '',
+            cert: d.cert || 'مسجّل',
+            logo: d.logo || '🏭',
+            items: d.items || [d.cat || ''],
+            desc: d.desc || ''
+          });
+        }
+      });
+      if(fresh.length > 0){
+        window.SUPS = fresh;
+        renderSups();
+        renderDash();
+        updateAllCounts();
+        console.log('✅ Suppliers loaded:', fresh.length);
+      }
+    }, function(err){ console.log('Suppliers listener err:', err.code); });
+
+    // 4. ORGANIZATIONS - real-time
+    db.collection('organizations').orderBy('timestamp','desc').limit(200)
+    .onSnapshot(function(snap){
+      var fresh = [];
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if(d.name) fresh.push(Object.assign({}, d, { id: doc.id }));
+      });
+      if(fresh.length > 0){
+        window.ORGS = fresh;
+        renderOrgs();
+        updateAllCounts();
+        console.log('✅ Organizations loaded:', fresh.length);
+      }
+    }, function(err){ console.log('Organizations listener err:', err.code); });
+
+    // 5. JOBS - real-time من Firebase
+    db.collection('jobs').orderBy('timestamp','desc').limit(200)
+    .onSnapshot(function(snap){
+      var fresh = [];
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if(d.title && d.status !== 'rejected'){
+          fresh.push({
+            id: doc.id,
+            title: d.title || '',
+            org: d.org || '',
+            gov: d.gov || '',
+            type: d.type || 'وظيفة',
+            sec: d.sec || '',
+            dl: d.dl || '',
+            logo: d.logo || '💼',
+            urg: d.urg || false,
+            sal: d.sal || 'تنافسي',
+            desc: d.desc || '',
+            req: d.req || '',
+            skills: d.skills || ''
+          });
+        }
+      });
+      if(fresh.length > 0){
+        window.JOBS_FB = fresh;
+        // دمج مع الوظائف الثابتة
+        window.JOBS = fresh.concat((window.JOBS_STATIC||[]));
+        renderJobs();
+        console.log('✅ Jobs loaded from Firebase:', fresh.length);
+      }
+    }, function(err){ console.log('Jobs listener err:', err.code); });
+
+    // 6. TENDERS - real-time من Firebase
+    db.collection('tenders').orderBy('timestamp','desc').limit(200)
+    .onSnapshot(function(snap){
+      var fresh = [];
+      snap.forEach(function(doc){
+        var d = doc.data();
+        if(d.title){
+          fresh.push({
+            id: doc.id,
+            title: d.title || '',
+            org: d.org || '',
+            type: d.type || 'مناقصة',
+            cat: d.cat || '',
+            budget: d.budget || '',
+            dl: d.dl || '',
+            loc: d.loc || '',
+            color: d.color || '#0094cc',
+            desc: d.desc || '',
+            req: d.req || ''
+          });
+        }
+      });
+      if(fresh.length > 0){
+        window.TENDERS_FB = fresh;
+        window.TENDERS = fresh.concat((window.TENDERS_STATIC||[]));
+        renderTenders();
+        console.log('✅ Tenders loaded from Firebase:', fresh.length);
+      }
+    }, function(err){ console.log('Tenders listener err:', err.code); });
+
+    // Admin listener للـ pending jobs
+    if(typeof auth !== 'undefined'){
+      auth.onAuthStateChanged(function(user){
+        if(user){ console.log('Admin logged in'); }
+      });
+    }
   }
   setTimeout(setupHeroShrink,100);
   // URL params handled separately after load
@@ -2862,6 +2967,8 @@ const TENDERS = [
   {id:7,type:'توريد',title:'توريد أدوات وأجهزة قياس لمشاريع الزراعة',org:'FAO Egypt',budget:'١٥٠٠٠٠ - ٢٢٠٠٠٠ جنيه',dl:'١٥ يوليو ٢٠٢٥',loc:'المنيا وبني سويف',cat:'توريد',color:'#00b894',desc:'توريد أدوات قياس التربة والمياه لمشروع التكيف مع تغير المناخ.',req:'موزع معتمد، ضمان سارٍ، صيانة بعد البيع'},
   {id:8,type:'استشارة مؤسسية',title:'بناء نظام قاعدة بيانات ورصد إلكتروني',org:'وزارة التخطيط',budget:'٣٠٠٠٠٠ - ٥٠٠٠٠٠ جنيه',dl:'٢٢ يوليو ٢٠٢٥',loc:'القاهرة',cat:'استشارة مؤسسية',color:'#e07a2f',desc:'تطوير نظام معلوماتي متكامل لرصد وتقييم مشاريع التنمية المحلية.',req:'خبرة في تطوير أنظمة المعلومات، فريق متكامل'},
 ];
+// احتفظ بنسخة ثابتة للدمج مع Firebase
+window.TENDERS_STATIC = TENDERS.slice();
 
 const NOTIFS = [];  // Real notifications only
 
@@ -3183,6 +3290,8 @@ const JOBS=[
   {id:11,title:'مسؤول مشتريات وتوريدات',org:'WFP مصر',gov:'أسيوط',type:'دوام كامل',sec:'المشتريات',dl:'٢٥ يوليو ٢٠٢٥',logo:'📦',urg:false,sal:'٨٠٠٠ - ١٢٠٠٠ جنيه',desc:'إدارة عمليات المشتريات والتوريدات لمشاريع WFP بصعيد مصر.',req:'خبرة 4 سنوات في المشتريات، إجادة الإنجليزية'},
   {id:12,title:'معالج نفسي دعم اجتماعي',org:'TDH مصر',gov:'الإسكندرية',type:'دوام كامل',sec:'الصحة النفسية',dl:'٢٨ يوليو ٢٠٢٥',logo:'🧠',urg:true,sal:'٧٠٠٠ - ١٠٠٠٠ جنيه',desc:'تقديم خدمات الدعم النفسي الاجتماعي للفئات المستهدفة بالإسكندرية.',req:'شهادة علم نفس أو طب نفسي، خبرة 2 سنة'},
 ];
+// احتفظ بنسخة ثابتة للدمج مع Firebase
+window.JOBS_STATIC = JOBS.slice();
 
 function renderJobs(){
   const q=(document.getElementById('ji')||{}).value||'';

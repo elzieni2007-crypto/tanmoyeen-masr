@@ -6008,7 +6008,7 @@ async function initNotifications() {
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      const token = await getToken(messaging, {vapidKey: 'VAPID_KEY_PLACEHOLDER'});
+      const token = await getToken(messaging, {vapidKey: 'BEBdJZAvob4KzcDxRsR1ABhQMQ9r2o8OJf3A0SMNe4yHOn35IaJNzBVMtckRqQNIXx5baxZkpaehIQsD8kM31yw'});
       if (token) { console.log('FCM Token:', token); }
     }
   } catch(e) { console.log('Notification error:', e); }

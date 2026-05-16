@@ -2368,10 +2368,10 @@ function enterApp(){
   setTimeout(function(){
     function fbRefresh(){
       if(typeof db==='undefined') return;
-      db.collection('consultants').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.CONS&&!(CONS).some(function(c){return c.phone===r.phone;}))CONS.unshift({id:Date.now()+Math.random(),name:r.name,spec:r.spec||'استشاري',spec2:'',gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',orgs:'',av:'👨‍💼',bg:'#e8f0fe'});});updateAllCounts();}).catch(function(){});
-      db.collection('suppliers').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.SUPS&&!(SUPS).some(function(c){return c.phone===r.phone;}))SUPS.unshift({id:Date.now()+Math.random(),name:r.name,cat:r.cat||'توريدات',gov:r.gov||'',phone:r.phone||'',email:r.email||'',logo:'🏭'});});updateAllCounts();}).catch(function(){});
-      db.collection('volunteers').get().then(function(s){var a=false;s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(!(VOLUNTEERS_PRELOAD||[]).some(function(v){return v.phone===r.phone;})){if(!window.VOLUNTEERS_PRELOAD)window.VOLUNTEERS_PRELOAD=[];VOLUNTEERS_PRELOAD.unshift({id:Date.now()+Math.random(),name:r.name,gov:r.gov||'',interests:r.interests||[],phone:r.phone||'',email:r.email||'',skills:r.skills||'',hours:r.hours||'',worktype:r.worktype||'',days:r.days||'',travel:r.travel||'',langs:r.langs||'',badges:r.badges||[],photo:''});a=true;}});if(a){loadVolunteers();updateAllCounts();}}).catch(function(){});
-      db.collection('organizations').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.ORGS&&!(ORGS).some(function(o){return o.name===r.name;}))ORGS.unshift({id:Date.now()+Math.random(),name:r.name,type:r.orgtype||'مؤسسة',gov:r.gov||'',field:r.field||'',phone:r.phone||'',email:r.email||'',logo:'🏢'});});updateAllCounts();}).catch(function(){});
+      db.collection('consultants').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.CONS&&!(CONS).some(function(c){return c.phone===r.phone;})){CONS.unshift({id:Date.now()+Math.random(),name:r.name,spec:r.spec||'استشاري',spec2:'',gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',orgs:'',av:'👨‍💼',bg:'#e8f0fe'});if(typeof addNotification==='function')addNotification('👨‍💼','استشاري جديد انضم!',r.name+' - '+(r.spec||''),'#e8f0fe');}});updateAllCounts();}).catch(function(){});
+      db.collection('suppliers').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.SUPS&&!(SUPS).some(function(c){return c.phone===r.phone;})){SUPS.unshift({id:Date.now()+Math.random(),name:r.name,cat:r.cat||'توريدات',gov:r.gov||'',phone:r.phone||'',email:r.email||'',logo:'🏭'});if(typeof addNotification==='function')addNotification('🏭','مورد جديد انضم!',r.name+' - '+(r.cat||''),'#f0e8fe');}});updateAllCounts();}).catch(function(){});
+      db.collection('volunteers').get().then(function(s){var a=false;s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(!(VOLUNTEERS_PRELOAD||[]).some(function(v){return v.phone===r.phone;})){if(!window.VOLUNTEERS_PRELOAD)window.VOLUNTEERS_PRELOAD=[];VOLUNTEERS_PRELOAD.unshift({id:Date.now()+Math.random(),name:r.name,gov:r.gov||'',interests:r.interests||[],phone:r.phone||'',email:r.email||'',skills:r.skills||'',hours:r.hours||'',worktype:r.worktype||'',days:r.days||'',travel:r.travel||'',langs:r.langs||'',badges:r.badges||[],photo:''});if(typeof addNotification==='function')addNotification('🤝','متطوع جديد انضم!',r.name+' - '+(r.gov||''),'#e7faf3');a=true;}});if(a){loadVolunteers();updateAllCounts();}}).catch(function(){});
+      db.collection('organizations').get().then(function(s){s.forEach(function(d){var r=d.data();if(!r.name||r.test)return;if(window.ORGS&&!(ORGS).some(function(o){return o.name===r.name;}))ORGS.unshift({id:Date.now()+Math.random(),name:r.name,type:r.orgtype||'مؤسسة',gov:r.gov||'',field:r.field||'',phone:r.phone||'',email:r.email||'',logo:'🏢'});if(typeof addNotification==='function')addNotification('🏢','مؤسسة جديدة انضمت!',r.name+' - '+(r.gov||''),'#fff3cd');});updateAllCounts();}).catch(function(){});
       // Re-render current screen
       var cur = document.querySelector('.scr.on');
       if(cur){
@@ -2384,8 +2384,7 @@ function enterApp(){
       }
       updateAllCounts();
     }
-    fbRefresh();
-    setInterval(fbRefresh, 3*60*1000);
+    // fbRefresh called after sheets load
   }, 5000);
 
   // Auto refresh sheets every 5 minutes

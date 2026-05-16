@@ -2354,6 +2354,8 @@ function enterApp(){
   document.getElementById('app').style.display='block';
   setAllLogos();
   initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);renderJobs();renderTenders();updateJobseekersList();
+  // Load public data from Firebase
+  setTimeout(loadPublicDataFromFirebase, 800);
   // Load live data from sheets
   // Load sheets on start
   setTimeout(function(){
@@ -4866,7 +4868,113 @@ function doLogout(){
   document.getElementById('adm-pass').value = '';
 }
 
-async function loadAdminData(){
+// ============ LOAD PUBLIC DATA FROM FIREBASE ============
+async function loadPublicDataFromFirebase(){
+  if(typeof db === 'undefined') return;
+  try {
+    // استشاريين
+    var consSnap = await db.collection('consultants').orderBy('timestamp','desc').limit(500).get();
+    if(!consSnap.empty){
+      var freshCons = [];
+      consSnap.docs.forEach(function(d){
+        var data = d.data();
+        if(data.name){
+          freshCons.push({
+            id: d.id,
+            name: data.name || '',
+            spec: data.spec || data.تخصص || '',
+            specs: data.specs || [data.spec || ''],
+            gov: data.gov || data.المحافظة || '',
+            phone: data.phone || data.موبايل || '',
+            email: data.email || data.إيميل || '',
+            bio: data.bio || data.نبذة || '',
+            exp: data.exp || data.خبرة || '',
+            orgs: data.orgs || '',
+            av: '👨‍💼', bg: '#e8f0fe',
+            spec2: data.spec2 || ''
+          });
+        }
+      });
+      if(freshCons.length > 0){
+        window.CONS = freshCons;
+        renderCons();
+        renderDash();
+        updateAllCounts();
+        console.log('✅ Consultants from Firebase:', freshCons.length);
+      }
+    }
+
+    // موردين
+    var supSnap = await db.collection('suppliers').orderBy('timestamp','desc').limit(500).get();
+    if(!supSnap.empty){
+      var freshSups = [];
+      supSnap.docs.forEach(function(d){
+        var data = d.data();
+        if(data.name){
+          freshSups.push({
+            id: d.id,
+            name: data.name || '',
+            cat: data.cat || data.نشاط || 'عام',
+            gov: data.gov || data.المحافظة || '',
+            phone: data.phone || data.موبايل || '',
+            email: data.email || data.إيميل || '',
+            cert: data.cert || data.أوراق || 'مسجّل',
+            logo: data.logo || '🏭',
+            items: data.items || [data.cat || ''],
+            desc: data.desc || data.نبذة || ''
+          });
+        }
+      });
+      if(freshSups.length > 0){
+        window.SUPS = freshSups;
+        renderSups();
+        renderDash();
+        updateAllCounts();
+        console.log('✅ Suppliers from Firebase:', freshSups.length);
+      }
+    }
+
+    // متطوعين
+    var volSnap = await db.collection('volunteers').orderBy('timestamp','desc').limit(300).get();
+    if(!volSnap.empty){
+      var freshVols = [];
+      volSnap.docs.forEach(function(d){
+        var data = d.data();
+        if(data.name){
+          freshVols.push(Object.assign({}, data, {
+            id: d.id,
+            interests: data.interests || (data.مجالات ? data.مجالات.split('/').map(s=>s.trim()) : []),
+            badges: data.badges || []
+          }));
+        }
+      });
+      if(freshVols.length > 0){
+        window.VOLUNTEERS_PRELOAD = freshVols;
+        loadVolunteers();
+        updateAllCounts();
+        console.log('✅ Volunteers from Firebase:', freshVols.length);
+      }
+    }
+
+    // مؤسسات
+    var orgSnap = await db.collection('organizations').orderBy('timestamp','desc').limit(300).get();
+    if(!orgSnap.empty){
+      var freshOrgs = [];
+      orgSnap.docs.forEach(function(d){
+        var data = d.data();
+        if(data.name) freshOrgs.push(Object.assign({}, data, { id: d.id }));
+      });
+      if(freshOrgs.length > 0){
+        window.ORGS = freshOrgs;
+        renderOrgs();
+        updateAllCounts();
+        console.log('✅ Organizations from Firebase:', freshOrgs.length);
+      }
+    }
+
+  } catch(e){ console.log('loadPublicData error:', e); }
+}
+
   var allData = [];
   var collections = ['jobseekers','consultants','suppliers','organizations','volunteers'];
   var labels = {

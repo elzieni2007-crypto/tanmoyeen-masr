@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تحويل البيانات لـ Firebase - تنمويين مصر</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Cairo',sans-serif; background:#eef3f9; color:#1a2a3a; padding:20px; max-width:600px; margin:0 auto; }
+h1 { color:#1a3a6e; font-size:20px; margin-bottom:6px; }
+.sub { color:#6b7a8d; font-size:13px; margin-bottom:20px; }
+.card { background:white; border-radius:14px; padding:20px; margin-bottom:16px; box-shadow:0 2px 16px rgba(26,58,110,.09); }
+.card h2 { font-size:15px; color:#1a3a6e; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.upload-area { border:2px dashed #dde6f0; border-radius:10px; padding:20px; text-align:center; cursor:pointer; transition:.2s; }
+.upload-area:hover { border-color:#0094cc; background:#f0f8ff; }
+.upload-area input { display:none; }
+.upload-label { font-size:13px; color:#6b7a8d; cursor:pointer; display:block; }
+.upload-label span { color:#0094cc; font-weight:700; }
+.file-info { margin-top:8px; font-size:12px; color:#00b894; font-weight:600; display:none; }
+.btn { width:100%; padding:14px; background:linear-gradient(135deg,#1a3a6e,#0094cc); color:white; border:none; border-radius:10px; font-family:'Cairo',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-top:10px; transition:.2s; }
+.btn:hover { opacity:.85; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn-danger { background:linear-gradient(135deg,#e05050,#e07a2f); }
+.progress { margin-top:12px; display:none; }
+.progress-bar-wrap { background:#eef3f9; border-radius:8px; height:10px; overflow:hidden; margin-bottom:6px; }
+.progress-bar { height:100%; background:linear-gradient(135deg,#0094cc,#00b894); border-radius:8px; transition:width .3s; }
+.progress-text { font-size:12px; color:#6b7a8d; text-align:center; }
+.log { background:#1a2a3a; border-radius:10px; padding:14px; margin-top:12px; max-height:200px; overflow-y:auto; display:none; }
+.log-line { font-size:11px; color:#a8d8ea; font-family:monospace; margin-bottom:3px; direction:ltr; }
+.log-line.ok { color:#00b894; }
+.log-line.err { color:#e05050; }
+.log-line.info { color:#f9ca24; }
+.stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.stat { background:#eef3f9; border-radius:8px; padding:10px; text-align:center; }
+.stat-n { font-size:20px; font-weight:900; color:#0094cc; }
+.stat-l { font-size:10px; color:#6b7a8d; }
+.type-select { width:100%; padding:10px; border:2px solid #dde6f0; border-radius:10px; font-family:'Cairo',sans-serif; font-size:13px; margin-bottom:10px; }
+</style>
+</head>
+<body>
+
+<h1>🔄 تحويل البيانات لـ Firebase</h1>
+<p class="sub">ارفع ملفات CSV من Google Sheets وحوّلها لـ Firebase بضغطة واحدة</p>
+
+<!-- FIREBASE CONFIG -->
+<div class="card">
+  <h2>⚙️ إعدادات Firebase</h2>
+  <div style="font-size:12px;color:#00b894;font-weight:600;margin-bottom:8px" id="fb-status">⏳ جاري الاتصال...</div>
+</div>
+
+<!-- UPLOAD & MIGRATE -->
+<div class="card">
+  <h2>📤 رفع وتحويل البيانات</h2>
+
+  <select class="type-select" id="data-type">
+    <option value="">اختار نوع البيانات</option>
+    <option value="consultants">👨‍💼 استشاريين</option>
+    <option value="suppliers">🏭 موردين</option>
+    <option value="volunteers">🙋 متطوعين</option>
+    <option value="organizations">🏢 مؤسسات</option>
+  </select>
+
+  <div class="upload-area" onclick="document.getElementById('csv-file').click()">
+    <input type="file" id="csv-file" accept=".csv" onchange="handleFile(this)">
+    <label class="upload-label">اضغط لرفع ملف CSV <span>أو اسحب هنا</span></label>
+    <div class="file-info" id="file-info"></div>
+  </div>
+
+  <div class="stats" id="stats" style="display:none">
+    <div class="stat"><div class="stat-n" id="total-rows">0</div><div class="stat-l">إجمالي السجلات</div></div>
+    <div class="stat"><div class="stat-n" id="valid-rows">0</div><div class="stat-l">سجلات صالحة</div></div>
+  </div>
+
+  <button class="btn" id="migrate-btn" onclick="startMigration()" disabled>🚀 ابدأ التحويل لـ Firebase</button>
+
+  <div class="progress" id="progress">
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+    <div class="progress-text" id="progress-text">0%</div>
+  </div>
+
+  <div class="log" id="log"></div>
+</div>
+
+<!-- CLEAR DATA -->
+<div class="card">
+  <h2>🗑️ مسح بيانات موجودة</h2>
+  <p style="font-size:12px;color:#e05050;margin-bottom:10px">⚠️ تحذير: هيمسح كل البيانات في الـ collection المختارة</p>
+  <select class="type-select" id="clear-type">
+    <option value="">اختار نوع البيانات للمسح</option>
+    <option value="consultants">👨‍💼 استشاريين</option>
+    <option value="suppliers">🏭 موردين</option>
+    <option value="volunteers">🙋 متطوعين</option>
+    <option value="organizations">🏢 مؤسسات</option>
+  </select>
+  <button class="btn btn-danger" onclick="clearCollection()">🗑️ مسح البيانات</button>
+</div>
+
+<script>
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyCk98_i0ozMuQumsO4PUDpXGRga5aWI4C8",
+  authDomain: "tanmoyeen-masr26.firebaseapp.com",
+  projectId: "tanmoyeen-masr26",
+  storageBucket: "tanmoyeen-masr26.firebasestorage.app",
+  messagingSenderId: "335780209700",
+  appId: "1:335780209700:web:c2839bb31364b5b18664b1"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+db.collection('_test').get().then(() => {
+  document.getElementById('fb-status').textContent = '✅ متصل بـ Firebase بنجاح';
+}).catch(() => {
+  document.getElementById('fb-status').textContent = '❌ خطأ في الاتصال بـ Firebase';
+  document.getElementById('fb-status').style.color = '#e05050';
+});
+
+let parsedData = [];
+
+function log(msg, type='ok') {
+  const logDiv = document.getElementById('log');
+  logDiv.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = 'log-line ' + type;
+  line.textContent = msg;
+  logDiv.appendChild(line);
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('file-info').style.display = 'block';
+  document.getElementById('file-info').textContent = '📄 ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const type = document.getElementById('data-type').value;
+    if (!type) { alert('اختار نوع البيانات أول'); return; }
+    parsedData = parseCSV(text, type);
+    document.getElementById('stats').style.display = 'grid';
+    document.getElementById('total-rows').textContent = parsedData.length;
+    document.getElementById('valid-rows').textContent = parsedData.filter(r => r.name).length;
+    document.getElementById('migrate-btn').disabled = false;
+    log('✅ تم قراءة ' + parsedData.length + ' سجل من الملف', 'info');
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSV(text, type) {
+  const lines = text.split('\n').filter(l => l.trim());
+  // Skip header rows (first 3 rows usually)
+  let dataStart = 0;
+  for (let i = 0; i < Math.min(5, lines.length); i++) {
+    if (lines[i].match(/^[\d١٢٣٤٥٦٧٨٩٠]+,/)) { dataStart = i; break; }
+  }
+
+  const results = [];
+  for (let i = dataStart; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    if (!cols || cols.length < 3) continue;
+
+    let record = {};
+    if (type === 'consultants') {
+      // CSV: م, تاريخ, الاسم, التخصص, المحافظة, سنوات الخبرة, موبايل, إيميل, جهات, نبذة
+      record = {
+        name: (cols[2] || '').trim(),
+        spec: (cols[3] || '').trim(),
+        gov: (cols[4] || '').trim(),
+        exp: (cols[5] || '').trim(),
+        phone: (cols[6] || '').trim(),
+        email: (cols[7] || '').trim(),
+        orgs: (cols[8] || '').trim(),
+        bio: (cols[9] || '').trim(),
+        source: 'sheets_import'
+      };
+    } else if (type === 'suppliers') {
+      // CSV: م, تاريخ, اسم المورد, نشاط, المحافظة, عنوان, موبايل, إيميل, أوراق, سابقة
+      record = {
+        name: (cols[2] || '').trim(),
+        cat: (cols[3] || '').trim(),
+        gov: (cols[4] || '').trim(),
+        address: (cols[5] || '').trim(),
+        phone: (cols[6] || '').trim(),
+        email: (cols[7] || '').trim(),
+        cert: (cols[8] || '').trim(),
+        prev: (cols[9] || '').trim(),
+        source: 'sheets_import'
+      };
+    } else if (type === 'volunteers') {
+      // CSV: م, تاريخ, اسم المتطوع, المحافظة, مجالات, موبايل, إيميل, مهارات, ساعات, نوع, أيام, سفر, لغات, بادج, عمر
+      record = {
+        name: (cols[2] || '').trim(),
+        gov: (cols[3] || '').trim(),
+        interests: (cols[4] || '').trim().split('/').map(s => s.trim()).filter(Boolean),
+        phone: (cols[5] || '').trim(),
+        email: (cols[6] || '').trim(),
+        skills: (cols[7] || '').trim(),
+        hours: (cols[8] || '').trim(),
+        worktype: (cols[9] || '').trim(),
+        days: (cols[10] || '').trim(),
+        travel: (cols[11] || '').trim(),
+        langs: (cols[12] || '').trim(),
+        badges: [],
+        source: 'sheets_import'
+      };
+    } else if (type === 'organizations') {
+      // CSV: م, تاريخ, اسم المؤسسة, نوع, المحافظة, مجال, موبايل, إيميل
+      record = {
+        name: (cols[2] || '').trim(),
+        type: (cols[3] || '').trim(),
+        gov: (cols[4] || '').trim(),
+        field: (cols[5] || '').trim(),
+        phone: (cols[6] || '').trim(),
+        email: (cols[7] || '').trim(),
+        source: 'sheets_import'
+      };
+    }
+
+    if (record.name && record.name.length > 1) {
+      record.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+      results.push(record);
+    }
+  }
+  return results;
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+async function startMigration() {
+  const type = document.getElementById('data-type').value;
+  const validData = parsedData.filter(r => r.name);
+  if (!validData.length) { alert('مفيش بيانات صالحة!'); return; }
+
+  document.getElementById('migrate-btn').disabled = true;
+  document.getElementById('progress').style.display = 'block';
+  log('🚀 بدأ التحويل... ' + validData.length + ' سجل', 'info');
+
+  let success = 0, errors = 0;
+  const batchSize = 50;
+
+  for (let i = 0; i < validData.length; i += batchSize) {
+    const batch = db.batch();
+    const chunk = validData.slice(i, i + batchSize);
+
+    chunk.forEach(record => {
+      const ref = db.collection(type).doc();
+      batch.set(ref, record);
+    });
+
+    try {
+      await batch.commit();
+      success += chunk.length;
+      const pct = Math.round((success / validData.length) * 100);
+      document.getElementById('progress-bar').style.width = pct + '%';
+      document.getElementById('progress-text').textContent = pct + '% - تم رفع ' + success + ' سجل';
+      log('✅ Batch ' + Math.ceil((i+1)/batchSize) + ': ' + chunk.length + ' سجل', 'ok');
+    } catch(e) {
+      errors += chunk.length;
+      log('❌ خطأ: ' + e.message, 'err');
+    }
+
+    // انتظر قليلاً بين كل batch
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  log('🎉 انتهى! نجح: ' + success + ' | أخطاء: ' + errors, 'info');
+  document.getElementById('migrate-btn').disabled = false;
+  if (success > 0) alert('🎉 تم رفع ' + success + ' سجل لـ Firebase بنجاح!');
+}
+
+async function clearCollection() {
+  const type = document.getElementById('clear-type').value;
+  if (!type) { alert('اختار نوع البيانات'); return; }
+  if (!confirm('⚠️ هتمسح كل بيانات ' + type + '!\nمتأكد؟')) return;
+
+  log('🗑️ جاري مسح ' + type + '...', 'info');
+  try {
+    const snap = await db.collection(type).get();
+    const batches = [];
+    let batch = db.batch();
+    let count = 0;
+
+    snap.forEach(doc => {
+      batch.delete(doc.ref);
+      count++;
+      if (count % 500 === 0) {
+        batches.push(batch.commit());
+        batch = db.batch();
+      }
+    });
+    batches.push(batch.commit());
+    await Promise.all(batches);
+    log('✅ تم مسح ' + snap.size + ' سجل من ' + type, 'ok');
+    alert('✅ تم مسح ' + snap.size + ' سجل!');
+  } catch(e) {
+    log('❌ خطأ: ' + e.message, 'err');
+  }
+}
+</script>
+</body>
+</html>

@@ -635,6 +635,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <button class="ib" id="notif-bell-btn" onclick="go('notifs')" style="position:relative">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <div class="nd" id="notif-dot" style="display:none"></div>
+      <div id="notif-badge" style="display:none;position:absolute;top:-4px;left:-4px;background:#e05050;color:white;font-size:9px;font-weight:900;font-family:Cairo,sans-serif;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--p)">0</div>
     </button>
     <button class="ib" onclick="go('profile')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1497,7 +1498,12 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 <div id="notifs" class="scr" style="padding-bottom:0">
   <div style="padding:14px 14px 8px;display:flex;justify-content:space-between;align-items:center">
     <div style="font-size:15px;font-weight:700">الإشعارات</div>
-    <div style="font-size:11px;color:var(--a);font-weight:600;cursor:pointer" onclick="NOTIFS.forEach(function(n){n.unr=false;});var d=document.getElementById('notif-dot');if(d)d.style.display='none';renderNotifs();">تحديد الكل كمقروء</div>
+    <div style="font-size:11px;color:var(--a);font-weight:600;cursor:pointer" onclick="clearNewRegs()">تحديد الكل كمقروء</div>
+  </div>
+  <!-- تسجيلات جديدة -->
+  <div id="new-regs-section" style="display:none;padding:0 12px 8px">
+    <div style="font-size:12px;font-weight:800;color:var(--p);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--border)">🔔 تسجيلات جديدة</div>
+    <div id="new-regs-list"></div>
   </div>
   <div id="nilist"></div>
 </div>
@@ -5814,7 +5820,122 @@ function manualRefresh(){
   });
 }
 
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),2500);}
+// ============ NEW REGISTRATIONS TRACKER ============
+var _newRegs = [];
+var _lastSeenTime = parseInt(localStorage.getItem('lastSeenRegTime') || '0');
+
+function updateBellBadge(){
+  var badge = document.getElementById('notif-badge');
+  var dot = document.getElementById('notif-dot');
+  var count = _newRegs.filter(function(r){ return r.ts > _lastSeenTime; }).length;
+  if(badge){
+    if(count > 0){
+      badge.style.display = 'flex';
+      badge.textContent = count > 9 ? '9+' : count;
+      if(dot) dot.style.display = 'block';
+    } else {
+      badge.style.display = 'none';
+      if(dot) dot.style.display = 'none';
+    }
+  }
+}
+
+function renderNewRegs(){
+  var section = document.getElementById('new-regs-section');
+  var list = document.getElementById('new-regs-list');
+  if(!section || !list) return;
+  if(_newRegs.length === 0){ section.style.display='none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = _newRegs.slice(0,20).map(function(r){
+    var isNew = r.ts > _lastSeenTime;
+    var d = new Date(r.ts);
+    var time = d.toLocaleDateString('ar-EG') + ' ' + d.toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'});
+    return `<div style="background:${isNew?'#e8f4fd':'white'};border-radius:10px;padding:10px 12px;margin-bottom:6px;border:1px solid ${isNew?'var(--a)':'var(--border)'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+        <div style="font-size:12px;font-weight:700">${r.icon} ${r.name}</div>
+        ${isNew ? '<span style="font-size:9px;background:var(--a);color:white;padding:2px 6px;border-radius:6px;font-weight:700">جديد</span>' : ''}
+      </div>
+      <div style="font-size:11px;color:var(--muted)">${r.type} • ${r.gov||''}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">🕐 ${time}</div>
+    </div>`;
+  }).join('');
+  updateBellBadge();
+}
+
+function clearNewRegs(){
+  _lastSeenTime = Date.now();
+  localStorage.setItem('lastSeenRegTime', _lastSeenTime);
+  updateBellBadge();
+  renderNewRegs();
+}
+
+function addNewReg(data, type, icon){
+  var ts = data.timestamp ? (data.timestamp.toMillis ? data.timestamp.toMillis() : Date.now()) : Date.now();
+  _newRegs.unshift({ name: data.name || 'مستخدم جديد', type: type, gov: data.gov || '', ts: ts, icon: icon });
+  if(_newRegs.length > 50) _newRegs = _newRegs.slice(0,50);
+  renderNewRegs();
+}
+
+// مراقبة التسجيلات الجديدة من كل الـ collections
+if(typeof db !== 'undefined'){
+  var _startTime = new Date();
+
+  // متطوعين جدد
+  db.collection('volunteers').orderBy('timestamp','desc').limit(1)
+  .onSnapshot(function(snap){
+    snap.docChanges().forEach(function(change){
+      if(change.type==='added'){
+        var d = change.doc.data();
+        if(d.timestamp && d.timestamp.toDate && d.timestamp.toDate() > _startTime){
+          addNewReg(d, 'متطوع جديد', '🙋');
+        }
+      }
+    });
+  });
+
+  // استشاريين جدد
+  db.collection('consultants').orderBy('timestamp','desc').limit(1)
+  .onSnapshot(function(snap){
+    snap.docChanges().forEach(function(change){
+      if(change.type==='added'){
+        var d = change.doc.data();
+        if(d.timestamp && d.timestamp.toDate && d.timestamp.toDate() > _startTime){
+          addNewReg(d, 'استشاري جديد', '👨‍💼');
+        }
+      }
+    });
+  });
+
+  // موردين جدد
+  db.collection('suppliers').orderBy('timestamp','desc').limit(1)
+  .onSnapshot(function(snap){
+    snap.docChanges().forEach(function(change){
+      if(change.type==='added'){
+        var d = change.doc.data();
+        if(d.timestamp && d.timestamp.toDate && d.timestamp.toDate() > _startTime){
+          addNewReg(d, 'مورد جديد', '🏭');
+        }
+      }
+    });
+  });
+
+  // مؤسسات جديدة
+  db.collection('organizations').orderBy('timestamp','desc').limit(1)
+  .onSnapshot(function(snap){
+    snap.docChanges().forEach(function(change){
+      if(change.type==='added'){
+        var d = change.doc.data();
+        if(d.timestamp && d.timestamp.toDate && d.timestamp.toDate() > _startTime){
+          addNewReg(d, 'مؤسسة جديدة', '🏢');
+        }
+      }
+    });
+  });
+}
+
+window.addEventListener('load', function(){ setTimeout(renderNewRegs, 1000); });
+
+
 
 window.addEventListener('load',()=>{
   // Auto enter after 2.5 seconds

@@ -2383,45 +2383,36 @@ function enterApp(){
       if(fresh.length){window.ORGS=fresh;renderOrgs();updateAllCounts();}
     }).catch(function(){});
   }, 1500);
-  // Load live data from sheets
-  // Load sheets on start
-  setTimeout(function(){
-    Promise.all([
-      loadConsFromSheet(),
-      loadSupsFromSheet(),
-      loadVolsFromSheet(),
-      loadOrgsFromSheet()
-    ]).then(function(){
-      renderDash();
-      loadVolunteers();
-      updateAllCounts();
-      console.log('All sheets loaded');
-    });
-  }, 500);
+  // Sheets disabled - using Firebase as single source
 
-  // Auto refresh sheets every 5 minutes
+  // Auto refresh from Firebase every 5 minutes
   setInterval(function(){
-    console.log('Auto refreshing data...');
-    Promise.all([
-      loadConsFromSheet(),
-      loadSupsFromSheet(),
-      loadVolsFromSheet(),
-      loadOrgsFromSheet()
-    ]).then(function(){
-      renderDash();
-      loadVolunteers();
-      updateAllCounts();
-      // Refresh current screen
-      var curScreen = document.querySelector('.scr.on');
-      if(curScreen){
-        var id = curScreen.id;
-        if(id==='consultants') renderCons();
-        if(id==='suppliers') renderSups();
-        if(id==='volunteers') renderVolunteers();
-        if(id==='orgs-screen') renderOrgs();
-      }
-      console.log('Data refreshed');
-    });
+    if(typeof db === 'undefined') return;
+    console.log('Auto refreshing from Firebase...');
+    db.collection('consultants').orderBy('timestamp','desc').limit(500).get().then(function(snap){
+      if(snap.empty) return;
+      var fresh=[];
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',exp:r.exp||'',orgs:r.orgs||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||''});});
+      if(fresh.length){window.CONS=fresh;renderCons();renderDash();updateAllCounts();}
+    }).catch(function(){});
+    db.collection('suppliers').orderBy('timestamp','desc').limit(500).get().then(function(snap){
+      if(snap.empty) return;
+      var fresh=[];
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',cat:r.cat||'عام',gov:r.gov||'',phone:r.phone||'',email:r.email||'',cert:r.cert||'مسجّل',logo:r.logo||'🏭',items:r.items||[r.cat||''],desc:r.desc||''});});
+      if(fresh.length){window.SUPS=fresh;renderSups();renderDash();updateAllCounts();}
+    }).catch(function(){});
+    db.collection('volunteers').orderBy('timestamp','desc').limit(300).get().then(function(snap){
+      if(snap.empty) return;
+      var fresh=[];
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[]}));});
+      if(fresh.length){window.VOLUNTEERS_PRELOAD=fresh;loadVolunteers();updateAllCounts();}
+    }).catch(function(){});
+    db.collection('organizations').orderBy('timestamp','desc').limit(300).get().then(function(snap){
+      if(snap.empty) return;
+      var fresh=[];
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id}));});
+      if(fresh.length){window.ORGS=fresh;renderOrgs();updateAllCounts();}
+    }).catch(function(){});
   }, 5 * 60 * 1000);
 
   // Firebase real-time listener - only when admin logged in
@@ -2502,7 +2493,7 @@ function handleUrlParams(){
 }
 
 // ============ REAL DATA FROM PDFs ============
-const CONS = [
+window.CONS_STATIC = [
 {id:1,name:'يزيد عبد الراضي مصطفى الوقفي',spec:'التمكين الاقتصادى',spec2:'رياده الاعمال / تمكين اقتصادي / ارشاد وتطوير مهني',gov:'اسوان',bio:'يزيد الوقفي اعمل بمجال التنمية منذ اكثر من ١٠ سنوات من خلال التنقل ما بين عدد من المشروعات التنموية كمنسق مشروع او مدير مشروع في مجالات دعم التشغيل و ',email:'yazedredaelwakfe@gmail.com',phone:'01122230020',orgs:'شبكه الاغاخان للتنمية / وكاله التعاون الدولي الالماني / اميدايست / منظمه العمل ا',av:'💼',bg:'#e8f0fe'},
 {id:2,name:'داليا ابراهيم عبد الغني',spec:'سياسة حماية الطفل',spec2:'المهارات الحياتية',gov:'قنا - سوهاج _ الاقصر - اسوان',bio:'خبرة في مجال التدريب ١٨ عام موضات النوع الاجتماعي ، التخطيط الاستراتجي ، والمهارات الحياتية معتمده لدي عده جهات مثل هيئة بلان انترناشونال ايجبت ، مشرو',email:'dodi.daiwo@yahoo.com',phone:'1000078021',orgs:'مشروعات هيئة بلان انترناشول ،هيئة كير الدولية',av:'👩‍💼',bg:'#e7faf3'},
 {id:3,name:'Saleh Mohsen Saleh',spec:'التمكين الاقتصادى',spec2:'Financial literacy  Women Empowerment  Financial institutions capacity building  Data management and an',gov:'Giza',bio:'I\'m an experienced MSMEs Senior Advisor with a demonstrated history of working in the Economic development sector. Skilled in MSME empowerment, Finan',email:'salehmohsens3@gmail.com',phone:'1007185835',orgs:'European Inveatment Bank  DAI  IPC GMBH  Global communities  Development Finance',av:'💼',bg:'#fff3cd'},
@@ -2748,7 +2739,7 @@ const CONS = [
 {id:243,name:'د. حنان مرزوق حسين',spec:'1009779231',spec2:'hananmaarzouk15@gmail.com',gov:'التعليم / تمكين المرأة / حماية الطفل',bio:'الجيزة',email:'أكثر من 15 سنة',phone:'',orgs:'استشاري ومرشد نفسي وتربوي متخصص في مجالات الطفولة والصحة النفسية والدعم النفسي و',av:'👩‍💼',bg:'#fff3cd'}
 ];
 
-const SUPS = [
+window.SUPS_STATIC = [
 {id:1,name:'شركه الحمد للانشاءات والتوريدات (ش.م.م)',cat:'مقاولات وصيانة',gov:'سوهاج',address:'سوهاج',phone:'1143555549',email:'sheriefabdazeem2002@gmail.com',delivery:'يوجد',clients:'جمعيه الصعيد للتربية والتنميه  Plane international  جمعيه خير وبركة',logo:'🏗️',cert:'سجل تجاري'},
 {id:2,name:'شركة رؤية للتوريدات العمومية',cat:'ادوات مكتبية',gov:'القاهرة',address:'المعادي',phone:'1150852973',email:'roqyacampany@gmail.com',delivery:'متاحة',clients:'متاحة',logo:'📦',cert:'سجل تجاري'},
 {id:3,name:'وائل عاطف موريس',cat:'سوبر ماركت',gov:'ملوى _ المنيا',address:'شارع ٤٦ متفرع من شارع ٥ ملوى المنيا',phone:'1225267378',email:'lolo_net55@yahoo.com',delivery:'موجود',clients:'تم التعامل مع جمعيات اهليه ل قصر هور _ الاشمونيين',logo:'🏭',cert:'سجل تجاري'},
@@ -2838,7 +2829,7 @@ const SUPS = [
 {id:87,name:'نماء للتوريدات العمومية',cat:'توريدات عمومية',gov:'القاهرة',address:'',phone:'',email:'1009366919',delivery:'nama_com2013@yahoo.com',clients:'نحن نعمل في مجال التنمية المستدامة والمشاريع التي تقدمها الجمعيات والمؤسسات الدو',logo:'📦',cert:'سجل تجاري'}
 ];
 
-const ORGS = [
+window.ORGS_STATIC = [
 {id:1,name:'جمعية الصعيد للتربية والتنمية',type:'جمعية أهلية',gov:'أسيوط',field:'التعليم / التنمية',phone:'',email:'',notes:'',logo:'🤝'},
 {id:2,name:'جمعية تحسين أوضاع المرأة والطفل',type:'جمعية أهلية',gov:'سوهاج',field:'المرأة / الطفل',phone:'',email:'',notes:'',logo:'🤝'},
 {id:3,name:'مؤسسة مصر الخير',type:'مؤسسة وطنية',gov:'القاهرة',field:'التنمية الشاملة',phone:'',email:'',notes:'',logo:'🏢'},
@@ -2900,6 +2891,11 @@ const TENDERS = [
 
 const NOTIFS = [];  // Real notifications only
 
+// تهيئة البيانات من الثابت - سيتم استبدالها من Firebase
+window.CONS = window.CONS_STATIC ? window.CONS_STATIC.slice() : [];
+window.SUPS = window.SUPS_STATIC ? window.SUPS_STATIC.slice() : [];
+window.ORGS = window.ORGS_STATIC ? window.ORGS_STATIC.slice() : [];
+
 // ============ STATE ============
 const saved = new Set();
 let jFilt='all', tFilt='all', cFilt='all', sFilt='all';
@@ -2914,8 +2910,8 @@ function go(id){
   const nid=navMap[id];
   if(nid){const nel=document.getElementById(nid);if(nel)nel.classList.add('on');}
   window.scrollTo(0,0);
-  if(id==='consultants'){ loadConsFromSheet().then(renderCons); }
-  if(id==='suppliers'){ loadSupsFromSheet().then(renderSups); }
+  if(id==='consultants'){ renderCons(); }
+  if(id==='suppliers'){ renderSups(); }
   if(id==='tenders')renderTenders();
   if(id==='notifs'){
     renderNotifs();

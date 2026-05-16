@@ -4193,25 +4193,7 @@ function renderOrgs(){
 }
 
 // ============ VOLUNTEERS SYSTEM ============
-const VOLUNTEERS_PRELOAD = [
-{id:1,name:'مصطفي',gov:'القاهرة',interests:['إغاثة','أطعام'],phone:'1224100000',email:'',skills:'',hours:'5-10 ساعات/أسبوع',worktype:'ميداني وأونلاين',days:'',travel:'',langs:'',badges:[],photo:''},
-{id:2,name:'محمد',gov:'بورسعيد',interests:['صحة','تعليم'],phone:'1058510000',email:'elzieni2007@gmail.com',skills:'',hours:'10-20 ساعة/أسبوع',worktype:'ميداني وأونلاين',days:'',travel:'',langs:'',badges:[],photo:''},
-{id:3,name:'احمد هاشم علي أبوالمجد',gov:'الأقصر',interests:['أطعام'],phone:'1100328294',email:'lyabwalmjdahmdhashm@gmail.com',skills:'تجهيز   وتوزيع وحصر حالات',hours:'1-5 ساعات/أسبوع',worktype:'ميداني',days:'',travel:'',langs:'',badges:[],photo:''},
-{id:4,name:'رحاب تاج الدين عبد الصادق سيد',gov:'أسوان',interests:['بيئة','مجتمع','فنون','إغاثة','أطعام'],phone:'1143257442',email:'',skills:'تدريس ـ تواصل فعال',hours:'أكثر من 20 ساعة',worktype:'ميداني',days:'',travel:'',langs:'',badges:[],photo:''},
-{id:5,name:'Rasha Elsayed Ahmed Mohamed',gov:'الفيوم',interests:['صحة','تعليم','بيئة','مجتمع','تكنولوجيا','رياضة','إغاثة','تنظيم مؤتمرات'],phone:'1014788577',email:'eosdalafaqalolia@gmail.com',skills:'خبرة ١٥ عام',hours:'أكثر من 20 ساعة',worktype:'ميداني وأونلاين',days:'',travel:'',langs:'',badges:[],photo:''},
-{id:6,name:'محمود',gov:'الإسكندرية',interests:['إغاثة','أطعام'],phone:'1224120000',email:'elzieni2007@gmail.com',skills:'',hours:'',worktype:'',days:'',travel:'',langs:'',badges:[],photo:''},
-{id:7,name:'ساره شعبان عبد العزيز محمد ابراهيم عمر',gov:'كفر الشيخ',interests:['صحة','تعليم','بيئة','مجتمع','تكنولوجيا','فنون','إغاثة','أطعام','تنظيم مؤتمرات'],phone:'1013764650',email:'mrs959653@gmail.com',skills:'',hours:'',worktype:'',days:'',travel:'',langs:'',badges:[],photo:''},
-{id:8,name:'Emad M AboElliel',gov:'المنيا',interests:['صحة','تعليم','بيئة','مجتمع','تكنولوجيا','فنون','رياضة','إغاثة','أطعام','تنظيم مؤتمرات'],phone:'1140067070',email:'eaboelliel@gmail.com',skills:'',hours:'',worktype:'',days:'',travel:'',langs:'',badges:[],photo:''},
-{id:9,name:'علي',gov:'الشرقية',interests:['صحة','بيئة','أطعام'],phone:'12241200000',email:'elzieni2007@gmail.comI',skills:'',hours:'',worktype:'',days:'',travel:'',langs:'',badges:[],photo:''},
-{id:10,name:'نورهان محمد عبد الفتاح الجعودي',gov:'الجيزة',interests:['صحة','مجتمع','رياضة','إغاثة','أطعام','تنظيم مؤتمرات'],phone:'1159544659',email:'01013805849n@gmail.com',skills:'',hours:'1-5 ساعات/أسبوع',worktype:'ميداني',days:'سبت',travel:'داخل المحافظة فقط',langs:'عربي',badges:['متاح الآن','لديه خبرة','متطوع مميز'],photo:''},
-{id:11,name:'الاء عمر محمد على',gov:'بني سويف',interests:['تعليم','مجتمع','إغاثة'],phone:'1211648514',email:'ao248643@gmail.com',skills:'',hours:'1-5 ساعات/أسبوع',worktype:'ميداني وأونلاين',days:'سبت - ثلاثاء - أربعاء',travel:'أي محافظة في مصر',langs:'عربى',badges:['متاح الآن','لديه خبرة','متطوع مميز'],photo:''},
-{id:12,name:'أحمد محمد مجلى محمد',gov:'سوهاج',interests:['مجتمع','رياضة','إغاثة','تنظيم مؤتمرات'],phone:'1140855845',email:'reko2040@gmail.com',skills:'',hours:'5-10 ساعات/أسبوع',worktype:'ميداني',days:'أي يوم',travel:'أي محافظة في مصر',langs:'عربى',badges:[],photo:''},
-{id:13,name:'منه الله ايهاب محمد',gov:'الدقهلية',interests:['صحة','تعليم','مجتمع','فنون'],phone:'1009746294',email:'mennatallahehab84@gmail.com',skills:'',hours:'5-10 ساعات/أسبوع',worktype:'ميداني وأونلاين',days:'سبت - أحد - خميس',travel:'محافظات مجاورة',langs:'عربي. انجليزي',badges:['متاح الآن','لديه خبرة','متطوع مميز'],photo:''},
-{id:14,name:'هناء فوزى سنائيل',gov:'القاهرة',interests:['صحة','تعليم'],phone:'1280762197',email:'nanamail_2009@yahoo.com',skills:'',hours:'1-5 ساعات/أسبوع',worktype:'ميداني وأونلاين',days:'سبت - أي يوم',travel:'أي محافظة في مصر',langs:'عربى',badges:['متاح الآن','لديه خبرة','متطوع مميز'],photo:''},
-{id:15,name:'مروان رامي محمد عبد الكريم',gov:'القاهرة',interests:['صحة','رياضة','إغاثة','تنظيم مؤتمرات'],phone:'1110856474',email:'‏marwaramy931@gmail.com',skills:'',hours:'5-10 ساعات/أسبوع',worktype:'ميداني',days:'سبت - جمعة',travel:'أي محافظة في مصر',langs:'عربي',badges:['متطوع مميز'],photo:''},
-{id:16,name:'محمد عبدالعال عبدالعزيز عبدالعال',gov:'أسيوط',interests:['صحة','مجتمع','إغاثة','أطعام'],phone:'1063361160',email:'abdelaalmohammed84@gmail.com',skills:'',hours:'أكثر من 20 ساعة',worktype:'ميداني',days:'أي يوم',travel:'داخل المحافظة فقط',langs:'abdelaalmohammed84@gmail.com',badges:['متاح الآن','لديه خبرة','متطوع مميز'],photo:''},
-{id:17,name:'فاطمة سامح أحمد محمد المصرى',gov:'الإسكندرية',interests:['صحة','تعليم','بيئة','مجتمع','تكنولوجيا','فنون','إغاثة','أطعام','تنظيم مؤتمرات'],phone:'1001835120',email:'fatma.selmasry@gmail.com',skills:'',hours:'أكثر من 20 ساعة',worktype:'ميداني وأونلاين',days:'أي يوم',travel:'أي محافظة في مصر',langs:'عربى، إنجليزى، كورى',badges:['متاح الآن'],photo:''}
-];
+const VOLUNTEERS_PRELOAD = [];
 
 var VOLUNTEERS_DATA = [];
 var volFilter = 'all';

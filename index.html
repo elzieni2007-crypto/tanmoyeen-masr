@@ -525,7 +525,6 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-6878879950296426~9515315987" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -2366,75 +2365,49 @@ function enterApp(){
     });
   }, 500);
 
-  // Firebase refresh every 2 min (after 3s delay)
+  // Firebase refresh every 2 min
   setTimeout(function(){
-    function refreshFromFirebase(){
-      if(typeof db === 'undefined') return;
-      // Consultants
+    function fbRefresh(){
+      if(typeof db==='undefined') return;
       db.collection('consultants').get().then(function(snap){
         snap.forEach(function(d){
-          var data = d.data();
-          if(!data.name || data.test) return;
-          var exists = (CONS||[]).some(function(c){ return c.phone&&c.phone===data.phone; });
-          if(!exists && window.CONS){
-            CONS.unshift({id:Date.now()+Math.random(),name:data.name,
-              spec:data.spec||'استشاري',spec2:'',gov:data.gov||'',
-              phone:data.phone||'',email:data.email||'',bio:data.bio||'',
-              orgs:'',av:'👨‍💼',bg:'#e8f0fe'});
-            updateAllCounts();
+          var r=d.data(); if(!r.name||r.test) return;
+          if(!(CONS||[]).some(function(c){return c.phone&&c.phone===r.phone;})){
+            if(window.CONS) CONS.unshift({id:Date.now(),name:r.name,spec:r.spec||'استشاري',spec2:'',gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',orgs:'',av:'👨‍💼',bg:'#e8f0fe'});
           }
-        });
+        }); updateAllCounts();
       }).catch(function(){});
-      // Suppliers
       db.collection('suppliers').get().then(function(snap){
         snap.forEach(function(d){
-          var data = d.data();
-          if(!data.name || data.test) return;
-          var exists = (SUPS||[]).some(function(s){ return s.phone&&s.phone===data.phone; });
-          if(!exists && window.SUPS){
-            SUPS.unshift({id:Date.now()+Math.random(),name:data.name,
-              cat:data.cat||'توريدات',gov:data.gov||'',
-              phone:data.phone||'',email:data.email||'',logo:'🏭'});
-            updateAllCounts();
+          var r=d.data(); if(!r.name||r.test) return;
+          if(!(SUPS||[]).some(function(s){return s.phone&&s.phone===r.phone;})){
+            if(window.SUPS) SUPS.unshift({id:Date.now(),name:r.name,cat:r.cat||'توريدات',gov:r.gov||'',phone:r.phone||'',email:r.email||'',logo:'🏭'});
           }
-        });
+        }); updateAllCounts();
       }).catch(function(){});
-      // Volunteers
       db.collection('volunteers').get().then(function(snap){
-        var added = false;
+        var added=false;
         snap.forEach(function(d){
-          var data = d.data();
-          if(!data.name || data.test) return;
-          var exists = (VOLUNTEERS_PRELOAD||[]).some(function(v){ return v.phone&&v.phone===data.phone; });
-          if(!exists){
+          var r=d.data(); if(!r.name||r.test) return;
+          if(!(VOLUNTEERS_PRELOAD||[]).some(function(v){return v.phone&&v.phone===r.phone;})){
             if(!window.VOLUNTEERS_PRELOAD) window.VOLUNTEERS_PRELOAD=[];
-            VOLUNTEERS_PRELOAD.unshift({id:Date.now()+Math.random(),
-              name:data.name,gov:data.gov||'',interests:data.interests||[],
-              phone:data.phone||'',email:data.email||'',skills:data.skills||'',
-              hours:data.hours||'',worktype:data.worktype||'',days:data.days||'',
-              travel:data.travel||'',langs:data.langs||'',badges:data.badges||[],photo:''});
-            added = true;
+            VOLUNTEERS_PRELOAD.unshift({id:Date.now(),name:r.name,gov:r.gov||'',interests:r.interests||[],phone:r.phone||'',email:r.email||'',skills:r.skills||'',hours:r.hours||'',worktype:r.worktype||'',days:r.days||'',travel:r.travel||'',langs:r.langs||'',badges:r.badges||[],photo:''});
+            added=true;
           }
         });
-        if(added){ loadVolunteers(); updateAllCounts(); }
+        if(added){loadVolunteers();updateAllCounts();}
       }).catch(function(){});
-      // Organizations
       db.collection('organizations').get().then(function(snap){
         snap.forEach(function(d){
-          var data = d.data();
-          if(!data.name || data.test) return;
-          var exists = (ORGS||[]).some(function(o){ return o.name===data.name; });
-          if(!exists && window.ORGS){
-            ORGS.unshift({id:Date.now()+Math.random(),name:data.name,
-              type:data.orgtype||'مؤسسة',gov:data.gov||'',field:data.field||'',
-              phone:data.phone||'',email:data.email||'',logo:'🏢'});
-            updateAllCounts();
+          var r=d.data(); if(!r.name||r.test) return;
+          if(!(ORGS||[]).some(function(o){return o.name===r.name;})){
+            if(window.ORGS) ORGS.unshift({id:Date.now(),name:r.name,type:r.orgtype||'مؤسسة',gov:r.gov||'',field:r.field||'',phone:r.phone||'',email:r.email||'',logo:'🏢'});
           }
-        });
+        }); updateAllCounts();
       }).catch(function(){});
     }
-    refreshFromFirebase();
-    setInterval(refreshFromFirebase, 2*60*1000);
+    fbRefresh();
+    setInterval(fbRefresh, 2*60*1000);
   }, 3000);
 
   // Auto refresh sheets every 5 minutes
@@ -6064,7 +6037,6 @@ window.addEventListener('load',()=>{
     <button class="success-btn-wa" onclick="shareSuccessWA()">💬 شارك تسجيلك على واتساب</button>
   </div>
 </div>
-
 <!-- AdMob Banner -->
 <ins class="adsbygoogle"
   style="display:block;position:fixed;bottom:72px;width:100%;z-index:98"
@@ -6073,48 +6045,5 @@ window.addEventListener('load',()=>{
   data-ad-format="auto"
   data-full-width-responsive="true"></ins>
 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-
-<!-- FCM using compat SDK -->
-<script>
-(function(){
-  if(typeof firebase === 'undefined') return;
-  try {
-    var messaging = firebase.messaging();
-
-    // Request permission and get token
-    function initFCM(){
-      Notification.requestPermission().then(function(perm){
-        if(perm === 'granted'){
-          messaging.getToken({vapidKey:'BEBdJZAvob4KzcDxRsR1ABhQMQ9r2o8OJf3A0SMNe4yHOn35IaJNzBVMtckRqQNIXx5baxZkpaehIQsD8kM31yw'})
-          .then(function(token){
-            if(token) console.log('FCM Token:', token.substring(0,20)+'...');
-          }).catch(function(e){ console.log('FCM token:', e.code); });
-        }
-      }).catch(function(){});
-    }
-
-    // Show notification in app
-    messaging.onMessage(function(payload){
-      var n = payload.notification || {};
-      var title = n.title || 'تنمويين مصر';
-      var body  = n.body  || '';
-      var d = document.createElement('div');
-      d.style.cssText = 'position:fixed;top:80px;right:12px;left:12px;z-index:99999;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;padding:14px 16px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.3);font-family:Cairo,sans-serif;direction:rtl;cursor:pointer';
-      d.innerHTML = '<div style="font-weight:700;font-size:14px;margin-bottom:4px">🔔 '+title+'</div><div style="font-size:12px;opacity:.9">'+body+'</div>';
-      d.onclick = function(){ d.remove(); };
-      document.body.appendChild(d);
-      setTimeout(function(){ if(d.parentNode) d.remove(); }, 5000);
-    });
-
-    // Register service worker
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('/tanmoyeen-masr/firebase-messaging-sw.js')
-        .then(function(){ initFCM(); })
-        .catch(function(e){ console.log('SW:', e.message); });
-    }
-  } catch(e){ console.log('FCM init:', e.message); }
-})();
-</script>
-
 </body>
 </html>

@@ -2397,31 +2397,25 @@ function enterApp(){
     db.collection('jobs').where('status','==','approved').orderBy('timestamp','desc').limit(200).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.title)fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,logo:r.logo||'💼',urg:r.urg||false,sal:r.sal||'تنافسي'}));});
-      if(fresh.length){
-        JOBS.length = 0;
-        fresh.forEach(function(j){ JOBS.push(j); });
-        renderJobs();
-        // تحديث الرقم في الداشبورد
-        var el = document.getElementById('dash-jobs-count');
-        if(el) el.textContent = fresh.length + ' وظيفة';
-        console.log('✅ Jobs:', fresh.length);
-      }
-    }).catch(function(){});
+      JOBS.length = 0;
+      fresh.forEach(function(j){ JOBS.push(j); });
+      renderJobs();
+      var el = document.getElementById('dash-jobs-count');
+      if(el) el.textContent = fresh.length > 0 ? fresh.length + ' وظيفة' : 'جديد يومياً';
+      console.log('✅ Jobs:', fresh.length);
+    }).catch(function(e){ console.log('Jobs error:', e); renderJobs(); });
 
     // Tenders
     db.collection('tenders').where('status','==','approved').orderBy('timestamp','desc').limit(200).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.title)fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,color:r.color||'#00aeef'}));});
-      if(fresh.length){
-        TENDERS.length = 0;
-        fresh.forEach(function(t){ TENDERS.push(t); });
-        renderTenders();
-        // تحديث الرقم في الداشبورد
-        var el = document.getElementById('dash-tenders-count');
-        if(el) el.textContent = fresh.length + ' مناقصة';
-        console.log('✅ Tenders:', fresh.length);
-      }
-    }).catch(function(){});
+      TENDERS.length = 0;
+      fresh.forEach(function(t){ TENDERS.push(t); });
+      renderTenders();
+      var el = document.getElementById('dash-tenders-count');
+      if(el) el.textContent = fresh.length > 0 ? fresh.length + ' مناقصة' : 'جديد يومياً';
+      console.log('✅ Tenders:', fresh.length);
+    }).catch(function(e){ console.log('Tenders error:', e); renderTenders(); });
 
   }, 1500);
   // Sheets disabled - using Firebase as single source
@@ -3260,14 +3254,14 @@ function shareJobWADirect(){
   if(!j) return;
   var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
   var link = j.link || appUrl;
-  var msg = '💼 *' + j.title + '*\n' +
-    '🏢 الجهة: ' + (j.org||'—') + '\n' +
-    '📍 المحافظة: ' + (j.gov||'—') + '\n' +
-    '💰 الراتب: ' + (j.sal||'—') + '\n' +
+  var msg = 'وجدت إعلان وظيفة وفكرت إنه يهمك! 💼\n\n' +
+    '📌 ' + j.title + '\n' +
+    '🏢 ' + (j.org||'—') + '\n' +
+    '📍 ' + (j.gov||'—') + ' | ' + (j.type||'—') + '\n' +
+    '💰 ' + (j.sal||'—') + '\n' +
     '⏰ آخر موعد: ' + (j.dl||'—') + '\n\n' +
-    '📝 ' + (j.desc||'').substring(0,150) + '\n\n' +
-    '🔗 الإعلان الأصلي:\n' + link + '\n\n' +
-    '📲 تنمويين مصر - لكل تنموي في مصر\n' + appUrl;
+    '🔗 رابط الإعلان الأصلي:\n' + link + '\n\n' +
+    'وانت كمان تقدر تشارك إعلانك على تنمويين مصر 👇\n' + appUrl;
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 
@@ -3276,7 +3270,10 @@ function shareJobFBDirect(){
   if(!j) return;
   var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
   var link = j.link || appUrl;
-  var msg = '💼 ' + j.title + ' - ' + (j.org||'') + '\n📍 ' + (j.gov||'') + ' | ⏰ ' + (j.dl||'') + '\n\n' + (j.desc||'').substring(0,200);
+  var msg = 'وجدت إعلان وظيفة وفكرت إنه يهمك! 💼\n' +
+    j.title + ' - ' + (j.org||'') + '\n' +
+    '📍 ' + (j.gov||'') + ' | ⏰ ' + (j.dl||'') + '\n\n' +
+    'وانت كمان تقدر تشارك إعلانك على تنمويين مصر';
   window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link) + '&quote=' + encodeURIComponent(msg), '_blank');
 }
 
@@ -3304,14 +3301,14 @@ function shareTenderWA(){
   if(!t) return;
   var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
   var link = t.link || appUrl;
-  var msg = '📋 *' + t.title + '*\n' +
-    '🏢 الجهة: ' + (t.org||'—') + '\n' +
+  var msg = 'وجدت فرصة مناقصة وفكرت إنها تهمك! 📋\n\n' +
+    '📌 ' + t.title + '\n' +
+    '🏢 ' + (t.org||'—') + '\n' +
     '📍 الموقع: ' + (t.loc||'—') + '\n' +
-    '💰 الميزانية: ' + (t.budget||'—') + '\n' +
+    '💰 ' + (t.budget||'—') + '\n' +
     '⏰ آخر موعد: ' + (t.dl||'—') + '\n\n' +
-    '📝 ' + (t.desc||'').substring(0,150) + '\n\n' +
-    '🔗 الإعلان الأصلي:\n' + link + '\n\n' +
-    '📲 تنمويين مصر - لكل تنموي في مصر\n' + appUrl;
+    '🔗 رابط الإعلان الأصلي:\n' + link + '\n\n' +
+    'وانت كمان تقدر تشارك مناقصتك على تنمويين مصر 👇\n' + appUrl;
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 
@@ -3320,7 +3317,10 @@ function shareTenderFB(){
   if(!t) return;
   var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
   var link = t.link || appUrl;
-  var msg = '📋 ' + t.title + ' - ' + (t.org||'') + '\n💰 ' + (t.budget||'') + ' | ⏰ ' + (t.dl||'') + '\n\n' + (t.desc||'').substring(0,200);
+  var msg = 'وجدت فرصة مناقصة وفكرت إنها تهمك! 📋\n' +
+    t.title + ' - ' + (t.org||'') + '\n' +
+    '📍 ' + (t.loc||'') + ' | 💰 ' + (t.budget||'') + ' | ⏰ ' + (t.dl||'') + '\n\n' +
+    'وانت كمان تقدر تشارك مناقصتك على تنمويين مصر';
   window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link) + '&quote=' + encodeURIComponent(msg), '_blank');
 }
 

@@ -2396,6 +2396,30 @@ function enterApp(){
       if(fresh.length){window.ORGS=fresh;renderOrgs();updateAllCounts();console.log('✅ Orgs:',fresh.length);}
     },function(){});
 
+    // Jobs real-time
+    db.collection('jobs').where('status','==','approved').orderBy('timestamp','desc').limit(200).onSnapshot(function(snap){
+      var fresh=[];
+      snap.docs.forEach(function(d){var r=d.data();if(r.title)fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,logo:r.logo||'💼',urg:r.urg||false,sal:r.sal||'تنافسي'}));});
+      if(fresh.length){
+        window.JOBS_FB = fresh;
+        window.JOBS = fresh.concat((window.JOBS_STATIC||[]));
+        renderJobs();
+        console.log('✅ Jobs:',fresh.length);
+      }
+    },function(){});
+
+    // Tenders real-time
+    db.collection('tenders').where('status','==','approved').orderBy('timestamp','desc').limit(200).onSnapshot(function(snap){
+      var fresh=[];
+      snap.docs.forEach(function(d){var r=d.data();if(r.title)fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,color:r.color||'#00aeef'}));});
+      if(fresh.length){
+        window.TENDERS_FB = fresh;
+        window.TENDERS = fresh.concat((window.TENDERS_STATIC||[]));
+        renderTenders();
+        console.log('✅ Tenders:',fresh.length);
+      }
+    },function(){});
+
   }, 1500);
   // Sheets disabled - using Firebase as single source
 
@@ -5215,11 +5239,13 @@ function renderPublishedJobsNew(){
   if(!el) return;
   el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
   if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
-    db.collection('jobs').orderBy('timestamp','desc').limit(100).get().then(function(snap){
+    db.collection('jobs').orderBy('timestamp','desc').get().then(function(snap){
       var jobs=[];
       snap.docs.forEach(function(d){ jobs.push(Object.assign({},d.data(),{fbId:d.id})); });
       _renderJobsList(el, jobs);
-    }).catch(function(){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ خطأ في التحميل</div>'; });
+    }).catch(function(e){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ خطأ: '+e.message+'</div>'; });
+  } else {
+    el.innerHTML='<div style="color:#e05050;padding:16px">❌ يجب تسجيل الدخول أولاً</div>';
   }
 }
 
@@ -5228,11 +5254,13 @@ function renderPublishedTendersNew(){
   if(!el) return;
   el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
   if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
-    db.collection('tenders').orderBy('timestamp','desc').limit(100).get().then(function(snap){
+    db.collection('tenders').orderBy('timestamp','desc').get().then(function(snap){
       var tenders=[];
       snap.docs.forEach(function(d){ tenders.push(Object.assign({},d.data(),{fbId:d.id})); });
       _renderTendersList(el, tenders);
-    }).catch(function(){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ خطأ في التحميل</div>'; });
+    }).catch(function(e){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ خطأ: '+e.message+'</div>'; });
+  } else {
+    el.innerHTML='<div style="color:#e05050;padding:16px">❌ يجب تسجيل الدخول أولاً</div>';
   }
 }
 
@@ -5240,13 +5268,15 @@ function renderPublishedJobs(){ renderPublishedJobsNew(); }
 function renderPublishedTenders(){ renderPublishedTendersNew(); }
 
 function _renderJobsList(el, jobs){
-  if(!jobs.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد وظائف منشورة</div>'; return; }
-  el.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--p)">💼 الوظائف المنشورة ('+jobs.length+')</div>' +
+  if(!jobs.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد وظائف</div>'; return; }
+  el.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--p)">💼 الوظائف ('+jobs.length+')</div>' +
     jobs.map(function(j,i){
-      return '<div class="adm-card" style="border-right-color:var(--p)" id="job-card-'+i+'">'+
+      var statusColor = j.status==='approved' ? '#00b894' : j.status==='rejected' ? '#e05050' : '#f0c040';
+      var statusLabel = j.status==='approved' ? '✅ منشورة' : j.status==='rejected' ? '❌ مرفوضة' : '⏳ انتظار';
+      return '<div class="adm-card" style="border-right-color:var(--p)">'+
         '<div class="adm-card-top">'+
-          '<div class="adm-name">'+j.title+'</div>'+
-          '<span class="adm-type" style="background:#e8f0fe;color:var(--p)">'+(j.type||'وظيفة')+'</span>'+
+          '<div class="adm-name">'+(j.title||'—')+'</div>'+
+          '<span style="font-size:9px;font-weight:800;background:'+statusColor+'22;color:'+statusColor+';padding:2px 8px;border-radius:10px">'+statusLabel+'</span>'+
         '</div>'+
         '<div class="adm-rows">'+
           '<div class="adm-row"><span class="adm-lbl">الجهة</span><span class="adm-val">'+(j.org||'—')+'</span></div>'+
@@ -5256,12 +5286,38 @@ function _renderJobsList(el, jobs){
           (j.link?'<div class="adm-row"><span class="adm-lbl">اللينك</span><span class="adm-val" style="font-size:10px;direction:ltr;word-break:break-all">'+j.link+'</span></div>':'')+
         '</div>'+
         '<div class="adm-actions">'+
-          '<button class="adm-btn" style="background:#e8f0fe;color:var(--p)" onclick="editJob('+i+',\''+( j.fbId||'')+'\')"  data-idx="'+i+'">✏️ تعديل</button>'+
+          '<button class="adm-btn" style="background:#e8f0fe;color:var(--p)" onclick="editJob('+i+',\''+(j.fbId||'')+'\')" data-idx="'+i+'">✏️ تعديل</button>'+
           '<button class="adm-btn adm-btn-del" onclick="deleteJob('+i+',\''+(j.fbId||'')+'\')">🗑️ حذف</button>'+
         '</div>'+
       '</div>';
     }).join('');
   window._adminJobs = jobs;
+}
+
+function _renderTendersList(el, tenders){
+  if(!tenders.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد مناقصات</div>'; return; }
+  el.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--orange)">📋 المناقصات ('+tenders.length+')</div>' +
+    tenders.map(function(t,i){
+      var statusColor = t.status==='approved' ? '#00b894' : t.status==='rejected' ? '#e05050' : '#f0c040';
+      var statusLabel = t.status==='approved' ? '✅ منشورة' : t.status==='rejected' ? '❌ مرفوضة' : '⏳ انتظار';
+      return '<div class="adm-card" style="border-right-color:'+(t.color||'var(--orange)')+'">'+
+        '<div class="adm-card-top">'+
+          '<div class="adm-name">'+(t.title||'—')+'</div>'+
+          '<span style="font-size:9px;font-weight:800;background:'+statusColor+'22;color:'+statusColor+';padding:2px 8px;border-radius:10px">'+statusLabel+'</span>'+
+        '</div>'+
+        '<div class="adm-rows">'+
+          '<div class="adm-row"><span class="adm-lbl">الجهة</span><span class="adm-val">'+(t.org||'—')+'</span></div>'+
+          '<div class="adm-row"><span class="adm-lbl">الميزانية</span><span class="adm-val">'+(t.budget||'—')+'</span></div>'+
+          '<div class="adm-row"><span class="adm-lbl">الموعد</span><span class="adm-val">'+(t.dl||'—')+'</span></div>'+
+          (t.link?'<div class="adm-row"><span class="adm-lbl">اللينك</span><span class="adm-val" style="font-size:10px;direction:ltr;word-break:break-all">'+t.link+'</span></div>':'')+
+        '</div>'+
+        '<div class="adm-actions">'+
+          '<button class="adm-btn" style="background:#fef3e8;color:var(--orange)" onclick="editTender('+i+',\''+(t.fbId||'')+'\')" >✏️ تعديل</button>'+
+          '<button class="adm-btn adm-btn-del" onclick="deleteTender('+i+',\''+(t.fbId||'')+'\')">🗑️ حذف</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  window._adminTenders = tenders;
 }
 
 

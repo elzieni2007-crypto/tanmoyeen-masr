@@ -23,10 +23,10 @@
   --bg:#eef3f9;--card:#fff;--txt:#1a2a3a;--muted:#6b7a8d;
   --border:#dde6f0;--green:#00b894;--orange:#e07a2f;--red:#e05050;
   --nav:64px;--bot:68px;--r:16px;
-  --sh:0 2px 12px rgba(15,23,42,.08);--shd:0 10px 30px rgba(15,23,42,.12);
+  --sh:0 2px 16px rgba(26,58,110,.09);--shd:0 6px 32px rgba(26,58,110,.15);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--txt);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--txt);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden}
 button{font-family:'Cairo',sans-serif;cursor:pointer}
 input,select,textarea{font-family:'Cairo',sans-serif}
 
@@ -39,7 +39,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 #splash{
   background:linear-gradient(150deg,#0d2654 0%,#1a3a6e 45%,#0094cc 100%);
   display:flex!important;flex-direction:column;align-items:center;justify-content:center;
-  min-height:100vh;padding-bottom:20px;position:relative;overflow:hidden;overflow-y:auto;
+  min-height:100vh;padding-bottom:0;position:relative;overflow:hidden;
 }
 .sp-ring{position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
 .sp-ring:nth-child(1){width:320px;height:320px;top:-80px;right:-80px;animation:rot 20s linear infinite}
@@ -47,14 +47,6 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 @keyframes rot{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .sp-logo{width:72px;height:72px;background:white;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.3);margin-bottom:12px;animation:pop .8s cubic-bezier(.34,1.56,.64,1) .3s both;position:relative;z-index:1;overflow:hidden}
 .sp-logo img{width:100%;height:100%;object-fit:contain;padding:8px}
-.sp-logo{
-background:linear-gradient(135deg,#ffffff,#f3f7ff);
-border:2px solid rgba(255,255,255,.15)
-}
-img{
-max-width:100%;
-display:block
-}
 @keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
 .sp-t{color:#fff;font-size:20px;font-weight:900;animation:su .6s ease .7s both;position:relative;z-index:1}
 .sp-s{color:rgba(255,255,255,.65);font-size:14px;margin-top:6px;animation:su .6s ease .9s both;position:relative;z-index:1}
@@ -65,7 +57,7 @@ display:block
 @keyframes ld{from{width:0}to{width:100%}}
 
 /* TOPBAR */
-.topbar{position:sticky;top:0;z-index:90;height:var(--nav);background:rgba(13,38,84,.92);backdrop-filter:blur(14px);padding:0 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 20px rgba(26,58,110,.25)}
+.topbar{position:sticky;top:0;z-index:90;height:var(--nav);background:var(--p);padding:0 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 20px rgba(26,58,110,.25)}
 .tb-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
 .tb-ico{width:40px;height:40px;background:white;border-radius:11px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
 .tb-ico img{width:100%;height:100%;object-fit:contain;padding:4px}
@@ -510,7 +502,7 @@ textarea.fi{resize:none}
   height:28px !important;
 }
 
-#home{overflow-y:auto !important;-webkit-overflow-scrolling:touch;height:auto;min-height:100vh}
+#home{overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 /* DARK MODE */
 body.dark-mode {
@@ -528,6 +520,157 @@ body.dark-mode .modal-sheet { background: #16213e; }
 body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e0; border-color: #2d3748; }
 
 @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* ===== MODERN TANMOYEEN UI ===== */
+
+body{
+background:#f4f7fb !important;
+overflow-y:auto !important;
+-webkit-font-smoothing:antialiased;
+text-rendering:optimizeLegibility;
+}
+
+.topbar{
+background:#ffffff !important;
+height:78px !important;
+box-shadow:0 4px 22px rgba(15,23,42,.06) !important;
+border-bottom:1px solid #eef2f7;
+}
+
+.tb-t{
+color:#16356b !important;
+font-size:19px !important;
+font-weight:900 !important;
+}
+
+.tb-s{
+color:#32b5ef !important;
+font-size:12px !important;
+font-weight:700;
+}
+
+.tb-ico{
+width:56px !important;
+height:56px !important;
+border-radius:18px !important;
+background:white !important;
+box-shadow:0 6px 18px rgba(15,23,42,.08);
+}
+
+.ib{
+background:#f3f6fb !important;
+color:#16356b !important;
+width:42px !important;
+height:42px !important;
+border-radius:14px !important;
+}
+
+.dash-hero{
+margin:14px 14px 18px !important;
+border-radius:34px !important;
+padding:28px 20px 22px !important;
+background:
+linear-gradient(135deg,#0d2d63 0%,#174b8d 55%,#0094cc 100%) !important;
+box-shadow:0 18px 50px rgba(13,38,84,.25) !important;
+overflow:hidden;
+}
+
+.dh-logo{
+display:none !important;
+}
+
+.dh-title{
+font-size:28px !important;
+font-weight:900 !important;
+line-height:1.35 !important;
+text-align:center !important;
+padding:0 !important;
+margin-bottom:16px !important;
+}
+
+.dh-greet{
+display:none !important;
+}
+
+.dh-stats{
+border-radius:20px !important;
+padding:12px 8px !important;
+background:rgba(255,255,255,.12) !important;
+backdrop-filter:blur(10px);
+}
+
+.ds-n{
+font-size:20px !important;
+color:white !important;
+}
+
+.ds-l{
+font-size:10px !important;
+color:rgba(255,255,255,.75) !important;
+}
+
+.dash-grid{
+grid-template-columns:repeat(2,1fr) !important;
+gap:14px !important;
+padding:0 14px 140px !important;
+}
+
+.dg-card{
+border-radius:26px !important;
+padding:22px 12px 18px !important;
+background:white !important;
+box-shadow:0 10px 30px rgba(15,23,42,.06) !important;
+border:none !important;
+}
+
+.dg-icon{
+width:64px !important;
+height:64px !important;
+border-radius:22px !important;
+font-size:30px !important;
+margin-bottom:8px !important;
+}
+
+.dg-t{
+font-size:16px !important;
+font-weight:900 !important;
+margin-top:6px;
+}
+
+.dg-c{
+font-size:11px !important;
+font-weight:700 !important;
+opacity:.75;
+margin-top:2px;
+}
+
+.bnav{
+height:82px !important;
+background:rgba(255,255,255,.95) !important;
+backdrop-filter:blur(16px);
+border-radius:32px 32px 0 0 !important;
+box-shadow:0 -10px 35px rgba(15,23,42,.12) !important;
+}
+
+.ni span{
+font-size:11px !important;
+font-weight:700 !important;
+}
+
+.sh-t{
+font-size:20px !important;
+font-weight:900 !important;
+color:#16356b !important;
+}
+
+.scr{
+overflow-y:auto !important;
+}
+
+*{
+transition:all .25s ease;
+}
+
 </style>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -538,10 +681,10 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 <div id="splash" class="scr on">
   <div class="sp-ring"></div><div class="sp-ring"></div>
-  <div class="sp-corner"><img id="sp-corner-img" src="https://i.ibb.co/Lz1cNZZQ/file-00000000c47c720aa2b32868309a3136.png" alt="logo"></div>
+  <div class="sp-corner"><img id="sp-corner-img" src="1000282606.png" alt="logo"></div>
 
   <!-- لوجو -->
-  <div class="sp-logo"><img id="logo-img" src="https://i.ibb.co/Lz1cNZZQ/file-00000000c47c720aa2b32868309a3136.png" alt="تنمويين مصر" onerror="this.style.display='none';this.parentNode.innerHTML='<div style=&quot;font-size:14px;font-weight:900;color:#1a3a6e&quot;>TM</div>'"></div>
+  <div class="sp-logo"><img id="logo-img" src="1000282606.png" alt="تنمويين مصر"></div>
 
   <!-- اسم المنصة -->
   <div class="sp-t">تنمويين مصر</div>
@@ -636,7 +779,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 <div class="topbar">
   <div class="tb-brand" onclick="logoTap()">
-    <div class="tb-ico"><img id="logo-tb" src="https://i.ibb.co/Lz1cNZZQ/file-00000000c47c720aa2b32868309a3136.png" alt="logo"></div>
+    <div class="tb-ico"><img id="logo-tb" src="1000282606.png" alt="logo"></div>
     <div><div class="tb-t">تنمويين مصر</div><div class="tb-s">لكل تنموي في مصر</div></div>
   </div>
   <div class="tb-acts">
@@ -653,15 +796,31 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 <!-- HOME -->
 <div id="home" class="scr on">
-  <div class="dash-hero">
-    <div class="dh-c1"></div><div class="dh-c2"></div>
-    <div class="dh-logo"><img id="logo-dh" src="" alt="logo"></div>
-    <div class="dh-greet" style="padding-right:54px;font-size:10px;margin-bottom:1px">مرحباً بك في تنمويين مصر 👋</div>
-  <div style="padding-right:54px;position:relative;z-index:1">
-    <span id="fb-test-result" style="font-size:10px;color:rgba(255,255,255,.8);margin-right:8px"></span>
-  </div>
-    <div class="dh-title" style="padding-right:54px;font-size:12px;margin-bottom:4px">منصتك الشاملة للعمل التنموي في مصر</div>
-    <div class="dh-stats">
+  
+<div class="dash-hero">
+
+<div style="display:flex;justify-content:center;margin-bottom:16px;position:relative;z-index:2">
+<img src="1000282606.png" style="width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 10px 20px rgba(0,0,0,.18))">
+</div>
+
+<div class="dh-title">
+تنمويين مصر<br>
+<span style="font-size:18px;color:#8edcff;font-weight:700">لكل تنموي في مصر</span>
+</div>
+
+<div style="text-align:center;font-size:14px;line-height:2;color:rgba(255,255,255,.88);margin-bottom:22px;position:relative;z-index:2">
+نجمع نخبة الكفاءات والموردين والاستشاريين والمتطوعين<br>
+لخلق فرص حقيقية وتأثير مستدام
+</div>
+
+<div style="display:flex;gap:12px;justify-content:center;margin-bottom:24px;position:relative;z-index:2">
+<button style="background:white;color:#16356b;border:none;border-radius:18px;padding:14px 26px;font-size:14px;font-weight:900;font-family:Cairo,sans-serif;box-shadow:0 10px 20px rgba(0,0,0,.15)">استكشف الفرص</button>
+
+<button style="background:#007bff;color:white;border:none;border-radius:18px;padding:14px 26px;font-size:14px;font-weight:900;font-family:Cairo,sans-serif;box-shadow:0 10px 20px rgba(0,123,255,.25)">انضم الآن</button>
+</div>
+
+<div class="dh-stats">
+
       <div class="ds"><div class="ds-n" id="dash-cons-n">243</div><div class="ds-l">استشاري</div></div>
       <div class="ds"><div class="ds-n" id="dash-sups-n">87</div><div class="ds-l">مورد</div></div>
       <div class="ds"><div class="ds-n" id="dash-vols-n">17</div><div class="ds-l">متطوع</div></div>

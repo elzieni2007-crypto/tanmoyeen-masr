@@ -3712,11 +3712,19 @@ function submitJobReport(){
     status: 'pending',
   };
 
-  // احفظ في pending
+  // احفظ في pending localStorage
   let pending = [];
   try{ pending = JSON.parse(localStorage.getItem('pending_jobs') || '[]'); }catch(e){}
   pending.unshift(job);
   localStorage.setItem('pending_jobs', JSON.stringify(pending));
+
+  // ✅ احفظ في Firebase
+  if(typeof db !== 'undefined'){
+    db.collection('pending_jobs').add(Object.assign({}, job, {
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })).then(function(){ console.log('✅ Job saved to Firebase'); })
+    .catch(function(e){ console.log('Firebase job error:', e); });
+  }
 
   // ابعت للـ Sheets
   const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzM09ySPqw6b7Oc922YZs_5grSbBuPVV9PW5zLy0MG2EddSR76r_aNxcRhs_0YjejjoUQ/exec';
@@ -3790,18 +3798,44 @@ function updatePendingBadge(){
 }
 
 function renderPendingJobs(){
-  let pending = [];
-  try{ pending = JSON.parse(localStorage.getItem('pending_jobs') || '[]'); }catch(e){}
-  let pendingTenders = [];
-  try{ pendingTenders = JSON.parse(localStorage.getItem('pending_tenders') || '[]'); }catch(e){}
+  // Load from Firebase first
+  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
+    db.collection('pending_jobs').orderBy('timestamp','desc').limit(100).get().then(function(snap){
+      var fromFB = [];
+      snap.docs.forEach(function(d){
+        fromFB.push(Object.assign({}, d.data(), {fbId: d.id}));
+      });
+      // Merge with localStorage
+      var local = [];
+      try{ local = JSON.parse(localStorage.getItem('pending_jobs')||'[]'); }catch(e){}
+      var localT = [];
+      try{ localT = JSON.parse(localStorage.getItem('pending_tenders')||'[]'); }catch(e){}
+      var localAll = [...local.map(j=>({...j,_ptype:'job'})), ...localT.map(t=>({...t,_ptype:'tender'}))];
+      // Add local ones not in Firebase
+      var fbIds = fromFB.map(function(r){ return r.id; });
+      localAll.forEach(function(r){ if(!fbIds.includes(r.id)) fromFB.push(r); });
+      _renderPendingList(fromFB.filter(function(j){ return j.status==='pending'; }));
+    }).catch(function(){
+      // Fallback to localStorage
+      _renderPendingFromLocal();
+    });
+  } else {
+    _renderPendingFromLocal();
+  }
+}
 
-  const allPending = [
-    ...pending.filter(j=>j.status==='pending').map(j=>({...j, _ptype:'job'})),
-    ...pendingTenders.filter(t=>t.status==='pending').map(t=>({...t, _ptype:'tender'})),
-  ].sort((a,b)=> (b.id||0)-(a.id||0));
+function _renderPendingFromLocal(){
+  var pending = [];
+  try{ pending = JSON.parse(localStorage.getItem('pending_jobs')||'[]'); }catch(e){}
+  var pendingT = [];
+  try{ pendingT = JSON.parse(localStorage.getItem('pending_tenders')||'[]'); }catch(e){}
+  var all = [...pending.filter(j=>j.status==='pending').map(j=>({...j,_ptype:'job'})),
+             ...pendingT.filter(t=>t.status==='pending').map(t=>({...t,_ptype:'tender'}))];
+  _renderPendingList(all);
+}
 
-  const list = allPending;
-  const container = document.getElementById('pending-jobs-list');
+function _renderPendingList(list){
+  var container = document.getElementById('pending-jobs-list');
   if(!container) return;
 
   if(list.length === 0){
@@ -3873,6 +3907,15 @@ function approvePending(idx){
     localStorage.setItem('custom_jobs', JSON.stringify(sj));
     const gi = pendingJobs.findIndex(j=>j.id===item.id);
     if(gi>-1){ pendingJobs[gi].status='approved'; localStorage.setItem('pending_jobs', JSON.stringify(pendingJobs)); }
+    // ✅ حفظ في Firebase jobs
+    if(typeof db !== 'undefined'){
+      var jobData = Object.assign({}, item);
+      delete jobData._ptype; delete jobData.fbId; delete jobData._custom;
+      db.collection('jobs').add(Object.assign({}, jobData, {
+        status:'approved', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      })).then(function(){ console.log('✅ Job published to Firebase'); });
+      if(item.fbId) db.collection('pending_jobs').doc(item.fbId).update({status:'approved'}).catch(function(){});
+    }
     renderJobs();
   } else {
     item._custom = true;
@@ -3882,6 +3925,15 @@ function approvePending(idx){
     localStorage.setItem('custom_tenders', JSON.stringify(st));
     const gi = pendingTenders.findIndex(t=>t.id===item.id);
     if(gi>-1){ pendingTenders[gi].status='approved'; localStorage.setItem('pending_tenders', JSON.stringify(pendingTenders)); }
+    // ✅ حفظ في Firebase tenders
+    if(typeof db !== 'undefined'){
+      var tenderData = Object.assign({}, item);
+      delete tenderData._ptype; delete tenderData.fbId; delete tenderData._custom;
+      db.collection('tenders').add(Object.assign({}, tenderData, {
+        status:'approved', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      })).then(function(){ console.log('✅ Tender published to Firebase'); });
+      if(item.fbId) db.collection('pending_jobs').doc(item.fbId).update({status:'approved'}).catch(function(){});
+    }
     renderTenders();
   }
 
@@ -3907,9 +3959,11 @@ function rejectPending(idx){
   if(item._ptype === 'job'){
     const gi = pendingJobs.findIndex(j=>j.id===item.id);
     if(gi>-1){ pendingJobs[gi].status='rejected'; localStorage.setItem('pending_jobs', JSON.stringify(pendingJobs)); }
+    if(item.fbId && typeof db !== 'undefined') db.collection('pending_jobs').doc(item.fbId).update({status:'rejected'}).catch(function(){});
   } else {
     const gi = pendingTenders.findIndex(t=>t.id===item.id);
     if(gi>-1){ pendingTenders[gi].status='rejected'; localStorage.setItem('pending_tenders', JSON.stringify(pendingTenders)); }
+    if(item.fbId && typeof db !== 'undefined') db.collection('pending_jobs').doc(item.fbId).update({status:'rejected'}).catch(function(){});
   }
 
   toast('🗑️ تم الرفض');
@@ -4069,11 +4123,20 @@ function submitTenderReport(){
     status: 'pending',
   };
 
-  // احفظ في pending tenders
+  // احفظ في pending tenders localStorage
   let pending = [];
   try{ pending = JSON.parse(localStorage.getItem('pending_tenders') || '[]'); }catch(e){}
   pending.unshift(tender);
   localStorage.setItem('pending_tenders', JSON.stringify(pending));
+
+  // ✅ احفظ في Firebase
+  if(typeof db !== 'undefined'){
+    db.collection('pending_jobs').add(Object.assign({}, tender, {
+      _ptype: 'tender',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })).then(function(){ console.log('✅ Tender saved to Firebase'); })
+    .catch(function(e){ console.log('Firebase tender error:', e); });
+  }
 
   // ابعت للـ Sheets
   fetch('https://script.google.com/macros/s/AKfycbzM09ySPqw6b7Oc922YZs_5grSbBuPVV9PW5zLy0MG2EddSR76r_aNxcRhs_0YjejjoUQ/exec', {

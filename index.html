@@ -2400,14 +2400,24 @@ function enterApp(){
     db.collection('jobs').where('status','==','approved').orderBy('timestamp','desc').limit(200).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.title)fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,logo:r.logo||'💼',urg:r.urg||false,sal:r.sal||'تنافسي'}));});
-      if(fresh.length){window.JOBS_FB=fresh;window.JOBS=fresh.concat((window.JOBS_STATIC||[]));renderJobs();}
+      if(fresh.length){
+        JOBS.length = 0;
+        fresh.forEach(function(j){ JOBS.push(j); });
+        renderJobs();
+        console.log('✅ Jobs:', fresh.length);
+      }
     }).catch(function(){});
 
     // Tenders
     db.collection('tenders').where('status','==','approved').orderBy('timestamp','desc').limit(200).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.title)fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,color:r.color||'#00aeef'}));});
-      if(fresh.length){window.TENDERS_FB=fresh;window.TENDERS=fresh.concat((window.TENDERS_STATIC||[]));renderTenders();}
+      if(fresh.length){
+        TENDERS.length = 0;
+        fresh.forEach(function(t){ TENDERS.push(t); });
+        renderTenders();
+        console.log('✅ Tenders:', fresh.length);
+      }
     }).catch(function(){});
 
   }, 1500);
@@ -2860,16 +2870,8 @@ window.ORGS_STATIC = [
 {id:46,name:'جمعية شموع للتنمية المستدامة',type:'',gov:'',field:'',phone:'',email:'1206622065',notes:'casd.shmoo@yahoo.co',logo:'🏠'}
 ];
 
-const TENDERS = [
-  {id:1,type:'استشارة فردية',title:'دراسة تقييم الأثر لبرنامج التنمية المجتمعية',org:'أوكسفام مصر',budget:'٥٠٠٠٠ - ٨٠٠٠٠ جنيه',dl:'٢٠ يونيو ٢٠٢٥',loc:'القاهرة + ميداني',cat:'استشارة فردية',color:'#00aeef',desc:'دراسة تقييم الأثر لبرنامج التنمية المجتمعية الممتد على 3 سنوات في 4 محافظات.',req:'خبرة 7 سنوات في الرصد والتقييم'},
-  {id:2,type:'مناقصة توريد',title:'توريد معدات تكنولوجية لمراكز التعلم',org:'CARE Egypt',budget:'٢٥٠٠٠٠ - ٤٠٠٠٠٠ جنيه',dl:'٢٥ يونيو ٢٠٢٥',loc:'٦ محافظات',cat:'توريد',color:'#00b894',desc:'توريد وتركيب معدات تكنولوجية لـ 12 مركز تعلم مجتمعي.',req:'سجل تجاري سارٍ، خبرة في مشاريع مشابهة'},
-  {id:3,type:'استشارة مؤسسية',title:'تقديم تدريب في مجال الرصد والتقييم',org:'GIZ مصر',budget:'١٢٠٠٠٠ جنيه',dl:'١ يوليو ٢٠٢٥',loc:'القاهرة والإسكندرية',cat:'استشارة مؤسسية',color:'#e07a2f',desc:'برنامج تدريبي لـ 40 موظف في مجال الرصد والتقييم.',req:'خبرة مؤسسية 5 سنوات مع جهات دولية'},
-  {id:4,type:'خدمات',title:'خدمات الترجمة والنشر للمواد التدريبية',org:'USAID Egypt',budget:'٣٠٠٠٠ - ٥٥٠٠٠ جنيه',dl:'٥ يوليو ٢٠٢٥',loc:'عن بُعد',cat:'خدمات',color:'#6c5ce7',desc:'ترجمة 15 مادة تدريبية وتصميم وطباعة النسخ النهائية.',req:'خبرة في الترجمة التخصصية والمصطلحات التنموية'},
-  {id:5,type:'مقاولات',title:'تأهيل ٣ مراكز صحة مجتمعية بمحافظة أسيوط',org:'WFP Egypt',budget:'٨٠٠٠٠٠ - ١٢٠٠٠٠٠ جنيه',dl:'١٢ يوليو ٢٠٢٥',loc:'أسيوط',cat:'مقاولات',color:'#e050a0',desc:'أعمال تأهيل وتجديد ثلاثة مراكز صحة مجتمعية.',req:'سجل تجاري، سجل مقاولات، خبرة في مشاريع مشابهة'},
-  {id:6,type:'استشارة فردية',title:'خبير تصميم مناهج تدريبية للشباب',org:'UNDP مصر',budget:'٤٠٠٠٠ - ٦٠٠٠٠ جنيه',dl:'٨ يوليو ٢٠٢٥',loc:'القاهرة',cat:'استشارة فردية',color:'#00aeef',desc:'تصميم وتطوير منهج تدريبي متكامل لتأهيل الشباب.',req:'خبرة في تصميم التعليم وبرامج الشباب'},
-  {id:7,type:'توريد',title:'توريد أدوات وأجهزة قياس لمشاريع الزراعة',org:'FAO Egypt',budget:'١٥٠٠٠٠ - ٢٢٠٠٠٠ جنيه',dl:'١٥ يوليو ٢٠٢٥',loc:'المنيا وبني سويف',cat:'توريد',color:'#00b894',desc:'توريد أدوات قياس التربة والمياه لمشروع التكيف مع تغير المناخ.',req:'موزع معتمد، ضمان سارٍ، صيانة بعد البيع'},
-  {id:8,type:'استشارة مؤسسية',title:'بناء نظام قاعدة بيانات ورصد إلكتروني',org:'وزارة التخطيط',budget:'٣٠٠٠٠٠ - ٥٠٠٠٠٠ جنيه',dl:'٢٢ يوليو ٢٠٢٥',loc:'القاهرة',cat:'استشارة مؤسسية',color:'#e07a2f',desc:'تطوير نظام معلوماتي متكامل لرصد وتقييم مشاريع التنمية المحلية.',req:'خبرة في تطوير أنظمة المعلومات، فريق متكامل'},
-];
+var TENDERS = []; // Firebase هو المصدر الوحيد
+window.TENDERS_STATIC = [];
 
 const NOTIFS = [];  // Real notifications only
 
@@ -3182,20 +3184,8 @@ function renderTenders(){
 function setTF(el,v){tFilt=v;document.querySelectorAll('#t-tabs .tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderTenders();}
 
 // ============ JOBS ============
-const JOBS=[
-  {id:1,title:'استشاري رصد وتقييم M&E',org:'أوكسفام مصر',gov:'القاهرة',type:'استشارة',sec:'M&E',dl:'٢٠ يونيو ٢٠٢٥',logo:'📊',urg:true,sal:'تنافسي',desc:'نبحث عن استشاري متخصص في الرصد والتقييم لمشاريع تمكين المرأة والشباب.',req:'خبرة 5 سنوات في M&E، إجادة SPSS وExcel'},
-  {id:2,title:'منسق مشروع مياه وصرف صحي',org:'وتر إيد مصر',gov:'أسيوط',type:'عقد',sec:'البيئة',dl:'٢٥ يونيو ٢٠٢٥',logo:'💧',urg:false,sal:'٨٠٠٠ - ١٢٠٠٠ جنيه',desc:'إدارة برامج المياه والصرف الصحي في المحافظات الجنوبية.',req:'خبرة 3 سنوات، شهادة هندسة أو بيئة'},
-  {id:3,title:'مدرب مهارات حياتية وريادة أعمال',org:'منظمة العمل الدولية ILO',gov:'سوهاج',type:'استشارة',sec:'التمكين الاقتصادي',dl:'٣٠ يونيو ٢٠٢٥',logo:'🎯',urg:true,sal:'عقد استشاري',desc:'تقديم تدريبات المهارات الحياتية وريادة الأعمال SIYB لصالح المنظمات الأهلية.',req:'مدرب معتمد من ILO، خبرة 3 سنوات'},
-  {id:4,title:'أخصائي تنمية طفولة مبكرة',org:'هيئة إنقاذ الطفولة',gov:'المنيا',type:'دوام كامل',sec:'الطفولة',dl:'٥ يوليو ٢٠٢٥',logo:'👶',urg:false,sal:'٦٠٠٠ - ٩٠٠٠ جنيه',desc:'دعم برامج تنمية الطفولة المبكرة بمحافظة المنيا.',req:'شهادة في تربية أو تنمية بشرية، خبرة 2 سنة'},
-  {id:5,title:'استشاري إدارة مالية للجمعيات',org:'USAID مصر',gov:'عن بُعد',type:'استشارة',sec:'الإدارة المالية',dl:'١٠ يوليو ٢٠٢٥',logo:'💰',urg:false,sal:'تنافسي',desc:'تقديم استشارات بناء القدرات المالية للجمعيات الأهلية الشريكة.',req:'خبرة 7 سنوات في الإدارة المالية للمنظمات غير الربحية'},
-  {id:6,title:'منسق حماية الطفل',org:'هيئة بلان إنترناشيونال',gov:'قنا',type:'دوام كامل',sec:'حماية الطفل',dl:'١٢ يوليو ٢٠٢٥',logo:'🛡️',urg:true,sal:'٧٠٠٠ - ١٠٠٠٠ جنيه',desc:'تنسيق وتنفيذ برامج حماية الطفل وسياسات الحماية بمحافظة قنا.',req:'خبرة 3 سنوات في حماية الطفل، مدرب معتمد'},
-  {id:7,title:'باحث اجتماعي ميداني',org:'UNFPA مصر',gov:'أسيوط',type:'عقد',sec:'الصحة الإنجابية',dl:'١٥ يوليو ٢٠٢٥',logo:'🔍',urg:false,sal:'٥٠٠٠ - ٧٠٠٠ جنيه',desc:'إجراء مقابلات ودراسات ميدانية لصالح مشاريع الصحة الإنجابية.',req:'ليسانس علوم اجتماعية، خبرة في البحث الميداني'},
-  {id:8,title:'مسؤول توثيق وإعلام',org:'كاريتاس مصر',gov:'الجيزة',type:'دوام كامل',sec:'التواصل',dl:'١٨ يوليو ٢٠٢٥',logo:'📸',urg:false,sal:'٤٥٠٠ - ٦٥٠٠ جنيه',desc:'توثيق أنشطة المشاريع التنموية وإعداد المواد الإعلامية.',req:'خبرة في التصوير والتوثيق، مهارات تصميم'},
-  {id:9,title:'استشاري تنمية زراعية',org:'FAO مصر',gov:'بني سويف',type:'استشارة',sec:'الزراعة',dl:'٢٠ يوليو ٢٠٢٥',logo:'🌾',urg:false,sal:'عقد استشاري',desc:'استشاري متخصص في التنمية الزراعية لمشروع الأمن الغذائي بالصعيد.',req:'خبرة 7 سنوات في التنمية الزراعية والريفية'},
-  {id:10,title:'مدرب موارد بشرية',org:'GIZ مصر',gov:'القاهرة',type:'استشارة',sec:'الموارد البشرية',dl:'٢٢ يوليو ٢٠٢٥',logo:'👥',urg:true,sal:'تنافسي',desc:'تقديم تدريبات في إدارة الموارد البشرية للعاملين بالجمعيات الأهلية.',req:'خبرة 5 سنوات في التدريب، شهادات معتمدة'},
-  {id:11,title:'مسؤول مشتريات وتوريدات',org:'WFP مصر',gov:'أسيوط',type:'دوام كامل',sec:'المشتريات',dl:'٢٥ يوليو ٢٠٢٥',logo:'📦',urg:false,sal:'٨٠٠٠ - ١٢٠٠٠ جنيه',desc:'إدارة عمليات المشتريات والتوريدات لمشاريع WFP بصعيد مصر.',req:'خبرة 4 سنوات في المشتريات، إجادة الإنجليزية'},
-  {id:12,title:'معالج نفسي دعم اجتماعي',org:'TDH مصر',gov:'الإسكندرية',type:'دوام كامل',sec:'الصحة النفسية',dl:'٢٨ يوليو ٢٠٢٥',logo:'🧠',urg:true,sal:'٧٠٠٠ - ١٠٠٠٠ جنيه',desc:'تقديم خدمات الدعم النفسي الاجتماعي للفئات المستهدفة بالإسكندرية.',req:'شهادة علم نفس أو طب نفسي، خبرة 2 سنة'},
-];
+var JOBS = []; // Firebase هو المصدر الوحيد
+window.JOBS_STATIC = [];
 
 function renderJobs(){
   const q=(document.getElementById('ji')||{}).value||'';

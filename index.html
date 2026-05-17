@@ -3236,12 +3236,7 @@ function openJob(id){
 
 function openTender(id){
   const t=TENDERS.find(x=>x.id==id||x.id===id);if(!t)return;
-  var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
-  var tenderLink = t.link || appUrl;
-  var shareText = '📋 ' + t.title + '\n🏢 ' + t.org + '\n💰 ' + (t.budget||'—') + '\n⏰ آخر موعد: ' + (t.dl||'—') + '\n\n' + (t.desc||'').substring(0,100) + '...\n\n🔗 تفاصيل أكثر:\n' + tenderLink;
-  var waUrl = 'https://wa.me/?text=' + encodeURIComponent(shareText);
-  var fbUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(tenderLink) + '&quote=' + encodeURIComponent('📋 ' + t.title + ' - ' + t.org);
-
+  window._currentTender = t;
   document.getElementById('mbody').innerHTML=`
     <div class="mt-tags"><span class="tag tg">${t.type}</span><span class="tag tt">📍 ${t.loc||'—'}</span></div>
     <div class="mt">${t.title}</div>
@@ -3251,11 +3246,36 @@ function openTender(id){
     <div class="ms-t">✅ المتطلبات</div><div class="ms-d">${t.req||'—'}</div>
     ${t.link ? '<div class="ms-t">🔗 الإعلان الأصلي</div><div class="ms-d"><a href="'+t.link+'" target="_blank" style="color:var(--a);word-break:break-all;font-size:11px">'+t.link+'</a></div>' : ''}
     <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap">
-      <button style="flex:1;min-width:80px;padding:11px;background:#25d366;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open('${waUrl}','_blank')">💬 شارك واتساب</button>
-      <button style="flex:1;min-width:80px;padding:11px;background:#1877f2;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open('${fbUrl}','_blank')">📘 شارك فيسبوك</button>
-      ${t.link ? '<button style="flex:1;min-width:80px;padding:11px;background:var(--orange);color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open(\''+t.link+'\',\'_blank\')">🔗 الإعلان</button>' : ''}
+      <button style="flex:1;min-width:80px;padding:11px;background:#25d366;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="shareTenderWA()">💬 شارك واتساب</button>
+      <button style="flex:1;min-width:80px;padding:11px;background:#1877f2;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="shareTenderFB()">📘 شارك فيسبوك</button>
+      ${t.link ? '<button style="flex:1;min-width:80px;padding:11px;background:var(--orange);color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open(window._currentTender.link,\'_blank\')">🔗 الإعلان</button>' : ''}
     </div>`;
   document.getElementById('modal').classList.add('op');
+}
+
+function shareTenderWA(){
+  var t = window._currentTender;
+  if(!t) return;
+  var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
+  var link = t.link || appUrl;
+  var msg = '📋 *' + t.title + '*\n' +
+    '🏢 الجهة: ' + (t.org||'—') + '\n' +
+    '📍 الموقع: ' + (t.loc||'—') + '\n' +
+    '💰 الميزانية: ' + (t.budget||'—') + '\n' +
+    '⏰ آخر موعد: ' + (t.dl||'—') + '\n\n' +
+    '📝 ' + (t.desc||'').substring(0,150) + '\n\n' +
+    '🔗 الإعلان الأصلي:\n' + link + '\n\n' +
+    '📲 تنمويين مصر - لكل تنموي في مصر\n' + appUrl;
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function shareTenderFB(){
+  var t = window._currentTender;
+  if(!t) return;
+  var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
+  var link = t.link || appUrl;
+  var msg = '📋 ' + t.title + ' - ' + (t.org||'') + '\n💰 ' + (t.budget||'') + ' | ⏰ ' + (t.dl||'') + '\n\n' + (t.desc||'').substring(0,200);
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link) + '&quote=' + encodeURIComponent(msg), '_blank');
 }
 
 function openCon(id){
@@ -5175,89 +5195,249 @@ function publishTender(){
 }
 
 function renderPublishedJobs(){
-  let stored = [];
-  try{ stored = JSON.parse(localStorage.getItem('custom_jobs') || '[]'); }catch(e){}
   const el = document.getElementById('published-jobs-list');
   if(!el) return;
-  if(stored.length === 0){ el.innerHTML=''; return; }
-  el.innerHTML = `
-    <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--p)">
-      💼 الوظائف المنشورة (${stored.length})
-    </div>` +
-    stored.map((j,i)=>`
-    <div class="adm-card" style="border-right-color:var(--p)">
-      <div class="adm-card-top">
-        <div class="adm-name">${j.title}</div>
-        <span class="adm-type" style="background:#e8f0fe;color:var(--p)">${j.type}</span>
-      </div>
-      <div class="adm-rows">
-        <div class="adm-row"><span class="adm-lbl">الجهة</span><span class="adm-val">${j.org}</span></div>
-        <div class="adm-row"><span class="adm-lbl">المحافظة</span><span class="adm-val">${j.gov}</span></div>
-        <div class="adm-row"><span class="adm-lbl">الموعد</span><span class="adm-val">${j.dl}</span></div>
-      </div>
-      <div class="adm-actions">
-        <button class="adm-btn adm-btn-del" onclick="deleteCustomJob(${i})">🗑️ حذف</button>
-      </div>
-    </div>`).join('');
+
+  // جيب من Firebase أول
+  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
+    db.collection('jobs').orderBy('timestamp','desc').limit(100).get().then(function(snap){
+      var jobs = [];
+      snap.docs.forEach(function(d){ jobs.push(Object.assign({},d.data(),{fbId:d.id})); });
+      _renderJobsList(el, jobs);
+    }).catch(function(){
+      var stored = [];
+      try{ stored = JSON.parse(localStorage.getItem('custom_jobs')||'[]'); }catch(e){}
+      _renderJobsList(el, stored);
+    });
+  } else {
+    var stored = [];
+    try{ stored = JSON.parse(localStorage.getItem('custom_jobs')||'[]'); }catch(e){}
+    _renderJobsList(el, stored);
+  }
+}
+
+function _renderJobsList(el, jobs){
+  if(!jobs.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد وظائف منشورة</div>'; return; }
+  el.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--p)">💼 الوظائف المنشورة ('+jobs.length+')</div>' +
+    jobs.map(function(j,i){
+      return '<div class="adm-card" style="border-right-color:var(--p)" id="job-card-'+i+'">'+
+        '<div class="adm-card-top">'+
+          '<div class="adm-name">'+j.title+'</div>'+
+          '<span class="adm-type" style="background:#e8f0fe;color:var(--p)">'+(j.type||'وظيفة')+'</span>'+
+        '</div>'+
+        '<div class="adm-rows">'+
+          '<div class="adm-row"><span class="adm-lbl">الجهة</span><span class="adm-val">'+(j.org||'—')+'</span></div>'+
+          '<div class="adm-row"><span class="adm-lbl">المحافظة</span><span class="adm-val">'+(j.gov||'—')+'</span></div>'+
+          '<div class="adm-row"><span class="adm-lbl">الموعد</span><span class="adm-val">'+(j.dl||'—')+'</span></div>'+
+          (j.sal?'<div class="adm-row"><span class="adm-lbl">الراتب</span><span class="adm-val">'+j.sal+'</span></div>':'')+
+          (j.link?'<div class="adm-row"><span class="adm-lbl">اللينك</span><span class="adm-val" style="font-size:10px;direction:ltr;word-break:break-all">'+j.link+'</span></div>':'')+
+        '</div>'+
+        '<div class="adm-actions">'+
+          '<button class="adm-btn" style="background:#e8f0fe;color:var(--p)" onclick="editJob('+i+',\''+( j.fbId||'')+'\')"  data-idx="'+i+'">✏️ تعديل</button>'+
+          '<button class="adm-btn adm-btn-del" onclick="deleteJob('+i+',\''+(j.fbId||'')+'\')">🗑️ حذف</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  window._adminJobs = jobs;
 }
 
 function renderPublishedTenders(){
-  let stored = [];
-  try{ stored = JSON.parse(localStorage.getItem('custom_tenders') || '[]'); }catch(e){}
   const el = document.getElementById('published-tenders-list');
   if(!el) return;
-  if(stored.length === 0){ el.innerHTML=''; return; }
-  el.innerHTML = `
-    <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--orange)">
-      📋 المناقصات المنشورة (${stored.length})
-    </div>` +
-    stored.map((t,i)=>`
-    <div class="adm-card" style="border-right-color:${t.color}">
-      <div class="adm-card-top">
-        <div class="adm-name">${t.title}</div>
-        <span class="adm-type" style="background:#fef3e8;color:var(--orange)">${t.type}</span>
-      </div>
-      <div class="adm-rows">
-        <div class="adm-row"><span class="adm-lbl">الجهة</span><span class="adm-val">${t.org}</span></div>
-        <div class="adm-row"><span class="adm-lbl">الميزانية</span><span class="adm-val">${t.budget}</span></div>
-        <div class="adm-row"><span class="adm-lbl">الموعد</span><span class="adm-val">${t.dl}</span></div>
-      </div>
-      <div class="adm-actions">
-        <button class="adm-btn adm-btn-del" onclick="deleteCustomTender(${i})">🗑️ حذف</button>
-      </div>
-    </div>`).join('');
+
+  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
+    db.collection('tenders').orderBy('timestamp','desc').limit(100).get().then(function(snap){
+      var tenders = [];
+      snap.docs.forEach(function(d){ tenders.push(Object.assign({},d.data(),{fbId:d.id})); });
+      _renderTendersList(el, tenders);
+    }).catch(function(){
+      var stored = [];
+      try{ stored = JSON.parse(localStorage.getItem('custom_tenders')||'[]'); }catch(e){}
+      _renderTendersList(el, stored);
+    });
+  } else {
+    var stored = [];
+    try{ stored = JSON.parse(localStorage.getItem('custom_tenders')||'[]'); }catch(e){}
+    _renderTendersList(el, stored);
+  }
 }
 
-function deleteCustomJob(idx){
-  let stored = [];
-  try{ stored = JSON.parse(localStorage.getItem('custom_jobs') || '[]'); }catch(e){}
-  stored.splice(idx, 1);
-  localStorage.setItem('custom_jobs', JSON.stringify(stored));
-  // أعد بناء JOBS
-  const baseJobs = JOBS.filter(j => !j._custom);
-  stored.forEach(j=>{ j._custom=true; });
-  JOBS.length = 0;
-  stored.forEach(j=>JOBS.push(j));
-  baseJobs.forEach(j=>JOBS.push(j));
-  toast('🗑️ تم حذف الوظيفة');
-  renderPublishedJobs();
-  renderJobs();
+function _renderTendersList(el, tenders){
+  if(!tenders.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد مناقصات منشورة</div>'; return; }
+  el.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--orange)">📋 المناقصات المنشورة ('+tenders.length+')</div>' +
+    tenders.map(function(t,i){
+      return '<div class="adm-card" style="border-right-color:'+(t.color||'var(--orange)')+'">'+
+        '<div class="adm-card-top">'+
+          '<div class="adm-name">'+t.title+'</div>'+
+          '<span class="adm-type" style="background:#fef3e8;color:var(--orange)">'+(t.type||'مناقصة')+'</span>'+
+        '</div>'+
+        '<div class="adm-rows">'+
+          '<div class="adm-row"><span class="adm-lbl">الجهة</span><span class="adm-val">'+(t.org||'—')+'</span></div>'+
+          '<div class="adm-row"><span class="adm-lbl">الميزانية</span><span class="adm-val">'+(t.budget||'—')+'</span></div>'+
+          '<div class="adm-row"><span class="adm-lbl">الموعد</span><span class="adm-val">'+(t.dl||'—')+'</span></div>'+
+          (t.link?'<div class="adm-row"><span class="adm-lbl">اللينك</span><span class="adm-val" style="font-size:10px;direction:ltr;word-break:break-all">'+t.link+'</span></div>':'')+
+        '</div>'+
+        '<div class="adm-actions">'+
+          '<button class="adm-btn" style="background:#fef3e8;color:var(--orange)" onclick="editTender('+i+',\''+(t.fbId||'')+'\')" >✏️ تعديل</button>'+
+          '<button class="adm-btn adm-btn-del" onclick="deleteTender('+i+',\''+(t.fbId||'')+'\')">🗑️ حذف</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  window._adminTenders = tenders;
 }
 
-function deleteCustomTender(idx){
-  let stored = [];
-  try{ stored = JSON.parse(localStorage.getItem('custom_tenders') || '[]'); }catch(e){}
-  stored.splice(idx, 1);
-  localStorage.setItem('custom_tenders', JSON.stringify(stored));
-  const baseTenders = TENDERS.filter(t => !t._custom);
-  stored.forEach(t=>{ t._custom=true; });
-  TENDERS.length = 0;
-  stored.forEach(t=>TENDERS.push(t));
-  baseTenders.forEach(t=>TENDERS.push(t));
-  toast('🗑️ تم حذف المناقصة');
-  renderPublishedTenders();
-  renderTenders();
+// ===== حذف =====
+function deleteJob(idx, fbId){
+  if(!confirm('هتحذف الوظيفة دي — متأكد؟')) return;
+  if(fbId && typeof db !== 'undefined'){
+    db.collection('jobs').doc(fbId).delete().then(function(){
+      toast('🗑️ تم الحذف من Firebase');
+      renderPublishedJobs();
+      window.JOBS = window.JOBS.filter(function(j){ return j.fbId !== fbId; });
+      renderJobs();
+    }).catch(function(){ toast('❌ خطأ في الحذف'); });
+  } else {
+    var stored = [];
+    try{ stored = JSON.parse(localStorage.getItem('custom_jobs')||'[]'); }catch(e){}
+    stored.splice(idx,1);
+    localStorage.setItem('custom_jobs', JSON.stringify(stored));
+    toast('🗑️ تم الحذف');
+    renderPublishedJobs(); renderJobs();
+  }
 }
+
+function deleteTender(idx, fbId){
+  if(!confirm('هتحذف المناقصة دي — متأكد؟')) return;
+  if(fbId && typeof db !== 'undefined'){
+    db.collection('tenders').doc(fbId).delete().then(function(){
+      toast('🗑️ تم الحذف من Firebase');
+      renderPublishedTenders();
+      window.TENDERS = window.TENDERS.filter(function(t){ return t.fbId !== fbId; });
+      renderTenders();
+    }).catch(function(){ toast('❌ خطأ في الحذف'); });
+  } else {
+    var stored = [];
+    try{ stored = JSON.parse(localStorage.getItem('custom_tenders')||'[]'); }catch(e){}
+    stored.splice(idx,1);
+    localStorage.setItem('custom_tenders', JSON.stringify(stored));
+    toast('🗑️ تم الحذف');
+    renderPublishedTenders(); renderTenders();
+  }
+}
+
+// ===== تعديل =====
+function editJob(idx, fbId){
+  var jobs = window._adminJobs || [];
+  var j = jobs[idx];
+  if(!j) return;
+  document.getElementById('mbody').innerHTML =
+    '<div style="padding:16px">' +
+    '<div style="font-size:14px;font-weight:800;color:var(--p);margin-bottom:14px">✏️ تعديل الوظيفة</div>' +
+    '<div class="fg"><label class="fl">عنوان الوظيفة</label><input class="fi" id="ej-title" value="'+( j.title||'').replace(/"/g,'&quot;')+'"></div>' +
+    '<div class="fg"><label class="fl">الجهة المعلنة</label><input class="fi" id="ej-org" value="'+(j.org||'').replace(/"/g,'&quot;')+'"></div>' +
+    '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ej-gov" value="'+(j.gov||'')+'"></div>' +
+    '<div class="fg"><label class="fl">نوع العمل</label><input class="fi" id="ej-type" value="'+(j.type||'')+'"></div>' +
+    '<div class="fg"><label class="fl">الراتب</label><input class="fi" id="ej-sal" value="'+(j.sal||'')+'"></div>' +
+    '<div class="fg"><label class="fl">الموعد النهائي</label><input class="fi" id="ej-dl" value="'+(j.dl||'')+'"></div>' +
+    '<div class="fg"><label class="fl">الوصف</label><textarea class="fi" id="ej-desc" rows="3">'+(j.desc||'')+'</textarea></div>' +
+    '<div class="fg"><label class="fl">المتطلبات</label><textarea class="fi" id="ej-req" rows="2">'+(j.req||'')+'</textarea></div>' +
+    '<div class="fg"><label class="fl">🔗 اللينك</label><input class="fi" id="ej-link" value="'+(j.link||'')+'" style="direction:ltr"></div>' +
+    '<div style="display:flex;gap:8px;margin-top:14px">' +
+      '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--p),var(--a));color:white;padding:12px" onclick="saveJobEdit(\''+fbId+'\','+idx+')">💾 حفظ وإعادة النشر</button>' +
+      '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
+    '</div></div>';
+  document.getElementById('modal').classList.add('op');
+}
+
+function editTender(idx, fbId){
+  var tenders = window._adminTenders || [];
+  var t = tenders[idx];
+  if(!t) return;
+  document.getElementById('mbody').innerHTML =
+    '<div style="padding:16px">' +
+    '<div style="font-size:14px;font-weight:800;color:var(--orange);margin-bottom:14px">✏️ تعديل المناقصة</div>' +
+    '<div class="fg"><label class="fl">عنوان المناقصة</label><input class="fi" id="et-title" value="'+(t.title||'').replace(/"/g,'&quot;')+'"></div>' +
+    '<div class="fg"><label class="fl">الجهة المعلنة</label><input class="fi" id="et-org" value="'+(t.org||'').replace(/"/g,'&quot;')+'"></div>' +
+    '<div class="fg"><label class="fl">نوع المناقصة</label><input class="fi" id="et-type" value="'+(t.type||'')+'"></div>' +
+    '<div class="fg"><label class="fl">الميزانية</label><input class="fi" id="et-budget" value="'+(t.budget||'')+'"></div>' +
+    '<div class="fg"><label class="fl">الموقع</label><input class="fi" id="et-loc" value="'+(t.loc||'')+'"></div>' +
+    '<div class="fg"><label class="fl">الموعد النهائي</label><input class="fi" id="et-dl" value="'+(t.dl||'')+'"></div>' +
+    '<div class="fg"><label class="fl">الوصف</label><textarea class="fi" id="et-desc" rows="3">'+(t.desc||'')+'</textarea></div>' +
+    '<div class="fg"><label class="fl">المتطلبات</label><textarea class="fi" id="et-req" rows="2">'+(t.req||'')+'</textarea></div>' +
+    '<div class="fg"><label class="fl">🔗 اللينك</label><input class="fi" id="et-link" value="'+(t.link||'')+'" style="direction:ltr"></div>' +
+    '<div style="display:flex;gap:8px;margin-top:14px">' +
+      '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--orange),#c06010);color:white;padding:12px" onclick="saveTenderEdit(\''+fbId+'\','+idx+')">💾 حفظ وإعادة النشر</button>' +
+      '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
+    '</div></div>';
+  document.getElementById('modal').classList.add('op');
+}
+
+// ===== حفظ التعديل =====
+function saveJobEdit(fbId, idx){
+  var updated = {
+    title: document.getElementById('ej-title').value.trim(),
+    org:   document.getElementById('ej-org').value.trim(),
+    gov:   document.getElementById('ej-gov').value.trim(),
+    type:  document.getElementById('ej-type').value.trim(),
+    sal:   document.getElementById('ej-sal').value.trim(),
+    dl:    document.getElementById('ej-dl').value.trim(),
+    desc:  document.getElementById('ej-desc').value.trim(),
+    req:   document.getElementById('ej-req').value.trim(),
+    link:  document.getElementById('ej-link').value.trim(),
+    status:'approved'
+  };
+  if(fbId && typeof db !== 'undefined'){
+    db.collection('jobs').doc(fbId).update(updated).then(function(){
+      toast('✅ تم التعديل والنشر!');
+      document.getElementById('modal').classList.remove('op');
+      renderPublishedJobs(); renderJobs();
+    }).catch(function(){ toast('❌ خطأ في التعديل'); });
+  } else {
+    var stored = [];
+    try{ stored = JSON.parse(localStorage.getItem('custom_jobs')||'[]'); }catch(e){}
+    Object.assign(stored[idx]||{}, updated);
+    localStorage.setItem('custom_jobs', JSON.stringify(stored));
+    toast('✅ تم التعديل!');
+    document.getElementById('modal').classList.remove('op');
+    renderPublishedJobs(); renderJobs();
+  }
+}
+
+function saveTenderEdit(fbId, idx){
+  var updated = {
+    title:  document.getElementById('et-title').value.trim(),
+    org:    document.getElementById('et-org').value.trim(),
+    type:   document.getElementById('et-type').value.trim(),
+    budget: document.getElementById('et-budget').value.trim(),
+    loc:    document.getElementById('et-loc').value.trim(),
+    dl:     document.getElementById('et-dl').value.trim(),
+    desc:   document.getElementById('et-desc').value.trim(),
+    req:    document.getElementById('et-req').value.trim(),
+    link:   document.getElementById('et-link').value.trim(),
+    status:'approved'
+  };
+  if(fbId && typeof db !== 'undefined'){
+    db.collection('tenders').doc(fbId).update(updated).then(function(){
+      toast('✅ تم التعديل والنشر!');
+      document.getElementById('modal').classList.remove('op');
+      renderPublishedTenders(); renderTenders();
+    }).catch(function(){ toast('❌ خطأ في التعديل'); });
+  } else {
+    var stored = [];
+    try{ stored = JSON.parse(localStorage.getItem('custom_tenders')||'[]'); }catch(e){}
+    Object.assign(stored[idx]||{}, updated);
+    localStorage.setItem('custom_tenders', JSON.stringify(stored));
+    toast('✅ تم التعديل!');
+    document.getElementById('modal').classList.remove('op');
+    renderPublishedTenders(); renderTenders();
+  }
+}
+
+function deleteCustomJob(idx){ deleteJob(idx,''); }
+function deleteCustomTender(idx){ deleteTender(idx,''); }
+
 
 // ============ EMAIL SYSTEM ============
 const EMAIL_TEMPLATES = {

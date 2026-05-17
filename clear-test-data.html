@@ -27,6 +27,12 @@ h1{color:#1a3a6e;font-size:17px;margin-bottom:16px;text-align:center}
 <body>
 <h1>🗑️ مسح البيانات التجريبية</h1>
 
+<div class="card" id="login-form" style="display:none">
+  <div style="font-size:14px;font-weight:800;color:#1a3a6e;margin-bottom:12px">🔐 تسجيل دخول الأدمن</div>
+  <input type="password" id="admin-pass" placeholder="كلمة السر" style="width:100%;padding:12px;border:2px solid #dde6f0;border-radius:10px;font-family:Cairo,sans-serif;font-size:14px;margin-bottom:8px">
+  <button class="btn btn-blue" onclick="doLogin()">دخول</button>
+</div>
+
 <div class="card">
   <div class="status" id="fb-status">⏳ جاري الاتصال...</div>
 
@@ -58,20 +64,25 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// Login with admin
-auth.signInWithEmailAndPassword('elzieni2007@gmail.com', prompt('ادخل كلمة السر:')||'')
-  .then(function(){
-    document.getElementById('fb-status').textContent = '✅ متصل كأدمن';
+// Check if already logged in
+auth.onAuthStateChanged(function(user){
+  if(user){
+    document.getElementById('fb-status').textContent = '✅ متصل كأدمن: ' + user.email;
     document.getElementById('fb-status').style.color = '#00b894';
+    document.getElementById('login-form').style.display = 'none';
     loadItems('jobs');
     loadItems('tenders');
-  }).catch(function(e){
-    document.getElementById('fb-status').textContent = '❌ ' + e.message;
-    document.getElementById('fb-status').style.color = '#e05050';
-    // Try without auth
-    loadItems('jobs');
-    loadItems('tenders');
-  });
+  } else {
+    document.getElementById('login-form').style.display = 'block';
+  }
+});
+
+function doLogin(){
+  var pass = document.getElementById('admin-pass').value;
+  auth.signInWithEmailAndPassword('elzieni2007@gmail.com', pass)
+    .then(function(){ document.getElementById('login-form').style.display='none'; })
+    .catch(function(e){ alert('❌ ' + e.message); });
+}
 
 function log(msg){
   var l = document.getElementById('log');

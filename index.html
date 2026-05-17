@@ -637,9 +637,6 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="nd" id="notif-dot" style="display:none"></div>
       <div id="notif-badge" style="display:none;position:absolute;top:-4px;left:-4px;background:#e05050;color:white;font-size:9px;font-weight:900;font-family:Cairo,sans-serif;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--p)">0</div>
     </button>
-    <button class="ib" onclick="go('profile')">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    </button>
   </div>
 </div>
 
@@ -716,7 +713,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div style="padding:0 14px 8px;display:flex;justify-content:space-between;align-items:center">
     <div style="font-size:12px;color:var(--muted)" id="jcnt">عرض <strong>12</strong> وظيفة</div>
   </div>
-  <div class="jlist" id="jlist"></div>
+  <div class="jlist" id="jlist"><div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">⏳</div><div style="font-size:13px;font-weight:600">جاري تحميل الوظائف...</div></div></div>
 
   <!-- باحثين عن عمل -->
   <div class="sh" style="margin-top:8px">
@@ -750,7 +747,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="tab" onclick="setTF(this,'خدمات')">خدمات</div>
     <div class="tab" onclick="setTF(this,'مقاولات')">مقاولات</div>
   </div>
-  <div class="tlist" id="tlist"></div>
+  <div class="tlist" id="tlist"><div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">⏳</div><div style="font-size:13px;font-weight:600">جاري تحميل المناقصات...</div></div></div>
 </div>
 
 <!-- CONSULTANTS -->
@@ -2367,7 +2364,7 @@ function enterApp(){
   document.getElementById('splash').style.display='none';
   document.getElementById('app').style.display='block';
   setAllLogos();
-  initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);renderJobs();renderTenders();updateJobseekersList();
+  initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);updateJobseekersList();
   // Load from Firebase (real-time)
   setTimeout(function(){
     if(typeof db === 'undefined') return;
@@ -2896,7 +2893,8 @@ function go(id){
   window.scrollTo(0,0);
   if(id==='consultants'){ renderCons(); }
   if(id==='suppliers'){ renderSups(); }
-  if(id==='tenders')renderTenders();
+  if(id==='tenders') renderTenders();
+  if(id==='jobs') renderJobs();
   if(id==='notifs'){
     renderNotifs();
     // Mark all as read

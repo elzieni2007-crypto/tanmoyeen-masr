@@ -711,7 +711,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="fchip" onclick="setjf(this,'عن بُعد')">عن بُعد</div>
   </div>
   <div style="padding:0 14px 8px;display:flex;justify-content:space-between;align-items:center">
-    <div style="font-size:12px;color:var(--muted)" id="jcnt">عرض <strong>12</strong> وظيفة</div>
+    <div style="font-size:12px;color:var(--muted)" id="jcnt">جاري التحميل...</div>
   </div>
   <div class="jlist" id="jlist"><div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">⏳</div><div style="font-size:13px;font-weight:600">جاري تحميل الوظائف...</div></div></div>
 
@@ -738,7 +738,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       ➕ أضف مناقصة
     </button>
   </div>
-  <div class="sh" style="padding-top:8px"><div class="sh-t">المناقصات والمشتريات</div><div class="cnt">٣٨ جديد</div></div>
+  <div class="sh" style="padding-top:8px"><div class="sh-t">المناقصات والمشتريات</div><div class="cnt" id="tenders-screen-count">جديد يومياً</div></div>
   <div class="tabs" id="t-tabs">
     <div class="tab on" onclick="setTF(this,'all')">الكل</div>
     <div class="tab" onclick="setTF(this,'استشارة فردية')">استشارات فردية</div>
@@ -3172,15 +3172,21 @@ function fs(){renderSups();}
 // ============ TENDERS ============
 function renderTenders(){
   let list=TENDERS;
-  if(tFilt!=='all')list=list.filter(t=>t.type.includes(tFilt)||t.cat===tFilt);
+  if(tFilt!=='all')list=list.filter(t=>t.type&&(t.type.includes(tFilt)||t.cat===tFilt));
+  var countEl = document.getElementById('tenders-screen-count');
+  if(countEl) countEl.textContent = list.length > 0 ? list.length + ' مناقصة' : 'جديد يومياً';
+  if(list.length === 0){
+    document.getElementById('tlist').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">📋</div><div style="font-size:13px;font-weight:600">لا توجد مناقصات حالياً</div></div>';
+    return;
+  }
   document.getElementById('tlist').innerHTML=list.map(t=>`
-    <div class="tcard" style="border-right-color:${t.color}" onclick="openTender(${t.id})">
-      <div class="tc-type">${t.type}</div>
+    <div class="tcard" style="border-right-color:${t.color||'#00aeef'}" onclick="openTender('${t.id}')">
+      <div class="tc-type">${t.type||'مناقصة'}</div>
       <div class="tc-t">${t.title}</div>
-      <div class="tc-o">${t.org}</div>
+      <div class="tc-o">${t.org||'—'}</div>
       <div class="tc-foot">
-        <div class="tc-val">💰 ${t.budget}</div>
-        <div class="tc-badge">📅 ${t.dl}</div>
+        <div class="tc-val">💰 ${t.budget||'—'}</div>
+        <div class="tc-badge">📅 ${t.dl||'—'}</div>
       </div>
     </div>`).join('');
 }

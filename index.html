@@ -23,11 +23,10 @@
   --bg:#eef3f9;--card:#fff;--txt:#1a2a3a;--muted:#6b7a8d;
   --border:#dde6f0;--green:#00b894;--orange:#e07a2f;--red:#e05050;
   --nav:64px;--bot:68px;--r:16px;
-  --sh:0 2px 10px rgba(15,23,42,.06);--shd:0 8px 24px rgba(15,23,42,.10);
+  --sh:0 2px 12px rgba(15,23,42,.08);--shd:0 10px 30px rgba(15,23,42,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-*{transition:background .25s ease,border-color .25s ease,transform .2s ease,box-shadow .25s ease}
-body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--txt);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--txt);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
 button{font-family:'Cairo',sans-serif;cursor:pointer}
 input,select,textarea{font-family:'Cairo',sans-serif}
 
@@ -40,7 +39,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 #splash{
   background:linear-gradient(150deg,#0d2654 0%,#1a3a6e 45%,#0094cc 100%);
   display:flex!important;flex-direction:column;align-items:center;justify-content:center;
-  min-height:100vh;padding-bottom:0;position:relative;overflow:hidden;
+  min-height:100vh;padding-bottom:20px;position:relative;overflow:hidden;overflow-y:auto;
 }
 .sp-ring{position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
 .sp-ring:nth-child(1){width:320px;height:320px;top:-80px;right:-80px;animation:rot 20s linear infinite}
@@ -48,6 +47,14 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 @keyframes rot{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .sp-logo{width:72px;height:72px;background:white;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.3);margin-bottom:12px;animation:pop .8s cubic-bezier(.34,1.56,.64,1) .3s both;position:relative;z-index:1;overflow:hidden}
 .sp-logo img{width:100%;height:100%;object-fit:contain;padding:8px}
+.sp-logo{
+background:linear-gradient(135deg,#ffffff,#f3f7ff);
+border:2px solid rgba(255,255,255,.15)
+}
+img{
+max-width:100%;
+display:block
+}
 @keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
 .sp-t{color:#fff;font-size:20px;font-weight:900;animation:su .6s ease .7s both;position:relative;z-index:1}
 .sp-s{color:rgba(255,255,255,.65);font-size:14px;margin-top:6px;animation:su .6s ease .9s both;position:relative;z-index:1}
@@ -58,7 +65,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 @keyframes ld{from{width:0}to{width:100%}}
 
 /* TOPBAR */
-.topbar{position:sticky;top:0;z-index:90;height:var(--nav);background:rgba(13,38,84,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08);padding:0 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 20px rgba(26,58,110,.25)}
+.topbar{position:sticky;top:0;z-index:90;height:var(--nav);background:rgba(13,38,84,.92);backdrop-filter:blur(14px);padding:0 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 20px rgba(26,58,110,.25)}
 .tb-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
 .tb-ico{width:40px;height:40px;background:white;border-radius:11px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
 .tb-ico img{width:100%;height:100%;object-fit:contain;padding:4px}
@@ -93,12 +100,12 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 .ds-n{font-size:13px;font-weight:900;color:var(--a2)}
 .ds-l{font-size:7px;color:rgba(255,255,255,.7);margin-top:0}
 
-.dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 12px}
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:0 10px}
 .dg-card{background:white;border-radius:12px;padding:10px 6px 8px;box-shadow:var(--sh);cursor:pointer;transition:.2s;text-align:center;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:4px}
 .dg-card:hover,.dg-card:active{border-color:var(--a);transform:translateY(-2px);box-shadow:var(--shd)}
 .dg-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px}
-.dg-t{font-size:12px;font-weight:800;color:var(--txt)}
-.dg-c{font-size:10px;color:var(--a);font-weight:600;opacity:.75}
+.dg-t{font-size:10px;font-weight:700;color:var(--txt)}
+.dg-c{font-size:9px;color:var(--a);font-weight:600}
 
 /* STRIP */
 .sh{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 8px}
@@ -503,17 +510,17 @@ textarea.fi{resize:none}
   height:28px !important;
 }
 
-#home{overflow-y:auto;-webkit-overflow-scrolling:touch}
+#home{overflow-y:auto !important;-webkit-overflow-scrolling:touch;height:auto;min-height:100vh}
 
 /* DARK MODE */
 body.dark-mode {
-  --bg:#0f172a;
-  --card:#111827;
-  --txt:#f3f4f6;
-  --muted:#94a3b8;
-  --border:#1e293b;
-  --p:#4a9eda;
-  --a:#63b3ed;
+  --bg: #1a1a2e;
+  --card: #16213e;
+  --txt: #e0e0e0;
+  --muted: #8892a4;
+  --border: #2d3748;
+  --p: #4a9eda;
+  --a: #63b3ed;
 }
 body.dark-mode .bnav { background: #16213e; border-color: #2d3748; }
 body.dark-mode .jcard { background: #16213e; }
@@ -531,10 +538,10 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 <div id="splash" class="scr on">
   <div class="sp-ring"></div><div class="sp-ring"></div>
-  <div class="sp-corner"><img id="sp-corner-img" src="" alt="logo"></div>
+  <div class="sp-corner"><img id="sp-corner-img" src="https://i.ibb.co/Lz1cNZZQ/file-00000000c47c720aa2b32868309a3136.png" alt="logo"></div>
 
   <!-- لوجو -->
-  <div class="sp-logo"><img id="logo-img" src="" alt="تنمويين مصر"></div>
+  <div class="sp-logo"><img id="logo-img" src="https://i.ibb.co/Lz1cNZZQ/file-00000000c47c720aa2b32868309a3136.png" alt="تنمويين مصر" onerror="this.style.display='none';this.parentNode.innerHTML='<div style=&quot;font-size:14px;font-weight:900;color:#1a3a6e&quot;>TM</div>'"></div>
 
   <!-- اسم المنصة -->
   <div class="sp-t">تنمويين مصر</div>
@@ -629,7 +636,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 <div class="topbar">
   <div class="tb-brand" onclick="logoTap()">
-    <div class="tb-ico"><img id="logo-tb" src="" alt="logo"></div>
+    <div class="tb-ico"><img id="logo-tb" src="https://i.ibb.co/Lz1cNZZQ/file-00000000c47c720aa2b32868309a3136.png" alt="logo"></div>
     <div><div class="tb-t">تنمويين مصر</div><div class="tb-s">لكل تنموي في مصر</div></div>
   </div>
   <div class="tb-acts">
@@ -1601,9 +1608,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" onclick="setAdmTab(this,'sup')">🏭 موردين</div>
       <div class="adm-tab" onclick="setAdmTab(this,'org')">🏢 مؤسسات</div>
       <div class="adm-tab" style="background:#e8f0fe;color:var(--p);border-color:var(--p)" onclick="setAdmTab(this,'add-job')">➕ وظيفة</div>
-      <div class="adm-tab" style="background:#e8f0fe;color:var(--p);border-color:var(--p)" onclick="setAdmTab(this,'jobs-list')">💼 الوظائف</div>
       <div class="adm-tab" style="background:#fef3e8;color:var(--orange);border-color:var(--orange)" onclick="setAdmTab(this,'add-tender')">➕ مناقصة</div>
-      <div class="adm-tab" style="background:#fef3e8;color:var(--orange);border-color:var(--orange)" onclick="setAdmTab(this,'tenders-list')">📋 المناقصات</div>
       <div class="adm-tab" style="background:#feeaea;color:#c03030;border-color:#e05050" onclick="setAdmTab(this,'email')">📧 إيميل جماعي</div>
       <div class="adm-tab" style="background:#e7faf3;color:#007a50;border-color:#00b894" onclick="setAdmTab(this,'featured')">⭐ مميزون</div>
       <div class="adm-tab" style="background:#fff3cd;color:#856404;border-color:#ffc107;position:relative" onclick="setAdmTab(this,'pending')">
@@ -1933,16 +1938,6 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
   </div>
 </div>
-
-    <!-- قائمة الوظائف -->
-    <div id="adm-form-jobs-list" style="display:none;padding:0 16px;padding-bottom:100px">
-      <div id="published-jobs-list-new" style="margin-top:8px"></div>
-    </div>
-
-    <!-- قائمة المناقصات -->
-    <div id="adm-form-tenders-list" style="display:none;padding:0 16px;padding-bottom:100px">
-      <div id="published-tenders-list-new" style="margin-top:8px"></div>
-    </div>
 
 <div id="adm-form-email" style="display:none;padding:0 16px;padding-bottom:100px">
 
@@ -4138,6 +4133,32 @@ function shareJobFB(){
   );
 }
 // مشاركة مناقصة مباشرة
+function shareTenderWA(){
+  var msg = [
+    'الان يمكنك نشر مناقصاتك ومهامك الاستشارية!',
+    '',
+    'شاركها مع 25,000 تنموي على منصة تنمويين مصر!',
+    '',
+    'اضغط الرابط واكمل البيانات في دقيقتين:',
+    'elzieni2007-crypto.github.io/tanmoyeen-masr?form=tender',
+    '',
+    'الاعلان بيوصل لكل المهتمين بالعمل التنموي',
+    'مجاني 100%',
+    'في دقيقتين بس!',
+    '',
+    'تنمويين مصر - لكل تنموي في مصر'
+  ].join('\n');
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+function shareTenderFB(){
+  var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
+  var msg = 'عندك مناقصة تنموية؟ شاركها على تنمويين مصر! اضغط: ' + appUrl + '?form=tender';
+  window.open(
+    'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(appUrl + '?form=tender') +
+    '&quote=' + encodeURIComponent(msg),
+    '_blank'
+  );
+}
 function submitTenderReport(){
   const reporter = (document.getElementById('st-reporter') || {}).value.trim();
   const title    = (document.getElementById('st-title')    || {}).value.trim();
@@ -4918,7 +4939,7 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){
+  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
@@ -4926,22 +4947,12 @@ function setAdmTab(el, tab){
     listEl.style.display   = 'none';
     formJob.style.display  = 'block';
     formTend.style.display = 'none';
-  } else if(tab === 'jobs-list'){
-    listEl.style.display   = 'none';
-    formJob.style.display  = 'none';
-    formTend.style.display = 'none';
-    var jl = document.getElementById('adm-form-jobs-list');
-    if(jl){ jl.style.display='block'; renderPublishedJobsNew(); }
+    renderPublishedJobs();
   } else if(tab === 'add-tender'){
     listEl.style.display   = 'none';
     formJob.style.display  = 'none';
     formTend.style.display = 'block';
-  } else if(tab === 'tenders-list'){
-    listEl.style.display   = 'none';
-    formJob.style.display  = 'none';
-    formTend.style.display = 'none';
-    var tl = document.getElementById('adm-form-tenders-list');
-    if(tl){ tl.style.display='block'; renderPublishedTendersNew(); }
+    renderPublishedTenders();
   } else if(tab === 'featured'){
     listEl.style.display='none';formJob.style.display='none';formTend.style.display='none';
     var fEl=document.getElementById('adm-form-email');if(fEl)fEl.style.display='none';
@@ -4979,7 +4990,7 @@ function setAdmTab(el, tab){
     loadAdminVols();
   } else if(tab === 'consultations-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-consultations-adm');
     if(cEl){cEl.style.display='block';}
     loadAdminConsultations();
@@ -4988,7 +4999,7 @@ function setAdmTab(el, tab){
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
     // Hide all special forms
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
     renderAdmList();
@@ -5211,34 +5222,7 @@ function publishTender(){
   renderTenders();
 }
 
-function renderPublishedJobsNew(){
-  var el = document.getElementById('published-jobs-list-new');
-  if(!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
-  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
-    db.collection('jobs').orderBy('timestamp','desc').limit(100).get().then(function(snap){
-      var jobs=[];
-      snap.docs.forEach(function(d){ jobs.push(Object.assign({},d.data(),{fbId:d.id})); });
-      _renderJobsList(el, jobs);
-    }).catch(function(){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ خطأ في التحميل</div>'; });
-  }
-}
-
-function renderPublishedTendersNew(){
-  var el = document.getElementById('published-tenders-list-new');
-  if(!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
-  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
-    db.collection('tenders').orderBy('timestamp','desc').limit(100).get().then(function(snap){
-      var tenders=[];
-      snap.docs.forEach(function(d){ tenders.push(Object.assign({},d.data(),{fbId:d.id})); });
-      _renderTendersList(el, tenders);
-    }).catch(function(){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ خطأ في التحميل</div>'; });
-  }
-}
-
-function renderPublishedJobs(){ renderPublishedJobsNew(); }
-function renderPublishedTenders(){ renderPublishedTendersNew(); }
+function renderPublishedJobs(){
   const el = document.getElementById('published-jobs-list');
   if(!el) return;
 

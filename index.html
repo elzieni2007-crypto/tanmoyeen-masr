@@ -2372,53 +2372,43 @@ function enterApp(){
   setTimeout(function(){
     if(typeof db === 'undefined') return;
 
-    db.collection('consultants').orderBy('timestamp','desc').limit(500).onSnapshot(function(snap){
+    db.collection('consultants').orderBy('timestamp','desc').limit(500).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',exp:r.exp||'',orgs:r.orgs||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||''});});
-      if(fresh.length){window.CONS=fresh;renderCons();renderDash();updateAllCounts();console.log('✅ Cons:',fresh.length);}
-    },function(){});
+      if(fresh.length){window.CONS=fresh;renderCons();renderDash();updateAllCounts();}
+    }).catch(function(){});
 
-    db.collection('suppliers').orderBy('timestamp','desc').limit(500).onSnapshot(function(snap){
+    db.collection('suppliers').orderBy('timestamp','desc').limit(500).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',cat:r.cat||'عام',gov:r.gov||'',phone:r.phone||'',email:r.email||'',cert:r.cert||'مسجّل',logo:r.logo||'🏭',items:r.items||[r.cat||''],desc:r.desc||''});});
-      if(fresh.length){window.SUPS=fresh;renderSups();renderDash();updateAllCounts();console.log('✅ Sups:',fresh.length);}
-    },function(){});
+      if(fresh.length){window.SUPS=fresh;renderSups();renderDash();updateAllCounts();}
+    }).catch(function(){});
 
-    db.collection('volunteers').orderBy('timestamp','desc').limit(300).onSnapshot(function(snap){
+    db.collection('volunteers').orderBy('timestamp','desc').limit(300).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[],photo:r.photo||''}));});
-      if(fresh.length){window.VOLUNTEERS_PRELOAD=fresh;localStorage.removeItem('volunteers');loadVolunteers();updateAllCounts();console.log('✅ Vols:',fresh.length);}
-    },function(){});
+      if(fresh.length){window.VOLUNTEERS_PRELOAD=fresh;localStorage.removeItem('volunteers');loadVolunteers();updateAllCounts();}
+    }).catch(function(){});
 
-    db.collection('organizations').orderBy('timestamp','desc').limit(300).onSnapshot(function(snap){
+    db.collection('organizations').orderBy('timestamp','desc').limit(300).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id}));});
-      if(fresh.length){window.ORGS=fresh;renderOrgs();updateAllCounts();console.log('✅ Orgs:',fresh.length);}
-    },function(){});
+      if(fresh.length){window.ORGS=fresh;renderOrgs();updateAllCounts();}
+    }).catch(function(){});
 
-    // Jobs real-time
-    db.collection('jobs').where('status','==','approved').orderBy('timestamp','desc').limit(200).onSnapshot(function(snap){
+    // Jobs
+    db.collection('jobs').where('status','==','approved').orderBy('timestamp','desc').limit(200).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.title)fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,logo:r.logo||'💼',urg:r.urg||false,sal:r.sal||'تنافسي'}));});
-      if(fresh.length){
-        window.JOBS_FB = fresh;
-        window.JOBS = fresh.concat((window.JOBS_STATIC||[]));
-        renderJobs();
-        console.log('✅ Jobs:',fresh.length);
-      }
-    },function(){});
+      if(fresh.length){window.JOBS_FB=fresh;window.JOBS=fresh.concat((window.JOBS_STATIC||[]));renderJobs();}
+    }).catch(function(){});
 
-    // Tenders real-time
-    db.collection('tenders').where('status','==','approved').orderBy('timestamp','desc').limit(200).onSnapshot(function(snap){
+    // Tenders
+    db.collection('tenders').where('status','==','approved').orderBy('timestamp','desc').limit(200).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.title)fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,color:r.color||'#00aeef'}));});
-      if(fresh.length){
-        window.TENDERS_FB = fresh;
-        window.TENDERS = fresh.concat((window.TENDERS_STATIC||[]));
-        renderTenders();
-        console.log('✅ Tenders:',fresh.length);
-      }
-    },function(){});
+      if(fresh.length){window.TENDERS_FB=fresh;window.TENDERS=fresh.concat((window.TENDERS_STATIC||[]));renderTenders();}
+    }).catch(function(){});
 
   }, 1500);
   // Sheets disabled - using Firebase as single source
@@ -3806,13 +3796,7 @@ function submitJobReport(){
     status: 'pending',
   };
 
-  // احفظ في pending localStorage
-  let pending = [];
-  try{ pending = JSON.parse(localStorage.getItem('pending_jobs') || '[]'); }catch(e){}
-  pending.unshift(job);
-  localStorage.setItem('pending_jobs', JSON.stringify(pending));
-
-  // ✅ احفظ في Firebase
+  // ✅ احفظ في Firebase فقط
   if(typeof db !== 'undefined'){
     db.collection('pending_jobs').add(Object.assign({}, job, {
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -3980,60 +3964,41 @@ function _renderPendingList(list){
 }
 
 function approvePending(idx){
-  let pendingJobs = [];
-  let pendingTenders = [];
-  try{ pendingJobs    = JSON.parse(localStorage.getItem('pending_jobs')    || '[]'); }catch(e){}
-  try{ pendingTenders = JSON.parse(localStorage.getItem('pending_tenders') || '[]'); }catch(e){}
+  // جيب من Firebase pending_jobs
+  if(typeof db === 'undefined'){ toast('❌ Firebase غير متصل'); return; }
 
-  const allPending = [
-    ...pendingJobs.filter(j=>j.status==='pending').map(j=>({...j,_ptype:'job'})),
-    ...pendingTenders.filter(t=>t.status==='pending').map(t=>({...t,_ptype:'tender'})),
-  ].sort((a,b)=>(b.id||0)-(a.id||0));
-
-  const item = allPending[idx];
-  if(!item) return;
-
-  if(item._ptype === 'job'){
-    item._custom = true; item.urg = false;
-    JOBS.unshift(item);
-    let sj = []; try{ sj = JSON.parse(localStorage.getItem('custom_jobs')||'[]'); }catch(e){}
-    sj.unshift(item);
-    localStorage.setItem('custom_jobs', JSON.stringify(sj));
-    const gi = pendingJobs.findIndex(j=>j.id===item.id);
-    if(gi>-1){ pendingJobs[gi].status='approved'; localStorage.setItem('pending_jobs', JSON.stringify(pendingJobs)); }
-    // ✅ حفظ في Firebase jobs
-    if(typeof db !== 'undefined'){
-      var jobData = Object.assign({}, item);
-      delete jobData._ptype; delete jobData.fbId; delete jobData._custom;
-      db.collection('jobs').add(Object.assign({}, jobData, {
-        status:'approved', timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      })).then(function(){ console.log('✅ Job published to Firebase'); });
-      if(item.fbId) db.collection('pending_jobs').doc(item.fbId).update({status:'approved'}).catch(function(){});
+  db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').get().then(function(snap){
+    var allPending = [];
+    snap.docs.forEach(function(d){ allPending.push(Object.assign({},d.data(),{fbId:d.id})); });
+    // fallback من localStorage
+    if(allPending.length === 0){
+      var lj=[]; try{lj=JSON.parse(localStorage.getItem('pending_jobs')||'[]');}catch(e){}
+      var lt=[]; try{lt=JSON.parse(localStorage.getItem('pending_tenders')||'[]');}catch(e){}
+      allPending = [...lj.filter(j=>j.status==='pending').map(j=>({...j,_ptype:'job'})),
+                    ...lt.filter(t=>t.status==='pending').map(t=>({...t,_ptype:'tender'}))];
     }
-    renderJobs();
-  } else {
-    item._custom = true;
-    TENDERS.unshift(item);
-    let st = []; try{ st = JSON.parse(localStorage.getItem('custom_tenders')||'[]'); }catch(e){}
-    st.unshift(item);
-    localStorage.setItem('custom_tenders', JSON.stringify(st));
-    const gi = pendingTenders.findIndex(t=>t.id===item.id);
-    if(gi>-1){ pendingTenders[gi].status='approved'; localStorage.setItem('pending_tenders', JSON.stringify(pendingTenders)); }
-    // ✅ حفظ في Firebase tenders
-    if(typeof db !== 'undefined'){
-      var tenderData = Object.assign({}, item);
-      delete tenderData._ptype; delete tenderData.fbId; delete tenderData._custom;
-      db.collection('tenders').add(Object.assign({}, tenderData, {
-        status:'approved', timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      })).then(function(){ console.log('✅ Tender published to Firebase'); });
-      if(item.fbId) db.collection('pending_jobs').doc(item.fbId).update({status:'approved'}).catch(function(){});
-    }
-    renderTenders();
-  }
+    var item = allPending[idx];
+    if(!item){ toast('❌ السجل غير موجود'); return; }
 
-  toast('✅ تم النشر بنجاح!');
-  renderPendingJobs();
-  updatePendingBadge();
+    var col = (item._ptype==='tender') ? 'tenders' : 'jobs';
+    var data = Object.assign({}, item);
+    delete data._ptype; delete data.fbId;
+
+    // أضف للـ collection المناسبة
+    db.collection(col).add(Object.assign({}, data, {
+      status:'approved',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })).then(function(){
+      // حدّث pending_jobs في Firebase
+      if(item.fbId) db.collection('pending_jobs').doc(item.fbId).update({status:'approved'}).catch(function(){});
+      toast('✅ تم النشر بنجاح! ظهر للمستخدمين فوراً');
+      renderPendingJobs();
+      updatePendingBadge();
+      // onSnapshot هيحدث renderJobs/renderTenders تلقائياً
+    }).catch(function(e){ toast('❌ خطأ: ' + e.message); });
+  }).catch(function(){
+    toast('❌ خطأ في تحميل البيانات');
+  });
 }
 
 function rejectPending(idx){
@@ -4191,13 +4156,7 @@ function submitTenderReport(){
     status: 'pending',
   };
 
-  // احفظ في pending tenders localStorage
-  let pending = [];
-  try{ pending = JSON.parse(localStorage.getItem('pending_tenders') || '[]'); }catch(e){}
-  pending.unshift(tender);
-  localStorage.setItem('pending_tenders', JSON.stringify(pending));
-
-  // ✅ احفظ في Firebase
+  // ✅ احفظ في Firebase فقط
   if(typeof db !== 'undefined'){
     db.collection('pending_jobs').add(Object.assign({}, tender, {
       _ptype: 'tender',
@@ -5143,7 +5102,6 @@ function publishJob(){
   }
 
   const newJob = {
-    id: Date.now(),
     title, org, orgtype, gov, type, sec, duration,
     sal, dl, applyHow, contact, desc,
     req:      req      || 'يُحدد لاحقاً',
@@ -5151,17 +5109,23 @@ function publishJob(){
     benefits: benefits || '',
     logo: EMOJIS[sec] || '💼',
     urg, featured,
-    _custom: true,
+    status: 'approved',
   };
 
-  // أضف لمصفوفة JOBS
-  JOBS.unshift(newJob);
-
-  // احفظ في localStorage
-  let storedJobs = [];
-  try{ storedJobs = JSON.parse(localStorage.getItem('custom_jobs') || '[]'); }catch(e){}
-  storedJobs.unshift(newJob);
-  localStorage.setItem('custom_jobs', JSON.stringify(storedJobs));
+  // ✅ احفظ في Firebase فقط
+  if(typeof db !== 'undefined'){
+    db.collection('jobs').add(Object.assign({}, newJob, {
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })).then(function(ref){
+      toast('✅ تم نشر الوظيفة في Firebase!');
+      addNotification('💼', 'تم نشر وظيفة جديدة', title + ' - ' + org, '#e8f0fe');
+      renderPublishedJobs();
+      // onSnapshot هيحدث renderJobs تلقائياً
+    }).catch(function(e){ toast('❌ خطأ في النشر: ' + e.message); });
+  } else {
+    toast('❌ Firebase غير متصل');
+    return;
+  }
 
   // مسح الفورم
   ['nj-title','nj-org','nj-sal','nj-dl','nj-desc','nj-req','nj-skills','nj-benefits','nj-contact'].forEach(id=>{
@@ -5195,7 +5159,6 @@ function publishTender(){
   }
 
   const newTender = {
-    id: Date.now(),
     title, org, type, budget, loc, dl, desc,
     req: req || 'يُحدد لاحقاً',
     link: link || '',
@@ -5204,21 +5167,19 @@ function publishTender(){
     status: 'approved',
   };
 
-  // أضف لمصفوفة TENDERS
-  TENDERS.unshift(newTender);
-
-  // احفظ في localStorage
-  let storedTenders = [];
-  try{ storedTenders = JSON.parse(localStorage.getItem('custom_tenders') || '[]'); }catch(e){}
-  storedTenders.unshift(newTender);
-  localStorage.setItem('custom_tenders', JSON.stringify(storedTenders));
-
-  // ✅ احفظ في Firebase
+  // ✅ احفظ في Firebase فقط
   if(typeof db !== 'undefined'){
     db.collection('tenders').add(Object.assign({}, newTender, {
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    })).then(function(){ console.log('✅ Tender published to Firebase'); })
-    .catch(function(e){ console.log('Firebase tender error:', e); });
+    })).then(function(){
+      toast('✅ تم نشر المناقصة في Firebase!');
+      addNotification('📋', 'تم نشر مناقصة جديدة', title + ' - ' + org, '#fef3e8');
+      renderPublishedTenders();
+      // onSnapshot هيحدث renderTenders تلقائياً
+    }).catch(function(e){ toast('❌ خطأ في النشر: ' + e.message); });
+  } else {
+    toast('❌ Firebase غير متصل');
+    return;
   }
 
   // مسح الفورم
@@ -6082,29 +6043,26 @@ function addNewReg(data, type, icon){
   renderNewRegs();
 }
 
-// مراقبة التسجيلات الجديدة
+// مراقبة التسجيلات الجديدة - كل 5 دقائق بس
 if(typeof db !== 'undefined'){
-  var _startTime = new Date();
-  db.collection('volunteers').orderBy('timestamp','desc').limit(1).onSnapshot(function(snap){
-    snap.docChanges().forEach(function(change){
-      if(change.type==='added'){var d=change.doc.data();if(d.timestamp&&d.timestamp.toDate&&d.timestamp.toDate()>_startTime)addNewReg(d,'متطوع جديد','🙋');}
-    });
-  });
-  db.collection('consultants').orderBy('timestamp','desc').limit(1).onSnapshot(function(snap){
-    snap.docChanges().forEach(function(change){
-      if(change.type==='added'){var d=change.doc.data();if(d.timestamp&&d.timestamp.toDate&&d.timestamp.toDate()>_startTime)addNewReg(d,'استشاري جديد','👨‍💼');}
-    });
-  });
-  db.collection('suppliers').orderBy('timestamp','desc').limit(1).onSnapshot(function(snap){
-    snap.docChanges().forEach(function(change){
-      if(change.type==='added'){var d=change.doc.data();if(d.timestamp&&d.timestamp.toDate&&d.timestamp.toDate()>_startTime)addNewReg(d,'مورد جديد','🏭');}
-    });
-  });
-  db.collection('organizations').orderBy('timestamp','desc').limit(1).onSnapshot(function(snap){
-    snap.docChanges().forEach(function(change){
-      if(change.type==='added'){var d=change.doc.data();if(d.timestamp&&d.timestamp.toDate&&d.timestamp.toDate()>_startTime)addNewReg(d,'مؤسسة جديدة','🏢');}
-    });
-  });
+  var _lastCheck = Date.now();
+  setInterval(function(){
+    db.collection('volunteers').orderBy('timestamp','desc').limit(3).get().then(function(snap){
+      snap.docs.forEach(function(d){
+        var r=d.data();
+        var ts = r.timestamp ? r.timestamp.toMillis() : 0;
+        if(ts > _lastCheck && r.name) addNewReg(r,'متطوع جديد','🙋');
+      });
+    }).catch(function(){});
+    db.collection('consultants').orderBy('timestamp','desc').limit(3).get().then(function(snap){
+      snap.docs.forEach(function(d){
+        var r=d.data();
+        var ts = r.timestamp ? r.timestamp.toMillis() : 0;
+        if(ts > _lastCheck && r.name) addNewReg(r,'استشاري جديد','👨‍💼');
+      });
+    }).catch(function(){});
+    _lastCheck = Date.now();
+  }, 5 * 60 * 1000);
 }
 window.addEventListener('load',function(){setTimeout(renderNewRegs,1000);});
 

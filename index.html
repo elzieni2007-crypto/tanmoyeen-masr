@@ -5066,29 +5066,28 @@ function publishJob(){
     db.collection('jobs').add(Object.assign({}, newJob, {
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })).then(function(ref){
-      toast('✅ تم نشر الوظيفة في Firebase!');
-      addNotification('💼', 'تم نشر وظيفة جديدة', title + ' - ' + org, '#e8f0fe');
+      // مسح الفورم بعد النجاح
+      ['nj-title','nj-org','nj-sal','nj-dl','nj-desc','nj-req','nj-skills','nj-benefits','nj-contact'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.value='';
+      });
+      document.getElementById('nj-gov').selectedIndex = 0;
+      document.getElementById('nj-type').selectedIndex = 0;
+      document.getElementById('nj-sec').selectedIndex = 0;
+      document.getElementById('nj-urg').checked = false;
+
+      // أضف للمصفوفة مباشرة
+      JOBS.unshift(Object.assign({}, newJob, {id: ref.id, fbId: ref.id}));
+      renderJobs();
       renderPublishedJobs();
-      // onSnapshot هيحدث renderJobs تلقائياً
+
+      toast('✅ تم نشر الوظيفة وظهرت للمستخدمين!');
+      addNotification('💼', 'تم نشر وظيفة جديدة', title + ' - ' + org, '#e8f0fe');
+
     }).catch(function(e){ toast('❌ خطأ في النشر: ' + e.message); });
   } else {
     toast('❌ Firebase غير متصل');
-    return;
   }
-
-  // مسح الفورم
-  ['nj-title','nj-org','nj-sal','nj-dl','nj-desc','nj-req','nj-skills','nj-benefits','nj-contact'].forEach(id=>{
-    document.getElementById(id).value='';
-  });
-  document.getElementById('nj-gov').selectedIndex = 0;
-  document.getElementById('nj-type').selectedIndex = 0;
-  document.getElementById('nj-sec').selectedIndex = 0;
-  document.getElementById('nj-urg').checked = false;
-
-  toast('✅ تم نشر الوظيفة! ظهرت في قسم الوظائف');
-  addNotification('💼', 'تم نشر وظيفة جديدة', title + ' - ' + org, '#e8f0fe');
-  renderPublishedJobs();
-  renderJobs();
 }
 
 function publishTender(){
@@ -5116,32 +5115,32 @@ function publishTender(){
     status: 'approved',
   };
 
-  // ✅ احفظ في Firebase فقط
+  // ✅ احفظ في Firebase
   if(typeof db !== 'undefined'){
     db.collection('tenders').add(Object.assign({}, newTender, {
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    })).then(function(){
-      toast('✅ تم نشر المناقصة في Firebase!');
-      addNotification('📋', 'تم نشر مناقصة جديدة', title + ' - ' + org, '#fef3e8');
+    })).then(function(ref){
+      // مسح الفورم بعد النجاح
+      ['nt-title','nt-org','nt-budget','nt-loc','nt-dl','nt-desc','nt-req','nt-link'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.value='';
+      });
+      document.getElementById('nt-type').selectedIndex = 0;
+
+      // أضف للمصفوفة مباشرة
+      TENDERS.unshift(Object.assign({}, newTender, {id: ref.id, fbId: ref.id}));
+      renderTenders();
       renderPublishedTenders();
-      // onSnapshot هيحدث renderTenders تلقائياً
-    }).catch(function(e){ toast('❌ خطأ في النشر: ' + e.message); });
+
+      toast('✅ تم نشر المناقصة وظهرت للمستخدمين!');
+      addNotification('📋', 'تم نشر مناقصة جديدة', title + ' - ' + org, '#fef3e8');
+
+    }).catch(function(e){
+      toast('❌ خطأ في النشر: ' + e.message);
+    });
   } else {
     toast('❌ Firebase غير متصل');
-    return;
   }
-
-  // مسح الفورم
-  ['nt-title','nt-org','nt-budget','nt-loc','nt-dl','nt-desc','nt-req','nt-link'].forEach(id=>{
-    var el = document.getElementById(id);
-    if(el) el.value='';
-  });
-  document.getElementById('nt-type').selectedIndex = 0;
-
-  toast('✅ تم نشر المناقصة! ظهرت في قسم المناقصات');
-  addNotification('📋', 'تم نشر مناقصة جديدة', title + ' - ' + org, '#fef3e8');
-  renderPublishedTenders();
-  renderTenders();
 }
 
 function renderPublishedJobsNew(){

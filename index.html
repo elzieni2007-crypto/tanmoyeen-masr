@@ -2418,65 +2418,19 @@ function enterApp(){
   if(typeof db !== 'undefined' && typeof auth !== 'undefined'){
     auth.onAuthStateChanged(function(user){
       if(user){
-        // Admin logged in - start listeners
-        db.collection('volunteers')
-      .orderBy('timestamp','desc')
-      .limit(50)
-      .onSnapshot(function(snap){
-        if(snap.docChanges().length > 0){
-          snap.docChanges().forEach(function(change){
-            if(change.type === 'added'){
-              var data = change.doc.data();
-              // Add to VOLUNTEERS_PRELOAD if not exists
-              var exists = (VOLUNTEERS_PRELOAD||[]).some(function(v){
-                return v.phone === data.phone;
-              });
-              if(!exists && data.name){
-                if(!window.VOLUNTEERS_PRELOAD) window.VOLUNTEERS_PRELOAD = [];
-                VOLUNTEERS_PRELOAD.unshift(Object.assign({}, data, {
-                  id: Date.now(),
-                  interests: data.interests || [],
-                  badges: data.badges || []
-                }));
-                loadVolunteers();
-                updateAllCounts();
-                console.log('New volunteer added:', data.name);
-              }
-            }
-          });
-        }
-      }, function(err){ console.log('Volunteer listener:', err.code); });
+        // ✅ الأدمن logged in تلقائياً
+        isLoggedIn = true;
+        console.log('✅ Admin auto-logged in:', user.email);
 
-    // Listen for new consultants
-    db.collection('consultants')
-      .orderBy('timestamp','desc')
-      .limit(20)
-      .onSnapshot(function(snap){
-        snap.docChanges().forEach(function(change){
-          if(change.type === 'added'){
-            var data = change.doc.data();
-            if(data.name && data.spec){
-              var exists = (CONS||[]).some(function(c){ return c.phone===data.phone; });
-              if(!exists){
-                var newCon = {
-                  id: (CONS||[]).length + 1,
-                  name: data.name,
-                  spec: data.spec || '',
-                  gov: data.gov || '',
-                  phone: data.phone || '',
-                  email: data.email || '',
-                  bio: data.bio || '',
-                  av: '👨‍💼', bg: '#e8f0fe',
-                  spec2: '', orgs: ''
-                };
-                if(window.CONS) CONS.unshift(newCon);
-                updateAllCounts();
-              }
-            }
-          }
-        });
-      }, function(err){ console.log('Cons listener:', err.code); });
-      } // end if(user)
+        // لو شاشة الأدمن مفتوحة — أخفي login وأظهر dashboard
+        var loginScreen = document.getElementById('admin-login-screen');
+        var dashboard = document.getElementById('admin-dashboard');
+        if(loginScreen && loginScreen.style.display !== 'none'){
+          loginScreen.style.display = 'none';
+          if(dashboard) dashboard.style.display = 'block';
+          loadAdminData();
+        }
+      }
     }); // end onAuthStateChanged
   }
   setTimeout(setupHeroShrink,100);
@@ -5639,6 +5593,11 @@ function goAdmin(){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   document.getElementById('admin').classList.add('on');
   window.scrollTo(0,0);
+
+  // تحقق من Firebase Auth أول
+  if(typeof auth !== 'undefined' && auth.currentUser){
+    isLoggedIn = true;
+  }
 
   if(!isLoggedIn){
     document.getElementById('admin-login-screen').style.display = 'block';

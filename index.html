@@ -3862,55 +3862,31 @@ function saveFeatured(){
   renderDash();
 }
 function updatePendingBadge(){
-  let pending = [];
-  try{ pending = JSON.parse(localStorage.getItem('pending_jobs') || '[]'); }catch(e){}
-  let pendingT = [];
-  try{ pendingT = JSON.parse(localStorage.getItem('pending_tenders') || '[]'); }catch(e){}
-  const count = pending.filter(j=>j.status==='pending').length +
-                pendingT.filter(t=>t.status==='pending').length;
-  const badge = document.getElementById('pending-count-badge');
-  if(badge){
-    badge.textContent = count;
-    badge.style.display = count > 0 ? 'flex' : 'none';
-  }
+  if(typeof db === 'undefined' || !auth.currentUser) return;
+  db.collection('pending_jobs').where('status','==','pending').get().then(function(snap){
+    var count = snap.size;
+    var badge = document.getElementById('pending-count-badge');
+    if(badge){
+      badge.textContent = count;
+      badge.style.display = count > 0 ? 'flex' : 'none';
+    }
+  }).catch(function(){});
 }
 
 function renderPendingJobs(){
-  // Load from Firebase first
-  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
-    db.collection('pending_jobs').orderBy('timestamp','desc').limit(100).get().then(function(snap){
-      var fromFB = [];
-      snap.docs.forEach(function(d){
-        fromFB.push(Object.assign({}, d.data(), {fbId: d.id}));
-      });
-      // Merge with localStorage
-      var local = [];
-      try{ local = JSON.parse(localStorage.getItem('pending_jobs')||'[]'); }catch(e){}
-      var localT = [];
-      try{ localT = JSON.parse(localStorage.getItem('pending_tenders')||'[]'); }catch(e){}
-      var localAll = [...local.map(j=>({...j,_ptype:'job'})), ...localT.map(t=>({...t,_ptype:'tender'}))];
-      // Add local ones not in Firebase
-      var fbIds = fromFB.map(function(r){ return r.id; });
-      localAll.forEach(function(r){ if(!fbIds.includes(r.id)) fromFB.push(r); });
-      _renderPendingList(fromFB.filter(function(j){ return j.status==='pending'; }));
-    }).catch(function(){
-      // Fallback to localStorage
-      _renderPendingFromLocal();
+  if(typeof db === 'undefined' || !auth || !auth.currentUser){ return; }
+  db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').limit(100).get().then(function(snap){
+    var list = [];
+    snap.docs.forEach(function(d){
+      list.push(Object.assign({}, d.data(), {fbId: d.id}));
     });
-  } else {
-    _renderPendingFromLocal();
-  }
+    _renderPendingList(list);
+  }).catch(function(e){
+    console.log('renderPendingJobs error:', e);
+  });
 }
 
-function _renderPendingFromLocal(){
-  var pending = [];
-  try{ pending = JSON.parse(localStorage.getItem('pending_jobs')||'[]'); }catch(e){}
-  var pendingT = [];
-  try{ pendingT = JSON.parse(localStorage.getItem('pending_tenders')||'[]'); }catch(e){}
-  var all = [...pending.filter(j=>j.status==='pending').map(j=>({...j,_ptype:'job'})),
-             ...pendingT.filter(t=>t.status==='pending').map(t=>({...t,_ptype:'tender'}))];
-  _renderPendingList(all);
-}
+function _renderPendingFromLocal(){ renderPendingJobs(); }
 
 function _renderPendingList(list){
   var container = document.getElementById('pending-jobs-list');
@@ -3970,13 +3946,6 @@ function approvePending(idx){
   db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').get().then(function(snap){
     var allPending = [];
     snap.docs.forEach(function(d){ allPending.push(Object.assign({},d.data(),{fbId:d.id})); });
-    // fallback من localStorage
-    if(allPending.length === 0){
-      var lj=[]; try{lj=JSON.parse(localStorage.getItem('pending_jobs')||'[]');}catch(e){}
-      var lt=[]; try{lt=JSON.parse(localStorage.getItem('pending_tenders')||'[]');}catch(e){}
-      allPending = [...lj.filter(j=>j.status==='pending').map(j=>({...j,_ptype:'job'})),
-                    ...lt.filter(t=>t.status==='pending').map(t=>({...t,_ptype:'tender'}))];
-    }
     var item = allPending[idx];
     if(!item){ toast('❌ السجل غير موجود'); return; }
 
@@ -4002,32 +3971,16 @@ function approvePending(idx){
 }
 
 function rejectPending(idx){
-  let pendingJobs = [];
-  let pendingTenders = [];
-  try{ pendingJobs    = JSON.parse(localStorage.getItem('pending_jobs')    || '[]'); }catch(e){}
-  try{ pendingTenders = JSON.parse(localStorage.getItem('pending_tenders') || '[]'); }catch(e){}
-
-  const allPending = [
-    ...pendingJobs.filter(j=>j.status==='pending').map(j=>({...j,_ptype:'job'})),
-    ...pendingTenders.filter(t=>t.status==='pending').map(t=>({...t,_ptype:'tender'})),
-  ].sort((a,b)=>(b.id||0)-(a.id||0));
-
-  const item = allPending[idx];
-  if(!item) return;
-
-  if(item._ptype === 'job'){
-    const gi = pendingJobs.findIndex(j=>j.id===item.id);
-    if(gi>-1){ pendingJobs[gi].status='rejected'; localStorage.setItem('pending_jobs', JSON.stringify(pendingJobs)); }
-    if(item.fbId && typeof db !== 'undefined') db.collection('pending_jobs').doc(item.fbId).update({status:'rejected'}).catch(function(){});
-  } else {
-    const gi = pendingTenders.findIndex(t=>t.id===item.id);
-    if(gi>-1){ pendingTenders[gi].status='rejected'; localStorage.setItem('pending_tenders', JSON.stringify(pendingTenders)); }
-    if(item.fbId && typeof db !== 'undefined') db.collection('pending_jobs').doc(item.fbId).update({status:'rejected'}).catch(function(){});
-  }
-
-  toast('🗑️ تم الرفض');
-  renderPendingJobs();
-  updatePendingBadge();
+  if(typeof db === 'undefined'){ toast('❌ Firebase غير متصل'); return; }
+  db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').get().then(function(snap){
+    var docs = snap.docs;
+    if(!docs[idx]){ toast('❌ السجل غير موجود'); return; }
+    docs[idx].ref.update({status:'rejected'}).then(function(){
+      toast('🗑️ تم الرفض');
+      renderPendingJobs();
+      updatePendingBadge();
+    }).catch(function(e){ toast('❌ خطأ: '+e.message); });
+  }).catch(function(){ toast('❌ خطأ في التحميل'); });
 }
 
 function approveJob(idx){ approvePending(idx); }
@@ -4035,27 +3988,23 @@ function rejectJob(idx){ rejectPending(idx); }
 
 
 function editAndPublishJob(idx){
-  let pending = [];
-  try{ pending = JSON.parse(localStorage.getItem('pending_jobs') || '[]'); }catch(e){}
-  const list = pending.filter(j=>j.status==='pending');
-  const job = list[idx];
-  if(!job) return;
-
-  // افتح فورمة الأدمن وملّيها ببيانات الوظيفة
-  setAdmTab(document.querySelector('.adm-tab'), 'add-job');
-  document.getElementById('nj-title').value   = job.title  || '';
-  document.getElementById('nj-org').value     = job.org    || '';
-  document.getElementById('nj-sal').value     = job.sal    || '';
-  document.getElementById('nj-dl').value      = job.dl     || '';
-  document.getElementById('nj-desc').value    = job.desc   || '';
-  document.getElementById('nj-contact').value = job.contact|| '';
-
-  // ارفض القديم
-  const globalIdx = pending.indexOf(job);
-  pending[globalIdx].status = 'editing';
-  localStorage.setItem('pending_jobs', JSON.stringify(pending));
-
-  toast('✏️ عدّل البيانات واضغط نشر');
+  if(typeof db === 'undefined') return;
+  db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').get().then(function(snap){
+    var docs = snap.docs;
+    if(!docs[idx]) return;
+    var job = docs[idx].data();
+    var fbId = docs[idx].id;
+    setAdmTab(document.querySelector('.adm-tab'), 'add-job');
+    document.getElementById('nj-title').value   = job.title   || '';
+    document.getElementById('nj-org').value     = job.org     || '';
+    document.getElementById('nj-sal').value     = job.sal     || '';
+    document.getElementById('nj-dl').value      = job.dl      || '';
+    document.getElementById('nj-desc').value    = job.desc    || '';
+    document.getElementById('nj-contact').value = job.contact || '';
+    // حدّث status في Firebase
+    docs[idx].ref.update({status:'editing'}).catch(function(){});
+    toast('✏️ عدّل البيانات واضغط نشر');
+  }).catch(function(){});
 }
 
 // ============ SUBMIT TENDER SYSTEM ============
@@ -5287,38 +5236,20 @@ function deleteJob(idx, fbId){
   if(!confirm('هتحذف الوظيفة دي — متأكد؟')) return;
   if(fbId && typeof db !== 'undefined'){
     db.collection('jobs').doc(fbId).delete().then(function(){
-      toast('🗑️ تم الحذف من Firebase');
+      toast('🗑️ تم الحذف');
       renderPublishedJobs();
-      window.JOBS = window.JOBS.filter(function(j){ return j.fbId !== fbId; });
-      renderJobs();
     }).catch(function(){ toast('❌ خطأ في الحذف'); });
-  } else {
-    var stored = [];
-    try{ stored = JSON.parse(localStorage.getItem('custom_jobs')||'[]'); }catch(e){}
-    stored.splice(idx,1);
-    localStorage.setItem('custom_jobs', JSON.stringify(stored));
-    toast('🗑️ تم الحذف');
-    renderPublishedJobs(); renderJobs();
-  }
+  } else { toast('❌ مفيش Firebase ID'); }
 }
 
 function deleteTender(idx, fbId){
   if(!confirm('هتحذف المناقصة دي — متأكد؟')) return;
   if(fbId && typeof db !== 'undefined'){
     db.collection('tenders').doc(fbId).delete().then(function(){
-      toast('🗑️ تم الحذف من Firebase');
+      toast('🗑️ تم الحذف');
       renderPublishedTenders();
-      window.TENDERS = window.TENDERS.filter(function(t){ return t.fbId !== fbId; });
-      renderTenders();
     }).catch(function(){ toast('❌ خطأ في الحذف'); });
-  } else {
-    var stored = [];
-    try{ stored = JSON.parse(localStorage.getItem('custom_tenders')||'[]'); }catch(e){}
-    stored.splice(idx,1);
-    localStorage.setItem('custom_tenders', JSON.stringify(stored));
-    toast('🗑️ تم الحذف');
-    renderPublishedTenders(); renderTenders();
-  }
+  } else { toast('❌ مفيش Firebase ID'); }
 }
 
 // ===== تعديل =====
@@ -5386,17 +5317,9 @@ function saveJobEdit(fbId, idx){
     db.collection('jobs').doc(fbId).update(updated).then(function(){
       toast('✅ تم التعديل والنشر!');
       document.getElementById('modal').classList.remove('op');
-      renderPublishedJobs(); renderJobs();
+      renderPublishedJobs();
     }).catch(function(){ toast('❌ خطأ في التعديل'); });
-  } else {
-    var stored = [];
-    try{ stored = JSON.parse(localStorage.getItem('custom_jobs')||'[]'); }catch(e){}
-    Object.assign(stored[idx]||{}, updated);
-    localStorage.setItem('custom_jobs', JSON.stringify(stored));
-    toast('✅ تم التعديل!');
-    document.getElementById('modal').classList.remove('op');
-    renderPublishedJobs(); renderJobs();
-  }
+  } else { toast('❌ مفيش Firebase ID'); }
 }
 
 function saveTenderEdit(fbId, idx){
@@ -5416,17 +5339,9 @@ function saveTenderEdit(fbId, idx){
     db.collection('tenders').doc(fbId).update(updated).then(function(){
       toast('✅ تم التعديل والنشر!');
       document.getElementById('modal').classList.remove('op');
-      renderPublishedTenders(); renderTenders();
+      renderPublishedTenders();
     }).catch(function(){ toast('❌ خطأ في التعديل'); });
-  } else {
-    var stored = [];
-    try{ stored = JSON.parse(localStorage.getItem('custom_tenders')||'[]'); }catch(e){}
-    Object.assign(stored[idx]||{}, updated);
-    localStorage.setItem('custom_tenders', JSON.stringify(stored));
-    toast('✅ تم التعديل!');
-    document.getElementById('modal').classList.remove('op');
-    renderPublishedTenders(); renderTenders();
-  }
+  } else { toast('❌ مفيش Firebase ID'); }
 }
 
 function deleteCustomJob(idx){ deleteJob(idx,''); }
@@ -5843,14 +5758,9 @@ function sendBulkEmail(){
   toast(`📧 جاري فتح الإيميل لـ ${list.length} مشترك...`);
 }
 
-// تحميل الوظائف والمناقصات المحفوظة عند بداية التطبيق
+// تحميل المحتوى - Firebase هو المصدر الوحيد
 function loadCustomContent(){
-  try{
-    const jobs = JSON.parse(localStorage.getItem('custom_jobs') || '[]');
-    jobs.forEach(j=>{ j._custom=true; JOBS.unshift(j); });
-    const tenders = JSON.parse(localStorage.getItem('custom_tenders') || '[]');
-    tenders.forEach(t=>{ t._custom=true; TENDERS.unshift(t); });
-  }catch(e){}
+  // Firebase بيحمل تلقائياً في setTimeout بعد كده
 }
 
 // إعادة توجيه لشاشة الدخول لو مش logged in - تم الإصلاح

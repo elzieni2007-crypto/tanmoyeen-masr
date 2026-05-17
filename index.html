@@ -1843,6 +1843,9 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="fg"><label class="fl">المتطلبات والشروط</label>
         <textarea class="fi" id="nt-req" rows="2" placeholder="مثال: خبرة 5 سنوات، سجل تجاري..."></textarea>
       </div>
+      <div class="fg"><label class="fl">🔗 لينك الإعلان الأصلي</label>
+        <input class="fi" id="nt-link" type="url" placeholder="https://..." style="direction:ltr">
+      </div>
       <button class="sbtn" onclick="publishTender()" style="background:linear-gradient(135deg,var(--orange),#c06010);margin-top:8px">
         📢 نشر المناقصة الآن
       </button>
@@ -3225,17 +3228,19 @@ function openJob(id){
 }
 
 function openTender(id){
-  const t=TENDERS.find(x=>x.id===id);if(!t)return;
+  const t=TENDERS.find(x=>x.id==id||x.id===id);if(!t)return;
   document.getElementById('mbody').innerHTML=`
-    <div class="mt-tags"><span class="tag tg">${t.type}</span><span class="tag tt">📍 ${t.loc}</span></div>
+    <div class="mt-tags"><span class="tag tg">${t.type}</span><span class="tag tt">📍 ${t.loc||'—'}</span></div>
     <div class="mt">${t.title}</div>
     <div class="mo">🏢 ${t.org}</div>
-    <div class="mig"><div class="mii"><div class="mil">الميزانية</div><div class="miv" style="font-size:11px">${t.budget}</div></div><div class="mii"><div class="mil">الموعد النهائي</div><div class="miv">${t.dl}</div></div></div>
-    <div class="ms-t">📋 وصف المهمة</div><div class="ms-d">${t.desc}</div>
-    <div class="ms-t">✅ المتطلبات</div><div class="ms-d">${t.req}</div>
-    <div style="display:flex;gap:8px;margin-top:18px">
-      <button style="flex:1;padding:13px;background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;border-radius:12px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="fbApply()">📘 تقدّم للجروب</button>
-      <button style="flex:1;padding:13px;background:var(--p);color:white;border:none;border-radius:12px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="shareApp()">🔗 شارك المناقصة</button>
+    <div class="mig"><div class="mii"><div class="mil">الميزانية</div><div class="miv" style="font-size:11px">${t.budget||'—'}</div></div><div class="mii"><div class="mil">الموعد النهائي</div><div class="miv">${t.dl||'—'}</div></div></div>
+    <div class="ms-t">📋 وصف المهمة</div><div class="ms-d">${t.desc||'—'}</div>
+    <div class="ms-t">✅ المتطلبات</div><div class="ms-d">${t.req||'—'}</div>
+    ${t.link ? `<div class="ms-t">🔗 الإعلان الأصلي</div><div class="ms-d"><a href="${t.link}" target="_blank" style="color:var(--a);word-break:break-all;font-size:11px">${t.link}</a></div>` : ''}
+    <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap">
+      ${t.link ? `<button style="flex:1;min-width:100px;padding:13px;background:linear-gradient(135deg,var(--orange),#c06010);color:white;border:none;border-radius:12px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open('${t.link}','_blank')">🔗 الإعلان الأصلي</button>` : ''}
+      <button style="flex:1;min-width:100px;padding:13px;background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;border-radius:12px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="fbApply()">📘 تقدّم للجروب</button>
+      <button style="flex:1;min-width:100px;padding:13px;background:var(--p);color:white;border:none;border-radius:12px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="shareApp()">🔗 شارك</button>
     </div>`;
   document.getElementById('modal').classList.add('op');
 }
@@ -5109,6 +5114,7 @@ function publishTender(){
   const dl     = document.getElementById('nt-dl').value.trim() || '—';
   const desc   = document.getElementById('nt-desc').value.trim();
   const req    = document.getElementById('nt-req').value.trim();
+  const link   = document.getElementById('nt-link').value.trim();
 
   if(!title || !org || !type || !desc){
     toast('⚠️ اكمل الحقول المطلوبة');
@@ -5119,8 +5125,10 @@ function publishTender(){
     id: Date.now(),
     title, org, type, budget, loc, dl, desc,
     req: req || 'يُحدد لاحقاً',
+    link: link || '',
     cat: type,
     color: TENDER_COLORS[type] || '#00aeef',
+    status: 'approved',
   };
 
   // أضف لمصفوفة TENDERS
@@ -5132,9 +5140,18 @@ function publishTender(){
   storedTenders.unshift(newTender);
   localStorage.setItem('custom_tenders', JSON.stringify(storedTenders));
 
+  // ✅ احفظ في Firebase
+  if(typeof db !== 'undefined'){
+    db.collection('tenders').add(Object.assign({}, newTender, {
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })).then(function(){ console.log('✅ Tender published to Firebase'); })
+    .catch(function(e){ console.log('Firebase tender error:', e); });
+  }
+
   // مسح الفورم
-  ['nt-title','nt-org','nt-budget','nt-loc','nt-dl','nt-desc','nt-req'].forEach(id=>{
-    document.getElementById(id).value='';
+  ['nt-title','nt-org','nt-budget','nt-loc','nt-dl','nt-desc','nt-req','nt-link'].forEach(id=>{
+    var el = document.getElementById(id);
+    if(el) el.value='';
   });
   document.getElementById('nt-type').selectedIndex = 0;
 

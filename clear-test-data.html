@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مسح البيانات التجريبية</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Cairo',sans-serif;background:#eef3f9;padding:16px;max-width:500px;margin:0 auto}
+.card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 16px rgba(26,58,110,.09)}
+h1{color:#1a3a6e;font-size:17px;margin-bottom:16px;text-align:center}
+.btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.btn-red{background:linear-gradient(135deg,#e05050,#c0392b);color:white}
+.btn-blue{background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white}
+.btn-green{background:linear-gradient(135deg,#00703a,#00b894);color:white}
+.btn:disabled{opacity:.4}
+.status{font-size:13px;color:#6b7a8d;margin-bottom:12px;font-weight:600}
+.log{background:#1a2a3a;border-radius:10px;padding:12px;max-height:250px;overflow-y:auto;font-size:11px;color:#a8d8ea;font-family:monospace;direction:ltr;margin-top:10px}
+.item{background:#f8f9fa;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.item-del{background:#e05050;color:white;border:none;border-radius:6px;padding:3px 8px;font-size:10px;font-family:'Cairo',sans-serif;cursor:pointer}
+.item-keep{background:#00b894;color:white;border:none;border-radius:6px;padding:3px 8px;font-size:10px;font-family:'Cairo',sans-serif}
+</style>
+</head>
+<body>
+<h1>🗑️ مسح البيانات التجريبية</h1>
+
+<div class="card">
+  <div class="status" id="fb-status">⏳ جاري الاتصال...</div>
+
+  <!-- JOBS -->
+  <div style="font-size:13px;font-weight:800;color:#1a3a6e;margin-bottom:8px">💼 الوظائف في Firebase</div>
+  <div id="jobs-list" style="margin-bottom:12px">⏳ جاري التحميل...</div>
+  <button class="btn btn-red" onclick="clearAll('jobs')" id="clear-jobs-btn">🗑️ مسح كل الوظائف</button>
+
+  <hr style="margin:12px 0;border-color:#eee">
+
+  <!-- TENDERS -->
+  <div style="font-size:13px;font-weight:800;color:#e07a2f;margin-bottom:8px">📋 المناقصات في Firebase</div>
+  <div id="tenders-list" style="margin-bottom:12px">⏳ جاري التحميل...</div>
+  <button class="btn btn-red" onclick="clearAll('tenders')" id="clear-tenders-btn">🗑️ مسح كل المناقصات</button>
+
+  <div class="log" id="log" style="display:none"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCk98_i0ozMuQumsO4PUDpXGRga5aWI4C8",
+  authDomain: "tanmoyeen-masr26.firebaseapp.com",
+  projectId: "tanmoyeen-masr26",
+  storageBucket: "tanmoyeen-masr26.firebasestorage.app",
+  messagingSenderId: "335780209700",
+  appId: "1:335780209700:web:c2839bb31364b5b18664b1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// Login with admin
+auth.signInWithEmailAndPassword('elzieni2007@gmail.com', prompt('ادخل كلمة السر:')||'')
+  .then(function(){
+    document.getElementById('fb-status').textContent = '✅ متصل كأدمن';
+    document.getElementById('fb-status').style.color = '#00b894';
+    loadItems('jobs');
+    loadItems('tenders');
+  }).catch(function(e){
+    document.getElementById('fb-status').textContent = '❌ ' + e.message;
+    document.getElementById('fb-status').style.color = '#e05050';
+    // Try without auth
+    loadItems('jobs');
+    loadItems('tenders');
+  });
+
+function log(msg){
+  var l = document.getElementById('log');
+  l.style.display = 'block';
+  l.innerHTML += '<div>' + msg + '</div>';
+  l.scrollTop = l.scrollHeight;
+}
+
+function loadItems(col){
+  var el = document.getElementById(col+'-list');
+  db.collection(col).orderBy('timestamp','desc').get().then(function(snap){
+    if(snap.empty){ el.innerHTML = '<div style="color:#00b894;font-size:12px">✅ فاضي</div>'; return; }
+    el.innerHTML = snap.docs.map(function(d){
+      var data = d.data();
+      var title = data.title || data.name || d.id.substring(0,12)+'...';
+      var status = data.status || '—';
+      var statusColor = status==='approved'?'#00b894':status==='pending'?'#f0c040':'#aaa';
+      return '<div class="item">'+
+        '<div style="flex:1">'+
+          '<div style="font-size:11px;font-weight:700">'+title.substring(0,35)+'</div>'+
+          '<div style="font-size:10px;color:'+statusColor+'">'+status+'</div>'+
+        '</div>'+
+        '<button class="item-del" onclick="deleteOne(\''+col+'\',\''+d.id+'\',this)">🗑️</button>'+
+      '</div>';
+    }).join('');
+  }).catch(function(e){ el.innerHTML = '<div style="color:#e05050;font-size:12px">❌ '+e.message+'</div>'; });
+}
+
+function deleteOne(col, id, btn){
+  btn.disabled = true; btn.textContent = '⏳';
+  db.collection(col).doc(id).delete().then(function(){
+    btn.closest('.item').style.opacity = '0.3';
+    btn.textContent = '✅';
+    log('✅ حُذف من '+col+': '+id.substring(0,8));
+  }).catch(function(e){ btn.textContent = '❌'; btn.disabled=false; log('❌ '+e.message); });
+}
+
+async function clearAll(col){
+  if(!confirm('هتمسح كل '+col+' — متأكد؟')) return;
+  var btn = document.getElementById('clear-'+col+'-btn');
+  btn.disabled = true; btn.textContent = '⏳ جاري المسح...';
+  try{
+    var snap = await db.collection(col).get();
+    var batch = db.batch();
+    snap.docs.forEach(function(d){ batch.delete(d.ref); });
+    await batch.commit();
+    log('✅ تم مسح '+snap.size+' سجل من '+col);
+    btn.textContent = '✅ تم المسح ('+snap.size+')';
+    loadItems(col);
+  }catch(e){
+    log('❌ '+e.message);
+    btn.disabled=false;
+    btn.textContent = '🗑️ حاول تاني';
+  }
+}
+</script>
+</body>
+</html>

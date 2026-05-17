@@ -3206,7 +3206,13 @@ function fj(){renderJobs();}
 
 // ============ MODALS ============
 function openJob(id){
-  const j=JOBS.find(x=>x.id===id);if(!j)return;
+  const j=JOBS.find(x=>x.id===id||x.id==id);if(!j)return;
+  var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
+  var jobLink = j.link || appUrl;
+  var shareText = '💼 ' + j.title + '\n🏢 ' + j.org + '\n📍 ' + j.gov + '\n⏰ آخر موعد: ' + j.dl + '\n\n' + j.desc.substring(0,100) + '...\n\n🔗 تفاصيل أكثر:\n' + jobLink;
+  var waUrl = 'https://wa.me/?text=' + encodeURIComponent(shareText);
+  var fbUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(jobLink) + '&quote=' + encodeURIComponent('💼 ' + j.title + ' - ' + j.org);
+
   document.getElementById('mbody').innerHTML=`
     <div class="mt-tags"><span class="tag tg">📍 ${j.gov}</span><span class="tag tt">${j.type}</span><span class="tag ts">${j.sec}</span>${j.urg?'<span class="tag tu">⚡ عاجل</span>':''}</div>
     <div class="mt">${j.title}</div>
@@ -3218,17 +3224,24 @@ function openJob(id){
     ${j.benefits ? '<div class="ms-t">🌟 مميزات الوظيفة</div><div class="ms-d">'+j.benefits+'</div>' : ''}
     ${j.applyHow ? '<div class="ms-t">📩 طريقة التقديم</div><div class="ms-d">'+j.applyHow+(j.contact?' - '+j.contact:'')+'</div>' : ''}
     ${j.duration ? '<div class="ms-t">⏱️ مدة العقد</div><div class="ms-d">'+j.duration+'</div>' : ''}
-    <div style="display:flex;gap:6px">
-      <button style="flex:1;padding:11px;background:#25d366;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="waApply()">💬 واتساب</button>
-      <button style="flex:1;padding:11px;background:#1877f2;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="fbApply()">📘 الجروب</button>
+    ${j.link ? '<div class="ms-t">🔗 الإعلان الأصلي</div><div class="ms-d"><a href="'+j.link+'" target="_blank" style="color:var(--a);word-break:break-all;font-size:11px">'+j.link+'</a></div>' : ''}
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">
+      <button style="flex:1;min-width:80px;padding:11px;background:#25d366;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open('${waUrl}','_blank')">💬 شارك واتساب</button>
+      <button style="flex:1;min-width:80px;padding:11px;background:#1877f2;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open('${fbUrl}','_blank')">📘 شارك فيسبوك</button>
+      ${j.link ? '<button style="flex:1;min-width:80px;padding:11px;background:var(--orange);color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open(\''+j.link+'\',\'_blank\')">🔗 الإعلان</button>' : ''}
     </div>`;
   document.getElementById('modal').classList.add('op');
-  
   _currentJobOrg=j.org; _currentJobTitle=j.title;
 }
 
 function openTender(id){
   const t=TENDERS.find(x=>x.id==id||x.id===id);if(!t)return;
+  var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
+  var tenderLink = t.link || appUrl;
+  var shareText = '📋 ' + t.title + '\n🏢 ' + t.org + '\n💰 ' + (t.budget||'—') + '\n⏰ آخر موعد: ' + (t.dl||'—') + '\n\n' + (t.desc||'').substring(0,100) + '...\n\n🔗 تفاصيل أكثر:\n' + tenderLink;
+  var waUrl = 'https://wa.me/?text=' + encodeURIComponent(shareText);
+  var fbUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(tenderLink) + '&quote=' + encodeURIComponent('📋 ' + t.title + ' - ' + t.org);
+
   document.getElementById('mbody').innerHTML=`
     <div class="mt-tags"><span class="tag tg">${t.type}</span><span class="tag tt">📍 ${t.loc||'—'}</span></div>
     <div class="mt">${t.title}</div>
@@ -3236,11 +3249,11 @@ function openTender(id){
     <div class="mig"><div class="mii"><div class="mil">الميزانية</div><div class="miv" style="font-size:11px">${t.budget||'—'}</div></div><div class="mii"><div class="mil">الموعد النهائي</div><div class="miv">${t.dl||'—'}</div></div></div>
     <div class="ms-t">📋 وصف المهمة</div><div class="ms-d">${t.desc||'—'}</div>
     <div class="ms-t">✅ المتطلبات</div><div class="ms-d">${t.req||'—'}</div>
-    ${t.link ? `<div class="ms-t">🔗 الإعلان الأصلي</div><div class="ms-d"><a href="${t.link}" target="_blank" style="color:var(--a);word-break:break-all;font-size:11px">${t.link}</a></div>` : ''}
+    ${t.link ? '<div class="ms-t">🔗 الإعلان الأصلي</div><div class="ms-d"><a href="'+t.link+'" target="_blank" style="color:var(--a);word-break:break-all;font-size:11px">'+t.link+'</a></div>' : ''}
     <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap">
-      ${t.link ? `<button style="flex:1;min-width:100px;padding:13px;background:linear-gradient(135deg,var(--orange),#c06010);color:white;border:none;border-radius:12px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open('${t.link}','_blank')">🔗 الإعلان الأصلي</button>` : ''}
-      <button style="flex:1;min-width:100px;padding:13px;background:linear-gradient(135deg,#25d366,#128c7e);color:white;border:none;border-radius:12px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="fbApply()">📘 تقدّم للجروب</button>
-      <button style="flex:1;min-width:100px;padding:13px;background:var(--p);color:white;border:none;border-radius:12px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="shareApp()">🔗 شارك</button>
+      <button style="flex:1;min-width:80px;padding:11px;background:#25d366;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open('${waUrl}','_blank')">💬 شارك واتساب</button>
+      <button style="flex:1;min-width:80px;padding:11px;background:#1877f2;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open('${fbUrl}','_blank')">📘 شارك فيسبوك</button>
+      ${t.link ? '<button style="flex:1;min-width:80px;padding:11px;background:var(--orange);color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open(\''+t.link+'\',\'_blank\')">🔗 الإعلان</button>' : ''}
     </div>`;
   document.getElementById('modal').classList.add('op');
 }

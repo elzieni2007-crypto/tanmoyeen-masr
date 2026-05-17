@@ -659,8 +659,8 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   </div>
   <div class="sh" style="margin-top:4px;padding:4px 14px 2px"><div class="sh-t" style="font-size:12px">🧭 الأقسام الرئيسية</div></div>
   <div class="dash-grid">
-    <div class="dg-card" onclick="go('jobs')"><div class="dg-icon" style="background:#e8f0fe">💼</div><div class="dg-t">الوظائف</div><div class="dg-c">جديد يومياً</div></div>
-    <div class="dg-card" onclick="go('tenders')"><div class="dg-icon" style="background:#fef3e8">📋</div><div class="dg-t">المناقصات</div><div class="dg-c">٣٨ مناقصة</div></div>
+    <div class="dg-card" onclick="go('jobs')"><div class="dg-icon" style="background:#e8f0fe">💼</div><div class="dg-t">الوظائف</div><div class="dg-c" id="dash-jobs-count">جديد يومياً</div></div>
+    <div class="dg-card" onclick="go('tenders')"><div class="dg-icon" style="background:#fef3e8">📋</div><div class="dg-t">المناقصات</div><div class="dg-c" id="dash-tenders-count">جديد يومياً</div></div>
     <div class="dg-card" onclick="go('consultants')"><div class="dg-icon" style="background:#e7faf3">👨‍💼</div><div class="dg-t">الاستشاريون</div><div class="dg-c" id="cons-dg-count">243 مسجّل</div></div>
     <div class="dg-card" onclick="go('orgs-screen')"><div class="dg-icon" style="background:#e8f4fd">🏢</div><div class="dg-t">المؤسسات</div><div class="dg-c">46 مؤسسة</div></div>
     <div class="dg-card" onclick="go('suppliers')"><div class="dg-icon" style="background:#f0e8fe">🏭</div><div class="dg-t">الموردون</div><div class="dg-c" id="sups-dg-count">87 مورد</div></div>
@@ -2401,6 +2401,9 @@ function enterApp(){
         JOBS.length = 0;
         fresh.forEach(function(j){ JOBS.push(j); });
         renderJobs();
+        // تحديث الرقم في الداشبورد
+        var el = document.getElementById('dash-jobs-count');
+        if(el) el.textContent = fresh.length + ' وظيفة';
         console.log('✅ Jobs:', fresh.length);
       }
     }).catch(function(){});
@@ -2413,6 +2416,9 @@ function enterApp(){
         TENDERS.length = 0;
         fresh.forEach(function(t){ TENDERS.push(t); });
         renderTenders();
+        // تحديث الرقم في الداشبورد
+        var el = document.getElementById('dash-tenders-count');
+        if(el) el.textContent = fresh.length + ' مناقصة';
         console.log('✅ Tenders:', fresh.length);
       }
     }).catch(function(){});

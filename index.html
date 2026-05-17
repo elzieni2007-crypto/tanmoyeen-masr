@@ -2353,40 +2353,34 @@ function enterApp(){
   document.getElementById('app').style.display='block';
   setAllLogos();
   initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);renderJobs();renderTenders();updateJobseekersList();
-  // Load from Firebase (public data)
+  // Load from Firebase (real-time)
   setTimeout(function(){
     if(typeof db === 'undefined') return;
-    db.collection('consultants').orderBy('timestamp','desc').limit(500).get().then(function(snap){
-      if(snap.empty) return;
+
+    db.collection('consultants').orderBy('timestamp','desc').limit(500).onSnapshot(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',exp:r.exp||'',orgs:r.orgs||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||''});});
-      if(fresh.length){window.CONS=fresh;renderCons();renderDash();updateAllCounts();}
-    }).catch(function(){});
-    db.collection('suppliers').orderBy('timestamp','desc').limit(500).get().then(function(snap){
-      if(snap.empty) return;
+      if(fresh.length){window.CONS=fresh;renderCons();renderDash();updateAllCounts();console.log('✅ Cons:',fresh.length);}
+    },function(){});
+
+    db.collection('suppliers').orderBy('timestamp','desc').limit(500).onSnapshot(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',cat:r.cat||'عام',gov:r.gov||'',phone:r.phone||'',email:r.email||'',cert:r.cert||'مسجّل',logo:r.logo||'🏭',items:r.items||[r.cat||''],desc:r.desc||''});});
-      if(fresh.length){window.SUPS=fresh;renderSups();renderDash();updateAllCounts();}
-    }).catch(function(){});
-    db.collection('volunteers').orderBy('timestamp','desc').limit(300).get().then(function(snap){
-      if(snap.empty) return;
+      if(fresh.length){window.SUPS=fresh;renderSups();renderDash();updateAllCounts();console.log('✅ Sups:',fresh.length);}
+    },function(){});
+
+    db.collection('volunteers').orderBy('timestamp','desc').limit(300).onSnapshot(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[],photo:r.photo||''}));});
-      if(fresh.length){
-        window.VOLUNTEERS_PRELOAD=fresh;
-        // مسح localStorage القديم عشان Firebase يبقى المصدر الوحيد
-        localStorage.removeItem('volunteers');
-        loadVolunteers();
-        updateAllCounts();
-        console.log('✅ Volunteers from Firebase:',fresh.length);
-      }
-    }).catch(function(){});
-    db.collection('organizations').orderBy('timestamp','desc').limit(300).get().then(function(snap){
-      if(snap.empty) return;
+      if(fresh.length){window.VOLUNTEERS_PRELOAD=fresh;localStorage.removeItem('volunteers');loadVolunteers();updateAllCounts();console.log('✅ Vols:',fresh.length);}
+    },function(){});
+
+    db.collection('organizations').orderBy('timestamp','desc').limit(300).onSnapshot(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id}));});
-      if(fresh.length){window.ORGS=fresh;renderOrgs();updateAllCounts();}
-    }).catch(function(){});
+      if(fresh.length){window.ORGS=fresh;renderOrgs();updateAllCounts();console.log('✅ Orgs:',fresh.length);}
+    },function(){});
+
   }, 1500);
   // Sheets disabled - using Firebase as single source
 

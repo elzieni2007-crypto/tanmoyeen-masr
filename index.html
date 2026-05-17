@@ -1600,7 +1600,9 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" onclick="setAdmTab(this,'sup')">🏭 موردين</div>
       <div class="adm-tab" onclick="setAdmTab(this,'org')">🏢 مؤسسات</div>
       <div class="adm-tab" style="background:#e8f0fe;color:var(--p);border-color:var(--p)" onclick="setAdmTab(this,'add-job')">➕ وظيفة</div>
+      <div class="adm-tab" style="background:#e8f0fe;color:var(--p);border-color:var(--p)" onclick="setAdmTab(this,'jobs-list')">💼 الوظائف</div>
       <div class="adm-tab" style="background:#fef3e8;color:var(--orange);border-color:var(--orange)" onclick="setAdmTab(this,'add-tender')">➕ مناقصة</div>
+      <div class="adm-tab" style="background:#fef3e8;color:var(--orange);border-color:var(--orange)" onclick="setAdmTab(this,'tenders-list')">📋 المناقصات</div>
       <div class="adm-tab" style="background:#feeaea;color:#c03030;border-color:#e05050" onclick="setAdmTab(this,'email')">📧 إيميل جماعي</div>
       <div class="adm-tab" style="background:#e7faf3;color:#007a50;border-color:#00b894" onclick="setAdmTab(this,'featured')">⭐ مميزون</div>
       <div class="adm-tab" style="background:#fff3cd;color:#856404;border-color:#ffc107;position:relative" onclick="setAdmTab(this,'pending')">
@@ -1930,6 +1932,16 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
   </div>
 </div>
+
+    <!-- قائمة الوظائف -->
+    <div id="adm-form-jobs-list" style="display:none;padding:0 16px;padding-bottom:100px">
+      <div id="published-jobs-list-new" style="margin-top:8px"></div>
+    </div>
+
+    <!-- قائمة المناقصات -->
+    <div id="adm-form-tenders-list" style="display:none;padding:0 16px;padding-bottom:100px">
+      <div id="published-tenders-list-new" style="margin-top:8px"></div>
+    </div>
 
 <div id="adm-form-email" style="display:none;padding:0 16px;padding-bottom:100px">
 
@@ -4125,32 +4137,6 @@ function shareJobFB(){
   );
 }
 // مشاركة مناقصة مباشرة
-function shareTenderWA(){
-  var msg = [
-    'الان يمكنك نشر مناقصاتك ومهامك الاستشارية!',
-    '',
-    'شاركها مع 25,000 تنموي على منصة تنمويين مصر!',
-    '',
-    'اضغط الرابط واكمل البيانات في دقيقتين:',
-    'elzieni2007-crypto.github.io/tanmoyeen-masr?form=tender',
-    '',
-    'الاعلان بيوصل لكل المهتمين بالعمل التنموي',
-    'مجاني 100%',
-    'في دقيقتين بس!',
-    '',
-    'تنمويين مصر - لكل تنموي في مصر'
-  ].join('\n');
-  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-}
-function shareTenderFB(){
-  var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
-  var msg = 'عندك مناقصة تنموية؟ شاركها على تنمويين مصر! اضغط: ' + appUrl + '?form=tender';
-  window.open(
-    'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(appUrl + '?form=tender') +
-    '&quote=' + encodeURIComponent(msg),
-    '_blank'
-  );
-}
 function submitTenderReport(){
   const reporter = (document.getElementById('st-reporter') || {}).value.trim();
   const title    = (document.getElementById('st-title')    || {}).value.trim();
@@ -4931,7 +4917,7 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm'].forEach(function(id){
+  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
@@ -4939,12 +4925,22 @@ function setAdmTab(el, tab){
     listEl.style.display   = 'none';
     formJob.style.display  = 'block';
     formTend.style.display = 'none';
-    renderPublishedJobs();
+  } else if(tab === 'jobs-list'){
+    listEl.style.display   = 'none';
+    formJob.style.display  = 'none';
+    formTend.style.display = 'none';
+    var jl = document.getElementById('adm-form-jobs-list');
+    if(jl){ jl.style.display='block'; renderPublishedJobsNew(); }
   } else if(tab === 'add-tender'){
     listEl.style.display   = 'none';
     formJob.style.display  = 'none';
     formTend.style.display = 'block';
-    renderPublishedTenders();
+  } else if(tab === 'tenders-list'){
+    listEl.style.display   = 'none';
+    formJob.style.display  = 'none';
+    formTend.style.display = 'none';
+    var tl = document.getElementById('adm-form-tenders-list');
+    if(tl){ tl.style.display='block'; renderPublishedTendersNew(); }
   } else if(tab === 'featured'){
     listEl.style.display='none';formJob.style.display='none';formTend.style.display='none';
     var fEl=document.getElementById('adm-form-email');if(fEl)fEl.style.display='none';
@@ -4982,7 +4978,7 @@ function setAdmTab(el, tab){
     loadAdminVols();
   } else if(tab === 'consultations-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-consultations-adm');
     if(cEl){cEl.style.display='block';}
     loadAdminConsultations();
@@ -4991,7 +4987,7 @@ function setAdmTab(el, tab){
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
     // Hide all special forms
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm'].forEach(function(id){
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
     renderAdmList();
@@ -5214,28 +5210,34 @@ function publishTender(){
   renderTenders();
 }
 
-function renderPublishedJobs(){
-  const el = document.getElementById('published-jobs-list');
+function renderPublishedJobsNew(){
+  var el = document.getElementById('published-jobs-list-new');
   if(!el) return;
-
-  // جيب من Firebase أول
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
   if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
-    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
     db.collection('jobs').orderBy('timestamp','desc').limit(100).get().then(function(snap){
-      var jobs = [];
+      var jobs=[];
       snap.docs.forEach(function(d){ jobs.push(Object.assign({},d.data(),{fbId:d.id})); });
       _renderJobsList(el, jobs);
-    }).catch(function(){
-      var stored = [];
-      try{ stored = JSON.parse(localStorage.getItem('custom_jobs')||'[]'); }catch(e){}
-      _renderJobsList(el, stored);
-    });
-  } else {
-    var stored = [];
-    try{ stored = JSON.parse(localStorage.getItem('custom_jobs')||'[]'); }catch(e){}
-    _renderJobsList(el, stored);
+    }).catch(function(){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ خطأ في التحميل</div>'; });
   }
 }
+
+function renderPublishedTendersNew(){
+  var el = document.getElementById('published-tenders-list-new');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
+  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
+    db.collection('tenders').orderBy('timestamp','desc').limit(100).get().then(function(snap){
+      var tenders=[];
+      snap.docs.forEach(function(d){ tenders.push(Object.assign({},d.data(),{fbId:d.id})); });
+      _renderTendersList(el, tenders);
+    }).catch(function(){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ خطأ في التحميل</div>'; });
+  }
+}
+
+function renderPublishedJobs(){ renderPublishedJobsNew(); }
+function renderPublishedTenders(){ renderPublishedTendersNew(); }
 
 function _renderJobsList(el, jobs){
   if(!jobs.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد وظائف منشورة</div>'; return; }
@@ -5262,51 +5264,6 @@ function _renderJobsList(el, jobs){
   window._adminJobs = jobs;
 }
 
-function renderPublishedTenders(){
-  const el = document.getElementById('published-tenders-list');
-  if(!el) return;
-
-  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
-    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
-    db.collection('tenders').orderBy('timestamp','desc').limit(100).get().then(function(snap){
-      var tenders = [];
-      snap.docs.forEach(function(d){ tenders.push(Object.assign({},d.data(),{fbId:d.id})); });
-      _renderTendersList(el, tenders);
-    }).catch(function(){
-      var stored = [];
-      try{ stored = JSON.parse(localStorage.getItem('custom_tenders')||'[]'); }catch(e){}
-      _renderTendersList(el, stored);
-    });
-  } else {
-    var stored = [];
-    try{ stored = JSON.parse(localStorage.getItem('custom_tenders')||'[]'); }catch(e){}
-    _renderTendersList(el, stored);
-  }
-}
-
-function _renderTendersList(el, tenders){
-  if(!tenders.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد مناقصات منشورة</div>'; return; }
-  el.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--orange)">📋 المناقصات المنشورة ('+tenders.length+')</div>' +
-    tenders.map(function(t,i){
-      return '<div class="adm-card" style="border-right-color:'+(t.color||'var(--orange)')+'">'+
-        '<div class="adm-card-top">'+
-          '<div class="adm-name">'+t.title+'</div>'+
-          '<span class="adm-type" style="background:#fef3e8;color:var(--orange)">'+(t.type||'مناقصة')+'</span>'+
-        '</div>'+
-        '<div class="adm-rows">'+
-          '<div class="adm-row"><span class="adm-lbl">الجهة</span><span class="adm-val">'+(t.org||'—')+'</span></div>'+
-          '<div class="adm-row"><span class="adm-lbl">الميزانية</span><span class="adm-val">'+(t.budget||'—')+'</span></div>'+
-          '<div class="adm-row"><span class="adm-lbl">الموعد</span><span class="adm-val">'+(t.dl||'—')+'</span></div>'+
-          (t.link?'<div class="adm-row"><span class="adm-lbl">اللينك</span><span class="adm-val" style="font-size:10px;direction:ltr;word-break:break-all">'+t.link+'</span></div>':'')+
-        '</div>'+
-        '<div class="adm-actions">'+
-          '<button class="adm-btn" style="background:#fef3e8;color:var(--orange)" onclick="editTender('+i+',\''+(t.fbId||'')+'\')" >✏️ تعديل</button>'+
-          '<button class="adm-btn adm-btn-del" onclick="deleteTender('+i+',\''+(t.fbId||'')+'\')">🗑️ حذف</button>'+
-        '</div>'+
-      '</div>';
-    }).join('');
-  window._adminTenders = tenders;
-}
 
 // ===== حذف =====
 function deleteJob(idx, fbId){

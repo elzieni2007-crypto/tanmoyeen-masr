@@ -1994,7 +1994,10 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
           </div>
         </div>
       </div>
-    </div> style="display:none;padding:0 16px;padding-bottom:100px">
+    </div>
+
+    <!-- قائمة الوظائف -->
+    <div id="adm-form-jobs-list" style="display:none;padding:0 16px;padding-bottom:100px">
       <div id="published-jobs-list-new" style="margin-top:8px"></div>
     </div>
 
@@ -4998,14 +5001,17 @@ function setAdmTab(el, tab){
     if(formPending){ formPending.style.display = 'block'; formPending.style.visibility = 'visible'; }
     renderPendingJobs();
     updatePendingBadge();
+  } else if(tab === 'broadcast'){
+    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    var bEl=document.getElementById('adm-form-broadcast');
+    if(bEl){ bEl.style.display='block'; }
+    loadBroadcastHistory();
   } else if(tab === 'settings'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var sEl = document.getElementById('adm-form-settings');
     if(sEl){ sEl.style.display='block'; loadVisibilitySettings(); }
-    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    var bEl=document.getElementById('adm-form-broadcast');
-    if(bEl){bEl.style.display='block';}
-    loadBroadcastHistory();
   } else if(tab === 'volunteers-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
     var vEl=document.getElementById('adm-form-volunteers-adm');

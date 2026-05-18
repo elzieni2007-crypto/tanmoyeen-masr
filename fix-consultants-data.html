@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تنظيف بيانات الاستشاريين والموردين</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Cairo',sans-serif;background:#eef3f9;padding:16px;max-width:600px;margin:0 auto}
+.card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 16px rgba(26,58,110,.09)}
+h1{color:#1a3a6e;font-size:17px;margin-bottom:16px;text-align:center}
+.btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.btn-blue{background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white}
+.btn-green{background:linear-gradient(135deg,#00703a,#00b894);color:white}
+.btn-red{background:linear-gradient(135deg,#e05050,#c0392b);color:white}
+.log{background:#1a2a3a;border-radius:10px;padding:12px;max-height:300px;overflow-y:auto;font-size:11px;color:#a8d8ea;font-family:monospace;direction:ltr;margin-top:10px}
+.stat{font-size:20px;font-weight:900;color:#0094cc;text-align:center;margin:8px 0}
+.issue{background:#fff8e1;border:1px solid #f0c040;border-radius:8px;padding:10px;margin-bottom:8px;font-size:11px}
+.issue-name{font-weight:700;color:#1a2a3a;margin-bottom:4px}
+.issue-detail{color:#6b7a8d}
+input[type=password]{width:100%;padding:10px;border:2px solid #dde6f0;border-radius:10px;font-family:Cairo,sans-serif;font-size:14px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<h1>🔧 تنظيف بيانات الاستشاريين والموردين</h1>
+
+<div class="card" id="login-card">
+  <div style="font-size:13px;font-weight:700;margin-bottom:8px">🔐 دخول الأدمن</div>
+  <input type="password" id="pass" placeholder="كلمة السر">
+  <button class="btn btn-blue" onclick="doLogin()">دخول</button>
+</div>
+
+<div class="card" id="main-card" style="display:none">
+  <div id="fb-status" style="color:#00b894;font-weight:700;margin-bottom:12px">✅ متصل</div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+  <button class="btn btn-blue" style="flex:1;padding:8px" onclick="setCol('consultants',this)" id="btn-cons">👨‍💼 استشاريين</button>
+  <button class="btn btn-green" style="flex:1;padding:8px;opacity:.6" onclick="setCol('suppliers',this)" id="btn-sups">🏭 موردين</button>
+</div>
+<div class="stat" id="total-count">0 سجل</div>
+  <div class="stat" id="issues-count" style="color:#e05050;font-size:16px">0 سجل فيه مشكلة</div>
+  <button class="btn btn-blue" onclick="scanData()">🔍 فحص البيانات</button>
+  <button class="btn btn-green" onclick="fixData()" id="fix-btn" style="display:none">🔧 إصلاح تلقائي للبيانات</button>
+  <div id="issues-list" style="margin-top:10px"></div>
+  <div class="log" id="log" style="display:none"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCk98_i0ozMuQumsO4PUDpXGRga5aWI4C8",
+  authDomain: "tanmoyeen-masr26.firebaseapp.com",
+  projectId: "tanmoyeen-masr26",
+  storageBucket: "tanmoyeen-masr26.firebasestorage.app",
+  messagingSenderId: "335780209700",
+  appId: "1:335780209700:web:c2839bb31364b5b18664b1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+function doLogin(){
+  var pass = document.getElementById('pass').value;
+  auth.signInWithEmailAndPassword('elzieni2007@gmail.com', pass)
+    .then(function(){
+      document.getElementById('login-card').style.display='none';
+      document.getElementById('main-card').style.display='block';
+    }).catch(function(e){ alert('❌ '+e.message); });
+}
+
+var allDocs = [];
+var currentCol = 'consultants';
+
+function setCol(col, btn){
+  currentCol = col;
+  document.querySelectorAll('.btn').forEach(function(b){ b.style.opacity='0.6'; });
+  btn.style.opacity='1';
+  allDocs=[]; issuesList=[];
+  document.getElementById('total-count').textContent='0 سجل';
+  document.getElementById('issues-count').textContent='0 مشكلة';
+  document.getElementById('issues-list').innerHTML='';
+  document.getElementById('fix-btn').style.display='none';
+}
+var issuesList = [];
+
+function log(msg, color){
+  var l = document.getElementById('log');
+  l.style.display='block';
+  l.innerHTML += '<div style="color:'+(color||'#a8d8ea')+'">'+msg+'</div>';
+  l.scrollTop = l.scrollHeight;
+}
+
+function isPhone(val){ return val && /^[0-9]{10,11}$/.test(String(val).replace(/\s/g,'').replace(/^\+?2/,'')); }
+function isEmail(val){ return val && String(val).includes('@'); }
+function isGov(val){
+  var govs = ['القاهرة','الجيزة','الإسكندرية','أسيوط','سوهاج','قنا','الأقصر','أسوان','المنيا','بني سويف','الفيوم','المنوفية','الغربية','الدقهلية','الشرقية','كفر الشيخ','البحيرة','دمياط','بورسعيد','الإسماعيلية','السويس','شمال سيناء','جنوب سيناء','مطروح','الوادي الجديد','البحر الأحمر'];
+  return val && govs.some(function(g){ return String(val).includes(g); });
+}
+
+async function scanData(){
+  log('🔍 جاري الفحص...', '#f9ca24');
+  var snap = await db.collection(currentCol).get();
+  allDocs = [];
+  snap.docs.forEach(function(d){ allDocs.push(Object.assign({fbId:d.id}, d.data())); });
+  
+  document.getElementById('total-count').textContent = allDocs.length + ' استشاري';
+  
+  issuesList = [];
+  allDocs.forEach(function(r){
+    var issues = [];
+    // Check if phone is in spec
+    if(r.spec && isPhone(r.spec)) issues.push({field:'spec', issue:'رقم موبايل في التخصص', val:r.spec});
+    // Check if email is in spec
+    if(r.spec && isEmail(r.spec)) issues.push({field:'spec', issue:'إيميل في التخصص', val:r.spec});
+    // Check if gov is in bio
+    if(r.bio && isGov(r.bio) && !r.gov) issues.push({field:'bio', issue:'محافظة في النبذة', val:r.bio});
+    // Check if phone is in gov
+    if(r.gov && isPhone(r.gov)) issues.push({field:'gov', issue:'رقم موبايل في المحافظة', val:r.gov});
+    // Check if email is in spec2
+    if(r.spec2 && isEmail(r.spec2)) issues.push({field:'spec2', issue:'إيميل في spec2', val:r.spec2});
+    // Check empty name or spec
+    if(!r.name || r.name.length < 2) issues.push({field:'name', issue:'اسم فاضي أو قصير', val:r.name});
+    if(!r.gov) issues.push({field:'gov', issue:'محافظة فاضية', val:''});
+    
+    // فحص خاص بالموردين
+    if(currentCol === 'suppliers'){
+      if(r.cat && isPhone(r.cat)) issues.push({field:'cat', issue:'رقم موبايل في النشاط', val:r.cat});
+      if(r.cat && isEmail(r.cat)) issues.push({field:'cat', issue:'إيميل في النشاط', val:r.cat});
+      if(r.address && isPhone(r.address)) issues.push({field:'address', issue:'رقم موبايل في العنوان', val:r.address});
+    }
+    
+    if(issues.length > 0){
+      issuesList.push({fbId:r.fbId, name:r.name||'—', issues:issues, data:r});
+    }
+  });
+  
+  document.getElementById('issues-count').textContent = issuesList.length + ' سجل فيه مشكلة';
+  
+  var html = issuesList.slice(0,30).map(function(item){
+    return '<div class="issue">' +
+      '<div class="issue-name">👤 '+item.name+'</div>' +
+      item.issues.map(function(iss){
+        return '<div class="issue-detail">⚠️ '+iss.issue+': <strong>'+String(iss.val||'').substring(0,40)+'</strong></div>';
+      }).join('') +
+    '</div>';
+  }).join('');
+  
+  document.getElementById('issues-list').innerHTML = html || '<div style="color:#00b894;text-align:center;padding:20px">✅ البيانات نظيفة!</div>';
+  
+  if(issuesList.length > 0){
+    document.getElementById('fix-btn').style.display='block';
+  }
+  log('✅ فحص انتهى: '+allDocs.length+' سجل، '+issuesList.length+' مشكلة', '#00b894');
+}
+
+async function fixData(){
+  if(!confirm('هيصلح '+issuesList.length+' سجل — متأكد؟')) return;
+  var fixed = 0;
+  for(var i=0; i<issuesList.length; i++){
+    var item = issuesList[i];
+    var r = item.data;
+    var updated = {};
+    
+    item.issues.forEach(function(iss){
+      if(iss.field==='spec' && isPhone(r.spec)){
+        if(!r.phone) updated.phone = r.spec;
+        updated.spec = 'غير محدد';
+        log('📞 '+r.name+': نقل موبايل من spec', '#f9ca24');
+      }
+      if(iss.field==='spec' && isEmail(r.spec)){
+        if(!r.email) updated.email = r.spec;
+        updated.spec = 'غير محدد';
+        log('✉️ '+r.name+': نقل إيميل من spec', '#f9ca24');
+      }
+      if(iss.field==='spec2' && isEmail(r.spec2)){
+        if(!r.email) updated.email = r.spec2;
+        updated.spec2 = '';
+        log('✉️ '+r.name+': نقل إيميل من spec2', '#f9ca24');
+      }
+      if(iss.field==='cat' && isPhone(r.cat)){
+        if(!r.phone) updated.phone = r.cat;
+        updated.cat = '—';
+        log('📞 '+r.name+': نقل موبايل من cat', '#f9ca24');
+      }
+      if(iss.field==='cat' && isEmail(r.cat)){
+        if(!r.email) updated.email = r.cat;
+        updated.cat = '—';
+        log('✉️ '+r.name+': نقل إيميل من cat', '#f9ca24');
+      }
+      if(iss.field==='gov' && isPhone(r.gov)){
+        if(!r.phone) updated.phone = r.gov;
+        updated.gov = '—';
+        log('📍 '+r.name+': نقل موبايل من gov', '#f9ca24');
+      }
+    });
+    
+    if(Object.keys(updated).length > 0){
+      try{
+        await db.collection(currentCol).doc(item.fbId).update(updated);
+        fixed++;
+        log('✅ صُلح: '+r.name, '#00b894');
+      }catch(e){ log('❌ فشل: '+r.name+' - '+e.message, '#e05050'); }
+    }
+    await new Promise(r=>setTimeout(r,100));
+  }
+  log('🎉 انتهى! صُلح '+fixed+' سجل', '#f9ca24');
+  alert('✅ تم إصلاح '+fixed+' سجل!');
+  scanData();
+}
+</script>
+</body>
+</html>

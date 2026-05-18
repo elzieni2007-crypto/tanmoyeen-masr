@@ -27,14 +27,14 @@ input[type=password]{width:100%;padding:10px;border:2px solid #dde6f0;border-rad
 <body>
 <h1>🔧 تنظيف بيانات الاستشاريين والموردين</h1>
 
-<div class="card" id="login-card">
+<div class="card" id="login-card" style="display:none">
   <div style="font-size:13px;font-weight:700;margin-bottom:8px">🔐 دخول الأدمن</div>
   <input type="password" id="pass" placeholder="كلمة السر">
-  <button class="btn btn-blue" onclick="doLogin()">دخول</button>
+  <button class="btn btn-blue" onclick="doLogin()">دخول بكلمة السر</button>
 </div>
 
-<div class="card" id="main-card" style="display:none">
-  <div id="fb-status" style="color:#00b894;font-weight:700;margin-bottom:12px">✅ متصل</div>
+<div class="card" id="main-card">
+  <div id="fb-status" style="color:#00b894;font-weight:700;margin-bottom:12px">⏳ جاري الاتصال...</div>
   <div style="display:flex;gap:8px;margin-bottom:12px">
   <button class="btn btn-blue" style="flex:1;padding:8px" onclick="setCol('consultants',this)" id="btn-cons">👨‍💼 استشاريين</button>
   <button class="btn btn-green" style="flex:1;padding:8px;opacity:.6" onclick="setCol('suppliers',this)" id="btn-sups">🏭 موردين</button>
@@ -62,12 +62,22 @@ const auth = firebase.auth();
 
 function doLogin(){
   var pass = document.getElementById('pass').value;
+  if(!pass){ alert('ادخل كلمة السر'); return; }
+  document.getElementById('login-card').style.display='none';
+  document.getElementById('main-card').style.display='block';
+  // Try auth for collections that need it
   auth.signInWithEmailAndPassword('elzieni2007@gmail.com', pass)
-    .then(function(){
-      document.getElementById('login-card').style.display='none';
-      document.getElementById('main-card').style.display='block';
-    }).catch(function(e){ alert('❌ '+e.message); });
+    .then(function(){ log('✅ تم تسجيل الدخول', '#00b894'); })
+    .catch(function(e){ log('⚠️ بدون auth: '+e.code, '#f9ca24'); });
 }
+
+// Auto-connect without login for public collections
+window.addEventListener('load', function(){
+  db.collection('suppliers').limit(1).get()
+    .then(function(){
+      document.getElementById('fb-status').textContent = '✅ متصل بـ Firebase';
+    }).catch(function(){});
+});
 
 var allDocs = [];
 var currentCol = 'consultants';

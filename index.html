@@ -4970,50 +4970,114 @@ function renderAdmList(){
     return;
   }
 
-  container.innerHTML = list.map((r, idx) => `
-    <div class="adm-card" id="adm-card-${idx}">
-      <div class="adm-card-top">
-        <div class="adm-name">${r.name || '—'}</div>
-        <span class="adm-type" style="background:${tc.bg};color:${tc.color}">${tc.label}</span>
-      </div>
-      <div class="adm-rows">
-        ${r.spec   ? `<div class="adm-row"><span class="adm-lbl">التخصص</span><span class="adm-val">${r.spec}</span></div>` : ''}
-        ${r.gov    ? `<div class="adm-row"><span class="adm-lbl">المحافظة</span><span class="adm-val">${r.gov}</span></div>` : ''}
-        ${r.exp    ? `<div class="adm-row"><span class="adm-lbl">الخبرة</span><span class="adm-val">${r.exp}</span></div>` : ''}
-        ${r.jobType? `<div class="adm-row"><span class="adm-lbl">نوع العمل</span><span class="adm-val">${r.jobType}</span></div>` : ''}
-        ${r.phone  ? `<div class="adm-row"><span class="adm-lbl">الموبايل</span><span class="adm-val" style="direction:ltr;text-align:right">${r.phone}</span></div>` : ''}
-        ${r.email  ? `<div class="adm-row"><span class="adm-lbl">الإيميل</span><span class="adm-val" style="font-size:10px;direction:ltr;text-align:right">${r.email}</span></div>` : ''}
-        ${r.notes  ? `<div class="adm-row"><span class="adm-lbl">نبذة</span><span class="adm-val">${r.notes}</span></div>` : ''}
-        ${r.date   ? `<div class="adm-row"><span class="adm-lbl">تاريخ</span><span class="adm-val">${r.date}</span></div>` : ''}
-      </div>
-      <div class="adm-actions">
-        <button class="adm-btn adm-btn-call" onclick="admCall('${r.phone}')">📞 اتصال</button>
-        <button class="adm-btn adm-btn-call" style="background:#e8f0fe;color:var(--p)" onclick="admMail('${r.email}')">✉️ إيميل</button>
-        <button class="adm-btn adm-btn-del" onclick="admDelete(${idx})">🗑️ حذف</button>
-      </div>
-    </div>`).join('');
+  container.innerHTML = list.map(function(r, idx){
+    var colName = admTab==='expert'?'consultants':admTab==='sup'?'suppliers':admTab==='org'?'organizations':'jobseekers';
+    return '<div class="adm-card" id="adm-card-'+idx+'">' +
+      '<div class="adm-card-top">' +
+        '<div class="adm-name">'+(r.name||'—')+'</div>' +
+        '<span class="adm-type" style="background:'+tc.bg+';color:'+tc.color+'">'+tc.label+'</span>' +
+      '</div>' +
+      '<div class="adm-rows">' +
+        (r.spec   ? '<div class="adm-row"><span class="adm-lbl">التخصص</span><span class="adm-val">'+r.spec+'</span></div>' : '') +
+        (r.cat    ? '<div class="adm-row"><span class="adm-lbl">النشاط</span><span class="adm-val">'+r.cat+'</span></div>' : '') +
+        (r.gov    ? '<div class="adm-row"><span class="adm-lbl">المحافظة</span><span class="adm-val">'+r.gov+'</span></div>' : '') +
+        (r.exp    ? '<div class="adm-row"><span class="adm-lbl">الخبرة</span><span class="adm-val">'+r.exp+'</span></div>' : '') +
+        (r.phone  ? '<div class="adm-row"><span class="adm-lbl">الموبايل</span><span class="adm-val" style="direction:ltr;text-align:right">'+r.phone+'</span></div>' : '') +
+        (r.email  ? '<div class="adm-row"><span class="adm-lbl">الإيميل</span><span class="adm-val" style="font-size:10px;direction:ltr;text-align:right">'+r.email+'</span></div>' : '') +
+      '</div>' +
+      '<div class="adm-actions">' +
+        '<button class="adm-btn" style="background:'+tc.bg+';color:'+tc.color+'" onclick="editAdmRecord('+idx+',\''+colName+'\')">✏️ تعديل</button>' +
+        '<button class="adm-btn adm-btn-del" onclick="deleteAdmRecord(\''+(r.fbId||r.id)+'\',\''+colName+'\')">🗑️ حذف</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  window._admListData = list;
 }
 
-function admCall(phone){
-  window.location.href = 'tel:+2' + phone.replace(/[^0-9]/g,'');
-}
-function admMail(email){
-  if(email) window.location.href = 'mailto:' + email;
-}
-function admDelete(idx){
-  let all = [];
-  try{ all = JSON.parse(localStorage.getItem('registrations') || '[]'); }catch(e){}
-  const list = all.filter(r => r.type === admTab);
-  const item = list[idx];
-  const globalIdx = all.indexOf(item);
-  if(globalIdx > -1){
-    all.splice(globalIdx, 1);
-    localStorage.setItem('registrations', JSON.stringify(all));
+function admCall(phone){ window.location.href = 'tel:+2' + phone.replace(/[^0-9]/g,''); }
+function admMail(email){ window.location.href = 'mailto:' + email; }
+
+function deleteAdmRecord(id, col){
+  if(!id || id==='undefined'){ toast('❌ مفيش ID'); return; }
+  if(!confirm('هتحذف السجل ده — متأكد؟')) return;
+  db.collection(col).doc(id).delete().then(function(){
     toast('🗑️ تم الحذف');
     loadAdminData();
-  }
+  }).catch(function(e){ toast('❌ '+e.message); });
 }
 
+function editAdmRecord(idx, col){
+  var r = (window._admListData||[])[idx];
+  if(!r) return;
+  var fbId = r.fbId || r.id || '';
+  var fields = '';
+  if(col === 'consultants'){
+    fields =
+      '<div class="fg"><label class="fl">الاسم</label><input class="fi" id="ea-name" value="'+(r.name||'').replace(/"/g,'&quot;')+'"></div>' +
+      '<div class="fg"><label class="fl">التخصص</label><input class="fi" id="ea-spec" value="'+(r.spec||'')+'"></div>' +
+      '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ea-gov" value="'+(r.gov||'')+'"></div>' +
+      '<div class="fg"><label class="fl">سنوات الخبرة</label><input class="fi" id="ea-exp" value="'+(r.exp||'')+'"></div>' +
+      '<div class="fg"><label class="fl">الموبايل</label><input class="fi" id="ea-phone" value="'+(r.phone||'')+'" style="direction:ltr"></div>' +
+      '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ea-email" value="'+(r.email||'')+'" style="direction:ltr"></div>' +
+      '<div class="fg"><label class="fl">نبذة</label><textarea class="fi" id="ea-bio" rows="2">'+(r.bio||r.notes||'')+'</textarea></div>';
+  } else if(col === 'suppliers'){
+    fields =
+      '<div class="fg"><label class="fl">اسم المورد</label><input class="fi" id="ea-name" value="'+(r.name||'').replace(/"/g,'&quot;')+'"></div>' +
+      '<div class="fg"><label class="fl">النشاط</label><input class="fi" id="ea-cat" value="'+(r.cat||r.type||'')+'"></div>' +
+      '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ea-gov" value="'+(r.gov||'')+'"></div>' +
+      '<div class="fg"><label class="fl">الموبايل</label><input class="fi" id="ea-phone" value="'+(r.phone||'')+'" style="direction:ltr"></div>' +
+      '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ea-email" value="'+(r.email||'')+'" style="direction:ltr"></div>' +
+      '<div class="fg"><label class="fl">الأوراق القانونية</label><input class="fi" id="ea-cert" value="'+(r.cert||'')+'"></div>';
+  } else {
+    fields =
+      '<div class="fg"><label class="fl">الاسم</label><input class="fi" id="ea-name" value="'+(r.name||'').replace(/"/g,'&quot;')+'"></div>' +
+      '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ea-gov" value="'+(r.gov||'')+'"></div>' +
+      '<div class="fg"><label class="fl">الموبايل</label><input class="fi" id="ea-phone" value="'+(r.phone||'')+'" style="direction:ltr"></div>' +
+      '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ea-email" value="'+(r.email||'')+'" style="direction:ltr"></div>';
+  }
+  document.getElementById('mbody').innerHTML =
+    '<div style="padding:16px">' +
+    '<div style="font-size:14px;font-weight:800;color:var(--p);margin-bottom:14px">✏️ تعديل السجل</div>' +
+    fields +
+    '<div style="display:flex;gap:8px;margin-top:14px">' +
+      '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--p),var(--a));color:white;padding:12px" onclick="saveAdmRecord(\''+fbId+'\',\''+col+'\')">💾 حفظ</button>' +
+      '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
+    '</div></div>';
+  document.getElementById('modal').classList.add('op');
+}
+
+function saveAdmRecord(fbId, col){
+  if(!fbId || fbId==='undefined'){ toast('❌ مفيش ID'); return; }
+  var updated = {};
+  var nameEl  = document.getElementById('ea-name');
+  var govEl   = document.getElementById('ea-gov');
+  var phoneEl = document.getElementById('ea-phone');
+  var emailEl = document.getElementById('ea-email');
+  if(nameEl)  updated.name  = nameEl.value.trim();
+  if(govEl)   updated.gov   = govEl.value.trim();
+  if(phoneEl) updated.phone = phoneEl.value.trim();
+  if(emailEl) updated.email = emailEl.value.trim();
+  if(col==='consultants'){
+    var specEl = document.getElementById('ea-spec');
+    var expEl  = document.getElementById('ea-exp');
+    var bioEl  = document.getElementById('ea-bio');
+    if(specEl) updated.spec = specEl.value.trim();
+    if(expEl)  updated.exp  = expEl.value.trim();
+    if(bioEl)  updated.bio  = bioEl.value.trim();
+  } else if(col==='suppliers'){
+    var catEl  = document.getElementById('ea-cat');
+    var certEl = document.getElementById('ea-cert');
+    if(catEl)  updated.cat  = catEl.value.trim();
+    if(certEl) updated.cert = certEl.value.trim();
+  }
+  db.collection(col).doc(fbId).update(updated).then(function(){
+    toast('✅ تم التعديل!');
+    document.getElementById('modal').classList.remove('op');
+    loadAdminData();
+  }).catch(function(e){ toast('❌ '+e.message); });
+}
+function admDelete(idx){ toast('استخدم زرار الحذف الجديد'); }
+    loadAdminData();
 // ============ PUBLISH JOB / TENDER ============
 const EMOJIS = {
   'M&E':'📊','التدريب':'🎯','الصحة':'🏥','التعليم':'📚',
@@ -5635,38 +5699,125 @@ async function loadAdminConsultations(){
   var countEl = document.getElementById('adm-consult-count');
   if(!list) return;
   list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل...</div>';
-  var items = [];
-  if(typeof db !== 'undefined'){
-    try {
-      var snap = await db.collection('consultations').orderBy('timestamp','desc').limit(100).get();
-      snap.docs.forEach(function(d){ items.push(Object.assign({}, d.data(), {fbId:d.id})); });
-    } catch(e){ console.log('Consultations:', e.code); }
-  }
-  if(countEl) countEl.textContent = items.length;
-  if(!items.length){
-    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">لا توجد طلبات استشارة</div>';
-    return;
-  }
-  list.innerHTML = items.map(function(c){
-    var isAx = c.consultType === 'ضريبية';
-    var col = isAx ? '#1a3a6e' : '#00703a';
-    var bg  = isAx ? '#e8f0fe'  : '#e7faf3';
-    return '<div class="adm-row" style="margin-bottom:10px;border-right:3px solid '+col+'">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
-        '<div style="font-weight:800;font-size:13px">'+(c.orgName||'—')+'</div>' +
-        '<span style="background:'+bg+';color:'+col+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px">'+(c.consultType||'—')+'</span>' +
+  if(typeof db === 'undefined'){ list.innerHTML = '<div style="color:#e05050;padding:16px">❌ Firebase غير متصل</div>'; return; }
+  try {
+    var snap = await db.collection('consultations').orderBy('timestamp','desc').get();
+    var items = [];
+    snap.docs.forEach(function(d){ items.push(Object.assign({}, d.data(), {fbId:d.id})); });
+    if(countEl) countEl.textContent = items.length;
+    if(!items.length){
+      list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">لا توجد طلبات استشارة</div>';
+      return;
+    }
+    window._adminConsults = items;
+    list.innerHTML = items.map(function(c, i){
+      var isAx = c.consultType === 'ضريبية';
+      var col = isAx ? '#1a3a6e' : '#00703a';
+      var bg  = isAx ? '#e8f0fe' : '#e7faf3';
+      return '<div class="adm-card" style="border-right-color:'+col+';cursor:pointer" onclick="viewConsultAdmin('+i+')">' +
+        '<div class="adm-card-top">' +
+          '<div class="adm-name">'+(c.orgName||'—')+'</div>' +
+          '<span class="adm-type" style="background:'+bg+';color:'+col+'">'+(c.consultType||'—')+'</span>' +
+        '</div>' +
+        '<div class="adm-rows">' +
+          '<div class="adm-row"><span class="adm-lbl">المندوب</span><span class="adm-val">'+(c.delegate||'—')+'</span></div>' +
+          '<div class="adm-row"><span class="adm-lbl">المحافظة</span><span class="adm-val">'+(c.gov||'—')+'</span></div>' +
+          '<div class="adm-row"><span class="adm-lbl">الموبايل</span><span class="adm-val" style="direction:ltr">'+(c.phone||'—')+'</span></div>' +
+        '</div>' +
+        '<div class="adm-actions" onclick="event.stopPropagation()">' +
+          '<button class="adm-btn" style="background:'+bg+';color:'+col+'" onclick="editConsultAdmin('+i+')">✏️ تعديل</button>' +
+          '<button class="adm-btn adm-btn-del" onclick="deleteConsultAdmin(\''+c.fbId+'\')">🗑️ حذف</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e){ list.innerHTML = '<div style="color:#e05050;padding:16px">❌ '+e.message+'</div>'; }
+}
+
+function viewConsultAdmin(idx){
+  var c = (window._adminConsults||[])[idx];
+  if(!c) return;
+  var isAx = c.consultType === 'ضريبية';
+  var col = isAx ? '#1a3a6e' : '#00703a';
+  var bg  = isAx ? '#e8f0fe' : '#e7faf3';
+  document.getElementById('mbody').innerHTML =
+    '<div class="prof-header" style="background:linear-gradient(135deg,'+col+',#0094cc)">' +
+      '<div class="prof-av">📋</div>' +
+      '<div>' +
+        '<div class="prof-name">'+(c.orgName||'—')+'</div>' +
+        '<div class="prof-spec">'+(c.consultType||'—')+'</div>' +
+        '<div class="prof-date">📍 '+(c.gov||'—')+'</div>' +
       '</div>' +
-      '<div style="font-size:11px;color:var(--muted)">📋 '+(c.regNum||'—')+' · 📍 '+(c.gov||'—')+'</div>' +
-      '<div style="font-size:11px;color:var(--muted)">👤 '+(c.delegate||'—')+'</div>' +
-      (c.unifiedNum ? '<div style="font-size:11px;color:var(--muted)">🔢 الرقم الموحد: '+c.unifiedNum+'</div>' : '') +
-      '<div style="font-size:11px;background:var(--bg);padding:8px;border-radius:8px;margin-top:6px;line-height:1.6">'+(c.desc||'—').substring(0,200)+'</div>' +
-      '<div style="display:flex;gap:6px;margin-top:8px">' +
-        (c.phone ? '<a href="tel:'+c.phone+'" style="flex:1;padding:7px;background:#e8f0fe;color:var(--p);border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">📞 اتصال</a>' : '') +
-        (c.phone ? '<a href="https://wa.me/2'+c.phone+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>' : '') +
-        (c.email ? '<a href="mailto:'+c.email+'" style="flex:1;padding:7px;background:#fef3e8;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ إيميل</a>' : '') +
-      '</div>' +
+    '</div>' +
+    '<div class="ptable-wrap"><table class="ptable">' +
+      '<tr><td>اسم الجهة</td><td>'+(c.orgName||'—')+'</td></tr>' +
+      '<tr><td>نوع الاستشارة</td><td>'+(c.consultType||'—')+'</td></tr>' +
+      '<tr><td>المندوب</td><td>'+(c.delegate||'—')+'</td></tr>' +
+      '<tr><td>المحافظة</td><td>'+(c.gov||'—')+'</td></tr>' +
+      '<tr><td>الموبايل</td><td style="direction:ltr;text-align:right">'+(c.phone||'—')+'</td></tr>' +
+      (c.email?'<tr><td>الإيميل</td><td style="direction:ltr;text-align:right;font-size:10px">'+c.email+'</td></tr>':'')+
+      (c.regNum?'<tr><td>رقم السجل التجاري</td><td>'+c.regNum+'</td></tr>':'')+
+      (c.unifiedNum?'<tr><td>الرقم الموحد</td><td>'+c.unifiedNum+'</td></tr>':'')+
+      (c.taxNum?'<tr><td>الرقم الضريبي</td><td>'+c.taxNum+'</td></tr>':'')+
+      (c.activity?'<tr><td>النشاط</td><td>'+c.activity+'</td></tr>':'')+
+      (c.desc?'<tr><td>تفاصيل الطلب</td><td style="font-size:11px;line-height:1.6">'+c.desc+'</td></tr>':'')+
+    '</table></div>' +
+    '<div class="call-strip">' +
+      (c.phone?'<button class="call-btn call-btn-p" onclick="window.location.href=\'tel:+2'+c.phone+'\'">📞 اتصال</button>':'')+
+      (c.phone?'<button class="call-btn" style="background:#25d366;color:white" onclick="window.open(\'https://wa.me/2'+c.phone+'\',\'_blank\')">💬 واتساب</button>':'')+
+      (c.email?'<button class="call-btn call-btn-g" onclick="window.location.href=\'mailto:'+c.email+'\'">✉️ إيميل</button>':'')+
+    '</div>' +
+    '<div style="display:flex;gap:8px;padding:0 16px 16px">' +
+      '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--orange),#c06010);color:white;padding:11px" onclick="editConsultAdmin('+idx+');document.getElementById(\'modal\').classList.remove(\'op\')">✏️ تعديل</button>' +
+      '<button class="adm-btn adm-btn-del" style="flex:0.5" onclick="deleteConsultAdmin(\''+c.fbId+'\');document.getElementById(\'modal\').classList.remove(\'op\')">🗑️ حذف</button>' +
     '</div>';
-  }).join('');
+  document.getElementById('modal').classList.add('op');
+}
+
+function editConsultAdmin(idx){
+  var c = (window._adminConsults||[])[idx];
+  if(!c) return;
+  document.getElementById('mbody').innerHTML =
+    '<div style="padding:16px">' +
+    '<div style="font-size:14px;font-weight:800;color:#c06010;margin-bottom:14px">✏️ تعديل الاستشارة</div>' +
+    '<div class="fg"><label class="fl">اسم الجهة</label><input class="fi" id="ec-org" value="'+(c.orgName||'').replace(/"/g,'&quot;')+'"></div>' +
+    '<div class="fg"><label class="fl">المندوب</label><input class="fi" id="ec-delegate" value="'+(c.delegate||'')+'"></div>' +
+    '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ec-gov" value="'+(c.gov||'')+'"></div>' +
+    '<div class="fg"><label class="fl">الموبايل</label><input class="fi" id="ec-phone" value="'+(c.phone||'')+'" style="direction:ltr"></div>' +
+    '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ec-email" value="'+(c.email||'')+'" style="direction:ltr"></div>' +
+    '<div class="fg"><label class="fl">رقم السجل</label><input class="fi" id="ec-regnum" value="'+(c.regNum||'')+'"></div>' +
+    '<div class="fg"><label class="fl">تفاصيل الطلب</label><textarea class="fi" id="ec-desc" rows="3">'+(c.desc||'')+'</textarea></div>' +
+    '<div style="display:flex;gap:8px;margin-top:14px">' +
+      '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--orange),#c06010);color:white;padding:12px" onclick="saveConsultAdmin(\''+c.fbId+'\')">💾 حفظ</button>' +
+      '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
+    '</div></div>';
+  document.getElementById('modal').classList.add('op');
+}
+
+function saveConsultAdmin(fbId){
+  if(!fbId){ toast('❌ مفيش ID'); return; }
+  var updated = {
+    orgName:  document.getElementById('ec-org').value.trim(),
+    delegate: document.getElementById('ec-delegate').value.trim(),
+    gov:      document.getElementById('ec-gov').value.trim(),
+    phone:    document.getElementById('ec-phone').value.trim(),
+    email:    document.getElementById('ec-email').value.trim(),
+    regNum:   document.getElementById('ec-regnum').value.trim(),
+    desc:     document.getElementById('ec-desc').value.trim()
+  };
+  db.collection('consultations').doc(fbId).update(updated).then(function(){
+    toast('✅ تم التعديل!');
+    document.getElementById('modal').classList.remove('op');
+    loadAdminConsultations();
+  }).catch(function(e){ toast('❌ '+e.message); });
+}
+
+function deleteConsultAdmin(fbId){
+  if(!fbId){ toast('❌ مفيش ID'); return; }
+  if(!confirm('هتحذف طلب الاستشارة ده — متأكد؟')) return;
+  db.collection('consultations').doc(fbId).delete().then(function(){
+    toast('🗑️ تم الحذف');
+    loadAdminConsultations();
+  }).catch(function(e){ toast('❌ '+e.message); });
 }
 
 async function loadAdminVols(){
@@ -5674,33 +5825,71 @@ async function loadAdminVols(){
   var countEl = document.getElementById("adm-vols-count");
   if(!list) return;
   list.innerHTML = "<div style='text-align:center;padding:20px;color:var(--muted)'>⏳ جاري التحميل...</div>";
-  var vols = [];
-  // Try Firebase (works if logged in)
-  if(typeof db !== "undefined"){
-    try {
-      var snap = await db.collection("volunteers").orderBy("timestamp","desc").limit(100).get();
-      snap.docs.forEach(function(d){ vols.push(Object.assign({},d.data(),{fbId:d.id,src:"firebase"})); });
-    } catch(e){ console.log("Firebase vols:",e.code); }
-  }
-  var local = (typeof VOLUNTEERS_DATA!=="undefined"&&VOLUNTEERS_DATA.length)?VOLUNTEERS_DATA:(VOLUNTEERS_PRELOAD||[]);
-  local.forEach(function(v){
-    var exists = vols.some(function(fv){ return fv.phone===v.phone; });
-    if(!exists) vols.push(Object.assign({},v,{src:"local"}));
-  });
-  if(countEl) countEl.textContent = vols.length;
-  if(!vols.length){ list.innerHTML = "<div style='text-align:center;padding:30px;color:var(--muted)'>لا يوجد متطوعون</div>"; return; }
-  list.innerHTML = vols.map(function(v){
-    var interests = Array.isArray(v.interests)?v.interests.join(" / "):(v.interests||"—");
-    var src = v.src==="firebase"?"🔥 Firebase":"💾 محلي";
-    return "<div class='adm-row' style='margin-bottom:8px;border-right:3px solid #00703a'>" +
-      "<div style='font-weight:700;font-size:13px'>" + (v.name||"—") + " <small style='color:#00703a'>" + src + "</small></div>" +
-      "<div style='font-size:11px;color:var(--muted)'>" + (v.gov||"—") + "</div>" +
-      "<div style='font-size:11px;color:var(--a)'>" + interests + "</div>" +
-      "<div style='display:flex;gap:6px;margin-top:8px'>" +
-        (v.phone?"<a href='tel:"+v.phone+"' style='flex:1;padding:6px;background:#e8f0fe;color:var(--p);border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700'>📞 اتصال</a>":"") +
-        (v.phone?"<a href='https://wa.me/2"+v.phone+"' target='_blank' style='flex:1;padding:6px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700'>💬 واتساب</a>":"") +
-      "</div></div>";
-  }).join("");
+  if(typeof db === 'undefined'){ list.innerHTML = '<div style="color:#e05050;padding:16px">❌ Firebase غير متصل</div>'; return; }
+  try {
+    var snap = await db.collection("volunteers").orderBy("timestamp","desc").get();
+    var vols = [];
+    snap.docs.forEach(function(d){ vols.push(Object.assign({},d.data(),{fbId:d.id})); });
+    if(countEl) countEl.textContent = vols.length;
+    if(!vols.length){ list.innerHTML = "<div style='text-align:center;padding:30px;color:var(--muted)'>لا يوجد متطوعون</div>"; return; }
+    window._adminVols = vols;
+    list.innerHTML = vols.map(function(v,i){
+      var interests = Array.isArray(v.interests)?v.interests.join(" / "):(v.interests||"—");
+      return "<div class='adm-card' style='border-right-color:#00703a'>" +
+        "<div class='adm-card-top'><div class='adm-name'>"+(v.name||"—")+"</div><span class='adm-type' style='background:#e7faf3;color:#00703a'>🙋 متطوع</span></div>" +
+        "<div class='adm-rows'>" +
+          "<div class='adm-row'><span class='adm-lbl'>المحافظة</span><span class='adm-val'>"+(v.gov||"—")+"</span></div>" +
+          "<div class='adm-row'><span class='adm-lbl'>الموبايل</span><span class='adm-val' style='direction:ltr'>"+(v.phone||"—")+"</span></div>" +
+          "<div class='adm-row'><span class='adm-lbl'>الاهتمامات</span><span class='adm-val'>"+interests+"</span></div>" +
+          (v.email?"<div class='adm-row'><span class='adm-lbl'>الإيميل</span><span class='adm-val' style='font-size:10px;direction:ltr'>"+v.email+"</span></div>":"")+
+        "</div>" +
+        "<div class='adm-actions'>" +
+          "<button class='adm-btn' style='background:#e7faf3;color:#00703a' onclick='editVolunteerAdmin("+i+")'>✏️ تعديل</button>" +
+          "<button class='adm-btn adm-btn-del' onclick='deleteVolunteerAdmin(\""+v.fbId+"\")'>🗑️ حذف</button>" +
+        "</div></div>";
+    }).join("");
+  } catch(e){ list.innerHTML = '<div style="color:#e05050;padding:16px">❌ '+e.message+'</div>'; }
+}
+
+function editVolunteerAdmin(idx){
+  var v = (window._adminVols||[])[idx];
+  if(!v) return;
+  document.getElementById('mbody').innerHTML =
+    '<div style="padding:16px">' +
+    '<div style="font-size:14px;font-weight:800;color:#00703a;margin-bottom:14px">✏️ تعديل متطوع</div>' +
+    '<div class="fg"><label class="fl">الاسم</label><input class="fi" id="ev-name" value="'+(v.name||'').replace(/"/g,'&quot;')+'"></div>' +
+    '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ev-gov" value="'+(v.gov||'')+'"></div>' +
+    '<div class="fg"><label class="fl">الموبايل</label><input class="fi" id="ev-phone" value="'+(v.phone||'')+'" style="direction:ltr"></div>' +
+    '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ev-email" value="'+(v.email||'')+'" style="direction:ltr"></div>' +
+    '<div class="fg"><label class="fl">الاهتمامات</label><input class="fi" id="ev-interests" value="'+(Array.isArray(v.interests)?v.interests.join(' / '):(v.interests||''))+'"></div>' +
+    '<div style="display:flex;gap:8px;margin-top:14px">' +
+      '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,#00703a,#00b894);color:white;padding:12px" onclick="saveVolunteerAdmin(\''+v.fbId+'\')">💾 حفظ</button>' +
+      '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
+    '</div></div>';
+  document.getElementById('modal').classList.add('op');
+}
+
+function saveVolunteerAdmin(fbId){
+  var updated = {
+    name: document.getElementById('ev-name').value.trim(),
+    gov:  document.getElementById('ev-gov').value.trim(),
+    phone:document.getElementById('ev-phone').value.trim(),
+    email:document.getElementById('ev-email').value.trim(),
+    interests: document.getElementById('ev-interests').value.trim().split('/').map(function(s){return s.trim();}).filter(Boolean)
+  };
+  db.collection('volunteers').doc(fbId).update(updated).then(function(){
+    toast('✅ تم التعديل!');
+    document.getElementById('modal').classList.remove('op');
+    loadAdminVols();
+  }).catch(function(e){ toast('❌ '+e.message); });
+}
+
+function deleteVolunteerAdmin(fbId){
+  if(!confirm('هتحذف المتطوع ده — متأكد؟')) return;
+  db.collection('volunteers').doc(fbId).delete().then(function(){
+    toast('🗑️ تم الحذف');
+    loadAdminVols();
+  }).catch(function(e){ toast('❌ '+e.message); });
 }
 
 async function loadBroadcastHistory(){

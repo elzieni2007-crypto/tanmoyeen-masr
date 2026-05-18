@@ -1632,12 +1632,6 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div style="font-size:10px;color:var(--muted);padding:0 12px 8px;text-align:left">← اسحب للمزيد من التبويبات</div>
 
     <!-- قائمة السجلات -->
-    <div style="padding:0 16px">
-      <div id="adm-list-header" style="display:none;justify-content:space-between;align-items:center;padding:10px 0 8px">
-        <div style="font-size:13px;font-weight:800;color:var(--p)" id="adm-list-title"></div>
-        <button onclick="exportAdminSection()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button>
-      </div>
-    </div>
     <div class="adm-list" id="adm-list" style="display:flex;flex-direction:column;gap:8px"></div>
 
     <!-- فورم إضافة وظيفة -->
@@ -5050,12 +5044,7 @@ function setAdmTab(el, tab){
     ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
-    // إظهار هيدر التصدير
-    var listNames = {jobseeker:'باحثو عمل', expert:'استشاريين', sup:'موردين', org:'مؤسسات'};
-    var header = document.getElementById('adm-list-header');
-    var titleEl = document.getElementById('adm-list-title');
-    if(header) header.style.display = 'flex';
-    if(titleEl) titleEl.textContent = listNames[tab]||'';
+    // إظهار القائمة
     renderAdmList();
   }
 }
@@ -5104,7 +5093,13 @@ function renderAdmList(){
     return;
   }
 
-  container.innerHTML = list.map(function(r, idx){
+  var listNames = {jobseeker:'باحثو عمل', expert:'استشاريين', sup:'موردين', org:'مؤسسات'};
+  var exportHeader = '<div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px 10px">' +
+    '<div style="font-size:13px;font-weight:800;color:var(--p)">'+(listNames[admTab]||'')+' ('+list.length+')</div>' +
+    '<button onclick="exportAdminSection()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button>' +
+  '</div>';
+
+  container.innerHTML = exportHeader + list.map(function(r, idx){
     var colName = admTab==='expert'?'consultants':admTab==='sup'?'suppliers':admTab==='org'?'organizations':'jobseekers';
     return '<div class="adm-card" id="adm-card-'+idx+'">' +
       '<div class="adm-card-top">' +

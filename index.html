@@ -327,7 +327,9 @@ textarea.fi{resize:none}
 .adm-lbl{color:var(--muted);min-width:80px;font-weight:600}
 .adm-val{color:var(--txt);flex:1}
 .adm-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-.adm-btn{flex:1;padding:8px;border:none;border-radius:9px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+.vis-check{display:flex;align-items:center;gap:8px;background:#f0f8ff;border-radius:8px;padding:8px 12px;margin-top:4px;cursor:pointer;font-size:12px;color:#1a3a6e;font-weight:600}
+.vis-check input{width:16px;height:16px;cursor:pointer;accent-color:var(--a)}border-radius:10px;background:#e7faf3;color:#00703a;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.2s}
+.vis-btn.hidden{border-color:#e05050;background:#feeaea;color:#e05050}flex:1;padding:8px;border:none;border-radius:9px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
 .adm-btn-call{background:#e8f0fe;color:var(--p)}
 .adm-btn-del{background:#feeaea;color:var(--red)}
 .adm-empty{text-align:center;padding:40px 20px;color:var(--muted)}
@@ -1162,10 +1164,12 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="fg"><label class="fl">الموبايل *</label>
         <input class="fi" id="vol-phone" type="tel" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right">
       </div>
+      <label class="vis-check"><input type="checkbox" id="vol-show-phone" checked> 👁️ اظهر رقمي للمستخدمين</label>
 
       <div class="fg"><label class="fl">الإيميل</label>
         <input class="fi" id="vol-email" type="email" placeholder="example@gmail.com" style="direction:ltr;text-align:right">
       </div>
+      <label class="vis-check"><input type="checkbox" id="vol-show-email" checked> 👁️ اظهر إيميلي للمستخدمين</label>
 
       <div class="fg"><label class="fl">Badge المتطوع</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1382,7 +1386,9 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
           </select>
     </div>
     <div class="fg"><label class="fl">رقم الهاتف *</label><input id="exp-phone" class="fi" type="tel" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:left"></div>
+    <label class="vis-check"><input type="checkbox" id="exp-show-phone" checked> 👁️ اظهر رقمي للمستخدمين</label>
     <div class="fg"><label class="fl">البريد الإلكتروني *</label><input id="exp-email" class="fi" type="email" placeholder="example@email.com" style="direction:ltr;text-align:left"></div>
+    <label class="vis-check"><input type="checkbox" id="exp-show-email" checked> 👁️ اظهر إيميلي للمستخدمين</label>
     <div class="fg"><label class="fl">نبذة مختصرة</label><textarea id="exp-notes" class="fi" rows="3" placeholder="اكتب نبذة عن خبراتك والجهات التي عملت معها..."></textarea></div>
     <button class="sbtn" onclick="doReg('expert')">👨‍💼 تسجيل كاستشاري</button>
   </div>
@@ -1416,7 +1422,9 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
     <div class="fg"><label class="fl">مجال عمل المؤسسة *</label><input class="fi" type="text" id="org-field" placeholder="مثال: تعليم - صحة - تمكين اقتصادي"></div>
     <div class="fg"><label class="fl">رقم الهاتف *</label><input class="fi" id="org-phone" type="tel" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:left"></div>
+    <label class="vis-check"><input type="checkbox" id="org-show-phone" checked> 👁️ اظهر رقمي للمستخدمين</label>
     <div class="fg"><label class="fl">البريد الإلكتروني *</label><input class="fi" id="org-email" type="email" placeholder="example@email.com" style="direction:ltr;text-align:left"></div>
+    <label class="vis-check"><input type="checkbox" id="org-show-email" checked> 👁️ اظهر إيميلي للمستخدمين</label>
     <div class="fg"><label class="fl">نبذة عن المؤسسة</label><textarea class="fi" rows="3" id="org-notes" placeholder="اكتب نبذة عن نشاط وأهداف المؤسسة..."></textarea></div>
     <button class="sbtn" onclick="doReg('org')">🏢 تسجيل المؤسسة</button>
   </div>
@@ -1483,7 +1491,9 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       </select>
     </div>
     <div class="fg"><label class="fl">رقم الهاتف *</label><input class="fi" id="sup-phone" type="tel" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:left"></div>
+    <label class="vis-check"><input type="checkbox" id="sup-show-phone" checked> 👁️ اظهر رقمي للمستخدمين</label>
     <div class="fg"><label class="fl">البريد الإلكتروني *</label><input class="fi" id="sup-email" type="email" placeholder="example@email.com" style="direction:ltr;text-align:left"></div>
+    <label class="vis-check"><input type="checkbox" id="sup-show-email" checked> 👁️ اظهر إيميلي للمستخدمين</label>
     <div class="fg"><label class="fl">معلومات إضافية</label><textarea class="fi" rows="3" id="sup-notes" placeholder="اكتب نبذة عن خدماتك وسابقة أعمالك..."></textarea></div>
     <button class="sbtn" onclick="doReg('sup')">🏭 تسجيل كمورد</button>
   </div>
@@ -1609,6 +1619,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" style="background:#e7faf3;color:#00703a;border-color:#00b894" onclick="setAdmTab(this,'volunteers-adm')">🤝 متطوعين</div>
       <div class="adm-tab" style="background:#fef3e8;color:#c06010;border-color:#c06010" onclick="setAdmTab(this,'consultations-adm')">📋 استشارات</div>
       <div class="adm-tab" style="background:#dcfce7;color:#00703a;border-color:#00703a" onclick="setAdmTab(this,'broadcast')">💬 واتساب</div>
+      <div class="adm-tab" style="background:#f3e8ff;color:#7c3aed;border-color:#7c3aed" onclick="setAdmTab(this,'settings')">⚙️ إعدادات</div>
     </div>
     <div style="font-size:10px;color:var(--muted);padding:0 12px 8px;text-align:left">← اسحب للمزيد من التبويبات</div>
 
@@ -1930,8 +1941,51 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   </div>
 </div>
 
-    <!-- قائمة الوظائف -->
-    <div id="adm-form-jobs-list" style="display:none;padding:0 16px;padding-bottom:100px">
+    <!-- إعدادات -->
+    <div id="adm-form-settings" style="display:none;padding:0 16px;padding-bottom:100px">
+      <div style="font-size:15px;font-weight:800;color:#7c3aed;margin:16px 0 12px">⚙️ إعدادات العرض</div>
+
+      <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:12px">
+        <div style="font-size:13px;font-weight:800;color:var(--p);margin-bottom:14px">👁️ إظهار / إخفاء بيانات التواصل</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px">التحكم في ظهور الموبايل والإيميل لكل الأقسام في التطبيق</p>
+
+        <!-- استشاريين -->
+        <div style="border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">👨‍💼 الاستشاريين</div>
+          <div style="display:flex;gap:8px">
+            <button id="cons-phone-btn" class="vis-btn" onclick="toggleVisibility('cons','phone',this)">📞 موبايل: ظاهر</button>
+            <button id="cons-email-btn" class="vis-btn" onclick="toggleVisibility('cons','email',this)">✉️ إيميل: ظاهر</button>
+          </div>
+        </div>
+
+        <!-- موردين -->
+        <div style="border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">🏭 الموردين</div>
+          <div style="display:flex;gap:8px">
+            <button id="sups-phone-btn" class="vis-btn" onclick="toggleVisibility('sups','phone',this)">📞 موبايل: ظاهر</button>
+            <button id="sups-email-btn" class="vis-btn" onclick="toggleVisibility('sups','email',this)">✉️ إيميل: ظاهر</button>
+          </div>
+        </div>
+
+        <!-- متطوعين -->
+        <div style="border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">🙋 المتطوعين</div>
+          <div style="display:flex;gap:8px">
+            <button id="vols-phone-btn" class="vis-btn" onclick="toggleVisibility('vols','phone',this)">📞 موبايل: ظاهر</button>
+            <button id="vols-email-btn" class="vis-btn" onclick="toggleVisibility('vols','email',this)">✉️ إيميل: ظاهر</button>
+          </div>
+        </div>
+
+        <!-- مؤسسات -->
+        <div>
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">🏢 المؤسسات</div>
+          <div style="display:flex;gap:8px">
+            <button id="orgs-phone-btn" class="vis-btn" onclick="toggleVisibility('orgs','phone',this)">📞 موبايل: ظاهر</button>
+            <button id="orgs-email-btn" class="vis-btn" onclick="toggleVisibility('orgs','email',this)">✉️ إيميل: ظاهر</button>
+          </div>
+        </div>
+      </div>
+    </div> style="display:none;padding:0 16px;padding-bottom:100px">
       <div id="published-jobs-list-new" style="margin-top:8px"></div>
     </div>
 
@@ -3326,6 +3380,8 @@ function shareTenderFB(){
 
 function openCon(id){
   const c=CONS.find(x=>x.id==id);if(!c)return;
+  var showPhone = c.showPhone !== false;
+  var showEmail = c.showEmail !== false;
   document.getElementById('mbody').innerHTML=`
     <div class="prof-header">
       <div class="prof-av">${c.av}</div>
@@ -3341,23 +3397,27 @@ function openCon(id){
         <tr><td>المحافظة</td><td>${c.gov}</td></tr>
         <tr><td>التخصص الرئيسي</td><td>${c.spec}</td></tr>
         <tr><td>سنوات الخبرة</td><td>${c.exp||'—'}</td></tr>
-        <tr><td>رقم الموبايل</td><td style="direction:ltr;text-align:right">${c.phone}</td></tr>
-        <tr><td>البريد الإلكتروني</td><td style="direction:ltr;text-align:right;font-size:10px;word-break:break-all">${c.email}</td></tr>
-        <tr><td>نبذة مختصرة</td><td>${c.bio}</td></tr>
+        ${showPhone?`<tr><td>رقم الموبايل</td><td style="direction:ltr;text-align:right">${c.phone||'—'}</td></tr>`:''}
+        ${showEmail?`<tr><td>البريد الإلكتروني</td><td style="direction:ltr;text-align:right;font-size:10px;word-break:break-all">${c.email||'—'}</td></tr>`:''}
+        <tr><td>نبذة مختصرة</td><td>${c.bio||'—'}</td></tr>
         <tr><td>مجالات التخصص</td><td>${(c.specs||[c.spec2||c.spec]).map(s=>'• '+s).join('<br>')}</td></tr>
-        <tr><td>سابقة الأعمال مع المنظمات الدولية</td><td>${typeof c.orgs==='string'?c.orgs:(c.orgs||[]).join('، ')}</td></tr>
+        <tr><td>سابقة الأعمال</td><td>${typeof c.orgs==='string'?c.orgs:(c.orgs||[]).join('، ')}</td></tr>
       </table>
     </div>
     <div class="call-strip">
-      <button class="call-btn call-btn-p" onclick="callCon('${c.phone}')">📞 اتصال</button>
-      <button class="call-btn" style="background:#25d366;color:white" onclick="waContact('${c.phone}','${c.name}')">💬 واتساب</button>
-      <button class="call-btn call-btn-g" onclick="mailCon('${c.email}')">✉️ إيميل</button>
+      ${showPhone?`<button class="call-btn call-btn-p" onclick="callCon('${c.phone}')">📞 اتصال</button>`:''}
+      ${showPhone?`<button class="call-btn" style="background:#25d366;color:white" onclick="waContact('${c.phone}','${c.name}')">💬 واتساب</button>`:''}
+      ${showEmail?`<button class="call-btn call-btn-g" onclick="mailCon('${c.email}')">✉️ إيميل</button>`:''}
     </div>`;
   document.getElementById('modal').classList.add('op');
 }
 
 function openSup(id){
   const s=SUPS.find(x=>x.id==id);if(!s)return;
+function openSup(id){
+  const s=SUPS.find(x=>x.id==id);if(!s)return;
+  var showPhone = s.showPhone !== false;
+  var showEmail = s.showEmail !== false;
   document.getElementById('mbody').innerHTML=`
     <div class="prof-header" style="background:linear-gradient(135deg,#00703a,#00b894)">
       <div class="prof-av">${s.logo}</div>
@@ -3370,22 +3430,19 @@ function openSup(id){
     <div class="ptable-wrap">
       <table class="ptable">
         <tr><td>اسم المورد</td><td>${s.name}</td></tr>
-        <tr><td>تاريخ الإضافة</td><td>${s.since||s.date||'—'}</td></tr>
         <tr><td>المحافظة</td><td>${s.gov}</td></tr>
-        <tr><td>البريد الإلكتروني</td><td style="direction:ltr;text-align:right;font-size:10px;word-break:break-all">${s.email||'—'}</td></tr>
-        <tr><td>رقم الموبايل</td><td style="direction:ltr;text-align:right">${s.phone||'—'}</td></tr>
-        <tr><td>هل يوجد خدمات توصيل</td><td>${s.delivery||'—'}</td></tr>
-        <tr><td>فاتورة ضريبية - بطاقة ضريبية - سجل تجاري</td><td>${s.cert||'—'}</td></tr>
+        ${showEmail?`<tr><td>البريد الإلكتروني</td><td style="direction:ltr;text-align:right;font-size:10px;word-break:break-all">${s.email||'—'}</td></tr>`:''}
+        ${showPhone?`<tr><td>رقم الموبايل</td><td style="direction:ltr;text-align:right">${s.phone||'—'}</td></tr>`:''}
         <tr><td>نشاط المورد</td><td>${s.cat||'—'}</td></tr>
         <tr><td>عنوان المورد</td><td>${s.address||s.gov||'—'}</td></tr>
-        <tr><td>سابقة الأعمال مع الجمعيات والمنظمات الدولية</td><td>${(typeof s.clients==="string"?s.clients.split("/"): (s.clients||[])).map(o=>'• '+o).join('<br>')||'—'}</td></tr>
-        <tr><td>معلومات إضافية</td><td>${s.desc||s.prev||s.notes||'—'}</td></tr>
+        <tr><td>الأوراق القانونية</td><td>${s.cert||'—'}</td></tr>
+        <tr><td>سابقة الأعمال</td><td>${(typeof s.clients==="string"?s.clients.split("/"): (s.clients||[])).map(o=>'• '+o).join('<br>')||s.prev||'—'}</td></tr>
       </table>
     </div>
     <div class="call-strip">
-      <button class="call-btn call-btn-p" onclick="callCon('${s.phone}')">📞 اتصال</button>
-      <button class="call-btn" style="background:#25d366;color:white" onclick="waContact('${s.phone}','${s.name}')">💬 واتساب</button>
-      <button class="call-btn call-btn-g" onclick="mailCon('${s.email}')">✉️ إيميل</button>
+      ${showPhone?`<button class="call-btn call-btn-p" onclick="callCon('${s.phone}')">📞 اتصال</button>`:''}
+      ${showPhone?`<button class="call-btn" style="background:#25d366;color:white" onclick="waContact('${s.phone}','${s.name}')">💬 واتساب</button>`:''}
+      ${showEmail?`<button class="call-btn call-btn-g" onclick="mailCon('${s.email}')">✉️ إيميل</button>`:''}
     </div>`;
   document.getElementById('modal').classList.add('op');
 }
@@ -3548,6 +3605,8 @@ function doReg(type){
     data.phone   = getVal('exp-phone');
     data.email   = getVal('exp-email');
     data.notes   = getVal('exp-notes');
+    data.showPhone = document.getElementById('exp-show-phone') ? document.getElementById('exp-show-phone').checked : true;
+    data.showEmail = document.getElementById('exp-show-email') ? document.getElementById('exp-show-email').checked : true;
   } else if(type === 'org'){
     data.name    = getVal('org-name');
     data.orgtype = getVal('org-type');
@@ -3556,6 +3615,8 @@ function doReg(type){
     data.phone   = getVal('org-phone');
     data.email   = getVal('org-email');
     data.notes   = getVal('org-notes');
+    data.showPhone = document.getElementById('org-show-phone') ? document.getElementById('org-show-phone').checked : true;
+    data.showEmail = document.getElementById('org-show-email') ? document.getElementById('org-show-email').checked : true;
   } else if(type === 'sup'){
     data.name    = getVal('sup-name');
     data.spec    = getVal('sup-cat');
@@ -3566,6 +3627,8 @@ function doReg(type){
     data.phone   = getVal('sup-phone');
     data.email   = getVal('sup-email');
     data.notes   = getVal('sup-notes');
+    data.showPhone = document.getElementById('sup-show-phone') ? document.getElementById('sup-show-phone').checked : true;
+    data.showEmail = document.getElementById('sup-show-email') ? document.getElementById('sup-show-email').checked : true;
   }
 
   // حفظ محلياً في المتصفح (يشتغل فوراً بدون إنترنت)
@@ -4195,6 +4258,8 @@ function openOrg(idx){
   });
   var o = data[idx];
   if(!o) return;
+  var showPhone = o.showPhone !== false;
+  var showEmail = o.showEmail !== false;
   document.getElementById('mbody').innerHTML =
     '<div class="prof-header" style="background:linear-gradient(135deg,#1a3a6e,#0094cc)">' +
       '<div class="prof-av">'+(o.logo||'🏢')+'</div>' +
@@ -4209,14 +4274,14 @@ function openOrg(idx){
       '<tr><td>نوع المؤسسة</td><td>'+(o.type||'—')+'</td></tr>' +
       '<tr><td>المحافظة</td><td>'+(o.gov||'—')+'</td></tr>' +
       '<tr><td>مجال العمل</td><td>'+(o.field||'—')+'</td></tr>' +
-      '<tr><td>رقم الموبايل</td><td style="direction:ltr;text-align:right">'+(o.phone||'—')+'</td></tr>' +
-      '<tr><td>البريد الإلكتروني</td><td style="direction:ltr;text-align:right;font-size:10px;word-break:break-all">'+(o.email||'—')+'</td></tr>' +
+      (showPhone?'<tr><td>رقم الموبايل</td><td style="direction:ltr;text-align:right">'+(o.phone||'—')+'</td></tr>':'')+
+      (showEmail?'<tr><td>البريد الإلكتروني</td><td style="direction:ltr;text-align:right;font-size:10px;word-break:break-all">'+(o.email||'—')+'</td></tr>':'')+
       (o.desc ? '<tr><td>نبذة</td><td>'+o.desc+'</td></tr>' : '') +
     '</table></div>' +
     '<div class="call-strip">' +
-      (o.phone ? '<button class="call-btn call-btn-p" onclick="callCon(\''+o.phone+'\')">📞 اتصال</button>' : '') +
-      (o.phone ? '<button class="call-btn" style="background:#25d366;color:white" onclick="waContact(\''+o.phone+'\',\''+o.name+'\')">💬 واتساب</button>' : '') +
-      (o.email ? '<button class="call-btn call-btn-g" onclick="mailCon(\''+o.email+'\')">✉️ إيميل</button>' : '') +
+      (showPhone&&o.phone ? '<button class="call-btn call-btn-p" onclick="callCon(\''+o.phone+'\')">📞 اتصال</button>' : '') +
+      (showPhone&&o.phone ? '<button class="call-btn" style="background:#25d366;color:white" onclick="waContact(\''+o.phone+'\',\''+o.name+'\')">💬 واتساب</button>' : '') +
+      (showEmail&&o.email ? '<button class="call-btn call-btn-g" onclick="mailCon(\''+o.email+'\')">✉️ إيميل</button>' : '') +
     '</div>';
   document.getElementById('modal').classList.add('op');
 }
@@ -4399,6 +4464,8 @@ function submitVolunteer(){
     email: (document.getElementById('vol-email')||{}).value||'',
     badges: badges,
     photo: photo,
+    showPhone: document.getElementById('vol-show-phone') ? document.getElementById('vol-show-phone').checked : true,
+    showEmail: document.getElementById('vol-show-email') ? document.getElementById('vol-show-email').checked : true,
     date: new Date().toLocaleDateString('ar-EG'),
   };
 
@@ -4513,11 +4580,13 @@ function openVolunteer(idx){
       (daysArr.length ? '<tr><td>الأيام المتاحة</td><td>'+daysArr.join(' - ')+'</td></tr>' : '') +
       (v.travel ? '<tr><td>إمكانية السفر</td><td>'+v.travel+'</td></tr>' : '') +
       (v.langs ? '<tr><td>اللغات</td><td>'+v.langs+'</td></tr>' : '') +
+      (VISIBILITY.vols.phone && v.showPhone !== false && v.phone ? '<tr><td>الموبايل</td><td style="direction:ltr;text-align:right">'+v.phone+'</td></tr>' : '') +
+      (VISIBILITY.vols.email && v.showEmail !== false && v.email ? '<tr><td>الإيميل</td><td style="direction:ltr;text-align:right;font-size:10px">'+v.email+'</td></tr>' : '') +
     '</table></div>' +
     '<div class="call-strip">' +
-      (v.phone ? '<a href="tel:'+v.phone+'" class="call-btn call-btn-p">📞 اتصال</a>' : '') +
-      (v.phone ? '<a href="https://wa.me/2'+v.phone+'" target="_blank" class="call-btn" style="background:#25d366;color:white">💬 واتساب</a>' : '') +
-      (v.email ? '<a href="mailto:'+v.email+'" class="call-btn call-btn-g">✉️ إيميل</a>' : '') +
+      (VISIBILITY.vols.phone && v.showPhone !== false && v.phone ? '<a href="tel:'+v.phone+'" class="call-btn call-btn-p">📞 اتصال</a>' : '') +
+      (VISIBILITY.vols.phone && v.showPhone !== false && v.phone ? '<a href="https://wa.me/2'+v.phone+'" target="_blank" class="call-btn" style="background:#25d366;color:white">💬 واتساب</a>' : '') +
+      (VISIBILITY.vols.email && v.showEmail !== false && v.email ? '<a href="mailto:'+v.email+'" class="call-btn call-btn-g">✉️ إيميل</a>' : '') +
     '</div>';
 
   document.getElementById('modal').classList.add('op');
@@ -4849,7 +4918,7 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){
+  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
@@ -4898,7 +4967,10 @@ function setAdmTab(el, tab){
     if(formPending){ formPending.style.display = 'block'; formPending.style.visibility = 'visible'; }
     renderPendingJobs();
     updatePendingBadge();
-  } else if(tab === 'broadcast'){
+  } else if(tab === 'settings'){
+    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    var sEl = document.getElementById('adm-form-settings');
+    if(sEl){ sEl.style.display='block'; loadVisibilitySettings(); }
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
     var bEl=document.getElementById('adm-form-broadcast');
     if(bEl){bEl.style.display='block';}
@@ -4910,7 +4982,7 @@ function setAdmTab(el, tab){
     loadAdminVols();
   } else if(tab === 'consultations-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-consultations-adm');
     if(cEl){cEl.style.display='block';}
     loadAdminConsultations();
@@ -4919,7 +4991,7 @@ function setAdmTab(el, tab){
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
     // Hide all special forms
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
     renderAdmList();
@@ -5018,7 +5090,9 @@ function editAdmRecord(idx, col){
       '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ea-gov" value="'+(r.gov||'')+'"></div>' +
       '<div class="fg"><label class="fl">سنوات الخبرة</label><input class="fi" id="ea-exp" value="'+(r.exp||'')+'"></div>' +
       '<div class="fg"><label class="fl">الموبايل</label><input class="fi" id="ea-phone" value="'+(r.phone||'')+'" style="direction:ltr"></div>' +
+      '<label class="vis-check"><input type="checkbox" id="ea-show-phone" '+(r.showPhone!==false?'checked':'')+'>  👁️ اظهر الموبايل للمستخدمين</label>' +
       '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ea-email" value="'+(r.email||'')+'" style="direction:ltr"></div>' +
+      '<label class="vis-check"><input type="checkbox" id="ea-show-email" '+(r.showEmail!==false?'checked':'')+'>  👁️ اظهر الإيميل للمستخدمين</label>' +
       '<div class="fg"><label class="fl">نبذة</label><textarea class="fi" id="ea-bio" rows="2">'+(r.bio||r.notes||'')+'</textarea></div>';
   } else if(col === 'suppliers'){
     fields =
@@ -5026,14 +5100,18 @@ function editAdmRecord(idx, col){
       '<div class="fg"><label class="fl">النشاط</label><input class="fi" id="ea-cat" value="'+(r.cat||r.type||'')+'"></div>' +
       '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ea-gov" value="'+(r.gov||'')+'"></div>' +
       '<div class="fg"><label class="fl">الموبايل</label><input class="fi" id="ea-phone" value="'+(r.phone||'')+'" style="direction:ltr"></div>' +
+      '<label class="vis-check"><input type="checkbox" id="ea-show-phone" '+(r.showPhone!==false?'checked':'')+'>  👁️ اظهر الموبايل للمستخدمين</label>' +
       '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ea-email" value="'+(r.email||'')+'" style="direction:ltr"></div>' +
+      '<label class="vis-check"><input type="checkbox" id="ea-show-email" '+(r.showEmail!==false?'checked':'')+'>  👁️ اظهر الإيميل للمستخدمين</label>' +
       '<div class="fg"><label class="fl">الأوراق القانونية</label><input class="fi" id="ea-cert" value="'+(r.cert||'')+'"></div>';
   } else {
     fields =
       '<div class="fg"><label class="fl">الاسم</label><input class="fi" id="ea-name" value="'+(r.name||'').replace(/"/g,'&quot;')+'"></div>' +
       '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ea-gov" value="'+(r.gov||'')+'"></div>' +
       '<div class="fg"><label class="fl">الموبايل</label><input class="fi" id="ea-phone" value="'+(r.phone||'')+'" style="direction:ltr"></div>' +
-      '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ea-email" value="'+(r.email||'')+'" style="direction:ltr"></div>';
+      '<label class="vis-check"><input type="checkbox" id="ea-show-phone" '+(r.showPhone!==false?'checked':'')+'>  👁️ اظهر الموبايل للمستخدمين</label>' +
+      '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ea-email" value="'+(r.email||'')+'" style="direction:ltr"></div>' +
+      '<label class="vis-check"><input type="checkbox" id="ea-show-email" '+(r.showEmail!==false?'checked':'')+'>  👁️ اظهر الإيميل للمستخدمين</label>';
   }
   document.getElementById('mbody').innerHTML =
     '<div style="padding:16px">' +
@@ -5053,10 +5131,14 @@ function saveAdmRecord(fbId, col){
   var govEl   = document.getElementById('ea-gov');
   var phoneEl = document.getElementById('ea-phone');
   var emailEl = document.getElementById('ea-email');
-  if(nameEl)  updated.name  = nameEl.value.trim();
-  if(govEl)   updated.gov   = govEl.value.trim();
-  if(phoneEl) updated.phone = phoneEl.value.trim();
-  if(emailEl) updated.email = emailEl.value.trim();
+  var showPhoneEl = document.getElementById('ea-show-phone');
+  var showEmailEl = document.getElementById('ea-show-email');
+  if(nameEl)  updated.name      = nameEl.value.trim();
+  if(govEl)   updated.gov       = govEl.value.trim();
+  if(phoneEl) updated.phone     = phoneEl.value.trim();
+  if(emailEl) updated.email     = emailEl.value.trim();
+  if(showPhoneEl) updated.showPhone = showPhoneEl.checked;
+  if(showEmailEl) updated.showEmail = showEmailEl.checked;
   if(col==='consultants'){
     var specEl = document.getElementById('ea-spec');
     var expEl  = document.getElementById('ea-exp');
@@ -5860,7 +5942,9 @@ function editVolunteerAdmin(idx){
     '<div class="fg"><label class="fl">الاسم</label><input class="fi" id="ev-name" value="'+(v.name||'').replace(/"/g,'&quot;')+'"></div>' +
     '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ev-gov" value="'+(v.gov||'')+'"></div>' +
     '<div class="fg"><label class="fl">الموبايل</label><input class="fi" id="ev-phone" value="'+(v.phone||'')+'" style="direction:ltr"></div>' +
+    '<label class="vis-check"><input type="checkbox" id="ev-show-phone" '+(v.showPhone!==false?'checked':'')+'>  👁️ اظهر الموبايل للمستخدمين</label>' +
     '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ev-email" value="'+(v.email||'')+'" style="direction:ltr"></div>' +
+    '<label class="vis-check"><input type="checkbox" id="ev-show-email" '+(v.showEmail!==false?'checked':'')+'>  👁️ اظهر الإيميل للمستخدمين</label>' +
     '<div class="fg"><label class="fl">الاهتمامات</label><input class="fi" id="ev-interests" value="'+(Array.isArray(v.interests)?v.interests.join(' / '):(v.interests||''))+'"></div>' +
     '<div style="display:flex;gap:8px;margin-top:14px">' +
       '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,#00703a,#00b894);color:white;padding:12px" onclick="saveVolunteerAdmin(\''+v.fbId+'\')">💾 حفظ</button>' +
@@ -5875,7 +5959,9 @@ function saveVolunteerAdmin(fbId){
     gov:  document.getElementById('ev-gov').value.trim(),
     phone:document.getElementById('ev-phone').value.trim(),
     email:document.getElementById('ev-email').value.trim(),
-    interests: document.getElementById('ev-interests').value.trim().split('/').map(function(s){return s.trim();}).filter(Boolean)
+    interests: document.getElementById('ev-interests').value.trim().split('/').map(function(s){return s.trim();}).filter(Boolean),
+    showPhone: document.getElementById('ev-show-phone') ? document.getElementById('ev-show-phone').checked : true,
+    showEmail: document.getElementById('ev-show-email') ? document.getElementById('ev-show-email').checked : true
   };
   db.collection('volunteers').doc(fbId).update(updated).then(function(){
     toast('✅ تم التعديل!');
@@ -6079,7 +6165,57 @@ function manualRefresh(){
   });
 }
 
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),2500);}
+// ============ VISIBILITY SETTINGS ============
+var VISIBILITY = {
+  cons:  { phone: true, email: true },
+  sups:  { phone: true, email: true },
+  vols:  { phone: true, email: true },
+  orgs:  { phone: true, email: true }
+};
+
+function loadVisibilitySettings(){
+  try{
+    var saved = JSON.parse(localStorage.getItem('visibility_settings')||'{}');
+    Object.keys(VISIBILITY).forEach(function(k){
+      if(saved[k]) VISIBILITY[k] = Object.assign({}, VISIBILITY[k], saved[k]);
+    });
+  }catch(e){}
+  // تحديث الأزرار
+  Object.keys(VISIBILITY).forEach(function(section){
+    ['phone','email'].forEach(function(field){
+      var btn = document.getElementById(section+'-'+field+'-btn');
+      if(!btn) return;
+      var visible = VISIBILITY[section][field];
+      btn.textContent = (field==='phone'?'📞 موبايل: ':'✉️ إيميل: ') + (visible?'ظاهر':'مخفي');
+      btn.className = 'vis-btn' + (visible?'':' hidden');
+    });
+  });
+}
+
+function toggleVisibility(section, field, btn){
+  VISIBILITY[section][field] = !VISIBILITY[section][field];
+  var visible = VISIBILITY[section][field];
+  btn.textContent = (field==='phone'?'📞 موبايل: ':'✉️ إيميل: ') + (visible?'ظاهر':'مخفي');
+  btn.className = 'vis-btn' + (visible?'':' hidden');
+  // حفظ في localStorage
+  localStorage.setItem('visibility_settings', JSON.stringify(VISIBILITY));
+  // إعادة رندر الأقسام المتأثرة
+  if(section==='cons') renderCons();
+  if(section==='sups') renderSups();
+  if(section==='vols') loadVolunteers();
+  if(section==='orgs') renderOrgs();
+  toast(visible ? '👁️ تم الإظهار' : '🙈 تم الإخفاء');
+}
+
+// تحميل الإعدادات عند بداية التطبيق
+(function(){
+  try{
+    var saved = JSON.parse(localStorage.getItem('visibility_settings')||'{}');
+    Object.keys(VISIBILITY).forEach(function(k){
+      if(saved[k]) VISIBILITY[k] = Object.assign({}, VISIBILITY[k], saved[k]);
+    });
+  }catch(e){}
+})();t.textContent=msg;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),2500);}
 
 // ============ NEW REGISTRATIONS BELL ============
 var _newRegs = [];

@@ -328,7 +328,18 @@ textarea.fi{resize:none}
 .adm-val{color:var(--txt);flex:1}
 .adm-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
 .vis-check{display:flex;align-items:center;gap:8px;background:#f0f8ff;border-radius:8px;padding:8px 12px;margin-top:4px;cursor:pointer;font-size:12px;color:#1a3a6e;font-weight:600}
-.vis-check input{width:16px;height:16px;cursor:pointer;accent-color:var(--a)}border-radius:10px;background:#e7faf3;color:#00703a;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.2s}
+.vis-check input{width:16px;height:16px;cursor:pointer;accent-color:var(--a)}
+.vis-btn{flex:1;padding:8px 6px;border:2px solid #00b894;border-radius:10px;background:#e7faf3;color:#00703a;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.2s}
+.vis-btn.hidden{border-color:#e05050;background:#feeaea;color:#e05050}
+
+/* SKELETON LOADING */
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-card{background:white;border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.sk-line{height:12px;margin-bottom:8px}
+.sk-title{height:16px;width:60%;margin-bottom:12px}
+.sk-avatar{width:44px;height:44px;border-radius:50%;flex-shrink:0}
+.vis-btn{flex:1;padding:8px 6px;border:2px solid #00b894;border-radius:10px;background:#e7faf3;color:#00703a;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.2s}
 .vis-btn.hidden{border-color:#e05050;background:#feeaea;color:#e05050}flex:1;padding:8px;border:none;border-radius:9px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
 .adm-btn-call{background:#e8f0fe;color:var(--p)}
 .adm-btn-del{background:#feeaea;color:var(--red)}
@@ -389,8 +400,6 @@ textarea.fi{resize:none}
 .sp-corner img{width:100%;height:100%;object-fit:contain;padding:5px}
 /* Enter button */
 .sp-enter{margin-top:16px;position:relative;z-index:1;animation:su .5s ease 1.4s both}
-.sp-enter-btn{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);color:white;padding:9px 26px;border-radius:20px;font-size:12px;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer;backdrop-filter:blur(8px)}
-
 .sp-enter-btn{
   background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);
   color:white;padding:10px 28px;border-radius:20px;
@@ -669,7 +678,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="dg-card" onclick="go('volunteers')"><div class="dg-icon" style="background:#e7faf3">🤝</div><div class="dg-t">متطوعون</div><div class="dg-c" id="vol-dash-count">انضم الآن</div></div>
     <div class="dg-card" onclick="go('register')" style="border:2px solid var(--a);background:linear-gradient(135deg,#e8f0fe,#f0f7ff)"><div class="dg-icon" style="background:var(--a)">📝</div><div class="dg-t" style="color:var(--p);font-weight:900">سجّل ملفك</div><div class="dg-c" style="color:var(--a);font-weight:800">مجاناً ✨</div></div>
     <div class="dg-card" onclick="go('consult-screen')" style="border:2px solid #c06010;background:linear-gradient(135deg,#fef3e8,#fff8f0)"><div class="dg-icon" style="background:#c06010">📋</div><div class="dg-t" style="color:#c06010;font-weight:900">استشارة</div><div class="dg-c" style="color:#c06010;font-weight:700">ضريبية / تأمينية</div></div>
-    <div class="dg-card" onclick="go('nexus-screen')" style="border:2px solid #0d1b2a;background:linear-gradient(135deg,#f0f4f8,#e8f0fe)"><div class="dg-icon" style="background:#0d1b2a;padding:0;overflow:hidden"><img src="''' + NEXUS_LOGO + '''" style="width:100%;height:100%;object-fit:contain" onerror="this.parentNode.innerHTML='🎯'"></div><div class="dg-t" style="color:#0d1b2a;font-weight:900">Nexus</div><div class="dg-c" style="color:#f59e0b;font-weight:700">قريباً ✨</div></div>
+    <div class="dg-card" onclick="go('nexus-screen')" style="border:2px solid #0d1b2a;background:linear-gradient(135deg,#f0f4f8,#e8f0fe)"><div class="dg-icon" style="background:#0d1b2a;display:flex;align-items:center;justify-content:center"><span style="color:#f59e0b;font-size:18px;font-weight:900">N</span></div><div class="dg-t" style="color:#0d1b2a;font-weight:900">Nexus</div><div class="dg-c" style="color:#f59e0b;font-weight:700">قريباً ✨</div></div>
   </div>
   <!-- أزرار المشاركة -->
   <div style="display:flex;gap:6px;padding:4px 10px 2px;direction:ltr">
@@ -715,7 +724,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div style="padding:0 14px 8px;display:flex;justify-content:space-between;align-items:center">
     <div style="font-size:12px;color:var(--muted)" id="jcnt">جاري التحميل...</div>
   </div>
-  <div class="jlist" id="jlist"><div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">⏳</div><div style="font-size:13px;font-weight:600">جاري تحميل الوظائف...</div></div></div>
+  <div class="jlist" id="jlist"><div id="jlist-skeleton"></div></div>
 
   <!-- باحثين عن عمل -->
   <div class="sh" style="margin-top:8px">
@@ -749,7 +758,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="tab" onclick="setTF(this,'خدمات')">خدمات</div>
     <div class="tab" onclick="setTF(this,'مقاولات')">مقاولات</div>
   </div>
-  <div class="tlist" id="tlist"><div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">⏳</div><div style="font-size:13px;font-weight:600">جاري تحميل المناقصات...</div></div></div>
+  <div class="tlist" id="tlist"><div id="tlist-skeleton"></div></div>
 </div>
 
 <!-- CONSULTANTS -->
@@ -3166,11 +3175,16 @@ function renderDash(){
 // ============ CONSULTANTS ============
 function renderCons(){
   const q=(document.getElementById('ci')||{}).value||'';
-  // إزالة التكرار بالموبايل أو الإيميل أو الاسم
   let list=deduplicateArray(CONS, ['phone','email','name']);
-  if(cFilt!=='all')list=list.filter(c=>c.specs.some(s=>s.includes(cFilt))||c.spec.includes(cFilt));
-  if(q)list=list.filter(c=>c.name.includes(q)||c.spec.includes(q)||c.gov.includes(q)||c.bio.includes(q));
-  document.getElementById('con-cnt').textContent=list.length;
+  if(cFilt!=='all')list=list.filter(c=>c.specs&&c.specs.some(s=>s.includes(cFilt))||c.spec&&c.spec.includes(cFilt));
+  if(q)list=list.filter(c=>c.name&&(c.name.includes(q)||c.spec&&c.spec.includes(q)||c.gov&&c.gov.includes(q)));
+  var clistEl = document.getElementById('clist');
+  var cntEl = document.getElementById('con-cnt');
+  if(cntEl) cntEl.textContent = list.length;
+  if(list.length === 0 && CONS.length === 0){
+    if(clistEl) clistEl.innerHTML = skeletonCards(4,'con');
+    return;
+  }
   document.getElementById('clist').innerHTML=list.map(c=>`
     <div class="con-row" onclick="openCon('${c.id}')">
       <div class="con-av" style="background:${c.bg}">${c.av}</div>
@@ -3192,11 +3206,16 @@ function fc(){renderCons();}
 // ============ SUPPLIERS ============
 function renderSups(){
   const q=(document.getElementById('si')||{}).value||'';
-  // إزالة التكرار بالموبايل أو الإيميل أو الاسم
   let list=deduplicateArray(SUPS, ['phone','email','name']);
-  if(sFilt!=='all')list=list.filter(s=>s.cat.includes(sFilt));
-  if(q)list=list.filter(s=>s.name.includes(q)||s.cat.includes(q)||s.gov.includes(q));
-  document.getElementById('sup-cnt').textContent=list.length;
+  if(sFilt!=='all')list=list.filter(s=>s.cat&&s.cat.includes(sFilt));
+  if(q)list=list.filter(s=>s.name&&(s.name.includes(q)||s.cat&&s.cat.includes(q)||s.gov&&s.gov.includes(q)));
+  var slistEl = document.getElementById('slist');
+  var scntEl = document.getElementById('sup-cnt');
+  if(scntEl) scntEl.textContent = list.length;
+  if(list.length === 0 && SUPS.length === 0){
+    if(slistEl) slistEl.innerHTML = skeletonCards(4,'con');
+    return;
+  }
   document.getElementById('slist').innerHTML=list.map(s=>`
     <div class="sup-card" onclick="openSup('${s.id}')">
       <div class="sup-top">
@@ -3222,9 +3241,16 @@ function renderTenders(){
   let list=TENDERS;
   if(tFilt!=='all')list=list.filter(t=>t.type&&(t.type.includes(tFilt)||t.cat===tFilt));
   var countEl = document.getElementById('tenders-screen-count');
+  var tlist = document.getElementById('tlist');
   if(countEl) countEl.textContent = list.length > 0 ? list.length + ' مناقصة' : 'جديد يومياً';
   if(list.length === 0){
-    document.getElementById('tlist').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">📋</div><div style="font-size:13px;font-weight:600">لا توجد مناقصات حالياً</div></div>';
+    // لو Firebase لسه بيحمل — skeleton
+    var isLoading = (typeof db !== 'undefined') && TENDERS.length === 0;
+    if(isLoading){
+      tlist.innerHTML = skeletonCards(3, 'tender');
+    } else {
+      tlist.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">📋</div><div style="font-size:13px;font-weight:600">لا توجد مناقصات حالياً</div></div>';
+    }
     return;
   }
   document.getElementById('tlist').innerHTML=list.map(t=>`
@@ -3249,8 +3275,15 @@ function renderJobs(){
   const q=(document.getElementById('ji')||{}).value||'';
   let list=JOBS;
   if(jFilt!=='all')list=list.filter(j=>j.gov===jFilt);
-  if(q)list=list.filter(j=>j.title.includes(q)||j.org.includes(q)||j.sec.includes(q));
-  document.getElementById('jcnt').innerHTML=`عرض <strong>${list.length}</strong> وظيفة`;
+  if(q)list=list.filter(j=>j.title&&(j.title.includes(q)||j.org.includes(q)||(j.sec&&j.sec.includes(q))));
+  var jcnt = document.getElementById('jcnt');
+  var jlist = document.getElementById('jlist');
+  if(jcnt) jcnt.innerHTML = list.length > 0 ? 'عرض <strong>'+list.length+'</strong> وظيفة' : 'جاري التحميل...';
+  if(list.length === 0){
+    var isLoading = (typeof db !== 'undefined') && JOBS.length === 0;
+    if(jlist) jlist.innerHTML = isLoading ? skeletonCards(3,'job') : '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">💼</div><div style="font-size:13px;font-weight:600">لا توجد وظائف حالياً</div></div>';
+    return;
+  }
   document.getElementById('jlist').innerHTML=list.map(j=>`
     <div class="jcard" onclick="openJob(${j.id})">
       <div class="jc-top">
@@ -3412,8 +3445,6 @@ function openCon(id){
   document.getElementById('modal').classList.add('op');
 }
 
-function openSup(id){
-  const s=SUPS.find(x=>x.id==id);if(!s)return;
 function openSup(id){
   const s=SUPS.find(x=>x.id==id);if(!s)return;
   var showPhone = s.showPhone !== false;
@@ -5292,7 +5323,7 @@ function publishTender(){
 function renderPublishedJobsNew(){
   var el = document.getElementById('published-jobs-list-new');
   if(!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
+  el.innerHTML = skeletonCards(3);
   if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
     db.collection('jobs').orderBy('timestamp','desc').get().then(function(snap){
       var jobs=[];
@@ -5307,7 +5338,7 @@ function renderPublishedJobsNew(){
 function renderPublishedTendersNew(){
   var el = document.getElementById('published-tenders-list-new');
   if(!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">⏳ جاري التحميل...</div>';
+  el.innerHTML = skeletonCards(3);
   if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
     db.collection('tenders').orderBy('timestamp','desc').get().then(function(snap){
       var tenders=[];
@@ -6165,6 +6196,43 @@ function manualRefresh(){
   });
 }
 
+// ============ SKELETON LOADING ============
+function skeletonCards(count, type){
+  count = count || 4;
+  if(type === 'con'){
+    return Array(count).fill(0).map(function(){
+      return '<div class="sk-card" style="display:flex;gap:12px;align-items:flex-start">' +
+        '<div class="skeleton sk-avatar"></div>' +
+        '<div style="flex:1">' +
+          '<div class="skeleton sk-title"></div>' +
+          '<div class="skeleton sk-line" style="width:40%"></div>' +
+          '<div class="skeleton sk-line" style="width:70%;margin-top:4px"></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } else if(type === 'tender' || type === 'job'){
+    return Array(count).fill(0).map(function(){
+      return '<div class="sk-card">' +
+        '<div class="skeleton sk-line" style="width:30%;height:10px;margin-bottom:10px"></div>' +
+        '<div class="skeleton sk-title"></div>' +
+        '<div class="skeleton sk-line" style="width:50%"></div>' +
+        '<div style="display:flex;gap:8px;margin-top:12px">' +
+          '<div class="skeleton sk-line" style="flex:1;height:10px"></div>' +
+          '<div class="skeleton sk-line" style="flex:1;height:10px"></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } else {
+    return Array(count).fill(0).map(function(){
+      return '<div class="sk-card">' +
+        '<div class="skeleton sk-title"></div>' +
+        '<div class="skeleton sk-line" style="width:50%"></div>' +
+        '<div class="skeleton sk-line" style="width:80%"></div>' +
+      '</div>';
+    }).join('');
+  }
+}
+
 // ============ VISIBILITY SETTINGS ============
 var VISIBILITY = {
   cons:  { phone: true, email: true },
@@ -6215,7 +6283,9 @@ function toggleVisibility(section, field, btn){
       if(saved[k]) VISIBILITY[k] = Object.assign({}, VISIBILITY[k], saved[k]);
     });
   }catch(e){}
-})();t.textContent=msg;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),2500);}
+})();
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),2500);}
 
 // ============ NEW REGISTRATIONS BELL ============
 var _newRegs = [];

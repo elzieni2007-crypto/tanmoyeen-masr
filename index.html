@@ -2446,31 +2446,62 @@ function enterApp(){
   initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);updateJobseekersList();
   // Load from Firebase (real-time)
   setTimeout(function(){
-    if(typeof db === 'undefined') return;
+    if(typeof db === 'undefined'){
+      // Firebase مش موجود - جيب من الـ cache
+      try{ var c=JSON.parse(localStorage.getItem('cache_cons')||'[]'); if(c.length){window.CONS=c;renderCons();} }catch(e){}
+      try{ var s=JSON.parse(localStorage.getItem('cache_sups')||'[]'); if(s.length){window.SUPS=s;renderSups();} }catch(e){}
+      try{ var v=JSON.parse(localStorage.getItem('cache_vols')||'[]'); if(v.length){window.VOLUNTEERS_PRELOAD=v;loadVolunteers();} }catch(e){}
+      try{ var o=JSON.parse(localStorage.getItem('cache_orgs')||'[]'); if(o.length){window.ORGS=o;renderOrgs();} }catch(e){}
+      return;
+    }
 
     db.collection('consultants').orderBy('timestamp','desc').limit(500).get().then(function(snap){
       var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',exp:r.exp||'',orgs:r.orgs||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||''});});
-      if(fresh.length){window.CONS=fresh;renderCons();renderDash();updateAllCounts();}
-    }).catch(function(){});
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',exp:r.exp||'',orgs:r.orgs||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||'',showPhone:r.showPhone!==false,showEmail:r.showEmail!==false});});
+      if(fresh.length){
+        window.CONS=fresh;
+        try{localStorage.setItem('cache_cons',JSON.stringify(fresh.slice(0,100)));}catch(e){}
+        renderCons();renderDash();updateAllCounts();
+      }
+    }).catch(function(){
+      try{ var c=JSON.parse(localStorage.getItem('cache_cons')||'[]'); if(c.length){window.CONS=c;renderCons();renderDash();} }catch(e){}
+    });
 
     db.collection('suppliers').orderBy('timestamp','desc').limit(500).get().then(function(snap){
       var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',cat:r.cat||'عام',gov:r.gov||'',phone:r.phone||'',email:r.email||'',cert:r.cert||'مسجّل',logo:r.logo||'🏭',items:r.items||[r.cat||''],desc:r.desc||''});});
-      if(fresh.length){window.SUPS=fresh;renderSups();renderDash();updateAllCounts();}
-    }).catch(function(){});
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',cat:r.cat||'عام',gov:r.gov||'',phone:r.phone||'',email:r.email||'',cert:r.cert||'مسجّل',logo:r.logo||'🏭',items:r.items||[r.cat||''],desc:r.desc||'',showPhone:r.showPhone!==false,showEmail:r.showEmail!==false});});
+      if(fresh.length){
+        window.SUPS=fresh;
+        try{localStorage.setItem('cache_sups',JSON.stringify(fresh.slice(0,100)));}catch(e){}
+        renderSups();renderDash();updateAllCounts();
+      }
+    }).catch(function(){
+      try{ var s=JSON.parse(localStorage.getItem('cache_sups')||'[]'); if(s.length){window.SUPS=s;renderSups();renderDash();} }catch(e){}
+    });
 
     db.collection('volunteers').orderBy('timestamp','desc').limit(300).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[],photo:r.photo||''}));});
-      if(fresh.length){window.VOLUNTEERS_PRELOAD=fresh;localStorage.removeItem('volunteers');loadVolunteers();updateAllCounts();}
-    }).catch(function(){});
+      if(fresh.length){
+        window.VOLUNTEERS_PRELOAD=fresh;
+        try{localStorage.setItem('cache_vols',JSON.stringify(fresh.slice(0,100)));}catch(e){}
+        loadVolunteers();updateAllCounts();
+      }
+    }).catch(function(){
+      try{ var v=JSON.parse(localStorage.getItem('cache_vols')||'[]'); if(v.length){window.VOLUNTEERS_PRELOAD=v;loadVolunteers();} }catch(e){}
+    });
 
     db.collection('organizations').orderBy('timestamp','desc').limit(300).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id}));});
-      if(fresh.length){window.ORGS=fresh;renderOrgs();updateAllCounts();}
-    }).catch(function(){});
+      if(fresh.length){
+        window.ORGS=fresh;
+        try{localStorage.setItem('cache_orgs',JSON.stringify(fresh.slice(0,100)));}catch(e){}
+        renderOrgs();updateAllCounts();
+      }
+    }).catch(function(){
+      try{ var o=JSON.parse(localStorage.getItem('cache_orgs')||'[]'); if(o.length){window.ORGS=o;renderOrgs();} }catch(e){}
+    });
 
     // Jobs
     db.collection('jobs').where('status','==','approved').orderBy('timestamp','desc').limit(200).get().then(function(snap){
@@ -2500,34 +2531,7 @@ function enterApp(){
   // Sheets disabled - using Firebase as single source
 
   // Auto refresh from Firebase every 5 minutes
-  setInterval(function(){
-    if(typeof db === 'undefined') return;
-    console.log('Auto refreshing from Firebase...');
-    db.collection('consultants').orderBy('timestamp','desc').limit(500).get().then(function(snap){
-      if(snap.empty) return;
-      var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',exp:r.exp||'',orgs:r.orgs||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||''});});
-      if(fresh.length){window.CONS=fresh;renderCons();renderDash();updateAllCounts();}
-    }).catch(function(){});
-    db.collection('suppliers').orderBy('timestamp','desc').limit(500).get().then(function(snap){
-      if(snap.empty) return;
-      var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',cat:r.cat||'عام',gov:r.gov||'',phone:r.phone||'',email:r.email||'',cert:r.cert||'مسجّل',logo:r.logo||'🏭',items:r.items||[r.cat||''],desc:r.desc||''});});
-      if(fresh.length){window.SUPS=fresh;renderSups();renderDash();updateAllCounts();}
-    }).catch(function(){});
-    db.collection('volunteers').orderBy('timestamp','desc').limit(300).get().then(function(snap){
-      if(snap.empty) return;
-      var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[]}));});
-      if(fresh.length){window.VOLUNTEERS_PRELOAD=fresh;loadVolunteers();updateAllCounts();}
-    }).catch(function(){});
-    db.collection('organizations').orderBy('timestamp','desc').limit(300).get().then(function(snap){
-      if(snap.empty) return;
-      var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id}));});
-      if(fresh.length){window.ORGS=fresh;renderOrgs();updateAllCounts();}
-    }).catch(function(){});
-  }, 5 * 60 * 1000);
+  // Auto-refresh disabled - data loads once on startup to save Firebase quota
 
   // Firebase real-time listener - only when admin logged in
   if(typeof db !== 'undefined' && typeof auth !== 'undefined'){
@@ -3972,7 +3976,7 @@ function saveFeatured(){
   renderDash();
 }
 function updatePendingBadge(){
-  if(typeof db === 'undefined' || !auth.currentUser) return;
+  if(typeof db === 'undefined') return;
   db.collection('pending_jobs').where('status','==','pending').get().then(function(snap){
     var count = snap.size;
     var badge = document.getElementById('pending-count-badge');
@@ -3984,16 +3988,31 @@ function updatePendingBadge(){
 }
 
 function renderPendingJobs(){
-  if(typeof db === 'undefined' || !auth || !auth.currentUser){ return; }
-  db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').limit(100).get().then(function(snap){
-    var list = [];
-    snap.docs.forEach(function(d){
-      list.push(Object.assign({}, d.data(), {fbId: d.id}));
+  if(typeof db === 'undefined'){ return; }
+  // لو auth موجود استخدمه، لو لأ جرب بدونه
+  var doFetch = function(){
+    db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').limit(100).get().then(function(snap){
+      var list = [];
+      snap.docs.forEach(function(d){
+        list.push(Object.assign({}, d.data(), {fbId: d.id}));
+      });
+      _renderPendingList(list);
+    }).catch(function(e){
+      console.log('renderPendingJobs error:', e);
     });
-    _renderPendingList(list);
-  }).catch(function(e){
-    console.log('renderPendingJobs error:', e);
-  });
+  };
+
+  if(auth && auth.currentUser){
+    doFetch();
+  } else if(typeof auth !== 'undefined'){
+    // استنى auth
+    var unsubscribe = auth.onAuthStateChanged(function(user){
+      unsubscribe();
+      if(user) doFetch();
+    });
+    // timeout fallback
+    setTimeout(doFetch, 2000);
+  }
 }
 
 function _renderPendingFromLocal(){ renderPendingJobs(); }

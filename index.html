@@ -534,6 +534,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -1631,7 +1632,12 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div style="font-size:10px;color:var(--muted);padding:0 12px 8px;text-align:left">← اسحب للمزيد من التبويبات</div>
 
     <!-- قائمة السجلات -->
-    <div class="adm-list" id="adm-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div class="adm-list" id="adm-list" style="display:flex;flex-direction:column;gap:8px">
+      <div id="adm-list-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 4px 8px">
+        <div style="font-size:12px;font-weight:700;color:var(--p)" id="adm-list-title"></div>
+        <button onclick="exportAdminSection()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 تصدير Excel</button>
+      </div>
+    </div>
 
     <!-- فورم إضافة وظيفة -->
     <div id="adm-form-job" style="display:none;padding:0 16px;padding-bottom:100px">
@@ -1875,16 +1881,22 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <!-- فورم الإيميل الجماعي -->
     <div id="adm-form-volunteers-adm" style="display:none;padding:0 16px;padding-bottom:100px">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px">
-    <div style="font-size:15px;font-weight:800;color:var(--p)">🤝 المتطوعون المسجلون</div>
-    <span id="adm-vols-count" style="background:var(--a);color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:15px;font-weight:800;color:var(--p)">🤝 المتطوعون</div>
+      <span id="adm-vols-count" style="background:var(--a);color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
+    </div>
+    <button onclick="exportVols()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button>
   </div>
   <div id="adm-vols-list"></div>
 </div>
 
 <div id="adm-form-consultations-adm" style="display:none;padding:0 16px;padding-bottom:100px">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px">
-    <div style="font-size:15px;font-weight:800;color:var(--p)">📋 طلبات الاستشارات</div>
-    <span id="adm-consult-count" style="background:#c06010;color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="font-size:15px;font-weight:800;color:var(--p)">📋 طلبات الاستشارات</div>
+      <span id="adm-consult-count" style="background:#c06010;color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
+    </div>
+    <button onclick="exportConsults()" style="padding:6px 12px;background:#fef3e8;color:#c06010;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button>
   </div>
 
   <!-- رسائل واتساب مخصصة -->
@@ -1996,11 +2008,19 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
     <!-- قائمة الوظائف -->
     <div id="adm-form-jobs-list" style="display:none;padding:0 16px;padding-bottom:100px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 10px">
+        <div style="font-size:15px;font-weight:800;color:var(--p)">💼 الوظائف</div>
+        <button onclick="exportJobsAdmin()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button>
+      </div>
       <div id="published-jobs-list-new" style="margin-top:8px"></div>
     </div>
 
     <!-- قائمة المناقصات -->
     <div id="adm-form-tenders-list" style="display:none;padding:0 16px;padding-bottom:100px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 10px">
+        <div style="font-size:15px;font-weight:800;color:var(--orange)">📋 المناقصات</div>
+        <button onclick="exportTendersAdmin()" style="padding:6px 12px;background:#fef3e8;color:var(--orange);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button>
+      </div>
       <div id="published-tenders-list-new" style="margin-top:8px"></div>
     </div>
 
@@ -6200,7 +6220,78 @@ function manualRefresh(){
   });
 }
 
-// ============ SKELETON LOADING ============
+// ============ EXPORT TO EXCEL ============
+function exportToExcel(data, filename){
+  if(!data || !data.length){ toast('❌ مفيش بيانات للتصدير'); return; }
+  var keys = [];
+  data.forEach(function(r){ Object.keys(r).forEach(function(k){ if(!keys.includes(k) && k !== 'fbId' && k !== '_id') keys.push(k); }); });
+  var wsData = [keys];
+  data.forEach(function(r){
+    wsData.push(keys.map(function(k){
+      var v = r[k];
+      if(v && typeof v === 'object' && v.seconds) return new Date(v.seconds*1000).toLocaleDateString('ar-EG');
+      if(Array.isArray(v)) return v.join(' / ');
+      return v || '';
+    }));
+  });
+  var ws = XLSX.utils.aoa_to_sheet(wsData);
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, filename);
+  XLSX.writeFile(wb, 'تنمويين_مصر_'+filename+'_'+new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')+'.xlsx');
+  toast('✅ تم تصدير '+data.length+' سجل!');
+}
+
+function exportAdminSection(){
+  var col = admTab==='expert'?'consultants':admTab==='sup'?'suppliers':admTab==='org'?'organizations':'jobseekers';
+  var name = admTab==='expert'?'استشاريين':admTab==='sup'?'موردين':admTab==='org'?'مؤسسات':'باحثو عمل';
+  if(typeof db === 'undefined'){ toast('❌ Firebase غير متصل'); return; }
+  toast('⏳ جاري التصدير...');
+  db.collection(col).get().then(function(snap){
+    var data = [];
+    snap.docs.forEach(function(d){ data.push(Object.assign({}, d.data(), {fbId: d.id})); });
+    exportToExcel(data, name);
+  }).catch(function(e){ toast('❌ '+e.message); });
+}
+
+function exportVols(){
+  if(typeof db === 'undefined'){ toast('❌ Firebase غير متصل'); return; }
+  toast('⏳ جاري التصدير...');
+  db.collection('volunteers').get().then(function(snap){
+    var data = [];
+    snap.docs.forEach(function(d){ data.push(Object.assign({}, d.data(), {fbId: d.id})); });
+    exportToExcel(data, 'متطوعين');
+  }).catch(function(e){ toast('❌ '+e.message); });
+}
+
+function exportConsults(){
+  if(typeof db === 'undefined'){ toast('❌ Firebase غير متصل'); return; }
+  toast('⏳ جاري التصدير...');
+  db.collection('consultations').get().then(function(snap){
+    var data = [];
+    snap.docs.forEach(function(d){ data.push(Object.assign({}, d.data(), {fbId: d.id})); });
+    exportToExcel(data, 'استشارات');
+  }).catch(function(e){ toast('❌ '+e.message); });
+}
+
+function exportJobsAdmin(){
+  if(typeof db === 'undefined'){ toast('❌ Firebase غير متصل'); return; }
+  toast('⏳ جاري التصدير...');
+  db.collection('jobs').get().then(function(snap){
+    var data = [];
+    snap.docs.forEach(function(d){ data.push(Object.assign({}, d.data(), {fbId: d.id})); });
+    exportToExcel(data, 'وظائف');
+  }).catch(function(e){ toast('❌ '+e.message); });
+}
+
+function exportTendersAdmin(){
+  if(typeof db === 'undefined'){ toast('❌ Firebase غير متصل'); return; }
+  toast('⏳ جاري التصدير...');
+  db.collection('tenders').get().then(function(snap){
+    var data = [];
+    snap.docs.forEach(function(d){ data.push(Object.assign({}, d.data(), {fbId: d.id})); });
+    exportToExcel(data, 'مناقصات');
+  }).catch(function(e){ toast('❌ '+e.message); });
+}
 function skeletonCards(count, type){
   count = count || 4;
   if(type === 'con'){

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تصدير بيانات Firebase - تنمويين مصر</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Cairo',sans-serif;background:#eef3f9;padding:16px;max-width:500px;margin:0 auto}
+h1{color:#1a3a6e;font-size:17px;margin-bottom:4px;text-align:center}
+.sub{text-align:center;color:#6b7a8d;font-size:12px;margin-bottom:16px}
+.card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(26,58,110,.08)}
+.section-title{font-size:13px;font-weight:800;color:#1a3a6e;margin-bottom:12px}
+.export-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#eef3f9;border-radius:10px;margin-bottom:8px}
+.export-info{display:flex;align-items:center;gap:10px}
+.export-icon{font-size:20px}
+.export-label{font-size:13px;font-weight:700;color:#1a2a3a}
+.export-count{font-size:11px;color:#6b7a8d;margin-top:2px}
+.btn-export{padding:7px 14px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;border:none;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.btn-export:hover{opacity:.85}
+.btn-export:disabled{opacity:.4;cursor:not-allowed}
+.btn-all{width:100%;padding:13px;background:linear-gradient(135deg,#00703a,#00b894);color:white;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
+.status{font-size:12px;color:#6b7a8d;margin-bottom:12px;text-align:center}
+.progress{background:#eef3f9;border-radius:8px;height:8px;overflow:hidden;margin-top:8px;display:none}
+.pbar{height:100%;background:linear-gradient(135deg,#0094cc,#00b894);border-radius:8px;transition:width .3s;width:0%}
+</style>
+</head>
+<body>
+
+<h1>📥 تصدير البيانات</h1>
+<p class="sub">تصدير بيانات Firebase إلى Excel</p>
+
+<div class="card">
+  <div class="status" id="status">⏳ جاري الاتصال...</div>
+
+  <div class="section-title">📊 اختار القسم</div>
+
+  <div class="export-item">
+    <div class="export-info">
+      <div class="export-icon">👨‍💼</div>
+      <div><div class="export-label">الاستشاريين</div><div class="export-count" id="cnt-consultants">جاري التحميل...</div></div>
+    </div>
+    <button class="btn-export" onclick="exportOne('consultants','الاستشاريين')">📥 تصدير</button>
+  </div>
+
+  <div class="export-item">
+    <div class="export-info">
+      <div class="export-icon">🏭</div>
+      <div><div class="export-label">الموردين</div><div class="export-count" id="cnt-suppliers">جاري التحميل...</div></div>
+    </div>
+    <button class="btn-export" onclick="exportOne('suppliers','الموردين')">📥 تصدير</button>
+  </div>
+
+  <div class="export-item">
+    <div class="export-info">
+      <div class="export-icon">🙋</div>
+      <div><div class="export-label">المتطوعين</div><div class="export-count" id="cnt-volunteers">جاري التحميل...</div></div>
+    </div>
+    <button class="btn-export" onclick="exportOne('volunteers','المتطوعين')">📥 تصدير</button>
+  </div>
+
+  <div class="export-item">
+    <div class="export-info">
+      <div class="export-icon">🏢</div>
+      <div><div class="export-label">المؤسسات</div><div class="export-count" id="cnt-organizations">جاري التحميل...</div></div>
+    </div>
+    <button class="btn-export" onclick="exportOne('organizations','المؤسسات')">📥 تصدير</button>
+  </div>
+
+  <div class="export-item">
+    <div class="export-info">
+      <div class="export-icon">💼</div>
+      <div><div class="export-label">الوظائف</div><div class="export-count" id="cnt-jobs">جاري التحميل...</div></div>
+    </div>
+    <button class="btn-export" onclick="exportOne('jobs','الوظائف')">📥 تصدير</button>
+  </div>
+
+  <div class="export-item">
+    <div class="export-info">
+      <div class="export-icon">📋</div>
+      <div><div class="export-label">المناقصات</div><div class="export-count" id="cnt-tenders">جاري التحميل...</div></div>
+    </div>
+    <button class="btn-export" onclick="exportOne('tenders','المناقصات')">📥 تصدير</button>
+  </div>
+
+  <div class="export-item">
+    <div class="export-info">
+      <div class="export-icon">📞</div>
+      <div><div class="export-label">الاستشارات</div><div class="export-count" id="cnt-consultations">جاري التحميل...</div></div>
+    </div>
+    <button class="btn-export" onclick="exportOne('consultations','الاستشارات')">📥 تصدير</button>
+  </div>
+
+  <div class="export-item">
+    <div class="export-info">
+      <div class="export-icon">🔍</div>
+      <div><div class="export-label">باحثو العمل</div><div class="export-count" id="cnt-jobseekers">جاري التحميل...</div></div>
+    </div>
+    <button class="btn-export" onclick="exportOne('jobseekers','باحثو العمل')">📥 تصدير</button>
+  </div>
+
+  <div class="progress" id="progress"><div class="pbar" id="pbar"></div></div>
+  <button class="btn-all" onclick="exportAll()">📦 تصدير الكل ملف واحد</button>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCk98_i0ozMuQumsO4PUDpXGRga5aWI4C8",
+  authDomain: "tanmoyeen-masr26.firebaseapp.com",
+  projectId: "tanmoyeen-masr26",
+  storageBucket: "tanmoyeen-masr26.firebasestorage.app",
+  messagingSenderId: "335780209700",
+  appId: "1:335780209700:web:c2839bb31364b5b18664b1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const collections = ['consultants','suppliers','volunteers','organizations','jobs','tenders','consultations','jobseekers'];
+
+// Load counts
+async function loadCounts(){
+  try{
+    for(var i=0; i<collections.length; i++){
+      var col = collections[i];
+      var snap = await db.collection(col).get();
+      var el = document.getElementById('cnt-'+col);
+      if(el) el.textContent = snap.size + ' سجل';
+    }
+    document.getElementById('status').textContent = '✅ متصل بـ Firebase';
+    document.getElementById('status').style.color = '#00b894';
+  }catch(e){
+    document.getElementById('status').textContent = '❌ '+e.message;
+    document.getElementById('status').style.color = '#e05050';
+  }
+}
+loadCounts();
+
+function flattenDoc(doc){
+  var flat = {};
+  Object.keys(doc).forEach(function(k){
+    var v = doc[k];
+    if(k === '_id') return;
+    if(v && typeof v === 'object' && v.seconds){ // Timestamp
+      flat[k] = new Date(v.seconds*1000).toLocaleDateString('ar-EG');
+    } else if(Array.isArray(v)){
+      flat[k] = v.join(' / ');
+    } else if(v && typeof v === 'object'){
+      flat[k] = JSON.stringify(v);
+    } else {
+      flat[k] = v || '';
+    }
+  });
+  return flat;
+}
+
+async function exportOne(col, name){
+  try{
+    var snap = await db.collection(col).get();
+    if(snap.empty){ alert('مفيش بيانات في '+name); return; }
+
+    var rows = [];
+    snap.forEach(function(d){
+      rows.push(flattenDoc(Object.assign({}, d.data(), {_firebaseId: d.id})));
+    });
+
+    // Get all keys
+    var keys = [];
+    rows.forEach(function(r){ Object.keys(r).forEach(function(k){ if(!keys.includes(k)) keys.push(k); }); });
+
+    var wsData = [keys];
+    rows.forEach(function(r){ wsData.push(keys.map(function(k){ return r[k]||''; })); });
+
+    var ws = XLSX.utils.aoa_to_sheet(wsData);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, name);
+    XLSX.writeFile(wb, 'تنمويين_مصر_'+name+'_'+new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')+'.xlsx');
+  }catch(e){ alert('❌ '+e.message); }
+}
+
+async function exportAll(){
+  var progress = document.getElementById('progress');
+  var pbar = document.getElementById('pbar');
+  progress.style.display = 'block';
+  pbar.style.width = '0%';
+
+  var wb = XLSX.utils.book_new();
+  var names = {
+    consultants:'استشاريين', suppliers:'موردين', volunteers:'متطوعين',
+    organizations:'مؤسسات', jobs:'وظائف', tenders:'مناقصات',
+    consultations:'استشارات', jobseekers:'باحثو عمل'
+  };
+
+  for(var i=0; i<collections.length; i++){
+    var col = collections[i];
+    try{
+      var snap = await db.collection(col).get();
+      if(!snap.empty){
+        var rows = [];
+        snap.forEach(function(d){ rows.push(flattenDoc(Object.assign({}, d.data(), {_firebaseId: d.id}))); });
+        var keys = [];
+        rows.forEach(function(r){ Object.keys(r).forEach(function(k){ if(!keys.includes(k)) keys.push(k); }); });
+        var wsData = [keys];
+        rows.forEach(function(r){ wsData.push(keys.map(function(k){ return r[k]||''; })); });
+        var ws = XLSX.utils.aoa_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, names[col]||col);
+      }
+    }catch(e){ console.log('Skip '+col+': '+e.message); }
+    pbar.style.width = ((i+1)/collections.length*100)+'%';
+    await new Promise(function(r){ setTimeout(r, 300); });
+  }
+
+  XLSX.writeFile(wb, 'تنمويين_مصر_كل_البيانات_'+new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')+'.xlsx');
+  progress.style.display = 'none';
+}
+</script>
+</body>
+</html>

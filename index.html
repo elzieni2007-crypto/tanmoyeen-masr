@@ -1836,7 +1836,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <textarea class="fi" id="wa-body-main" rows="4" placeholder="اكتب تفاصيل الإشعار..." style="resize:vertical"></textarea>
     </div>
     <div class="fg"><label class="fl">رابط (اختياري)</label>
-      <input class="fi" id="wa-link-main" type="url" placeholder="https://..." style="direction:ltr;text-align:left" value="https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=consult">
+      <input class="fi" id="wa-link-main" type="url" placeholder="https://..." style="direction:ltr;text-align:left">
     </div>
 
     <!-- قوالب جاهزة -->
@@ -4572,13 +4572,10 @@ function openVolunteer(idx){
       (daysArr.length ? '<tr><td>الأيام المتاحة</td><td>'+daysArr.join(' - ')+'</td></tr>' : '') +
       (v.travel ? '<tr><td>إمكانية السفر</td><td>'+v.travel+'</td></tr>' : '') +
       (v.langs ? '<tr><td>اللغات</td><td>'+v.langs+'</td></tr>' : '') +
-      (VISIBILITY.vols.phone && v.showPhone !== false && v.phone ? '<tr><td>الموبايل</td><td style="direction:ltr;text-align:right">'+v.phone+'</td></tr>' : '') +
-      (VISIBILITY.vols.email && v.showEmail !== false && v.email ? '<tr><td>الإيميل</td><td style="direction:ltr;text-align:right;font-size:10px">'+v.email+'</td></tr>' : '') +
+      (v.showEmail !== false && v.email ? '<tr><td>الإيميل</td><td style="direction:ltr;text-align:right;font-size:10px">'+v.email+'</td></tr>' : '') +
     '</table></div>' +
     '<div class="call-strip">' +
-      (VISIBILITY.vols.phone && v.showPhone !== false && v.phone ? '<a href="tel:'+v.phone+'" class="call-btn call-btn-p">📞 اتصال</a>' : '') +
-      (VISIBILITY.vols.phone && v.showPhone !== false && v.phone ? '<a href="https://wa.me/2'+v.phone+'" target="_blank" class="call-btn" style="background:#25d366;color:white">💬 واتساب</a>' : '') +
-      (VISIBILITY.vols.email && v.showEmail !== false && v.email ? '<a href="mailto:'+v.email+'" class="call-btn call-btn-g">✉️ إيميل</a>' : '') +
+      (v.showEmail !== false && v.email ? '<a href="mailto:'+v.email+'" class="call-btn call-btn-g" style="flex:1">✉️ تواصل بالإيميل</a>' : '<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px">📧 بيانات التواصل غير متاحة</div>') +
     '</div>';
 
   document.getElementById('modal').classList.add('op');
@@ -4972,6 +4969,9 @@ function setAdmTab(el, tab){
     ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var bEl=document.getElementById('adm-form-broadcast');
     if(bEl){ bEl.style.display='block'; }
+    // حط الرابط الافتراضي
+    var linkEl = document.getElementById('wa-link-main');
+    if(linkEl && !linkEl.value) linkEl.value = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=consult';
     loadBroadcastHistory();
   } else if(tab === 'settings'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
@@ -5928,13 +5928,19 @@ async function loadAdminVols(){
         "<div class='adm-rows'>" +
           "<div class='adm-row'><span class='adm-lbl'>المحافظة</span><span class='adm-val'>"+(v.gov||"—")+"</span></div>" +
           "<div class='adm-row'><span class='adm-lbl'>الموبايل</span><span class='adm-val' style='direction:ltr'>"+(v.phone||"—")+"</span></div>" +
+          "<div class='adm-row'><span class='adm-lbl'>الإيميل</span><span class='adm-val' style='font-size:10px;direction:ltr'>"+(v.email||"—")+"</span></div>" +
           "<div class='adm-row'><span class='adm-lbl'>الاهتمامات</span><span class='adm-val'>"+interests+"</span></div>" +
-          (v.email?"<div class='adm-row'><span class='adm-lbl'>الإيميل</span><span class='adm-val' style='font-size:10px;direction:ltr'>"+v.email+"</span></div>":"")+
         "</div>" +
         "<div class='adm-actions'>" +
+          (v.phone?"<a href='tel:"+v.phone+"' class='adm-btn' style='background:#e8f0fe;color:var(--p);text-decoration:none;text-align:center'>📞 اتصال</a>":"") +
+          (v.phone?"<a href='https://wa.me/2"+v.phone.replace(/[^0-9]/g,'')+"' target='_blank' class='adm-btn' style='background:#e7faf3;color:#00703a;text-decoration:none;text-align:center'>💬 واتساب</a>":"") +
+          (v.email?"<a href='mailto:"+v.email+"' class='adm-btn' style='background:#fff3cd;color:#c06010;text-decoration:none;text-align:center'>✉️ إيميل</a>":"") +
+        "</div>" +
+        "<div class='adm-actions' style='margin-top:4px'>" +
           "<button class='adm-btn' style='background:#e7faf3;color:#00703a' onclick='editVolunteerAdmin("+i+")'>✏️ تعديل</button>" +
           "<button class='adm-btn adm-btn-del' onclick='deleteVolunteerAdmin(\""+v.fbId+"\")'>🗑️ حذف</button>" +
-        "</div></div>";
+        "</div>" +
+      "</div>";
     }).join("");
   } catch(e){ list.innerHTML = '<div style="color:#e05050;padding:16px">❌ '+e.message+'</div>'; }
 }

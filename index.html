@@ -3441,15 +3441,13 @@ function callCon(phone){
 function cleanPhone(phone){
   if(!phone) return '';
   var num = String(phone).replace(/[^0-9]/g,'');
-  // شيل الصفر الأول
+  // لو بيبدأ بـ 002 أو 20 شيل البادئة
+  if(num.startsWith('002')) num = num.substring(3);
+  else if(num.startsWith('20')) num = num.substring(2);
+  // لو بيبدأ بـ 0 شيله
   if(num.startsWith('0')) num = num.substring(1);
-  // شيل 20 أو 2 في الأول لو موجودين
-  if(num.startsWith('20')) num = num.substring(2);
-  else if(num.startsWith('2') && num.length > 10) num = num.substring(1);
-  // الرقم المصري 10 أرقام يبدأ بـ 01
-  if(num.startsWith('1') && num.length === 10) return '2' + num;
-  if(num.startsWith('01') && num.length === 11) return '2' + num.substring(1);
-  return '2' + num;
+  // دلوقتي المفروض 10 أرقام تبدأ بـ 1
+  return '20' + num;
 }
 
 function waNum(phone){

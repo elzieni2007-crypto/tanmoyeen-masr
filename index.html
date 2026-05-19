@@ -2480,6 +2480,10 @@ function handleUrlParams(){
   var fp=urlParams.get('form');
   if(fp==='job'){setTimeout(()=>{go('jobs');setTimeout(openSubmitJob,400);},300);}
   else if(fp==='tender'){setTimeout(()=>{go('tenders');setTimeout(openSubmitTender,400);},300);}
+  else if(fp==='consult'){setTimeout(()=>{go('consult-screen');},300);}
+  else if(fp==='expert'||fp==='sup'||fp==='org'||fp==='jobseeker'||fp==='volunteer'){
+    setTimeout(()=>{go('register');setTimeout(function(){ selectRegType(fp); },400);},300);
+  }
 }
 
 // ============ REAL DATA FROM PDFs ============
@@ -3519,6 +3523,13 @@ function addNotification(ico, title, body, bg){
 
 function setRT(t,el){document.querySelectorAll('.rtype-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
 
+function selectRegType(type){
+  // للـ deep links - بيفتح صفحة التسجيل بالنوع المطلوب
+  var el = document.getElementById('rt-'+type);
+  if(el) el.click();
+  else switchRegType(type);
+}
+
 function switchRegType(type){
   // Update cards
   ['jobseeker','expert','org','sup'].forEach(t=>{
@@ -3715,6 +3726,7 @@ function closeSuccess(){
 function shareSuccessWA(){
   var type = window._lastRegType;
   var data = window._lastRegData || {};
+  var baseUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
   var typeNames = {
     jobseeker: 'باحث عن عمل 🔍',
     expert:    'استشاري 👨‍💼',
@@ -3722,17 +3734,19 @@ function shareSuccessWA(){
     org:       'مؤسسة / جمعية 🏢',
     volunteer: 'متطوع 🤝',
   };
+  var regLinks = {
+    jobseeker: baseUrl + '/?form=jobseeker',
+    expert:    baseUrl + '/?form=expert',
+    sup:       baseUrl + '/?form=sup',
+    org:       baseUrl + '/?form=org',
+    volunteer: baseUrl + '/?form=volunteer',
+  };
   var typeName = typeNames[type] || type;
-  var parts = [
-    'سجّلت للتو على منصة تنمويين مصر كـ ' + typeName,
-    '',
-    'المنصة الشاملة للعمل التنموي في مصر',
-    'لأكثر من 25,000 تنموي من كل محافظات مصر 🌟',
-    '',
-    'سجّل أنت كمان:',
-    'https://elzieni2007-crypto.github.io/tanmoyeen-masr',
-  ];
-  window.open('https://wa.me/?text=' + encodeURIComponent(parts.join('\n')), '_blank');
+  var regLink = regLinks[type] || baseUrl;
+  var msg = '✅ سجّلت للتو على منصة تنمويين مصر كـ ' + typeName + '\n\n' +
+    'المنصة الشاملة للعمل التنموي في مصر 🌟\n\n' +
+    'سجّل أنت كمان:\n' + regLink;
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
   document.getElementById('success-overlay').classList.remove('on');
 }
 
@@ -4095,28 +4109,21 @@ function getTenderFormData(){
 
 // مشاركة وظيفة مباشرة
 function shareJobWA(){
-  var appUrl = 'elzieni2007-crypto.github.io/tanmoyeen-masr?form=job';
-  var msg = [
-    'الان يمكنك مشاركة اعلانات الوظائف الخاصة بك',
-    '',
-    'شاركها مع 25,000 تنموي على منصة تنمويين مصر!',
-    '',
-    'اضغط الرابط واكمل البيانات في دقيقتين:',
-    'elzieni2007-crypto.github.io/tanmoyeen-masr?form=job',
-    '',
-    'الاعلان بيوصل لكل المهتمين بالعمل التنموي',
-    'مجاني 100%',
-    'في دقيقتين بس!',
-    '',
-    'تنمويين مصر - لكل تنموي في مصر'
-  ].join('\n');
+  var url = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=job';
+  var msg = '💼 *عندك وظيفة تنموية؟ شاركها معانا!*\n\n' +
+    'منصة تنمويين مصر - الإعلان بيوصل لكل المهتمين بالعمل التنموي\n\n' +
+    '✅ مجاني 100%\n' +
+    '⏱ في دقيقتين بس!\n\n' +
+    '👇 افتح الرابط وسجّل الإعلان:\n' +
+    url + '\n\n' +
+    'تنمويين مصر 🌟 لكل تنموي في مصر';
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 function shareJobFB(){
-  var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
-  var msg = 'عارف عن وظيفة تنموية؟ شاركها على تنمويين مصر! اضغط: ' + appUrl + '?form=job';
+  var url = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=job';
+  var msg = '💼 عندك وظيفة تنموية؟ شاركها مجاناً على تنمويين مصر!\nاضغط الرابط وسجّل في دقيقتين ✅';
   window.open(
-    'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(appUrl + '?form=job') +
+    'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) +
     '&quote=' + encodeURIComponent(msg),
     '_blank'
   );
@@ -4579,16 +4586,24 @@ function openVolunteer(idx){
 // ============ SHARE FUNCTIONS ============
 const FB_GROUP_URL = 'https://www.facebook.com/groups/346107035759429/?ref=share&mibextid=NSMWBT';
 const APP_SHARE_URL = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
-const APP_SHARE_TEXT = 'تنمويين مصر - منصة العمل التنموي في مصر\n301 استشاري | 87 مورد | وظائف ومناقصات يومياً\n\nانضم دلوقتي:';
+const APP_SHARE_TEXT = 'تنمويين مصر - منصة العمل التنموي في مصر\nاستشاريين | موردين | وظائف ومناقصات يومياً\n\nانضم دلوقتي:';
 
 function shareWA(){
-  const text = APP_SHARE_TEXT + '\n' + APP_SHARE_URL + '\n\nوانضم لمجموعة فيسبوك:\n' + FB_GROUP_URL;
+  var consultUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=consult';
+  var text = '📋 *اطلب استشارتك الضريبية أو التأمينية الآن!*\n\n' +
+    'منصة تنمويين مصر تقدم استشارات مجانية للجمعيات والمؤسسات في:\n' +
+    '🧾 الضرائب | 🛡 التأمينات\n\n' +
+    '👇 افتح الرابط وسجّل طلبك:\n' +
+    consultUrl + '\n\n' +
+    '⏱ سيتم التواصل معك خلال 48 ساعة\n\n' +
+    'تنمويين مصر 🌟 لكل تنموي في مصر';
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
 
 function shareFB(){
-  // مشاركة رابط المجموعة مباشرة
-  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(FB_GROUP_URL), '_blank');
+  var consultUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=consult';
+  var msg = '📋 اطلب استشارتك الضريبية أو التأمينية مجاناً من تنمويين مصر!\n🧾 ضرائب | 🛡 تأمينات\n⏱ رد خلال 48 ساعة';
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(consultUrl) + '&quote=' + encodeURIComponent(msg), '_blank');
 }
 
 // ============ PWA INSTALL ============

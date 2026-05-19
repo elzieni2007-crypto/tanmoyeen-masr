@@ -2416,28 +2416,34 @@ function enterApp(){
     });
 
     // Jobs
-    db.collection('jobs').where('status','==','approved').orderBy('timestamp','desc').limit(200).get().then(function(snap){
+    db.collection('jobs').orderBy('timestamp','desc').limit(200).get().then(function(snap){
       var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.title)fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,logo:r.logo||'💼',urg:r.urg||false,sal:r.sal||'تنافسي'}));});
-      JOBS.length = 0;
+      snap.docs.forEach(function(d){
+        var r=d.data();
+        if(r.title && r.status==='approved')
+          fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,logo:r.logo||'💼',urg:r.urg||false,sal:r.sal||'تنافسي'}));
+      });
+      JOBS.length=0;
       fresh.forEach(function(j){ JOBS.push(j); });
       renderJobs();
-      var el = document.getElementById('dash-jobs-count');
-      if(el) el.textContent = fresh.length > 0 ? fresh.length + ' وظيفة' : 'جديد يومياً';
-      console.log('✅ Jobs:', fresh.length);
-    }).catch(function(e){ console.log('Jobs error:', e); renderJobs(); });
+      var el=document.getElementById('dash-jobs-count');
+      if(el) el.textContent=fresh.length>0?fresh.length+' وظيفة':'جديد يومياً';
+    }).catch(function(e){ console.log('Jobs error:',e); renderJobs(); });
 
     // Tenders
-    db.collection('tenders').where('status','==','approved').orderBy('timestamp','desc').limit(200).get().then(function(snap){
+    db.collection('tenders').orderBy('timestamp','desc').limit(200).get().then(function(snap){
       var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.title)fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,color:r.color||'#00aeef'}));});
-      TENDERS.length = 0;
+      snap.docs.forEach(function(d){
+        var r=d.data();
+        if(r.title && r.status==='approved')
+          fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,color:r.color||'#00aeef'}));
+      });
+      TENDERS.length=0;
       fresh.forEach(function(t){ TENDERS.push(t); });
       renderTenders();
-      var el = document.getElementById('dash-tenders-count');
-      if(el) el.textContent = fresh.length > 0 ? fresh.length + ' مناقصة' : 'جديد يومياً';
-      console.log('✅ Tenders:', fresh.length);
-    }).catch(function(e){ console.log('Tenders error:', e); renderTenders(); });
+      var el=document.getElementById('dash-tenders-count');
+      if(el) el.textContent=fresh.length>0?fresh.length+' مناقصة':'جديد يومياً';
+    }).catch(function(e){ console.log('Tenders error:',e); renderTenders(); });
 
   }, 1500);
   // Sheets disabled - using Firebase as single source

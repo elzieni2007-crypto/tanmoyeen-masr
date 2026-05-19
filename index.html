@@ -1836,7 +1836,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <textarea class="fi" id="wa-body-main" rows="4" placeholder="اكتب تفاصيل الإشعار..." style="resize:vertical"></textarea>
     </div>
     <div class="fg"><label class="fl">رابط (اختياري)</label>
-      <input class="fi" id="wa-link-main" type="url" placeholder="https://..." style="direction:ltr;text-align:left" value="https://elzieni2007-crypto.github.io/tanmoyeen-masr/">
+      <input class="fi" id="wa-link-main" type="url" placeholder="https://..." style="direction:ltr;text-align:left" value="https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=consult">
     </div>
 
     <!-- قوالب جاهزة -->
@@ -5660,27 +5660,33 @@ function useWATemplate(type){
   var templates = {
     job: {
       title: '💼 وظيفة جديدة على منصة تنمويين مصر!',
-      body: 'تم نشر وظيفة جديدة في قطاع التنمية\n📍 المحافظة: \n🏢 الجهة: \n📅 آخر موعد: \n\nسجّل الآن وابعت CV على الرابط:'
+      body: 'تم نشر وظيفة جديدة في قطاع التنمية\n📍 المحافظة: \n🏢 الجهة: \n📅 آخر موعد: \n\nسجّل الآن وابعت CV على الرابط:',
+      link: 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=job'
     },
     tender: {
       title: '📋 مناقصة جديدة على منصة تنمويين مصر!',
-      body: 'تم نشر مناقصة جديدة\n📍 المحافظة: \n🏢 الجهة: \n💰 القيمة التقديرية: \n📅 آخر موعد: \n\nشوف التفاصيل على الرابط:'
+      body: 'تم نشر مناقصة جديدة\n📍 المحافظة: \n🏢 الجهة: \n💰 القيمة التقديرية: \n📅 آخر موعد: \n\nشوف التفاصيل على الرابط:',
+      link: 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=tender'
     },
     update: {
       title: '🔄 تحديث جديد على منصة تنمويين مصر!',
-      body: 'تم تحديث قاعدة البيانات:\n👨‍💼 استشاريين جدد\n🏭 موردين جدد\n🤝 متطوعين جدد\n\nاستكشف المنصة الآن:'
+      body: 'تم تحديث قاعدة البيانات:\n👨‍💼 استشاريين جدد\n🏭 موردين جدد\n🤝 متطوعين جدد\n\nاستكشف المنصة الآن:',
+      link: 'https://elzieni2007-crypto.github.io/tanmoyeen-masr'
     },
     event: {
       title: '🎯 فعالية تنموية قادمة!',
-      body: 'ندعوكم للمشاركة في:\n📌 الفعالية: \n📅 التاريخ: \n📍 المكان: \n\nسجّل مشاركتك على الرابط:'
+      body: 'ندعوكم للمشاركة في:\n📌 الفعالية: \n📅 التاريخ: \n📍 المكان: \n\nسجّل مشاركتك على الرابط:',
+      link: 'https://elzieni2007-crypto.github.io/tanmoyeen-masr'
     }
   };
   var t = templates[type];
   if(!t) return;
   var title = document.getElementById('wa-title-main');
   var body = document.getElementById('wa-body-main');
+  var link = document.getElementById('wa-link-main');
   if(title) title.value = t.title;
   if(body) body.value = t.body;
+  if(link) link.value = t.link;
   document.getElementById('wa-preview-main').style.display = 'none';
 }
 

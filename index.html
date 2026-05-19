@@ -2187,10 +2187,11 @@ async function saveToFirebase(type, data){
 async function loadPendingFromFirebase(){
   try {
     var snap = await db.collection('pending_jobs')
-      .where('status','==','pending')
       .orderBy('timestamp','desc')
       .get();
-    return snap.docs.map(function(d){ return {...d.data(), fbId: d.id}; });
+    return snap.docs
+      .filter(function(d){ return d.data().status === 'pending'; })
+      .map(function(d){ return Object.assign({}, d.data(), {fbId: d.id}); });
   } catch(e) {
     console.log('Load pending failed:', e);
     return [];
@@ -3921,8 +3922,9 @@ function saveFeatured(){
 }
 function updatePendingBadge(){
   if(typeof db === 'undefined') return;
-  db.collection('pending_jobs').where('status','==','pending').get().then(function(snap){
-    var count = snap.size;
+  db.collection('pending_jobs').get().then(function(snap){
+    var count = 0;
+    snap.docs.forEach(function(d){ if(d.data().status === 'pending') count++; });
     var badge = document.getElementById('pending-count-badge');
     if(badge){
       badge.textContent = count;
@@ -3933,28 +3935,37 @@ function updatePendingBadge(){
 
 function renderPendingJobs(){
   if(typeof db === 'undefined'){ return; }
-  // لو auth موجود استخدمه، لو لأ جرب بدونه
   var doFetch = function(){
-    db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').limit(100).get().then(function(snap){
+    db.collection('pending_jobs').orderBy('timestamp','desc').limit(100).get().then(function(snap){
       var list = [];
       snap.docs.forEach(function(d){
-        list.push(Object.assign({}, d.data(), {fbId: d.id}));
+        var data = d.data();
+        if(data.status === 'pending'){
+          list.push(Object.assign({}, data, {fbId: d.id}));
+        }
       });
       _renderPendingList(list);
     }).catch(function(e){
       console.log('renderPendingJobs error:', e);
+      // fallback بدون orderBy
+      db.collection('pending_jobs').get().then(function(snap){
+        var list = [];
+        snap.docs.forEach(function(d){
+          var data = d.data();
+          if(data.status === 'pending') list.push(Object.assign({}, data, {fbId: d.id}));
+        });
+        _renderPendingList(list);
+      }).catch(function(){});
     });
   };
 
   if(auth && auth.currentUser){
     doFetch();
   } else if(typeof auth !== 'undefined'){
-    // استنى auth
     var unsubscribe = auth.onAuthStateChanged(function(user){
       unsubscribe();
       if(user) doFetch();
     });
-    // timeout fallback
     setTimeout(doFetch, 2000);
   }
 }
@@ -4016,9 +4027,12 @@ function approvePending(idx){
   // جيب من Firebase pending_jobs
   if(typeof db === 'undefined'){ toast('❌ Firebase غير متصل'); return; }
 
-  db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').get().then(function(snap){
+  db.collection('pending_jobs').orderBy('timestamp','desc').get().then(function(snap){
     var allPending = [];
-    snap.docs.forEach(function(d){ allPending.push(Object.assign({},d.data(),{fbId:d.id})); });
+    snap.docs.forEach(function(d){
+      var data = d.data();
+      if(data.status === 'pending') allPending.push(Object.assign({},data,{fbId:d.id}));
+    });
     var item = allPending[idx];
     if(!item){ toast('❌ السجل غير موجود'); return; }
 
@@ -4045,10 +4059,10 @@ function approvePending(idx){
 
 function rejectPending(idx){
   if(typeof db === 'undefined'){ toast('❌ Firebase غير متصل'); return; }
-  db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').get().then(function(snap){
-    var docs = snap.docs;
-    if(!docs[idx]){ toast('❌ السجل غير موجود'); return; }
-    docs[idx].ref.update({status:'rejected'}).then(function(){
+  db.collection('pending_jobs').orderBy('timestamp','desc').get().then(function(snap){
+    var pendingDocs = snap.docs.filter(function(d){ return d.data().status === 'pending'; });
+    if(!pendingDocs[idx]){ toast('❌ السجل غير موجود'); return; }
+    pendingDocs[idx].ref.update({status:'rejected'}).then(function(){
       toast('🗑️ تم الرفض');
       renderPendingJobs();
       updatePendingBadge();
@@ -4062,8 +4076,8 @@ function rejectJob(idx){ rejectPending(idx); }
 
 function editAndPublishJob(idx){
   if(typeof db === 'undefined') return;
-  db.collection('pending_jobs').where('status','==','pending').orderBy('timestamp','desc').get().then(function(snap){
-    var docs = snap.docs;
+  db.collection('pending_jobs').orderBy('timestamp','desc').get().then(function(snap){
+    var docs = snap.docs.filter(function(d){ return d.data().status === 'pending'; });
     if(!docs[idx]) return;
     var job = docs[idx].data();
     var fbId = docs[idx].id;

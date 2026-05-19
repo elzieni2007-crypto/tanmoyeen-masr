@@ -1706,7 +1706,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
           <input class="fi" id="nj-sal" type="text" placeholder="مثال: 8,000 جنيه">
         </div>
         <div class="fg"><label class="fl">آخر موعد للتقديم *</label>
-          <input class="fi" id="nj-dl" type="text" placeholder="مثال: 30 يونيو 2025">
+          <input class="fi" id="nj-dl" type="date" style="direction:ltr;text-align:left">
         </div>
       </div>
 
@@ -1765,7 +1765,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
         </div>
       </div>
       <div class="fg"><label class="fl">آخر موعد للتقديم</label>
-        <input class="fi" id="nt-dl" type="text" placeholder="مثال: ٣٠ يونيو ٢٠٢٥">
+        <input class="fi" id="nt-dl" type="date" style="direction:ltr;text-align:left">
       </div>
       <div class="fg"><label class="fl">وصف المهمة *</label>
         <textarea class="fi" id="nt-desc" rows="3" placeholder="اكتب تفاصيل المناقصة والمهام المطلوبة..."></textarea>
@@ -3832,7 +3832,7 @@ function submitJobReport(){
   const type     = document.getElementById('sj-type').value;
   const sec      = document.getElementById('sj-sec').value;
   const sal      = document.getElementById('sj-sal').value.trim();
-  const dl       = document.getElementById('sj-dl').value.trim();
+  const dl       = getDeadline('sj-dl');
   const desc     = document.getElementById('sj-desc').value.trim();
   const contact  = document.getElementById('sj-contact').value.trim();
   const link     = document.getElementById('sj-link').value.trim();
@@ -4113,7 +4113,7 @@ function getJobFormData(){
     type:    (document.getElementById('sj-type')    || {}).value || '',
     sec:     (document.getElementById('sj-sec')     || {}).value || '',
     sal:     (document.getElementById('sj-sal')     || {}).value || 'تنافسي',
-    dl:      (document.getElementById('sj-dl')      || {}).value || '',
+    dl:      getDeadline('sj-dl'),
     desc:    (document.getElementById('sj-desc')    || {}).value || '',
     contact: (document.getElementById('sj-contact') || {}).value || '',
   };
@@ -4126,7 +4126,7 @@ function getTenderFormData(){
     type:    (document.getElementById('st-type')    || {}).value || '',
     gov:     (document.getElementById('st-gov')     || {}).value || '',
     budget:  (document.getElementById('st-budget')  || {}).value || '',
-    dl:      (document.getElementById('st-dl')      || {}).value || '',
+    dl:      getDeadline('st-dl'),
     desc:    (document.getElementById('st-desc')    || {}).value || '',
     contact: (document.getElementById('st-contact') || {}).value || '',
     link:    (document.getElementById('st-link')    || {}).value || '',
@@ -4158,7 +4158,7 @@ function submitTenderReport(){
   const type     = (document.getElementById('st-type')     || {}).value;
   const gov      = (document.getElementById('st-gov')      || {}).value;
   const budget   = (document.getElementById('st-budget')   || {}).value.trim();
-  const dl       = (document.getElementById('st-dl')       || {}).value.trim();
+  const dl       = getDeadline('st-dl');
   const desc     = (document.getElementById('st-desc')     || {}).value.trim();
   const contact  = (document.getElementById('st-contact')  || {}).value.trim();
   const link     = (document.getElementById('st-link')     || {}).value.trim();
@@ -5214,7 +5214,7 @@ function publishJob(){
   const type    = document.getElementById('nj-type').value;
   const sec     = document.getElementById('nj-sec').value;
   const sal     = document.getElementById('nj-sal').value.trim() || 'تنافسي';
-  const dl      = document.getElementById('nj-dl').value.trim() || '—';
+  const dl      = getDeadline('nj-dl');
   const contact = document.getElementById('nj-contact').value.trim();
   const desc    = document.getElementById('nj-desc').value.trim();
   const link    = document.getElementById('nj-link').value.trim();
@@ -5267,7 +5267,7 @@ function publishTender(){
   const type   = document.getElementById('nt-type').value;
   const budget = document.getElementById('nt-budget').value.trim() || 'يُحدد لاحقاً';
   const loc    = document.getElementById('nt-loc').value.trim() || '—';
-  const dl     = document.getElementById('nt-dl').value.trim() || '—';
+  const dl     = getDeadline('nt-dl');
   const desc   = document.getElementById('nt-desc').value.trim();
   const req    = document.getElementById('nt-req').value.trim();
   const link   = document.getElementById('nt-link').value.trim();
@@ -6275,6 +6275,20 @@ function exportTendersAdmin(){
     exportToExcel(data, 'مناقصات');
   }).catch(function(e){ toast('❌ '+e.message); });
 }
+// تحويل التاريخ لصيغة عربية
+function formatDateAr(dateStr){
+  if(!dateStr) return '—';
+  try{
+    var d = new Date(dateStr);
+    return d.toLocaleDateString('ar-EG', {year:'numeric', month:'long', day:'numeric'});
+  }catch(e){ return dateStr; }
+}
+function getDeadline(id){
+  var el = document.getElementById(id);
+  if(!el || !el.value) return '—';
+  return formatDateAr(el.value);
+}
+
 function skeletonCards(count, type){
   count = count || 4;
   if(type === 'con'){
@@ -6559,7 +6573,7 @@ window.addEventListener('load',()=>{
           <input class="fi" id="sj-sal" type="text" placeholder="مثال: 8,000 جنيه">
         </div>
         <div class="fg"><label class="fl">آخر موعد للتقديم</label>
-          <input class="fi" id="sj-dl" type="text" placeholder="مثال: 30 يونيو 2025">
+          <input class="fi" id="sj-dl" type="date" style="direction:ltr;text-align:left">
         </div>
       </div>
 
@@ -6679,7 +6693,7 @@ window.addEventListener('load',()=>{
           <input class="fi" id="st-budget" type="text" placeholder="مثال: 50,000 جنيه">
         </div>
         <div class="fg"><label class="fl">آخر موعد للتقديم</label>
-          <input class="fi" id="st-dl" type="text" placeholder="مثال: 30 يونيو 2025">
+          <input class="fi" id="st-dl" type="date" style="direction:ltr;text-align:left">
         </div>
       </div>
 

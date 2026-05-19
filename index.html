@@ -682,7 +682,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <!-- أزرار المشاركة -->
   <div style="display:flex;gap:6px;padding:4px 10px 2px;direction:ltr">
     <button onclick="shareWA()" style="flex:1;padding:9px 4px;background:#25d366;color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">💬 واتساب</button>
-    <button onclick="shareFB()" style="flex:1;padding:9px 4px;background:#1877f2;color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">📘 الجروب</button>
+    <button onclick="window.open(FB_GROUP_URL,'_blank')" style="flex:1;padding:9px 4px;background:#1877f2;color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">📘 الجروب</button>
     <button onclick="shareApp()" style="flex:1;padding:9px 4px;background:var(--p);color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🔗 شارك</button>
   </div>
   <div class="sh" style="margin-top:4px;padding:3px 14px 2px">
@@ -5754,6 +5754,7 @@ function sendWAMain(){
 }
 
 function sendConsultWA(type){
+  var formUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=consult';
   var msgs = {
     tax: '🧾 *استشارة ضريبية مجانية لجمعيتك!*\n\n' +
       'تنمويين مصر تقدم خدمة الاستشارات الضريبية للجمعيات والمؤسسات الأهلية\n\n' +
@@ -5763,7 +5764,7 @@ function sendConsultWA(type){
       '• الإعفاءات الضريبية للجمعيات\n' +
       '• تسوية المتأخرات الضريبية\n\n' +
       '📋 سجّل طلبك الآن:\n' +
-      'https://elzieni2007-crypto.github.io/tanmoyeen-masr/\n\n' +
+      formUrl + '\n\n' +
       'تنمويين مصر 🌟 لكل تنموي في مصر',
 
     ins: '🛡 *استشارة تأمينية مجانية لجمعيتك!*\n\n' +
@@ -5774,14 +5775,14 @@ function sendConsultWA(type){
       '• تسجيل العمالة في التأمينات\n' +
       '• الاستفسار عن الاشتراكات\n\n' +
       '📋 سجّل طلبك الآن:\n' +
-      'https://elzieni2007-crypto.github.io/tanmoyeen-masr/\n\n' +
+      formUrl + '\n\n' +
       'تنمويين مصر 🌟 لكل تنموي في مصر',
 
     link: '📋 *اطلب استشارتك الضريبية أو التأمينية الآن!*\n\n' +
       'منصة تنمويين مصر تقدم استشارات مجانية للجمعيات والمؤسسات في:\n' +
       '🧾 الضرائب | 🛡 التأمينات\n\n' +
       '👇 افتح الرابط وسجّل طلبك:\n' +
-      'https://elzieni2007-crypto.github.io/tanmoyeen-masr/\n\n' +
+      formUrl + '\n\n' +
       '⏱ سيتم التواصل معك خلال 48 ساعة\n\n' +
       'تنمويين مصر 🌟 لكل تنموي في مصر'
   };

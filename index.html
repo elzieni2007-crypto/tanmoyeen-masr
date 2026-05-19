@@ -3283,6 +3283,7 @@ function shareJobWADirect(){
   if(!j) return;
   var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
   var link = j.link || appUrl;
+  var formUrl = appUrl + '/?form=job';
   var msg = 'وجدت إعلان وظيفة وفكرت إنه يهمك! 💼\n\n' +
     '📌 ' + j.title + '\n' +
     '🏢 ' + (j.org||'—') + '\n' +
@@ -3290,7 +3291,7 @@ function shareJobWADirect(){
     '💰 ' + (j.sal||'—') + '\n' +
     '⏰ آخر موعد: ' + (j.dl||'—') + '\n\n' +
     '🔗 رابط الإعلان الأصلي:\n' + link + '\n\n' +
-    'وانت كمان تقدر تشارك إعلانك على تنمويين مصر 👇\n' + appUrl;
+    'وانت كمان تقدر تشارك إعلانك على تنمويين مصر 👇\n' + formUrl;
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 
@@ -3330,6 +3331,7 @@ function shareTenderWA(){
   if(!t) return;
   var appUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
   var link = t.link || appUrl;
+  var formUrl = appUrl + '/?form=tender';
   var msg = 'وجدت فرصة مناقصة وفكرت إنها تهمك! 📋\n\n' +
     '📌 ' + t.title + '\n' +
     '🏢 ' + (t.org||'—') + '\n' +
@@ -3337,7 +3339,7 @@ function shareTenderWA(){
     '💰 ' + (t.budget||'—') + '\n' +
     '⏰ آخر موعد: ' + (t.dl||'—') + '\n\n' +
     '🔗 رابط الإعلان الأصلي:\n' + link + '\n\n' +
-    'وانت كمان تقدر تشارك مناقصتك على تنمويين مصر 👇\n' + appUrl;
+    'وانت كمان تقدر تشارك مناقصتك على تنمويين مصر 👇\n' + formUrl;
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 

@@ -3296,6 +3296,13 @@ function shareJobWADirect(){
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 
+function shareJobFBDirect(){
+  var j = window._currentJob;
+  if(!j) return;
+  var link = j.link || 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=job';
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link), '_blank');
+}
+
 function shareJobLI(){
   var j = window._currentJob;
   if(!j) return;
@@ -4392,8 +4399,7 @@ function renderVolunteers(){
       (v.hours ? '<div style="font-size:10px;color:var(--muted);margin-top:3px">⏱️ ' + v.hours + '</div>' : '') +
       daysHtml +
       '<div style="display:flex;gap:6px;margin-top:10px">' +
-        (v.phone ? '<a href="tel:' + v.phone + '" style="flex:1;padding:8px;background:#e8f0fe;color:var(--p);border-radius:9px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">📞 اتصال</a>' : '') +
-        (v.phone ? '<a href="https://wa.me/2' + v.phone + '" target="_blank" style="flex:1;padding:8px;background:#e7faf3;color:#00703a;border-radius:9px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>' : '') +
+        (v.showEmail !== false && v.email ? '<a href="mailto:' + v.email + '" style="flex:1;padding:8px;background:#e7faf3;color:#00703a;border-radius:9px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ تواصل بالإيميل</a>' : '') +
       '</div>' +
     '</div>';
   }).join('');
@@ -5054,6 +5060,7 @@ function renderAdmList(){
 
   container.innerHTML = exportHeader + list.map(function(r, idx){
     var colName = admTab==='expert'?'consultants':admTab==='sup'?'suppliers':admTab==='org'?'organizations':'jobseekers';
+    var phone = (r.phone||'').replace(/[^0-9]/g,'');
     return '<div class="adm-card" id="adm-card-'+idx+'">' +
       '<div class="adm-card-top">' +
         '<div class="adm-name">'+(r.name||'—')+'</div>' +
@@ -5068,6 +5075,10 @@ function renderAdmList(){
         (r.email  ? '<div class="adm-row"><span class="adm-lbl">الإيميل</span><span class="adm-val" style="font-size:10px;direction:ltr;text-align:right">'+r.email+'</span></div>' : '') +
       '</div>' +
       '<div class="adm-actions">' +
+        (r.phone ? '<a href="https://wa.me/2'+phone+'" target="_blank" class="adm-btn" style="background:#e7faf3;color:#00703a;text-decoration:none;text-align:center">💬 واتساب</a>' : '') +
+        (r.email ? '<a href="mailto:'+r.email+'" class="adm-btn" style="background:#fff3cd;color:#c06010;text-decoration:none;text-align:center">✉️ إيميل</a>' : '') +
+      '</div>' +
+      '<div class="adm-actions" style="margin-top:4px">' +
         '<button class="adm-btn" style="background:'+tc.bg+';color:'+tc.color+'" onclick="editAdmRecord('+idx+',\''+colName+'\')">✏️ تعديل</button>' +
         '<button class="adm-btn adm-btn-del" onclick="deleteAdmRecord(\''+(r.fbId||r.id)+'\',\''+colName+'\')">🗑️ حذف</button>' +
       '</div>' +

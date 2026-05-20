@@ -13,6 +13,31 @@
 <meta http-equiv="X-Frame-Options" content="DENY">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+<!-- OneSignal -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "8dfa5d04-3fc5-448d-b72d-52d2ed5dc5d9",
+      notifyButton: { enable: false },
+      promptOptions: {
+        slidedown: {
+          prompts: [{
+            type: "push",
+            autoPrompt: true,
+            text: {
+              actionMessage: "اشترك في الإشعارات لتصلك أحدث الوظائف والمناقصات في تنمويين مصر",
+              acceptButton: "اشترك الآن",
+              cancelButton: "لاحقاً"
+            },
+            delay: { pageViews: 1, timeDelay: 5 }
+          }]
+        }
+      }
+    });
+  });
+</script>
 <!-- CSP removed to allow Firebase connections -->
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>تنمويين مصر</title>

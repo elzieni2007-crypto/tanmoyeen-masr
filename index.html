@@ -5298,6 +5298,11 @@ function publishJob(){
 
       toast('✅ تم نشر الوظيفة وظهرت للمستخدمين!');
       addNotification('💼', 'تم نشر وظيفة جديدة', title + ' - ' + org, '#e8f0fe');
+      sendPushNotification(
+        '💼 وظيفة جديدة - ' + org,
+        title + ' | ' + gov,
+        'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=job'
+      );
 
     }).catch(function(e){ toast('❌ خطأ في النشر: ' + e.message); });
   } else {
@@ -5349,6 +5354,11 @@ function publishTender(){
 
       toast('✅ تم نشر المناقصة وظهرت للمستخدمين!');
       addNotification('📋', 'تم نشر مناقصة جديدة', title + ' - ' + org, '#fef3e8');
+      sendPushNotification(
+        '📋 مناقصة جديدة - ' + org,
+        title + ' | ' + (loc||'—'),
+        'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=tender'
+      );
 
     }).catch(function(e){
       toast('❌ خطأ في النشر: ' + e.message);
@@ -6275,7 +6285,29 @@ function manualRefresh(){
   });
 }
 
-// ============ EXPORT TO EXCEL ============
+// ============ ONESIGNAL NOTIFICATIONS ============
+const ONESIGNAL_APP_ID = "8dfa5d04-3fc5-448d-b72d-52d2ed5dc5d9";
+const ONESIGNAL_REST_KEY = "os_v2_app_rx5f2bb7yvci3nznkljo2xof3gb6vmtuxbsuicnilw5ucuxc6kkw2ve3nbryb5q24hiqhyjtlklkvehuxogrgqswrmo5ou5ktuqekxy";
+
+function sendPushNotification(title, message, url){
+  if(!ONESIGNAL_REST_KEY || ONESIGNAL_REST_KEY === "ضع_الـ_REST_API_KEY_هنا") return;
+  fetch('https://onesignal.com/api/v1/notifications', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Basic ' + ONESIGNAL_REST_KEY
+    },
+    body: JSON.stringify({
+      app_id: ONESIGNAL_APP_ID,
+      included_segments: ['All'],
+      headings: { ar: title, en: title },
+      contents: { ar: message, en: message },
+      url: url || 'https://elzieni2007-crypto.github.io/tanmoyeen-masr',
+      chrome_web_icon: 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/icon-192.png'
+    })
+  }).then(function(){ console.log('✅ Push notification sent'); })
+    .catch(function(e){ console.log('Push error:', e); });
+}
 function exportToExcel(data, filename){
   if(!data || !data.length){ toast('❌ مفيش بيانات للتصدير'); return; }
   var keys = [];

@@ -6545,24 +6545,34 @@ function addNewReg(data, type, icon){
 
 // مراقبة التسجيلات الجديدة - كل 5 دقائق بس
 if(typeof db !== 'undefined'){
-  var _lastCheck = Date.now();
-  setInterval(function(){
-    db.collection('volunteers').orderBy('timestamp','desc').limit(3).get().then(function(snap){
-      snap.docs.forEach(function(d){
-        var r=d.data();
-        var ts = r.timestamp ? r.timestamp.toMillis() : 0;
-        if(ts > _lastCheck && r.name) addNewReg(r,'متطوع جديد','🙋');
-      });
-    }).catch(function(){});
-    db.collection('consultants').orderBy('timestamp','desc').limit(3).get().then(function(snap){
-      snap.docs.forEach(function(d){
-        var r=d.data();
-        var ts = r.timestamp ? r.timestamp.toMillis() : 0;
-        if(ts > _lastCheck && r.name) addNewReg(r,'استشاري جديد','👨‍💼');
-      });
-    }).catch(function(){});
+  // تحميل التسجيلات الجديدة عند فتح التطبيق
+  var _lastCheck = Date.now() - (24 * 60 * 60 * 1000); // آخر 24 ساعة
+
+  function checkNewRegs(){
+    var cols = [
+      {col:'volunteers',   type:'متطوع جديد',    icon:'🙋'},
+      {col:'consultants',  type:'استشاري جديد',  icon:'👨‍💼'},
+      {col:'suppliers',    type:'مورد جديد',      icon:'🏭'},
+      {col:'organizations',type:'مؤسسة جديدة',   icon:'🏢'},
+    ];
+    cols.forEach(function(c){
+      db.collection(c.col).orderBy('timestamp','desc').limit(5).get().then(function(snap){
+        snap.docs.forEach(function(d){
+          var r = d.data();
+          var ts = r.timestamp ? r.timestamp.toMillis() : 0;
+          if(ts > _lastCheck && r.name) addNewReg(r, c.type, c.icon);
+        });
+        updateBellBadge();
+        renderNewRegs();
+      }).catch(function(){});
+    });
     _lastCheck = Date.now();
-  }, 5 * 60 * 1000);
+  }
+
+  // تحقق عند الفتح
+  setTimeout(checkNewRegs, 2000);
+  // تحقق كل 5 دقائق
+  setInterval(checkNewRegs, 5 * 60 * 1000);
 }
 window.addEventListener('load',function(){setTimeout(renderNewRegs,1000);});
 

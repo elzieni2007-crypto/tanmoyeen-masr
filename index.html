@@ -422,6 +422,7 @@ textarea.fi{resize:none}
   50%{box-shadow:0 0 0 8px rgba(255,255,255,0)}
 }
 .sp-enter-btn:active{transform:scale(.96)}
+@keyframes swipeHint{0%,100%{transform:translateX(0)}50%{transform:translateX(-6px)}}
 
 /* DESKTOP RESPONSIVE */
 @media (min-width: 768px) {
@@ -583,8 +584,32 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <!-- Loading bar -->
   <div class="sp-bar" style="margin-top:24px"><div class="sp-track"><div class="sp-fill"></div></div></div>
 
+  <!-- زرار ابدأ الآن -->
+  <div class="sp-enter" style="margin-top:20px">
+    <button class="sp-enter-btn" onclick="enterApp()" style="padding:14px 40px;font-size:15px;font-weight:900">
+      ابدأ الآن ←
+    </button>
+  </div>
+
+  <!-- تلميح السحب -->
+  <div style="position:relative;z-index:1;margin-top:16px;animation:su .6s ease 1.5s both;text-align:center">
+    <div style="color:rgba(255,255,255,.6);font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px">
+      <span style="animation:swipeHint 1.5s ease-in-out infinite">👈</span>
+      <span>اسحب لاستكشاف الأقسام</span>
+      <span style="animation:swipeHint 1.5s ease-in-out infinite;animation-delay:.3s">👉</span>
+    </div>
+  </div>
+
+  <!-- سجل ملفك -->
+  <div style="position:relative;z-index:1;margin-top:16px;animation:su .6s ease 1.6s both;padding:0 24px">
+    <button onclick="enterApp();setTimeout(function(){go('register')},500)" style="width:100%;padding:14px;background:linear-gradient(135deg,#00b894,#00703a);color:white;border:none;border-radius:14px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 6px 20px rgba(0,184,148,.4)">
+      ✨ سجّل ملفك مجاناً الآن
+    </button>
+    <div style="text-align:center;margin-top:6px;color:rgba(255,255,255,.5);font-size:10px">يظهر ملفك فوراً لآلاف المهتمين بالقطاع التنموي</div>
+  </div>
+
   <!-- URL -->
-  <div style="color:rgba(255,255,255,.35);font-size:10px;margin-top:8px;position:relative;z-index:1;animation:su .6s ease 1.2s both">
+  <div style="color:rgba(255,255,255,.35);font-size:10px;margin-top:12px;position:relative;z-index:1;animation:su .6s ease 1.2s both">
     🌐 elzieni2007-crypto.github.io/tanmoyeen-masr
   </div>
   <div style="position:relative;z-index:1;margin-top:6px;display:flex;gap:12px;justify-content:center">
@@ -684,7 +709,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="dg-card" onclick="go('jobs')"><div class="dg-icon" style="background:#e8f0fe">💼</div><div class="dg-t">الوظائف</div><div class="dg-c" id="dash-jobs-count">جديد يومياً</div></div>
     <div class="dg-card" onclick="go('tenders')"><div class="dg-icon" style="background:#fef3e8">📋</div><div class="dg-t">المناقصات</div><div class="dg-c" id="dash-tenders-count">جديد يومياً</div></div>
     <div class="dg-card" onclick="go('consultants')"><div class="dg-icon" style="background:#e7faf3">👨‍💼</div><div class="dg-t">الاستشاريون</div><div class="dg-c" id="cons-dg-count">243 مسجّل</div></div>
-    <div class="dg-card" onclick="go('orgs-screen')"><div class="dg-icon" style="background:#e8f4fd">🏢</div><div class="dg-t">المؤسسات</div><div class="dg-c">46 مؤسسة</div></div>
+    <div class="dg-card" onclick="go('orgs-screen')"><div class="dg-icon" style="background:#e8f4fd">🏢</div><div class="dg-t">المؤسسات</div><div class="dg-c" id="dash-orgs-count">جديد يومياً</div></div>
     <div class="dg-card" onclick="go('suppliers')"><div class="dg-icon" style="background:#f0e8fe">🏭</div><div class="dg-t">الموردون</div><div class="dg-c" id="sups-dg-count">87 مورد</div></div>
     <div class="dg-card" onclick="go('volunteers')"><div class="dg-icon" style="background:#e7faf3">🤝</div><div class="dg-t">متطوعون</div><div class="dg-c" id="vol-dash-count">انضم الآن</div></div>
     <div class="dg-card" onclick="go('register')" style="border:2px solid var(--a);background:linear-gradient(135deg,#e8f0fe,#f0f7ff)"><div class="dg-icon" style="background:var(--a)">📝</div><div class="dg-t" style="color:var(--p);font-weight:900">سجّل ملفك</div><div class="dg-c" style="color:var(--a);font-weight:800">مجاناً ✨</div></div>
@@ -774,7 +799,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 <!-- CONSULTANTS -->
 <div id="consultants" class="scr">
-  <div class="sh"><div class="sh-t">قاعدة الاستشاريين</div><div class="cnt" id="con-cnt">301</div></div>
+  <div class="sh"><div class="sh-t">قاعدة الاستشاريين</div><div class="cnt" id="con-cnt">جاري التحميل...</div></div>
   <div class="search-wrap" style="padding-top:0"><div class="sbar">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aab" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input id="ci" placeholder="ابحث باسم أو تخصص أو محافظة..." oninput="fc()">
@@ -795,7 +820,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 <!-- SUPPLIERS -->
 <div id="suppliers" class="scr">
-  <div class="sh"><div class="sh-t">قاعدة الموردين</div><div class="cnt" id="sup-cnt">73</div></div>
+  <div class="sh"><div class="sh-t">قاعدة الموردين</div><div class="cnt" id="sup-cnt">جاري التحميل...</div></div>
   <div class="search-wrap" style="padding-top:0"><div class="sbar">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aab" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input id="si" placeholder="ابحث باسم المورد أو النشاط..." oninput="fs()">
@@ -817,7 +842,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div style="background:linear-gradient(135deg,#1a3a6e,#0094cc);padding:20px 16px 16px;color:white">
     <div style="font-size:28px;margin-bottom:6px">🏢</div>
     <div style="font-size:18px;font-weight:900;margin-bottom:4px">المؤسسات والجمعيات</div>
-    <div style="font-size:12px;opacity:.85">46 مؤسسة وجمعية مسجّلة</div>
+    <div style="font-size:12px;opacity:.85" id="org-cnt">جاري التحميل...</div>
   </div>
   <div class="search-wrap">
     <div class="sbar">
@@ -1550,7 +1575,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="msec">
       <div class="mstit">حسابي</div>
       <div class="mitem" onclick="go('register')"><div class="mico" style="background:#e8f0fe">📝</div><div class="mtxt"><div class="mtt">تسجيل / تحديث ملفي</div><div class="mst">أضف بياناتك لقاعدة المعلومات</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
-      <div class="mitem" onclick="go('consultants')"><div class="mico" style="background:#e7faf3">👨‍💼</div><div class="mtxt"><div class="mtt">قاعدة الاستشاريين</div><div class="mst">301 استشاري مسجّل</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div class="mitem" onclick="go('consultants')"><div class="mico" style="background:#e7faf3">👨‍💼</div><div class="mtxt"><div class="mtt">قاعدة الاستشاريين</div><div class="mst" id="menu-cons-count">استشاريين مسجّلين</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="go('suppliers')"><div class="mico" style="background:#f0e8fe">🏭</div><div class="mtxt"><div class="mtt">قاعدة الموردين</div><div class="mst">87 مورد مسجّل</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
     </div>
     <div class="msec">
@@ -2387,6 +2412,8 @@ function enterApp(){
         window.CONS=fresh;
         try{localStorage.setItem('cache_cons',JSON.stringify(fresh.slice(0,100)));}catch(e){}
         renderCons();renderDash();updateAllCounts();
+        var menuEl = document.getElementById('menu-cons-count');
+        if(menuEl) menuEl.textContent = fresh.length + ' استشاري مسجّل';
       }
     }).catch(function(){
       try{ var c=JSON.parse(localStorage.getItem('cache_cons')||'[]'); if(c.length){window.CONS=c;renderCons();renderDash();} }catch(e){}
@@ -2423,6 +2450,8 @@ function enterApp(){
         window.ORGS=fresh;
         try{localStorage.setItem('cache_orgs',JSON.stringify(fresh.slice(0,100)));}catch(e){}
         renderOrgs();updateAllCounts();
+        var el=document.getElementById('dash-orgs-count');
+        if(el) el.textContent=fresh.length+' مؤسسة';
       }
     }).catch(function(){
       try{ var o=JSON.parse(localStorage.getItem('cache_orgs')||'[]'); if(o.length){window.ORGS=o;renderOrgs();} }catch(e){}
@@ -3013,6 +3042,18 @@ function updateAllCounts(){
   if(e) e.textContent=uniqueCons.length;
   e=document.querySelector('#suppliers .section-count');
   if(e) e.textContent=uniqueSups.length;
+
+  // Org screen count
+  e=document.getElementById('org-cnt');
+  if(e && orgsCount > 0) e.textContent = orgsCount + ' مؤسسة وجمعية مسجّلة';
+
+  // Sidebar menu counts
+  e=document.getElementById('menu-cons-count');
+  if(e && uniqueCons.length > 0) e.textContent = uniqueCons.length + ' استشاري مسجّل';
+
+  // Dashboard orgs count
+  e=document.getElementById('dash-orgs-count');
+  if(e && orgsCount > 0) e.textContent = orgsCount + ' مؤسسة';
 
   // Firebase live registrations
   if(typeof db !== 'undefined'){
@@ -4267,8 +4308,11 @@ function renderOrgs(){
   var list = document.getElementById('orgs-list');
   if(!list) return;
   var orgsData = (typeof ORGS !== 'undefined') ? ORGS : [];
+  var cntEl = document.getElementById('org-cnt');
+  if(cntEl && orgsData.length > 0) cntEl.textContent = orgsData.length + ' مؤسسة وجمعية مسجّلة';
   if(orgsData.length === 0){
-    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">لا توجد مؤسسات</div>';
+    if(cntEl) cntEl.textContent = 'جاري التحميل...';
+    list.innerHTML = skeletonCards(3);
     return;
   }
   var search = (document.getElementById('org-search')||{}).value || '';
@@ -6535,37 +6579,35 @@ function addNewReg(data, type, icon){
   renderNewRegs();
 }
 
-// مراقبة التسجيلات الجديدة - كل 5 دقائق بس
-if(typeof db !== 'undefined'){
-  // تحميل التسجيلات الجديدة عند فتح التطبيق
-  var _lastCheck = Date.now() - (24 * 60 * 60 * 1000); // آخر 24 ساعة
+// مراقبة التسجيلات الجديدة
+var _lastCheck = Date.now() - (24 * 60 * 60 * 1000); // آخر 24 ساعة
 
-  function checkNewRegs(){
-    var cols = [
-      {col:'volunteers',   type:'متطوع جديد',    icon:'🙋'},
-      {col:'consultants',  type:'استشاري جديد',  icon:'👨‍💼'},
-      {col:'suppliers',    type:'مورد جديد',      icon:'🏭'},
-      {col:'organizations',type:'مؤسسة جديدة',   icon:'🏢'},
-    ];
-    cols.forEach(function(c){
-      db.collection(c.col).orderBy('timestamp','desc').limit(5).get().then(function(snap){
-        snap.docs.forEach(function(d){
-          var r = d.data();
-          var ts = r.timestamp ? r.timestamp.toMillis() : 0;
-          if(ts > _lastCheck && r.name) addNewReg(r, c.type, c.icon);
-        });
-        updateBellBadge();
-        renderNewRegs();
-      }).catch(function(){});
-    });
-    _lastCheck = Date.now();
-  }
-
-  // تحقق عند الفتح
-  setTimeout(checkNewRegs, 2000);
-  // تحقق كل 5 دقائق
-  setInterval(checkNewRegs, 5 * 60 * 1000);
+function checkNewRegs(){
+  if(typeof db === 'undefined') return;
+  var cols = [
+    {col:'volunteers',   type:'متطوع جديد',    icon:'🙋'},
+    {col:'consultants',  type:'استشاري جديد',  icon:'👨‍💼'},
+    {col:'suppliers',    type:'مورد جديد',      icon:'🏭'},
+    {col:'organizations',type:'مؤسسة جديدة',   icon:'🏢'},
+  ];
+  cols.forEach(function(c){
+    db.collection(c.col).orderBy('timestamp','desc').limit(5).get().then(function(snap){
+      snap.docs.forEach(function(d){
+        var r = d.data();
+        var ts = r.timestamp ? r.timestamp.toMillis() : 0;
+        if(ts > _lastCheck && r.name) addNewReg(r, c.type, c.icon);
+      });
+      updateBellBadge();
+      renderNewRegs();
+    }).catch(function(){});
+  });
+  _lastCheck = Date.now();
 }
+
+// تحقق عند الفتح بعد ما Firebase يتحمل
+setTimeout(checkNewRegs, 3000);
+// تحقق كل 5 دقائق
+setInterval(checkNewRegs, 5 * 60 * 1000);
 window.addEventListener('load',function(){setTimeout(renderNewRegs,1000);});
 
 window.addEventListener('load',()=>{

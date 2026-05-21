@@ -20,21 +20,6 @@
   OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
       appId: "8dfa5d04-3fc5-448d-b72d-52d2ed5dc5d9",
-      notifyButton: { enable: false },
-      promptOptions: {
-        slidedown: {
-          prompts: [{
-            type: "push",
-            autoPrompt: true,
-            text: {
-              actionMessage: "اشترك في الإشعارات لتصلك أحدث الوظائف والمناقصات في تنمويين مصر",
-              acceptButton: "اشترك الآن",
-              cancelButton: "لاحقاً"
-            },
-            delay: { pageViews: 1, timeDelay: 5 }
-          }]
-        }
-      }
     });
   });
 </script>

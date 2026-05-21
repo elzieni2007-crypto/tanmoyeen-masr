@@ -20,6 +20,8 @@
   OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
       appId: "8dfa5d04-3fc5-448d-b72d-52d2ed5dc5d9",
+      serviceWorkerPath: "/tanmoyeen-masr/OneSignalSDKWorker.js",
+      serviceWorkerParam: { scope: "/tanmoyeen-masr/" },
     });
   });
 </script>
@@ -3869,6 +3871,7 @@ function submitJobReport(){
 
   const job = {
     id: Date.now(),
+    _ptype: 'job',
     reporter, title, org, gov, type, sec,
     sal: sal || 'تنافسي',
     dl:  dl  || '—',
@@ -4009,7 +4012,7 @@ function _renderPendingList(list){
   }
 
   container.innerHTML = list.map((item,idx) => {
-    const isJob = item._ptype === 'job';
+    const isJob = item._ptype !== 'tender' && !item.budget;
     const borderColor = isJob ? 'var(--a)' : 'var(--orange)';
     const typeLabel = isJob ? '💼 وظيفة' : '📋 مناقصة';
     const typeBg = isJob ? '#e8f0fe' : '#fff3cd';
@@ -4060,6 +4063,10 @@ function approvePending(idx){
     if(!item){ toast('❌ السجل غير موجود'); return; }
 
     var col = (item._ptype==='tender') ? 'tenders' : 'jobs';
+    // لو مفيش _ptype — نحدده من البيانات
+    if(!item._ptype){
+      col = item.budget ? 'tenders' : 'jobs';
+    }
     var data = Object.assign({}, item);
     delete data._ptype; delete data.fbId;
 

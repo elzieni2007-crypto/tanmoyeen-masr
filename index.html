@@ -2413,8 +2413,10 @@ async function loadOrgsFromSheet(){
 function enterApp(){
   var splash = document.getElementById('splash');
   var app = document.getElementById('app');
-  if(splash) splash.style.display='none';
-  if(app) app.style.display='block';
+  if(!splash || !app) return;
+  // مخبّيها بس مرة واحدة
+  splash.style.display = 'none';
+  app.style.display = 'block';
   window.scrollTo(0,0);
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
@@ -2958,25 +2960,27 @@ let logoTaps=0, logoTimer=null;
 // ============ NAVIGATION ============
 const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus'};
 function go(id){
+  // تأكد إن الـ splash مش ظاهرة
+  var splash = document.getElementById('splash');
+  if(splash) splash.style.display = 'none';
+  var app = document.getElementById('app');
+  if(app) app.style.display = 'block';
+
   const el = document.getElementById(id);
   if(!el) return;
 
-  // أخفي كل الصفحات وارجع scrollTop لكل واحدة
   document.querySelectorAll('.scr').forEach(s=>{
     s.classList.remove('on');
     s.scrollTop = 0;
   });
-
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
 
-  // أظهر الصفحة الجديدة
   el.classList.add('on');
   el.scrollTop = 0;
 
   const nid = navMap[id];
   if(nid){ const nel=document.getElementById(nid); if(nel) nel.classList.add('on'); }
 
-  // رجوع للأعلى فوراً
   window.scrollTo(0,0);
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
@@ -5180,25 +5184,25 @@ function filterAdmList(query){
   container.innerHTML = '<div style="padding:4px 4px 8px;font-size:11px;color:var(--muted)">' +
     'عرض '+list.length+' نتيجة' + (q ? ' لـ "'+query+'"' : '') + '</div>' +
   list.map(function(r, idx){
-    return '<div class="adm-card" id="adm-card-'+idx+'" style="border-right:3px solid '+tc.color+'">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
-        '<div style="width:42px;height:42px;border-radius:50%;background:'+tc.bg+';display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+(isExpert?'👨‍💼':isSup?'🏭':admTab==='org'?'🏢':'🔍')+'</div>' +
-        '<div style="flex:1">' +
-          '<div style="font-size:13px;font-weight:800;color:#1a2a3a">'+(r.name||'—')+'</div>' +
-          '<div style="font-size:11px;color:'+tc.color+';font-weight:600">'+(r.spec||r.cat||r.jobType||tc.label)+'</div>' +
+    return '<div class="adm-card" id="adm-card-'+idx+'" style="border-right:3px solid '+tc.color+';padding:10px">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+        '<div style="font-size:18px;flex-shrink:0">'+(isExpert?'👨‍💼':isSup?'🏭':admTab==='org'?'🏢':'🔍')+'</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:12px;font-weight:800;color:#1a2a3a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r.name||'—')+'</div>' +
+          '<div style="font-size:10px;color:'+tc.color+'">'+(r.spec||r.cat||r.jobType||tc.label)+'</div>' +
         '</div>' +
+        '<span style="font-size:9px;background:'+tc.bg+';color:'+tc.color+';padding:2px 6px;border-radius:8px;font-weight:700;flex-shrink:0">'+tc.label+'</span>' +
       '</div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">' +
-        (r.gov ? '<span style="font-size:10px;background:#eef3f9;color:#6b7a8d;padding:3px 8px;border-radius:8px">📍 '+r.gov+'</span>' : '') +
-        (r.exp ? '<span style="font-size:10px;background:#eef3f9;color:#6b7a8d;padding:3px 8px;border-radius:8px">⭐ '+r.exp+'</span>' : '') +
-        (r.phone ? '<span style="font-size:10px;background:#eef3f9;color:#6b7a8d;padding:3px 8px;border-radius:8px;direction:ltr">📞 '+r.phone+'</span>' : '') +
-        (r.email ? '<span style="font-size:10px;background:#eef3f9;color:#6b7a8d;padding:3px 8px;border-radius:8px;direction:ltr">✉️ '+r.email.substring(0,22)+'</span>' : '') +
+      '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px">' +
+        (r.gov ? '<span style="font-size:9px;background:#eef3f9;color:#6b7a8d;padding:2px 6px;border-radius:6px">📍 '+r.gov+'</span>' : '') +
+        (r.phone ? '<span style="font-size:9px;background:#eef3f9;color:#6b7a8d;padding:2px 6px;border-radius:6px;direction:ltr">📞 '+r.phone+'</span>' : '') +
+        (r.email ? '<span style="font-size:9px;background:#eef3f9;color:#6b7a8d;padding:2px 6px;border-radius:6px;direction:ltr">✉️ '+r.email.substring(0,18)+'</span>' : '') +
       '</div>' +
-      '<div style="display:flex;gap:6px">' +
-        (r.phone ? '<a href="'+waNum(r.phone)+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬</a>' : '') +
-        (r.email ? '<a href="mailto:'+r.email+'" style="flex:1;padding:7px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️</a>' : '') +
-        '<button style="flex:2;padding:7px;background:'+tc.bg+';color:'+tc.color+';border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="editAdmRecord('+idx+',\''+colName+'\')">✏️ تعديل</button>' +
-        '<button style="flex:1;padding:7px;background:#feeaea;color:#e05050;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="deleteAdmRecord(\''+(r.fbId||r.id)+'\',\''+colName+'\')">🗑️</button>' +
+      '<div style="display:flex;gap:4px">' +
+        (r.phone ? '<a href="'+waNum(r.phone)+'" target="_blank" style="flex:1;padding:5px;background:#e7faf3;color:#00703a;border-radius:6px;text-align:center;text-decoration:none;font-size:12px">💬</a>' : '') +
+        (r.email ? '<a href="mailto:'+r.email+'" style="flex:1;padding:5px;background:#fff3cd;color:#c06010;border-radius:6px;text-align:center;text-decoration:none;font-size:12px">✉️</a>' : '') +
+        '<button style="flex:2;padding:5px;background:'+tc.bg+';color:'+tc.color+';border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="editAdmRecord('+idx+',\''+colName+'\')">✏️ تعديل</button>' +
+        '<button style="flex:1;padding:5px;background:#feeaea;color:#e05050;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer" onclick="deleteAdmRecord(\''+(r.fbId||r.id)+'\',\''+colName+'\')">🗑️</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -6629,11 +6633,15 @@ setInterval(checkNewRegs, 5 * 60 * 1000);
 window.addEventListener('load',function(){setTimeout(renderNewRegs,1000);});
 
 window.addEventListener('load',()=>{
-  // Auto enter after 2.5 seconds
+  // بعد 5 ثواني الـ splash تصغر وتظهر الرئيسية
   setTimeout(()=>{
-    enterApp();
-    handleUrlParams();
-  }, 800);
+    // لو المستخدم لسه في الـ splash
+    var splash = document.getElementById('splash');
+    if(splash && splash.style.display !== 'none'){
+      enterApp();
+      handleUrlParams();
+    }
+  }, 5000);
 });
 </script>
 

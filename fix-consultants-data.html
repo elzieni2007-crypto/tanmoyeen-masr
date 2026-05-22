@@ -72,8 +72,10 @@ function doLogin(){
 }
 
 // Ready immediately
-document.getElementById('fb-status').textContent = '✅ جاهز - اختار قسم واضغط فحص';
-document.getElementById('fb-status').style.color = '#00b894';
+window.addEventListener('DOMContentLoaded', function(){
+  var el = document.getElementById('fb-status');
+  if(el){ el.textContent = '✅ جاهز - اختار قسم واضغط فحص'; el.style.color = '#00b894'; }
+});
 
 var allDocs = [];
 var currentCol = 'consultants';

@@ -44,9 +44,8 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 
 /* SCREENS */
 .scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
-.scr.on{display:block;animation:fi .28s ease}
-html,body{scroll-behavior:auto}
-body{overflow-x:hidden}
+.scr.on{display:block;animation:fi .28s ease;position:relative}
+html,body{scroll-behavior:auto;overflow-x:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* SPLASH */
@@ -2398,46 +2397,20 @@ async function loadOrgsFromSheet(){
 }
 
 function enterApp(){
-
-  // اخفاء شاشة البداية بالكامل
-  const splash = document.getElementById('splash');
-  splash.style.opacity = '0';
-  splash.style.pointerEvents = 'none';
-
-  setTimeout(function(){
-
-    splash.style.display = 'none';
-
-    // اظهار التطبيق
-    const app = document.getElementById('app');
-    app.style.display = 'block';
-
-    // اظهار الصفحة الرئيسية فقط
-    document.querySelectorAll('.scr').forEach(s=>{
-      s.classList.remove('on');
-      s.style.display = 'none';
-    });
-
-    const home = document.getElementById('home');
-    home.style.display = 'block';
-    home.classList.add('on');
-
-    // reset scroll
-    window.scrollTo(0,0);
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
-
-    setAllLogos();
-    initDarkMode();
-    loadCustomContent();
-    renderDash();
-    setTimeout(updateAllCounts, 500);
-    updateJobseekersList();
-    // Load from Firebase
-    setTimeout(loadFromFirebase, 300);
-
-  }, 250);
-
+  var splash = document.getElementById('splash');
+  var app = document.getElementById('app');
+  if(splash) splash.style.display='none';
+  if(app) app.style.display='block';
+  window.scrollTo(0,0);
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+  setAllLogos();
+  initDarkMode();
+  loadCustomContent();
+  renderDash();
+  setTimeout(updateAllCounts, 500);
+  updateJobseekersList();
+  setTimeout(loadFromFirebase, 300);
 }
 
 function loadFromFirebase(){
@@ -2974,6 +2947,7 @@ function go(id){
   const el = document.getElementById(id);
   if(!el) return;
 
+  // أخفي كل الصفحات وارجع scrollTop لكل واحدة
   document.querySelectorAll('.scr').forEach(s=>{
     s.classList.remove('on');
     s.scrollTop = 0;
@@ -2981,26 +2955,17 @@ function go(id){
 
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
 
+  // أظهر الصفحة الجديدة
   el.classList.add('on');
-
-  const nid = navMap[id];
-  if(nid){
-    const nel = document.getElementById(nid);
-    if(nel) nel.classList.add('on');
-  }
-
-  // إجبار الانتقال لأعلى الصفحة الجديدة فوراً
-  window.scrollTo({top:0,left:0,behavior:'auto'});
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
   el.scrollTop = 0;
 
-  setTimeout(function(){
-    window.scrollTo(0,0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    el.scrollTop = 0;
-  }, 50);
+  const nid = navMap[id];
+  if(nid){ const nel=document.getElementById(nid); if(nel) nel.classList.add('on'); }
+
+  // رجوع للأعلى فوراً
+  window.scrollTo(0,0);
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
 
   if(id==='consultants') renderCons();
   if(id==='suppliers') renderSups();
@@ -3009,8 +2974,8 @@ function go(id){
   if(id==='notifs'){
     renderNotifs();
     NOTIFS.forEach(function(n){ n.unr=false; });
-    var dot = document.getElementById('notif-dot');
-    if(dot) dot.style.display = 'none';
+    var dot=document.getElementById('notif-dot');
+    if(dot) dot.style.display='none';
   }
   if(id==='volunteers') loadVolunteers();
   if(id==='orgs-screen') setTimeout(renderOrgs,50);

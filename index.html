@@ -526,7 +526,7 @@ textarea.fi{resize:none}
   height:28px !important;
 }
 
-#home{overflow-y:visible;}
+#splash{transition:opacity .25s ease}
 
 /* DARK MODE */
 body.dark-mode {
@@ -604,7 +604,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
   <!-- سجل ملفك -->
   <div style="position:relative;z-index:1;margin-top:16px;animation:su .6s ease 1.6s both;padding:0 24px">
-    <button onclick="enterApp();setTimeout(function(){go('register');},300)" style="width:100%;padding:14px;background:linear-gradient(135deg,#00b894,#00703a);color:white;border:none;border-radius:14px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 6px 20px rgba(0,184,148,.4)">
+    <button onclick="enterApp();setTimeout(function(){go('register');},350)" style="width:100%;padding:14px;background:linear-gradient(135deg,#00b894,#00703a);color:white;border:none;border-radius:14px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 6px 20px rgba(0,184,148,.4)">
       ✨ سجّل ملفك مجاناً الآن
     </button>
     <div style="text-align:center;margin-top:6px;color:rgba(255,255,255,.5);font-size:10px">يظهر ملفك فوراً لآلاف المهتمين بالقطاع التنموي</div>
@@ -723,6 +723,12 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <button onclick="shareWA()" style="flex:1;padding:9px 4px;background:#25d366;color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">💬 واتساب</button>
     <button onclick="window.open(FB_GROUP_URL,'_blank')" style="flex:1;padding:9px 4px;background:#1877f2;color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">📘 الجروب</button>
     <button onclick="shareApp()" style="flex:1;padding:9px 4px;background:var(--p);color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🔗 شارك</button>
+  </div>
+  <!-- زرار تفعيل الإشعارات -->
+  <div style="padding:8px 10px 2px" id="push-btn-wrap">
+    <button onclick="enablePush()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;border:none;border-radius:11px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
+      🔔 فعّل إشعارات الوظائف والمناقصات
+    </button>
   </div>
   <div class="sh" style="margin-top:4px;padding:3px 14px 2px">
     <div class="sh-t" style="font-size:12px">👨‍💼 استشاريون مميزون</div>
@@ -2392,15 +2398,49 @@ async function loadOrgsFromSheet(){
 }
 
 function enterApp(){
-  document.getElementById('splash').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
-  window.scrollTo({top:0, behavior:'instant'});
-  setAllLogos();
-  initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);updateJobseekersList();
-  // Load from Firebase (real-time)
+
+  // اخفاء شاشة البداية بالكامل
+  const splash = document.getElementById('splash');
+  splash.style.opacity = '0';
+  splash.style.pointerEvents = 'none';
+
   setTimeout(function(){
+
+    splash.style.display = 'none';
+
+    // اظهار التطبيق
+    const app = document.getElementById('app');
+    app.style.display = 'block';
+
+    // اظهار الصفحة الرئيسية فقط
+    document.querySelectorAll('.scr').forEach(s=>{
+      s.classList.remove('on');
+      s.style.display = 'none';
+    });
+
+    const home = document.getElementById('home');
+    home.style.display = 'block';
+    home.classList.add('on');
+
+    // reset scroll
+    window.scrollTo(0,0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+
+    setAllLogos();
+    initDarkMode();
+    loadCustomContent();
+    renderDash();
+    setTimeout(updateAllCounts, 500);
+    updateJobseekersList();
+    // Load from Firebase
+    setTimeout(loadFromFirebase, 300);
+
+  }, 250);
+
+}
+
+function loadFromFirebase(){
     if(typeof db === 'undefined'){
       // Firebase مش موجود - جيب من الـ cache
       try{ var c=JSON.parse(localStorage.getItem('cache_cons')||'[]'); if(c.length){window.CONS=c;renderCons();} }catch(e){}
@@ -2492,11 +2532,7 @@ function enterApp(){
       if(el) el.textContent=fresh.length>0?fresh.length+' مناقصة':'جديد يومياً';
     }).catch(function(e){ console.log('Tenders error:',e); renderTenders(); });
 
-  }, 1500);
-  // Sheets disabled - using Firebase as single source
-
-  // Auto refresh from Firebase every 5 minutes
-  // Auto-refresh disabled - data loads once on startup to save Firebase quota
+}
 
   // Firebase real-time listener - only when admin logged in
   if(typeof db !== 'undefined' && typeof auth !== 'undefined'){
@@ -2517,9 +2553,7 @@ function enterApp(){
       }
     }); // end onAuthStateChanged
   }
-  setTimeout(setupHeroShrink,100);
-  // URL params handled separately after load
-}
+  setTimeout(setupHeroShrink, 100);
 
 // Handle URL params - called after app loads
 function handleUrlParams(){
@@ -6352,26 +6386,22 @@ function manualRefresh(){
 
 // ============ ONESIGNAL NOTIFICATIONS ============
 const ONESIGNAL_APP_ID = "8dfa5d04-3fc5-448d-b72d-52d2ed5dc5d9";
-const ONESIGNAL_REST_KEY = "os_v2_app_rx5f2bb7yvci3nznkljo2xof3gb6vmtuxbsuicnilw5ucuxc6kkw2ve3nbryb5q24hiqhyjtlklkvehuxogrgqswrmo5ou5ktuqekxy";
+// الإرسال يتم من Firebase Cloud Function - مش من هنا
 
 function sendPushNotification(title, message, url){
-  if(!ONESIGNAL_REST_KEY || ONESIGNAL_REST_KEY === "ضع_الـ_REST_API_KEY_هنا") return;
-  fetch('https://onesignal.com/api/v1/notifications', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Basic ' + ONESIGNAL_REST_KEY
-    },
-    body: JSON.stringify({
-      app_id: ONESIGNAL_APP_ID,
-      included_segments: ['All'],
-      headings: { ar: title, en: title },
-      contents: { ar: message, en: message },
-      url: url || 'https://elzieni2007-crypto.github.io/tanmoyeen-masr',
-      chrome_web_icon: 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/icon-192.png'
-    })
-  }).then(function(){ console.log('✅ Push notification sent'); })
-    .catch(function(e){ console.log('Push error:', e); });
+  // الإشعارات بتتبعت من Firebase Cloud Function تلقائياً
+  console.log('Push will be sent via Cloud Function:', title);
+}
+
+async function enablePush(){
+  try{
+    await OneSignalDeferred.push(async function(OneSignal){
+      await OneSignal.Notifications.requestPermission();
+      toast('🔔 تم تفعيل الإشعارات بنجاح!');
+    });
+  }catch(e){
+    toast('⚠️ لم يتم تفعيل الإشعارات');
+  }
 }
 function exportToExcel(data, filename){
   if(!data || !data.length){ toast('❌ مفيش بيانات للتصدير'); return; }

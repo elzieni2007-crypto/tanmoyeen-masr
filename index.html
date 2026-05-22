@@ -722,6 +722,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div style="display:flex;gap:6px;padding:4px 10px 2px;direction:ltr">
     <button onclick="shareWA()" style="flex:1;padding:9px 4px;background:#25d366;color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">💬 واتساب</button>
     <button onclick="window.open(FB_GROUP_URL,'_blank')" style="flex:1;padding:9px 4px;background:#1877f2;color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">📘 الجروب</button>
+    <button onclick="window.open(WA_GROUP_URL,'_blank')" style="flex:1;padding:9px 4px;background:#128c7e;color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">👥 جروب WA</button>
     <button onclick="shareApp()" style="flex:1;padding:9px 4px;background:var(--p);color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🔗 شارك</button>
   </div>
   <!-- زرار تفعيل الإشعارات -->
@@ -1589,6 +1590,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="msec">
       <div class="mstit">الإعدادات</div>
       <div class="mitem" onclick="window.open('https://www.facebook.com/groups/346107035759429/?ref=share&mibextid=NSMWBT','_blank')"><div class="mico" style="background:#e8f0fe">📘</div><div class="mtxt"><div class="mtt">مجموعة فيسبوك</div><div class="mst">٢٥,٠٠٠ عضو - انضم الآن</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div class="mitem" onclick="window.open(WA_GROUP_URL,'_blank')"><div class="mico" style="background:#e7faf3">👥</div><div class="mtxt"><div class="mtt">جروب واتساب</div><div class="mst">انضم لجروب تنمويين مصر</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
     </div>
   </div>
 </div>
@@ -1675,6 +1677,17 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" style="background:#f3e8ff;color:#7c3aed;border-color:#7c3aed" onclick="setAdmTab(this,'settings')">⚙️ إعدادات</div>
     </div>
     <div style="font-size:10px;color:var(--muted);padding:0 12px 8px;text-align:left">← اسحب للمزيد من التبويبات</div>
+
+    <!-- بحث في السجلات -->
+    <div style="padding:8px 16px 4px">
+      <div style="position:relative">
+        <input id="adm-search" type="text" placeholder="🔍 ابحث بالاسم أو التخصص أو المحافظة..." 
+          oninput="filterAdmList(this.value)"
+          style="width:100%;padding:10px 14px;border:2px solid #dde6f0;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;background:white;outline:none;box-sizing:border-box">
+        <button onclick="document.getElementById('adm-search').value='';filterAdmList('')" 
+          style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:14px;cursor:pointer;color:#6b7a8d">✕</button>
+      </div>
+    </div>
 
     <!-- قائمة السجلات -->
     <div class="adm-list" id="adm-list" style="display:flex;flex-direction:column;gap:8px"></div>
@@ -4108,10 +4121,10 @@ function _renderPendingList(list){
       ${item.contact ? '<div style="font-size:11px;margin-bottom:6px">📞 تواصل: '+item.contact+'</div>' : ''}
       ${item.link ? '<div style="font-size:10px;margin-bottom:10px;word-break:break-all;color:var(--a)">🔗 '+item.link+'</div>' : ''}
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button onclick="approvePending(${idx})" style="flex:2;padding:13px;background:linear-gradient(135deg,#00b894,#00703a);color:white;border:none;border-radius:12px;font-size:13px;font-weight:800;font-family:Cairo,sans-serif;cursor:pointer;box-shadow:0 4px 12px rgba(0,184,148,.3)">
+        <button onclick="if(confirm('هتنشر الإعلان ده للمستخدمين — متأكد؟')) approvePending(${idx})" style="flex:2;padding:13px;background:linear-gradient(135deg,#00b894,#00703a);color:white;border:none;border-radius:12px;font-size:13px;font-weight:800;font-family:Cairo,sans-serif;cursor:pointer;box-shadow:0 4px 12px rgba(0,184,148,.3)">
           ✅ نشر الآن
         </button>
-        <button onclick="rejectPending(${idx})" style="flex:1;padding:13px;background:#feeaea;color:#c03030;border:2px solid #f5c6c6;border-radius:12px;font-size:13px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
+        <button onclick="if(confirm('هترفض الإعلان ده — متأكد؟')) rejectPending(${idx})" style="flex:1;padding:13px;background:#feeaea;color:#c03030;border:2px solid #f5c6c6;border-radius:12px;font-size:13px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
           ❌ رفض
         </button>
       </div>
@@ -4706,6 +4719,7 @@ function openVolunteer(idx){
 
 // ============ SHARE FUNCTIONS ============
 const FB_GROUP_URL = 'https://www.facebook.com/groups/346107035759429/?ref=share&mibextid=NSMWBT';
+const WA_GROUP_URL = 'https://chat.whatsapp.com/FsJ8jmAQStP805Jptm3Khi';
 const APP_SHARE_URL = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
 const APP_SHARE_TEXT = 'تنمويين مصر - منصة العمل التنموي في مصر\nاستشاريين | موردين | وظائف ومناقصات يومياً\n\nانضم دلوقتي:';
 
@@ -5121,74 +5135,75 @@ function setAdmTab(el, tab){
 }
 
 function renderAdmList(){
+  // امسح البحث لما تتغير التاب
+  var searchEl = document.getElementById('adm-search');
+  if(searchEl) searchEl.value = '';
+  filterAdmList('');
+}
+
+function filterAdmList(query){
+  var q = query.trim().toLowerCase();
   var fbData = window._adminData || [];
+  var list = fbData.filter(function(r){ return r._type === admTab; });
 
-  var list = fbData.filter(function(r){
-    return r._type === admTab;
-  });
+  if(q){
+    list = list.filter(function(r){
+      return (r.name||'').toLowerCase().includes(q) ||
+             (r.spec||'').toLowerCase().includes(q) ||
+             (r.cat||'').toLowerCase().includes(q) ||
+             (r.gov||'').toLowerCase().includes(q) ||
+             (r.phone||'').includes(q) ||
+             (r.email||'').toLowerCase().includes(q);
+    });
+  }
 
-  const container = document.getElementById('adm-list');
+  var container = document.getElementById('adm-list');
+  if(!container) return;
 
-  const typeColors = {
-    jobseeker: {bg:'#e8f4fd', color:'#1a5cbe', label:'باحث عمل'},
-    expert:    {bg:'#e7faf3', color:'#0a8a5e', label:'استشاري'},
-    sup:       {bg:'#e7faf3', color:'#007a50', label:'مورد'},
-    org:       {bg:'#fef3e8', color:'#c06010', label:'مؤسسة'},
-  };
-  const tc = typeColors[admTab] || typeColors.jobseeker;
+  var tc = {
+    jobseeker:{bg:'#e8f4fd',color:'#1a5cbe',label:'باحث عمل'},
+    expert:   {bg:'#e7faf3',color:'#0a8a5e',label:'استشاري'},
+    sup:      {bg:'#e7faf3',color:'#007a50',label:'مورد'},
+    org:      {bg:'#fef3e8',color:'#c06010',label:'مؤسسة'},
+  }[admTab] || {bg:'#e8f4fd',color:'#1a5cbe',label:'سجل'};
 
   if(list.length === 0){
-    container.innerHTML = `
-      <div class="adm-empty">
-        <div>📭</div>
-        <div style="font-size:14px;font-weight:700;margin-bottom:6px">لا يوجد سجلات</div>
-        <div style="font-size:12px">لم يتم تسجيل أي ${tc.label} بعد</div>
-      </div>`;
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">' +
+      (q ? '🔍 مفيش نتايج لـ "'+query+'"' : '📭 لا يوجد سجلات') + '</div>';
     return;
   }
 
-  var listNames = {jobseeker:'باحثو عمل', expert:'استشاريين', sup:'موردين', org:'مؤسسات'};
-  var exportHeader = '<div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px 10px">' +
-    '<div style="font-size:13px;font-weight:800;color:var(--p)">'+(listNames[admTab]||'')+' ('+list.length+')</div>' +
-    '<button onclick="exportAdminSection()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button>' +
-  '</div>';
+  var isExpert = admTab==='expert';
+  var isSup = admTab==='sup';
+  var colName = admTab==='expert'?'consultants':admTab==='sup'?'suppliers':admTab==='org'?'organizations':'jobseekers';
 
-  container.innerHTML = exportHeader + list.map(function(r, idx){
-    var colName = admTab==='expert'?'consultants':admTab==='sup'?'suppliers':admTab==='org'?'organizations':'jobseekers';
-    var phone = (r.phone||'').replace(/[^0-9]/g,'');
-    var isExpert = admTab === 'expert';
-    var isSup = admTab === 'sup';
-
-    return '<div class="adm-card" id="adm-card-'+idx+'" style="border-right:3px solid '+tc.color+';cursor:pointer">' +
-      // Header
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+  container.innerHTML = '<div style="padding:4px 4px 8px;font-size:11px;color:var(--muted)">' +
+    'عرض '+list.length+' نتيجة' + (q ? ' لـ "'+query+'"' : '') + '</div>' +
+  list.map(function(r, idx){
+    return '<div class="adm-card" id="adm-card-'+idx+'" style="border-right:3px solid '+tc.color+'">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
         '<div style="width:42px;height:42px;border-radius:50%;background:'+tc.bg+';display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+(isExpert?'👨‍💼':isSup?'🏭':admTab==='org'?'🏢':'🔍')+'</div>' +
         '<div style="flex:1">' +
           '<div style="font-size:13px;font-weight:800;color:#1a2a3a">'+(r.name||'—')+'</div>' +
           '<div style="font-size:11px;color:'+tc.color+';font-weight:600">'+(r.spec||r.cat||r.jobType||tc.label)+'</div>' +
         '</div>' +
-        '<span style="font-size:9px;background:'+tc.bg+';color:'+tc.color+';padding:2px 8px;border-radius:10px;font-weight:700">'+tc.label+'</span>' +
       '</div>' +
-      // Info
-      '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">' +
+      '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">' +
         (r.gov ? '<span style="font-size:10px;background:#eef3f9;color:#6b7a8d;padding:3px 8px;border-radius:8px">📍 '+r.gov+'</span>' : '') +
         (r.exp ? '<span style="font-size:10px;background:#eef3f9;color:#6b7a8d;padding:3px 8px;border-radius:8px">⭐ '+r.exp+'</span>' : '') +
         (r.phone ? '<span style="font-size:10px;background:#eef3f9;color:#6b7a8d;padding:3px 8px;border-radius:8px;direction:ltr">📞 '+r.phone+'</span>' : '') +
-        (r.email ? '<span style="font-size:10px;background:#eef3f9;color:#6b7a8d;padding:3px 8px;border-radius:8px;direction:ltr">✉️ '+r.email.substring(0,20)+'</span>' : '') +
+        (r.email ? '<span style="font-size:10px;background:#eef3f9;color:#6b7a8d;padding:3px 8px;border-radius:8px;direction:ltr">✉️ '+r.email.substring(0,22)+'</span>' : '') +
       '</div>' +
-      // Actions
       '<div style="display:flex;gap:6px">' +
-        (r.phone ? '<a href="'+waNum(r.phone)+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>' : '') +
-        (r.email ? '<a href="mailto:'+r.email+'" style="flex:1;padding:7px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ إيميل</a>' : '') +
-        '<button style="flex:1;padding:7px;background:'+tc.bg+';color:'+tc.color+';border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="editAdmRecord('+idx+',\''+colName+'\')">✏️ تعديل</button>' +
-        '<button style="flex:1;padding:7px;background:#feeaea;color:#e05050;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="deleteAdmRecord(\''+(r.fbId||r.id)+'\',\''+colName+'\')">🗑️ حذف</button>' +
+        (r.phone ? '<a href="'+waNum(r.phone)+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬</a>' : '') +
+        (r.email ? '<a href="mailto:'+r.email+'" style="flex:1;padding:7px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️</a>' : '') +
+        '<button style="flex:2;padding:7px;background:'+tc.bg+';color:'+tc.color+';border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="editAdmRecord('+idx+',\''+colName+'\')">✏️ تعديل</button>' +
+        '<button style="flex:1;padding:7px;background:#feeaea;color:#e05050;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="deleteAdmRecord(\''+(r.fbId||r.id)+'\',\''+colName+'\')">🗑️</button>' +
       '</div>' +
     '</div>';
   }).join('');
   window._admListData = list;
 }
-
-function admCall(phone){ window.location.href = 'tel:+2' + phone.replace(/[^0-9]/g,''); }
 function admMail(email){ window.location.href = 'mailto:' + email; }
 
 function deleteAdmRecord(id, col){
@@ -6895,6 +6910,7 @@ window.addEventListener('load',()=>{
     <div class="success-info" id="success-info"></div>
     <button class="success-btn" onclick="closeSuccess()">🏠 العودة للرئيسية</button>
     <button class="success-btn-wa" onclick="shareSuccessWA()">💬 شارك تسجيلك على واتساب</button>
+    <button class="success-btn-wa" onclick="window.open(WA_GROUP_URL,'_blank')" style="background:#128c7e;margin-top:6px">👥 انضم لجروب واتساب تنمويين مصر</button>
   </div>
 </div>
 </body>

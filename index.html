@@ -526,7 +526,7 @@ textarea.fi{resize:none}
   height:28px !important;
 }
 
-#home{overflow-y:auto;-webkit-overflow-scrolling:touch}
+#home{overflow-y:visible;}
 
 /* DARK MODE */
 body.dark-mode {
@@ -2937,21 +2937,39 @@ let logoTaps=0, logoTimer=null;
 // ============ NAVIGATION ============
 const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus'};
 function go(id){
-  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  var el = document.getElementById(id);
+  const el = document.getElementById(id);
   if(!el) return;
-  el.classList.add('on');
-  const nid=navMap[id];
-  if(nid){const nel=document.getElementById(nid);if(nel)nel.classList.add('on');}
-  // رجوع للأعلى فوراً
-  requestAnimationFrame(function(){
-    window.scrollTo(0,0);
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
+
+  document.querySelectorAll('.scr').forEach(s=>{
+    s.classList.remove('on');
+    s.scrollTop = 0;
   });
-  if(id==='consultants'){ renderCons(); }
-  if(id==='suppliers'){ renderSups(); }
+
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+
+  el.classList.add('on');
+
+  const nid = navMap[id];
+  if(nid){
+    const nel = document.getElementById(nid);
+    if(nel) nel.classList.add('on');
+  }
+
+  // إجبار الانتقال لأعلى الصفحة الجديدة فوراً
+  window.scrollTo({top:0,left:0,behavior:'auto'});
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  el.scrollTop = 0;
+
+  setTimeout(function(){
+    window.scrollTo(0,0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    el.scrollTop = 0;
+  }, 50);
+
+  if(id==='consultants') renderCons();
+  if(id==='suppliers') renderSups();
   if(id==='tenders') renderTenders();
   if(id==='jobs') renderJobs();
   if(id==='notifs'){
@@ -2960,9 +2978,9 @@ function go(id){
     var dot = document.getElementById('notif-dot');
     if(dot) dot.style.display = 'none';
   }
-  if(id==='volunteers'){ loadVolunteers(); }
-  if(id==='orgs-screen'){ setTimeout(renderOrgs,50); }
-  if(id==='home')setupHeroShrink();
+  if(id==='volunteers') loadVolunteers();
+  if(id==='orgs-screen') setTimeout(renderOrgs,50);
+  if(id==='home') setupHeroShrink();
 }
 
 // ============ LOGO TAP (admin access) ============

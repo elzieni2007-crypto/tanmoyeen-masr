@@ -6,6 +6,7 @@
 <title>كاشف المكررات - تنمويين مصر</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -48,6 +49,7 @@ h1{color:#1a3a6e;font-size:17px;margin-bottom:16px;text-align:center}
 </head>
 <body>
 
+<div id="main-content">
 <h1>🔍 كاشف المكررات</h1>
 
 <div class="card">
@@ -89,6 +91,30 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
+
+// Login card
+document.addEventListener('DOMContentLoaded', function(){
+  var loginHtml = '<div id="login-card" style="background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.08)">' +
+    '<div style="font-size:14px;font-weight:800;color:#1a3a6e;margin-bottom:12px">🔐 دخول الأدمن</div>' +
+    '<input type="password" id="adm-pass" placeholder="كلمة السر" style="width:100%;padding:10px;border:2px solid #dde6f0;border-radius:10px;font-family:Cairo,sans-serif;font-size:14px;margin-bottom:8px">' +
+    '<button onclick="doLogin()" style="width:100%;padding:12px;background:#1a3a6e;color:white;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:14px;font-weight:700;cursor:pointer">دخول</button>' +
+    '<div id="login-err" style="color:#e05050;font-size:12px;margin-top:6px"></div>' +
+  '</div>';
+  document.body.insertAdjacentHTML('afterbegin', loginHtml);
+  document.getElementById('main-content').style.display = 'none';
+});
+
+function doLogin(){
+  var pass = document.getElementById('adm-pass').value;
+  auth.signInWithEmailAndPassword('elzieni2007@gmail.com', pass)
+    .then(function(){
+      document.getElementById('login-card').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
+    }).catch(function(e){
+      document.getElementById('login-err').textContent = '❌ ' + e.message;
+    });
+}
 
 var currentSection = 'consultants';
 var activeFilters = ['name','phone','email'];
@@ -321,5 +347,6 @@ function keepRecord(gi, ii){
   }
 }
 </script>
+</div><!-- end main-content -->
 </body>
 </html>

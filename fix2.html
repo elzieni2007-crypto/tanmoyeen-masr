@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فحص البيانات</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+body{font-family:Cairo,sans-serif;background:#eef3f9;padding:16px;max-width:600px;margin:0 auto}
+button{display:block;width:100%;padding:13px;margin:8px 0;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+.blue{background:#1a3a6e;color:white}
+.green{background:#00703a;color:white}
+.red{background:#e05050;color:white}
+#log{background:#1a2a3a;color:#a8d8ea;padding:12px;border-radius:10px;font-size:11px;font-family:monospace;direction:ltr;min-height:100px;white-space:pre-wrap;margin-top:10px}
+.card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+h2{font-size:16px;color:#1a3a6e;margin:0 0 12px}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tab{flex:1;padding:8px;border:2px solid #ddd;border-radius:8px;background:white;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+.tab.on{border-color:#1a3a6e;background:#e8f0fe;color:#1a3a6e}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>🔧 فحص وإصلاح البيانات</h2>
+  <div class="tabs">
+    <button class="tab on" id="t1" onclick="switchTab('consultants','t1','t2')">👨‍💼 استشاريين</button>
+    <button class="tab" id="t2" onclick="switchTab('suppliers','t2','t1')">🏭 موردين</button>
+  </div>
+  <div id="status" style="color:#6b7a8d;font-size:12px;margin-bottom:8px">اختار قسم واضغط فحص</div>
+  <button class="blue" onclick="doScan()">🔍 فحص البيانات</button>
+  <button class="green" id="fixBtn" onclick="doFix()" style="display:none">🔧 إصلاح تلقائي</button>
+  <div id="results"></div>
+  <div id="log"></div>
+</div>
+
+<script>
+// Firebase init
+var cfg = {
+  apiKey:"AIzaSyCk98_i0ozMuQumsO4PUDpXGRga5aWI4C8",
+  projectId:"tanmoyeen-masr26",
+  appId:"1:335780209700:web:c2839bb31364b5b18664b1"
+};
+firebase.initializeApp(cfg);
+var db = firebase.firestore();
+
+var currentCol = 'consultants';
+var allDocs = [];
+var issues = [];
+
+function switchTab(col, t1, t2){
+  currentCol = col;
+  document.getElementById(t1).className = 'tab on';
+  document.getElementById(t2).className = 'tab';
+  allDocs = []; issues = [];
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('fixBtn').style.display = 'none';
+  document.getElementById('status').textContent = 'اختار قسم واضغط فحص';
+  document.getElementById('log').textContent = '';
+}
+
+function addLog(msg){
+  document.getElementById('log').textContent += msg + '\n';
+}
+
+function isPhone(v){ return v && /^[0-9+\s]{10,15}$/.test(String(v).trim()); }
+function isEmail(v){ return v && String(v).includes('@') && String(v).includes('.'); }
+
+async function doScan(){
+  document.getElementById('status').textContent = '⏳ جاري الفحص...';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('log').textContent = '';
+  addLog('جاري تحميل ' + currentCol + '...');
+
+  try{
+    var snap = await db.collection(currentCol).get();
+    allDocs = snap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
+    addLog('✅ تم تحميل ' + allDocs.length + ' سجل');
+
+    issues = [];
+    allDocs.forEach(function(r){
+      var rIssues = [];
+      if(isPhone(r.spec))  rIssues.push({f:'spec',  t:'موبايل في التخصص',  v:r.spec});
+      if(isEmail(r.spec))  rIssues.push({f:'spec',  t:'إيميل في التخصص',   v:r.spec});
+      if(isEmail(r.spec2)) rIssues.push({f:'spec2', t:'إيميل في spec2',     v:r.spec2});
+      if(isPhone(r.gov))   rIssues.push({f:'gov',   t:'موبايل في المحافظة',v:r.gov});
+      if(isPhone(r.email) && !isEmail(r.email)) rIssues.push({f:'email', t:'موبايل في الإيميل', v:r.email});
+      if(rIssues.length) issues.push({doc:r, problems:rIssues});
+    });
+
+    document.getElementById('status').textContent = 
+      allDocs.length + ' سجل | ' + issues.length + ' فيه مشكلة';
+
+    if(issues.length === 0){
+      document.getElementById('results').innerHTML = 
+        '<div style="color:#00703a;text-align:center;padding:20px;font-weight:700">✅ البيانات نظيفة!</div>';
+    } else {
+      document.getElementById('fixBtn').style.display = 'block';
+      document.getElementById('results').innerHTML = issues.slice(0,30).map(function(item){
+        return '<div style="background:#fff8e1;border:1px solid #f0c040;border-radius:8px;padding:10px;margin:6px 0">' +
+          '<div style="font-weight:700;font-size:12px">' + (item.doc.name||'—') + '</div>' +
+          item.problems.map(function(p){
+            return '<div style="font-size:10px;color:#6b7a8d">⚠️ ' + p.t + ': <b>' + String(p.v).substring(0,30) + '</b></div>';
+          }).join('') +
+        '</div>';
+      }).join('');
+    }
+  } catch(e){
+    addLog('❌ خطأ: ' + e.message);
+    document.getElementById('status').textContent = '❌ ' + e.message;
+  }
+}
+
+async function doFix(){
+  if(!confirm('هيصلح ' + issues.length + ' سجل — متأكد؟')) return;
+  var fixed = 0;
+  for(var i=0; i<issues.length; i++){
+    var item = issues[i];
+    var r = item.doc;
+    var update = {};
+    item.problems.forEach(function(p){
+      if(p.f === 'spec' && isPhone(p.v)){
+        if(!r.phone) update.phone = p.v.replace(/[^0-9]/g,'');
+        update.spec = 'غير محدد';
+      }
+      if(p.f === 'spec' && isEmail(p.v)){
+        if(!r.email) update.email = p.v;
+        update.spec = 'غير محدد';
+      }
+      if(p.f === 'spec2' && isEmail(p.v)){
+        if(!r.email) update.email = p.v;
+        update.spec2 = '';
+      }
+      if(p.f === 'gov' && isPhone(p.v)){
+        if(!r.phone) update.phone = p.v.replace(/[^0-9]/g,'');
+        update.gov = '—';
+      }
+      if(p.f === 'email' && isPhone(p.v)){
+        if(!r.phone) update.phone = p.v.replace(/[^0-9]/g,'');
+        update.email = '';
+      }
+    });
+    if(Object.keys(update).length > 0){
+      try{
+        await db.collection(currentCol).doc(r._id).update(update);
+        fixed++;
+        addLog('✅ ' + (r.name||r._id));
+      } catch(e){ addLog('❌ ' + (r.name||r._id) + ': ' + e.message); }
+    }
+    await new Promise(function(res){ setTimeout(res, 100); });
+  }
+  addLog('🎉 تم إصلاح ' + fixed + ' سجل');
+  document.getElementById('status').textContent = '✅ تم إصلاح ' + fixed + ' سجل';
+  document.getElementById('fixBtn').style.display = 'none';
+  doScan();
+}
+</script>
+</body>
+</html>

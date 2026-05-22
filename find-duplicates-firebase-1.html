@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كاشف المكررات - تنمويين مصر</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Cairo',sans-serif;background:#eef3f9;padding:16px;max-width:620px;margin:0 auto}
+h1{color:#1a3a6e;font-size:17px;margin-bottom:16px;text-align:center}
+.card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(26,58,110,.08)}
+.btn{padding:10px 16px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+.btn-blue{background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white}
+.btn-green{background:linear-gradient(135deg,#00703a,#00b894);color:white}
+.btn-red{background:#e05050;color:white}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:7px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{flex:1;padding:10px;border:2px solid #dde6f0;border-radius:10px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:.2s;background:white}
+.tab.on{border-color:#0094cc;background:#e8f4fd;color:#1a3a6e}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filter{padding:6px 12px;border:2px solid #dde6f0;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;background:white;font-family:'Cairo',sans-serif;transition:.2s}
+.filter.on{border-color:#0094cc;background:#0094cc;color:white}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat-box{background:#eef3f9;border-radius:10px;padding:10px;text-align:center}
+.stat-n{font-size:20px;font-weight:900;color:#0094cc}
+.stat-n.red{color:#e05050}
+.stat-l{font-size:10px;color:#6b7a8d;margin-top:2px}
+.dup-group{background:#fff8e1;border:1px solid #f0c040;border-radius:12px;padding:12px;margin-bottom:12px;animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.dup-reason{display:inline-block;font-size:10px;font-weight:800;background:#fff3cd;color:#c06010;padding:3px 10px;border-radius:10px;margin-bottom:10px}
+.dup-card{background:white;border-radius:10px;padding:12px;margin-bottom:8px;border-right:3px solid #f0c040;position:relative}
+.dup-card:last-child{margin-bottom:0}
+.dup-name{font-size:13px;font-weight:800;color:#1a2a3a;margin-bottom:6px}
+.dup-fields{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px}
+.dup-field{font-size:10px;color:#6b7a8d;background:#f8f9fa;padding:4px 8px;border-radius:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dup-field span{color:#1a2a3a;font-weight:600}
+.dup-actions{display:flex;gap:6px}
+.del-btn{flex:1;padding:7px;background:#feeaea;color:#e05050;border:none;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer}
+.keep-btn{flex:1;padding:7px;background:#e7faf3;color:#00703a;border:none;border-radius:8px;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer}
+.deleted{opacity:.3;pointer-events:none}
+.log{background:#1a2a3a;border-radius:10px;padding:12px;max-height:150px;overflow-y:auto;font-size:11px;color:#a8d8ea;font-family:monospace;direction:ltr;margin-top:10px;display:none}
+.empty{text-align:center;padding:30px;color:#00b894;font-weight:700}
+.highlight{background:#fff3cd;padding:1px 4px;border-radius:4px;font-weight:800;color:#c06010}
+</style>
+</head>
+<body>
+
+<h1>🔍 كاشف المكررات</h1>
+
+<div class="card">
+  <div id="status" style="font-size:12px;color:#6b7a8d;margin-bottom:12px">⏳ جاري الاتصال بـ Firebase...</div>
+
+  <div class="tabs">
+    <div class="tab on" onclick="setSection('consultants',this)">👨‍💼 استشاريين</div>
+    <div class="tab" onclick="setSection('suppliers',this)">🏭 موردين</div>
+    <div class="tab" onclick="setSection('jobseekers',this)">🔍 باحثين</div>
+    <div class="tab" onclick="setSection('volunteers',this)">🙋 متطوعين</div>
+  </div>
+
+  <div class="filters">
+    <div class="filter on" onclick="toggleFilter('name',this)">📛 اسم</div>
+    <div class="filter on" onclick="toggleFilter('phone',this)">📞 موبايل</div>
+    <div class="filter on" onclick="toggleFilter('email',this)">✉️ إيميل</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-box"><div class="stat-n" id="s-total">0</div><div class="stat-l">إجمالي</div></div>
+    <div class="stat-box"><div class="stat-n red" id="s-groups">0</div><div class="stat-l">مجموعات مكررة</div></div>
+    <div class="stat-box"><div class="stat-n red" id="s-records">0</div><div class="stat-l">سجلات مكررة</div></div>
+  </div>
+
+  <button class="btn btn-blue" onclick="scanDuplicates()" style="width:100%">🔍 ابدأ الفحص</button>
+  <div class="log" id="log"></div>
+</div>
+
+<div id="results"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCk98_i0ozMuQumsO4PUDpXGRga5aWI4C8",
+  authDomain: "tanmoyeen-masr26.firebaseapp.com",
+  projectId: "tanmoyeen-masr26",
+  storageBucket: "tanmoyeen-masr26.firebasestorage.app",
+  messagingSenderId: "335780209700",
+  appId: "1:335780209700:web:c2839bb31364b5b18664b1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+var currentSection = 'consultants';
+var activeFilters = ['name','phone','email'];
+var allGroups = [];
+
+// Test connection
+db.collection('suppliers').limit(1).get().then(function(){
+  document.getElementById('status').textContent = '✅ متصل بـ Firebase';
+  document.getElementById('status').style.color = '#00b894';
+}).catch(function(e){
+  document.getElementById('status').textContent = '❌ ' + e.message;
+  document.getElementById('status').style.color = '#e05050';
+});
+
+function setSection(col, btn){
+  currentSection = col;
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('on'); });
+  btn.classList.add('on');
+  allGroups = [];
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('s-total').textContent = '0';
+  document.getElementById('s-groups').textContent = '0';
+  document.getElementById('s-records').textContent = '0';
+}
+
+function toggleFilter(f, btn){
+  btn.classList.toggle('on');
+  if(activeFilters.includes(f)){
+    activeFilters = activeFilters.filter(function(x){ return x !== f; });
+  } else {
+    activeFilters.push(f);
+  }
+  renderGroups();
+}
+
+function norm(val){
+  if(!val) return '';
+  return String(val).trim().toLowerCase()
+    .replace(/\s+/g,' ')
+    .replace(/^0+/,'')
+    .replace(/^\+?2/,'');
+}
+
+function log(msg, color){
+  var l = document.getElementById('log');
+  l.style.display = 'block';
+  l.innerHTML += '<div style="color:'+(color||'#a8d8ea')+'">'+msg+'</div>';
+  l.scrollTop = l.scrollHeight;
+}
+
+async function scanDuplicates(){
+  log('🔍 جاري الفحص...', '#f9ca24');
+  document.getElementById('results').innerHTML = '';
+
+  try{
+    var snap = await db.collection(currentSection).get();
+    var docs = [];
+    snap.forEach(function(d){ docs.push(Object.assign({}, d.data(), {_id: d.id})); });
+
+    document.getElementById('s-total').textContent = docs.length;
+    log('✅ تم تحميل '+docs.length+' سجل', '#00b894');
+
+    // Find duplicates
+    var nameMap = {}, phoneMap = {}, emailMap = {};
+    docs.forEach(function(doc){
+      var name  = norm(doc.name);
+      var phone = norm(doc.phone);
+      var email = norm(doc.email);
+      if(name  && name.length > 2){ if(!nameMap[name])  nameMap[name]  = []; nameMap[name].push(doc); }
+      if(phone && phone.length > 5){ if(!phoneMap[phone]) phoneMap[phone] = []; phoneMap[phone].push(doc); }
+      if(email && email.includes('@')){ if(!emailMap[email]) emailMap[email] = []; emailMap[email].push(doc); }
+    });
+
+    var dupIds = new Set();
+    allGroups = [];
+
+    function addGroup(reason, items){
+      if(items.length < 2) return;
+      var key = items.map(function(i){ return i._id; }).sort().join('|');
+      var existing = allGroups.find(function(g){ return g.key === key; });
+      if(existing){ if(!existing.reasons.includes(reason)) existing.reasons.push(reason); return; }
+      dupIds.add(key);
+      allGroups.push({ key:key, reasons:[reason], items:items });
+    }
+
+    Object.values(nameMap).forEach(function(items){ if(items.length>1) addGroup('name', items); });
+    Object.values(phoneMap).forEach(function(items){ if(items.length>1) addGroup('phone', items); });
+    Object.values(emailMap).forEach(function(items){ if(items.length>1) addGroup('email', items); });
+
+    var dupRecords = new Set();
+    allGroups.forEach(function(g){ g.items.forEach(function(i){ dupRecords.add(i._id); }); });
+
+    document.getElementById('s-groups').textContent = allGroups.length;
+    document.getElementById('s-records').textContent = dupRecords.size;
+    log('⚠️ '+allGroups.length+' مجموعة مكررة، '+dupRecords.size+' سجل', '#f9ca24');
+
+    renderGroups();
+  }catch(e){
+    log('❌ '+e.message, '#e05050');
+  }
+}
+
+var reasonLabels = { name:'اسم مكرر', phone:'موبايل مكرر', email:'إيميل مكرر' };
+var reasonIcons  = { name:'📛', phone:'📞', email:'✉️' };
+
+function renderGroups(){
+  var filtered = activeFilters.length === 0 ? [] :
+    allGroups.filter(function(g){
+      return g.reasons.some(function(r){ return activeFilters.includes(r); });
+    });
+
+  if(!filtered.length){
+    document.getElementById('results').innerHTML =
+      '<div class="card"><div class="empty">✅ لا توجد مكررات!</div></div>';
+    return;
+  }
+
+  var isConsultant = currentSection === 'consultants';
+
+  document.getElementById('results').innerHTML = filtered.map(function(g, gi){
+    return '<div class="dup-group" id="group-'+gi+'">' +
+      '<div class="dup-reason">' +
+        g.reasons.map(function(r){ return reasonIcons[r]+' '+reasonLabels[r]; }).join(' + ') +
+      '</div>' +
+      g.items.map(function(item, ii){
+        var matchVals = g.reasons.map(function(r){ return norm(item[r]); });
+        return '<div class="dup-card" id="card-'+gi+'-'+ii+'">' +
+          '<div class="dup-name">'+( item.name||'—')+'</div>' +
+          '<div class="dup-fields">' +
+            (isConsultant ?
+              '<div class="dup-field">التخصص: <span>'+(item.spec||'—').substring(0,20)+'</span></div>' +
+              '<div class="dup-field">الخبرة: <span>'+(item.exp||'—')+'</span></div>'
+              :
+              '<div class="dup-field">النشاط: <span>'+(item.cat||item.type||'—').substring(0,20)+'</span></div>' +
+              '<div class="dup-field">العنوان: <span>'+(item.address||'—').substring(0,20)+'</span></div>'
+            ) +
+            '<div class="dup-field">المحافظة: <span>'+(item.gov||'—')+'</span></div>' +
+            '<div class="dup-field" style="direction:ltr">📞 <span class="highlight">'+(item.phone||'—')+'</span></div>' +
+            '<div class="dup-field" style="direction:ltr;font-size:9px">✉️ <span class="highlight">'+(item.email||'—').substring(0,25)+'</span></div>' +
+            (isConsultant ? '<div class="dup-field">النبذة: <span>'+(item.bio||'—').substring(0,25)+'</span></div>' : '') +
+          '</div>' +
+          '<div class="dup-actions">' +
+            '<button class="keep-btn" onclick="keepRecord('+gi+','+ii+')">✅ احتفظ</button>' +
+            '<button style="flex:1;padding:7px;background:#e8f0fe;color:#1a3a6e;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="mergeRecords('+gi+','+ii+')">🔀 دمج</button>' +
+            '<button class="del-btn" onclick="deleteRecord(\''+item._id+'\','+gi+','+ii+')">🗑️ احذف</button>' +
+          '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }).join('');
+}
+
+async function deleteRecord(id, gi, ii){
+  if(!confirm('هتحذف السجل ده — متأكد؟')) return;
+  var btn = document.querySelector('#card-'+gi+'-'+ii+' .del-btn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳'; }
+  try{
+    await db.collection(currentSection).doc(id).delete();
+    var card = document.getElementById('card-'+gi+'-'+ii);
+    if(card) card.classList.add('deleted');
+    if(btn){ btn.textContent='✅ تم الحذف'; }
+    log('✅ تم حذف: '+id.substring(0,12), '#00b894');
+  }catch(e){
+    log('❌ '+e.message, '#e05050');
+    if(btn){ btn.disabled=false; btn.textContent='🗑️ احذفه'; }
+  }
+}
+
+async function mergeRecords(gi, ii){
+  var group = allGroups.filter(function(g){
+    return g.reasons.some(function(r){ return activeFilters.includes(r); });
+  })[gi];
+  if(!group || group.items.length < 2){ alert('محتاج سجلين على الأقل للدمج'); return; }
+
+  // السجل اللي ضغطت عليه هو الأساسي
+  var main = group.items[ii];
+  // الباقيين هم المصادر
+  var others = group.items.filter(function(_, i){ return i !== ii; });
+
+  if(!confirm('هيدمج كل البيانات في سجل "'+main.name+'" ويحذف الباقي — متأكد؟')) return;
+
+  // دمج البيانات — بياخد الحقل لو الأساسي فاضي
+  var merged = Object.assign({}, main);
+  var fields = ['name','spec','spec2','gov','phone','email','bio','exp','orgs',
+                'cat','type','address','cert','delivery','field','notes','interests',
+                'skills','langs','showPhone','showEmail'];
+
+  others.forEach(function(other){
+    fields.forEach(function(f){
+      if((!merged[f] || merged[f] === '—' || merged[f] === '') && other[f]){
+        merged[f] = other[f];
+      }
+    });
+  });
+
+  // حذف الـ _id من المerged
+  var id = merged._id;
+  delete merged._id;
+
+  try{
+    // تحديث السجل الأساسي
+    await db.collection(currentSection).doc(id).update(merged);
+    log('✅ تم تحديث السجل الأساسي', '#00b894');
+
+    // حذف الباقيين
+    for(var i=0; i<others.length; i++){
+      await db.collection(currentSection).doc(others[i]._id).delete();
+      log('🗑️ تم حذف: '+others[i].name, '#f9ca24');
+    }
+
+    log('🎉 تم الدمج بنجاح!', '#00b894');
+    // إخفاء المجموعة
+    var groupEl = document.getElementById('group-'+gi);
+    if(groupEl){ groupEl.style.opacity='0.3'; groupEl.style.pointerEvents='none'; }
+    setTimeout(scanDuplicates, 1500);
+  }catch(e){
+    log('❌ '+e.message, '#e05050');
+  }
+}
+
+function keepRecord(gi, ii){
+  var card = document.getElementById('card-'+gi+'-'+ii);
+  if(card){
+    card.style.border = '3px solid #00b894';
+    card.style.background = '#e7faf3';
+    var btn = card.querySelector('.keep-btn');
+    if(btn){ btn.textContent='✅ محتفظ به'; btn.disabled=true; }
+    var delBtn = card.querySelector('.del-btn');
+    if(delBtn){ delBtn.disabled=true; delBtn.style.opacity='.4'; }
+  }
+}
+</script>
+</body>
+</html>

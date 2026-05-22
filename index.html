@@ -4807,25 +4807,35 @@ function filterAdmList(query){
   container.innerHTML = '<div style="padding:4px 4px 8px;font-size:11px;color:var(--muted)">' +
     'عرض '+list.length+' نتيجة' + (q ? ' لـ "'+query+'"' : '') + '</div>' +
   list.map(function(r, idx){
-    return '<div class="adm-card" id="adm-card-'+idx+'" style="border-right:3px solid '+tc.color+';padding:10px">' +
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
-        '<div style="font-size:18px;flex-shrink:0">'+(isExpert?'👨‍💼':isSup?'🏭':admTab==='org'?'🏢':'🔍')+'</div>' +
-        '<div style="flex:1;min-width:0">' +
-          '<div style="font-size:12px;font-weight:800;color:#1a2a3a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r.name||'—')+'</div>' +
-          '<div style="font-size:10px;color:'+tc.color+'">'+(r.spec||r.cat||r.jobType||tc.label)+'</div>' +
+    return '<div class="adm-card" id="adm-card-'+idx+'" style="border-right:3px solid '+tc.color+';padding:12px">' +
+      // Header
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
+        '<div style="font-size:20px;flex-shrink:0">'+(isExpert?'👨‍💼':isSup?'🏭':admTab==='org'?'🏢':'🔍')+'</div>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:13px;font-weight:800;color:#1a2a3a">'+(r.name||'—')+'</div>' +
+          '<div style="font-size:10px;color:'+tc.color+';font-weight:600">'+(r.spec||r.cat||r.field||r.jobType||tc.label)+'</div>' +
         '</div>' +
-        '<span style="font-size:9px;background:'+tc.bg+';color:'+tc.color+';padding:2px 6px;border-radius:8px;font-weight:700;flex-shrink:0">'+tc.label+'</span>' +
+        '<span style="font-size:9px;background:'+tc.bg+';color:'+tc.color+';padding:2px 6px;border-radius:8px;font-weight:700">'+tc.label+'</span>' +
       '</div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px">' +
-        (r.gov ? '<span style="font-size:9px;background:#eef3f9;color:#6b7a8d;padding:2px 6px;border-radius:6px">📍 '+r.gov+'</span>' : '') +
-        (r.phone ? '<span style="font-size:9px;background:#eef3f9;color:#6b7a8d;padding:2px 6px;border-radius:6px;direction:ltr">📞 '+r.phone+'</span>' : '') +
-        (r.email ? '<span style="font-size:9px;background:#eef3f9;color:#6b7a8d;padding:2px 6px;border-radius:6px;direction:ltr">✉️ '+r.email.substring(0,18)+'</span>' : '') +
-      '</div>' +
+      // كل البيانات
+      '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:8px">' +
+        (r.gov     ? '<tr><td style="color:#6b7a8d;padding:2px 4px;width:35%">📍 المحافظة</td><td style="padding:2px 4px;font-weight:600">'+(r.gov)+'</td></tr>' : '') +
+        (r.exp     ? '<tr><td style="color:#6b7a8d;padding:2px 4px">⭐ الخبرة</td><td style="padding:2px 4px;font-weight:600">'+(r.exp)+'</td></tr>' : '') +
+        (r.jobType ? '<tr><td style="color:#6b7a8d;padding:2px 4px">💼 نوع العمل</td><td style="padding:2px 4px;font-weight:600">'+(r.jobType)+'</td></tr>' : '') +
+        (r.cert    ? '<tr><td style="color:#6b7a8d;padding:2px 4px">📄 الأوراق</td><td style="padding:2px 4px;font-weight:600">'+(r.cert)+'</td></tr>' : '') +
+        (r.phone   ? '<tr><td style="color:#6b7a8d;padding:2px 4px">📞 الموبايل</td><td style="padding:2px 4px;font-weight:600;direction:ltr;text-align:right">'+(r.phone)+'</td></tr>' : '') +
+        (r.email   ? '<tr><td style="color:#6b7a8d;padding:2px 4px">✉️ الإيميل</td><td style="padding:2px 4px;font-weight:600;direction:ltr;text-align:right;font-size:10px">'+(r.email)+'</td></tr>' : '') +
+        (r.bio||r.notes ? '<tr><td style="color:#6b7a8d;padding:2px 4px">📝 نبذة</td><td style="padding:2px 4px;font-size:10px;color:#444">'+(r.bio||r.notes||'').substring(0,80)+'</td></tr>' : '') +
+        (r.field   ? '<tr><td style="color:#6b7a8d;padding:2px 4px">🎯 المجال</td><td style="padding:2px 4px;font-weight:600">'+(r.field)+'</td></tr>' : '') +
+        (r.orgs    ? '<tr><td style="color:#6b7a8d;padding:2px 4px">🏛️ سابقة</td><td style="padding:2px 4px;font-size:10px">'+(r.orgs||'').substring(0,60)+'</td></tr>' : '') +
+        (r.date    ? '<tr><td style="color:#6b7a8d;padding:2px 4px">📅 التاريخ</td><td style="padding:2px 4px">'+(r.date)+'</td></tr>' : '') +
+      '</table>' +
+      // الأزرار
       '<div style="display:flex;gap:4px">' +
-        (r.phone ? '<a href="'+waNum(r.phone)+'" target="_blank" style="flex:1;padding:5px;background:#e7faf3;color:#00703a;border-radius:6px;text-align:center;text-decoration:none;font-size:12px">💬</a>' : '') +
-        (r.email ? '<a href="mailto:'+r.email+'" style="flex:1;padding:5px;background:#fff3cd;color:#c06010;border-radius:6px;text-align:center;text-decoration:none;font-size:12px">✉️</a>' : '') +
-        '<button style="flex:2;padding:5px;background:'+tc.bg+';color:'+tc.color+';border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="editAdmRecord('+idx+',\''+colName+'\')">✏️ تعديل</button>' +
-        '<button style="flex:1;padding:5px;background:#feeaea;color:#e05050;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer" onclick="deleteAdmRecord(\''+(r.fbId||r.id)+'\',\''+colName+'\')">🗑️</button>' +
+        (r.phone ? '<a href="'+waNum(r.phone)+'" target="_blank" style="flex:1;padding:6px;background:#e7faf3;color:#00703a;border-radius:6px;text-align:center;text-decoration:none;font-size:12px;font-weight:700">💬</a>' : '') +
+        (r.email ? '<a href="mailto:'+r.email+'" style="flex:1;padding:6px;background:#fff3cd;color:#c06010;border-radius:6px;text-align:center;text-decoration:none;font-size:12px;font-weight:700">✉️</a>' : '') +
+        '<button style="flex:2;padding:6px;background:'+tc.bg+';color:'+tc.color+';border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="editAdmRecord('+idx+',\''+colName+'\')">✏️ تعديل</button>' +
+        '<button style="flex:1;padding:6px;background:#feeaea;color:#e05050;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer" onclick="deleteAdmRecord(\''+(r.fbId||r.id)+'\',\''+colName+'\')">🗑️</button>' +
       '</div>' +
     '</div>';
   }).join('');

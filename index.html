@@ -2540,20 +2540,16 @@ function loadFromFirebase(){
   if(typeof db !== 'undefined' && typeof auth !== 'undefined'){
     auth.onAuthStateChanged(function(user){
       if(user){
-        // ✅ الأدمن logged in تلقائياً
         isLoggedIn = true;
         console.log('✅ Admin auto-logged in:', user.email);
-
-        // لو شاشة الأدمن مفتوحة — أخفي login وأظهر dashboard
         var loginScreen = document.getElementById('admin-login-screen');
         var dashboard = document.getElementById('admin-dashboard');
-        if(loginScreen && loginScreen.style.display !== 'none'){
-          loginScreen.style.display = 'none';
-          if(dashboard) dashboard.style.display = 'block';
-          loadAdminData();
-        }
+        if(loginScreen) loginScreen.style.display = 'none';
+        if(dashboard) dashboard.style.display = 'block';
+        // حمّل البيانات دايماً لما الأدمن يكون logged in
+        setTimeout(loadAdminData, 500);
       }
-    }); // end onAuthStateChanged
+    });
   }
   setTimeout(setupHeroShrink, 100);
 
@@ -4659,8 +4655,15 @@ async function loadAdminData(){
   }
 
   window._adminData = allData;
-  renderAdmList(allData);
-  updateAdmCounts(allData);
+  renderAdmList();
+  // تحديث الأرقام
+  var counts = {jobseeker:0, expert:0, sup:0, org:0};
+  allData.forEach(function(r){ if(counts[r._type]!==undefined) counts[r._type]++; });
+  var el;
+  el=document.getElementById('adm-n-js');  if(el) el.textContent=counts.jobseeker;
+  el=document.getElementById('adm-n-exp'); if(el) el.textContent=counts.expert;
+  el=document.getElementById('adm-n-sup'); if(el) el.textContent=counts.sup;
+  el=document.getElementById('adm-n-org'); if(el) el.textContent=counts.org;
 }
 
 function loadAdminFromLocal(){

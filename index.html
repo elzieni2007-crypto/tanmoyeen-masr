@@ -586,7 +586,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
   <!-- زرار ابدأ الآن -->
   <div class="sp-enter" style="margin-top:20px">
-    <button class="sp-enter-btn" onclick="enterApp()" style="padding:14px 40px;font-size:15px;font-weight:900">
+    <button class="sp-enter-btn" onclick="enterApp();go('home')" style="padding:14px 40px;font-size:15px;font-weight:900">
       ابدأ الآن ←
     </button>
   </div>
@@ -602,7 +602,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
   <!-- سجل ملفك -->
   <div style="position:relative;z-index:1;margin-top:16px;animation:su .6s ease 1.6s both;padding:0 24px">
-    <button onclick="enterApp();setTimeout(function(){go('register')},500)" style="width:100%;padding:14px;background:linear-gradient(135deg,#00b894,#00703a);color:white;border:none;border-radius:14px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 6px 20px rgba(0,184,148,.4)">
+    <button onclick="enterApp();setTimeout(function(){go('register');},300)" style="width:100%;padding:14px;background:linear-gradient(135deg,#00b894,#00703a);color:white;border:none;border-radius:14px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 6px 20px rgba(0,184,148,.4)">
       ✨ سجّل ملفك مجاناً الآن
     </button>
     <div style="text-align:center;margin-top:6px;color:rgba(255,255,255,.5);font-size:10px">يظهر ملفك فوراً لآلاف المهتمين بالقطاع التنموي</div>
@@ -2392,6 +2392,8 @@ async function loadOrgsFromSheet(){
 function enterApp(){
   document.getElementById('splash').style.display='none';
   document.getElementById('app').style.display='block';
+  window.scrollTo(0,0);
+  document.getElementById('app').scrollTop = 0;
   setAllLogos();
   initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);updateJobseekersList();
   // Load from Firebase (real-time)

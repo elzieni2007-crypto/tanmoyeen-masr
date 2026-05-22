@@ -45,6 +45,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 /* SCREENS */
 .scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
 .scr.on{display:block;animation:fi .28s ease;position:relative}
+#home{overflow-y:visible}
 html,body{scroll-behavior:auto;overflow-x:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
@@ -4990,23 +4991,18 @@ async function loadAdminData(){
     suppliers:'موردين', organizations:'مؤسسات', volunteers:'متطوعين'
   };
 
-  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
+  if(typeof db !== 'undefined'){
     try {
       for(var i=0; i<collections.length; i++){
         var col = collections[i];
         try {
-          var snap = await db.collection(col).orderBy('timestamp','desc').limit(100).get();
+          var snap = await db.collection(col).orderBy('timestamp','desc').limit(200).get();
           snap.docs.forEach(function(d){
-            allData.push({...d.data(), fbId:d.id, _type:col, _label:labels[col]||col});
+            var typeKey = col==='consultants'?'expert':col==='suppliers'?'sup':col==='organizations'?'org':col==='jobseekers'?'jobseeker':col;
+            allData.push(Object.assign({}, d.data(), {fbId:d.id, _type:typeKey, _col:col, _label:labels[col]||col}));
           });
         } catch(colErr){ console.log('Skip', col, colErr.code); }
       }
-      // Also load from localStorage as backup
-      var localData = loadAdminFromLocal();
-      localData.forEach(function(r){
-        var exists = allData.some(function(a){ return a.phone && a.phone===r.phone; });
-        if(!exists) allData.push(r);
-      });
       console.log('✅ Admin total:', allData.length);
     } catch(e) {
       console.log('Firebase admin failed:', e);
@@ -5125,27 +5121,10 @@ function setAdmTab(el, tab){
 }
 
 function renderAdmList(){
-  // Use Firebase data if available, fallback to localStorage
   var fbData = window._adminData || [];
-  var typeMap = {
-    jobseeker: ['jobseeker','jobseekers'],
-    expert:    ['expert','consultants'],
-    sup:       ['sup','suppliers'],
-    org:       ['org','organizations']
-  };
-  var validTypes = typeMap[admTab] || [admTab];
 
   var list = fbData.filter(function(r){
-    return validTypes.indexOf(r.type) > -1 ||
-           validTypes.indexOf(r._type) > -1;
-  });
-
-  // Also add from localStorage
-  var local = [];
-  try{ local = JSON.parse(localStorage.getItem('registrations') || '[]'); }catch(e){}
-  local.filter(function(r){ return r.type === admTab; }).forEach(function(r){
-    var exists = list.some(function(f){ return f.phone && f.phone === r.phone; });
-    if(!exists) list.push(r);
+    return r._type === admTab;
   });
 
   const container = document.getElementById('adm-list');
@@ -6629,7 +6608,7 @@ function checkNewRegs(){
 }
 
 // تحقق عند الفتح بعد ما Firebase يتحمل
-setTimeout(checkNewRegs, 3000);
+setTimeout(checkNewRegs, 4000);
 // تحقق كل 5 دقائق
 setInterval(checkNewRegs, 5 * 60 * 1000);
 window.addEventListener('load',function(){setTimeout(renderNewRegs,1000);});

@@ -45,6 +45,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 /* SCREENS */
 .scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
 .scr.on{display:block;animation:fi .28s ease}
+html,body{scroll-behavior:auto}
 body{overflow-x:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
@@ -2938,13 +2939,17 @@ const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',supplie
 function go(id){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
+  var el = document.getElementById(id);
+  if(!el) return;
+  el.classList.add('on');
   const nid=navMap[id];
   if(nid){const nel=document.getElementById(nid);if(nel)nel.classList.add('on');}
-  // scroll للأعلى في كل الحالات
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
-  window.scrollTo({top:0, behavior:'instant'});
+  // رجوع للأعلى فوراً
+  requestAnimationFrame(function(){
+    window.scrollTo(0,0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  });
   if(id==='consultants'){ renderCons(); }
   if(id==='suppliers'){ renderSups(); }
   if(id==='tenders') renderTenders();

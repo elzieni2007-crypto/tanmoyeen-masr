@@ -45,6 +45,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 /* SCREENS */
 .scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
 .scr.on{display:block;animation:fi .28s ease}
+body{overflow-x:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* SPLASH */
@@ -2392,8 +2393,9 @@ async function loadOrgsFromSheet(){
 function enterApp(){
   document.getElementById('splash').style.display='none';
   document.getElementById('app').style.display='block';
-  window.scrollTo(0,0);
-  document.getElementById('app').scrollTop = 0;
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+  window.scrollTo({top:0, behavior:'instant'});
   setAllLogos();
   initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);updateJobseekersList();
   // Load from Firebase (real-time)
@@ -2939,14 +2941,16 @@ function go(id){
   document.getElementById(id).classList.add('on');
   const nid=navMap[id];
   if(nid){const nel=document.getElementById(nid);if(nel)nel.classList.add('on');}
-  window.scrollTo(0,0);
+  // scroll للأعلى في كل الحالات
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+  window.scrollTo({top:0, behavior:'instant'});
   if(id==='consultants'){ renderCons(); }
   if(id==='suppliers'){ renderSups(); }
   if(id==='tenders') renderTenders();
   if(id==='jobs') renderJobs();
   if(id==='notifs'){
     renderNotifs();
-    // Mark all as read
     NOTIFS.forEach(function(n){ n.unr=false; });
     var dot = document.getElementById('notif-dot');
     if(dot) dot.style.display = 'none';

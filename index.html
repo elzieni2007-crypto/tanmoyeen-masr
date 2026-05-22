@@ -2730,31 +2730,31 @@ function updateAllCounts(){
   e=document.getElementById('dash-orgs-count');
   if(e && orgsCount > 0) e.textContent = orgsCount + ' مؤسسة';
 
-  // Firebase live registrations
+  // Firebase live registrations - direct counts
   if(typeof db !== 'undefined'){
     var fbCollections = [
-      {col:'jobseekers',  el:'adm-n-js'},
-      {col:'consultants', el:'adm-n-exp'},
-      {col:'suppliers',   el:'adm-n-sup'},
+      {col:'jobseekers',   el:'adm-n-js'},
+      {col:'consultants',  el:'adm-n-exp'},
+      {col:'suppliers',    el:'adm-n-sup'},
       {col:'organizations',el:'adm-n-org'},
-      {col:'volunteers',  el:null},
-      {col:'pending_jobs',el:'pending-count-badge'},
+      {col:'volunteers',   el:null},
+      {col:'pending_jobs', el:'pending-count-badge'},
     ];
-    var totalNew = 0;
-    var promises = fbCollections.map(function(item){
-      return db.collection(item.col).get()
-        .then(function(snap){
-          totalNew += snap.size;
-          if(item.el){
-            var el2 = document.getElementById(item.el);
-            if(el2) el2.textContent = snap.size;
-          }
-          window['_fb_'+item.col] = snap.size;
-        })
-        .catch(function(){});
-    });
-    Promise.all(promises).then(function(){
-      updateFBStats();
+    fbCollections.forEach(function(item){
+      db.collection(item.col).get().then(function(snap){
+        // عداد الأدمن dashboard
+        if(item.el){
+          var el2 = document.getElementById(item.el);
+          if(el2) el2.textContent = snap.size;
+        }
+        // pending badge
+        if(item.col === 'pending_jobs'){
+          var count = snap.docs.filter(function(d){ return d.data().status === 'pending'; }).length;
+          var badge = document.getElementById('pending-count-badge');
+          if(badge){ badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none'; }
+        }
+        window['_fb_'+item.col] = snap.size;
+      }).catch(function(){});
     });
   }
 }
@@ -4656,14 +4656,6 @@ async function loadAdminData(){
 
   window._adminData = allData;
   renderAdmList();
-  // تحديث الأرقام
-  var counts = {jobseeker:0, expert:0, sup:0, org:0};
-  allData.forEach(function(r){ if(counts[r._type]!==undefined) counts[r._type]++; });
-  var el;
-  el=document.getElementById('adm-n-js');  if(el) el.textContent=counts.jobseeker;
-  el=document.getElementById('adm-n-exp'); if(el) el.textContent=counts.expert;
-  el=document.getElementById('adm-n-sup'); if(el) el.textContent=counts.sup;
-  el=document.getElementById('adm-n-org'); if(el) el.textContent=counts.org;
 }
 
 function loadAdminFromLocal(){

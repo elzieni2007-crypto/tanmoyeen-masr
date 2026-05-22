@@ -331,7 +331,7 @@ textarea.fi{resize:none}
 .adm-tabs::-webkit-scrollbar-thumb{background:#ddd;border-radius:3px}
 .adm-tab{flex-shrink:0;padding:7px 12px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:2px solid var(--border);background:white;color:var(--muted);transition:.2s;font-family:'Cairo',sans-serif}
 .adm-tab.on{background:var(--p);color:white;border-color:var(--p)}
-.adm-list{padding:0 16px;display:flex;flex-direction:column;gap:8px}
+.adm-list{padding:0 16px;padding-bottom:calc(var(--bot) + 160px);display:flex;flex-direction:column;gap:8px}
 .adm-card{background:white;border-radius:14px;padding:14px;box-shadow:var(--sh);border-right:3px solid var(--a)}
 .adm-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
 .adm-name{font-size:13px;font-weight:700}
@@ -1679,7 +1679,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div style="font-size:10px;color:var(--muted);padding:0 12px 8px;text-align:left">← اسحب للمزيد من التبويبات</div>
 
     <!-- بحث في السجلات -->
-    <div style="padding:8px 16px 4px">
+    <div style="padding:8px 16px 4px;position:sticky;top:0;background:var(--bg);z-index:10">
       <div style="position:relative">
         <input id="adm-search" type="text" placeholder="🔍 ابحث بالاسم أو التخصص أو المحافظة..." 
           oninput="filterAdmList(this.value)"

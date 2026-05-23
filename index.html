@@ -106,12 +106,12 @@ html,body{scroll-behavior:auto;overflow-x:hidden}
 .ds-n{font-size:13px;font-weight:900;color:var(--a2)}
 .ds-l{font-size:7px;color:rgba(255,255,255,.7);margin-top:0}
 
-.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:0 10px}
-.dg-card{background:white;border-radius:12px;padding:10px 6px 8px;box-shadow:var(--sh);cursor:pointer;transition:.2s;text-align:center;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:4px}
-.dg-card:hover,.dg-card:active{border-color:var(--a);transform:translateY(-2px);box-shadow:var(--shd)}
-.dg-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px}
-.dg-t{font-size:10px;font-weight:700;color:var(--txt)}
-.dg-c{font-size:9px;color:var(--a);font-weight:600}
+.dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:0 12px}
+.dg-card{background:white;border-radius:14px;padding:14px 12px 12px;box-shadow:0 2px 10px rgba(0,0,0,.07);cursor:pointer;transition:.18s;text-align:center;border-bottom:3px solid transparent;display:flex;flex-direction:column;align-items:center;gap:5px}
+.dg-card:active{transform:scale(.96);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.dg-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.dg-t{font-size:12px;font-weight:800;color:#1a2a3a}
+.dg-c{font-size:10px;font-weight:700;color:var(--a)}
 
 /* STRIP */
 .sh{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 8px}
@@ -695,30 +695,32 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="dh-c1"></div><div class="dh-c2"></div>
     <div class="dh-logo"><img id="logo-dh" src="" alt="logo"></div>
     <div class="dh-greet" style="padding-right:54px;font-size:10px;margin-bottom:1px">مرحباً بك في تنمويين مصر 👋</div>
-  <div style="padding-right:54px;position:relative;z-index:1">
-    <span id="fb-test-result" style="font-size:10px;color:rgba(255,255,255,.8);margin-right:8px"></span>
-  </div>
+    <div style="padding-right:54px;position:relative;z-index:1">
+      <span id="fb-test-result" style="font-size:10px;color:rgba(255,255,255,.8);margin-right:8px"></span>
+    </div>
     <div class="dh-title" style="padding-right:54px;font-size:12px;margin-bottom:4px">منصتك الشاملة للعمل التنموي في مصر</div>
     <div class="dh-stats">
-      <div class="ds"><div class="ds-n" id="dash-cons-n">243</div><div class="ds-l">استشاري</div></div>
-      <div class="ds"><div class="ds-n" id="dash-sups-n">87</div><div class="ds-l">مورد</div></div>
-      <div class="ds"><div class="ds-n" id="dash-vols-n">17</div><div class="ds-l">متطوع</div></div>
-      <div class="ds"><div class="ds-n">25K</div><div class="ds-l">عضو</div></div>
+      <div class="ds"><div class="ds-n" id="dash-cons-n">—</div><div class="ds-l">استشاري</div></div>
+      <div class="ds"><div class="ds-n" id="dash-sups-n">—</div><div class="ds-l">مورد</div></div>
+      <div class="ds"><div class="ds-n" id="dash-orgs-n">—</div><div class="ds-l">مؤسسة</div></div>
+      <div class="ds"><div class="ds-n" id="dash-vols-n">—</div><div class="ds-l">متطوع</div></div>
+      <div class="ds"><div class="ds-n" id="dash-js-n">—</div><div class="ds-l">باحث عمل</div></div>
+      <div class="ds"><div class="ds-n">25K</div><div class="ds-l">عضو FB</div></div>
     </div>
   </div>
   <div class="sh" style="margin-top:4px;padding:4px 14px 2px"><div class="sh-t" style="font-size:12px">🧭 الأقسام الرئيسية</div></div>
   <div class="dash-grid">
     <div class="dg-card" onclick="go('jobs')"><div class="dg-icon" style="background:#e8f0fe">💼</div><div class="dg-t">الوظائف</div><div class="dg-c" id="dash-jobs-count">جديد يومياً</div></div>
     <div class="dg-card" onclick="go('tenders')"><div class="dg-icon" style="background:#fef3e8">📋</div><div class="dg-t">المناقصات</div><div class="dg-c" id="dash-tenders-count">جديد يومياً</div></div>
-    <div class="dg-card" onclick="go('consultants')"><div class="dg-icon" style="background:#e7faf3">👨‍💼</div><div class="dg-t">الاستشاريون</div><div class="dg-c" id="cons-dg-count">243 مسجّل</div></div>
-    <div class="dg-card" onclick="go('orgs-screen')"><div class="dg-icon" style="background:#e8f4fd">🏢</div><div class="dg-t">المؤسسات</div><div class="dg-c" id="dash-orgs-count">جديد يومياً</div></div>
-    <div class="dg-card" onclick="go('suppliers')"><div class="dg-icon" style="background:#f0e8fe">🏭</div><div class="dg-t">الموردون</div><div class="dg-c" id="sups-dg-count">87 مورد</div></div>
-    <div class="dg-card" onclick="go('volunteers')"><div class="dg-icon" style="background:#e7faf3">🤝</div><div class="dg-t">متطوعون</div><div class="dg-c" id="vol-dash-count">انضم الآن</div></div>
+    <div class="dg-card" onclick="go('consultants')"><div class="dg-icon" style="background:#e7faf3">👨‍💼</div><div class="dg-t">الاستشاريون</div><div class="dg-c" id="con-cnt">—</div></div>
+    <div class="dg-card" onclick="go('orgs-screen')"><div class="dg-icon" style="background:#e8f4fd">🏢</div><div class="dg-t">المؤسسات</div><div class="dg-c" id="dash-orgs-count">—</div></div>
+    <div class="dg-card" onclick="go('suppliers')"><div class="dg-icon" style="background:#f0e8fe">🏭</div><div class="dg-t">الموردون</div><div class="dg-c" id="sup-cnt">—</div></div>
+    <div class="dg-card" onclick="go('volunteers')"><div class="dg-icon" style="background:#e7faf3">🤝</div><div class="dg-t">متطوعون</div><div class="dg-c" id="vol-dash-count">—</div></div>
     <div class="dg-card" onclick="go('consult-screen')" style="border:2px solid #c06010;background:linear-gradient(135deg,#fef3e8,#fff8f0)"><div class="dg-icon" style="background:#c06010">📋</div><div class="dg-t" style="color:#c06010;font-weight:900">استشارة</div><div class="dg-c" style="color:#c06010;font-weight:700">ضريبية / تأمينية</div></div>
     <div class="dg-card" onclick="go('nexus-screen')" style="border:2px solid #0d1b2a;background:linear-gradient(135deg,#f0f4f8,#e8f0fe)"><div class="dg-icon" style="background:#0d1b2a;display:flex;align-items:center;justify-content:center"><span style="color:#f59e0b;font-size:18px;font-weight:900">N</span></div><div class="dg-t" style="color:#0d1b2a;font-weight:900">Nexus</div><div class="dg-c" style="color:#f59e0b;font-weight:700">قريباً ✨</div></div>
   </div>
 
-  <!-- سجل ملفك - بارز ومميز -->
+  <!-- سجل ملفك -->
   <div style="padding:10px 12px 4px">
     <div onclick="go('register')" style="background:linear-gradient(135deg,#00703a,#00b894);border-radius:16px;padding:16px 20px;cursor:pointer;box-shadow:0 6px 20px rgba(0,184,148,.35);display:flex;align-items:center;gap:14px">
       <div style="font-size:32px">✨</div>
@@ -729,6 +731,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div style="color:white;font-size:20px">←</div>
     </div>
   </div>
+
   <!-- أزرار المشاركة -->
   <div style="display:flex;gap:6px;padding:4px 10px 2px;direction:ltr">
     <button onclick="shareWA()" style="flex:1;padding:9px 4px;background:#25d366;color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">💬 واتساب</button>
@@ -736,12 +739,14 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <button onclick="window.open(WA_GROUP_URL,'_blank')" style="flex:1;padding:9px 4px;background:#128c7e;color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">👥 جروب WA</button>
     <button onclick="shareApp()" style="flex:1;padding:9px 4px;background:var(--p);color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🔗 شارك</button>
   </div>
+
   <!-- زرار تفعيل الإشعارات -->
   <div style="padding:8px 10px 2px" id="push-btn-wrap">
     <button onclick="enablePush()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;border:none;border-radius:11px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
       🔔 فعّل إشعارات الوظائف والمناقصات
     </button>
   </div>
+
   <div class="sh" style="margin-top:4px;padding:3px 14px 2px">
     <div class="sh-t" style="font-size:12px">👨‍💼 استشاريون مميزون</div>
     <div class="sh-a" onclick="go('consultants')">عرض الكل ←</div>
@@ -2733,21 +2738,23 @@ function updateAllCounts(){
   // Firebase live registrations - direct counts
   if(typeof db !== 'undefined'){
     var fbCollections = [
-      {col:'jobseekers',   el:'adm-n-js'},
-      {col:'consultants',  el:'adm-n-exp'},
-      {col:'suppliers',    el:'adm-n-sup'},
-      {col:'organizations',el:'adm-n-org'},
-      {col:'volunteers',   el:null},
-      {col:'pending_jobs', el:'pending-count-badge'},
+      {col:'jobseekers',   el:'adm-n-js',  dashEl:'dash-js-n',   suffix:''},
+      {col:'consultants',  el:'adm-n-exp', dashEl:'dash-cons-n', suffix:''},
+      {col:'suppliers',    el:'adm-n-sup', dashEl:'dash-sups-n', suffix:''},
+      {col:'organizations',el:'adm-n-org', dashEl:'dash-orgs-n', suffix:''},
+      {col:'volunteers',   el:null,        dashEl:'dash-vols-n', suffix:''},
+      {col:'pending_jobs', el:'pending-count-badge', dashEl:null, suffix:''},
     ];
     fbCollections.forEach(function(item){
       db.collection(item.col).get().then(function(snap){
-        // عداد الأدمن dashboard
         if(item.el){
           var el2 = document.getElementById(item.el);
           if(el2) el2.textContent = snap.size;
         }
-        // pending badge
+        if(item.dashEl){
+          var el3 = document.getElementById(item.dashEl);
+          if(el3) el3.textContent = snap.size;
+        }
         if(item.col === 'pending_jobs'){
           var count = snap.docs.filter(function(d){ return d.data().status === 'pending'; }).length;
           var badge = document.getElementById('pending-count-badge');

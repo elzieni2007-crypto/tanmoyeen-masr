@@ -5102,20 +5102,24 @@ function _renderJobsList(el, jobs){
     jobs.map(function(j,i){
       var statusColor = j.status==='approved' ? '#00b894' : j.status==='rejected' ? '#e05050' : '#f0c040';
       var statusLabel = j.status==='approved' ? '✅ منشورة' : j.status==='rejected' ? '❌ مرفوضة' : '⏳ انتظار';
-      return '<div class="adm-card" style="border-right-color:var(--p)">'+
-        '<div class="adm-card-top">'+
-          '<div class="adm-name">'+(j.title||'—')+'</div>'+
-          '<span style="font-size:9px;font-weight:800;background:'+statusColor+'22;color:'+statusColor+';padding:2px 8px;border-radius:10px">'+statusLabel+'</span>'+
+      return '<div class="adm-card" style="border-right:3px solid var(--p);padding:12px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
+          '<div style="font-size:13px;font-weight:800;color:#1a2a3a;flex:1">'+(j.title||'—')+'</div>'+
+          '<span style="font-size:9px;font-weight:800;background:'+statusColor+'22;color:'+statusColor+';padding:2px 8px;border-radius:10px;flex-shrink:0">'+statusLabel+'</span>'+
         '</div>'+
-        '<div class="adm-rows">'+
-          '<div class="adm-row"><span class="adm-lbl">الجهة</span><span class="adm-val">'+(j.org||'—')+'</span></div>'+
-          '<div class="adm-row"><span class="adm-lbl">المحافظة</span><span class="adm-val">'+(j.gov||'—')+'</span></div>'+
-          '<div class="adm-row"><span class="adm-lbl">الموعد</span><span class="adm-val">'+(j.dl||'—')+'</span></div>'+
-          (j.sal?'<div class="adm-row"><span class="adm-lbl">الراتب</span><span class="adm-val">'+j.sal+'</span></div>':'')+
-          (j.link?'<div class="adm-row"><span class="adm-lbl">اللينك</span><span class="adm-val" style="font-size:10px;direction:ltr;word-break:break-all">'+j.link+'</span></div>':'')+
-        '</div>'+
+        '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:8px">'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px;width:35%">🏢 الجهة</td><td style="padding:2px 4px;font-weight:600">'+(j.org||'—')+'</td></tr>'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px">📍 المحافظة</td><td style="padding:2px 4px;font-weight:600">'+(j.gov||'—')+'</td></tr>'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px">💼 النوع</td><td style="padding:2px 4px">'+(j.type||'—')+'</td></tr>'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px">🎯 المجال</td><td style="padding:2px 4px">'+(j.sec||'—')+'</td></tr>'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px">💰 الراتب</td><td style="padding:2px 4px">'+(j.sal||'—')+'</td></tr>'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px">⏰ الموعد</td><td style="padding:2px 4px">'+(j.dl||'—')+'</td></tr>'+
+          (j.contact?'<tr><td style="color:#6b7a8d;padding:2px 4px">📞 التواصل</td><td style="padding:2px 4px;direction:ltr;text-align:right">'+j.contact+'</td></tr>':'')+
+          (j.desc?'<tr><td style="color:#6b7a8d;padding:2px 4px">📝 الوصف</td><td style="padding:2px 4px;font-size:10px">'+j.desc.substring(0,100)+'</td></tr>':'')+
+          (j.link?'<tr><td style="color:#6b7a8d;padding:2px 4px">🔗 اللينك</td><td style="padding:2px 4px;font-size:10px;direction:ltr;word-break:break-all">'+j.link+'</td></tr>':'')+
+        '</table>'+
         '<div class="adm-actions">'+
-          '<button class="adm-btn" style="background:#e8f0fe;color:var(--p)" onclick="editJob('+i+',\''+(j.fbId||'')+'\')" data-idx="'+i+'">✏️ تعديل</button>'+
+          '<button class="adm-btn" style="background:#e8f0fe;color:var(--p)" onclick="editJob('+i+',\''+(j.fbId||'')+'\')">✏️ تعديل</button>'+
           '<button class="adm-btn adm-btn-del" onclick="deleteJob('+i+',\''+(j.fbId||'')+'\')">🗑️ حذف</button>'+
         '</div>'+
       '</div>';
@@ -5129,19 +5133,23 @@ function _renderTendersList(el, tenders){
     tenders.map(function(t,i){
       var statusColor = t.status==='approved' ? '#00b894' : t.status==='rejected' ? '#e05050' : '#f0c040';
       var statusLabel = t.status==='approved' ? '✅ منشورة' : t.status==='rejected' ? '❌ مرفوضة' : '⏳ انتظار';
-      return '<div class="adm-card" style="border-right-color:'+(t.color||'var(--orange)')+'">'+
-        '<div class="adm-card-top">'+
-          '<div class="adm-name">'+(t.title||'—')+'</div>'+
-          '<span style="font-size:9px;font-weight:800;background:'+statusColor+'22;color:'+statusColor+';padding:2px 8px;border-radius:10px">'+statusLabel+'</span>'+
+      return '<div class="adm-card" style="border-right:3px solid '+(t.color||'var(--orange)')+';padding:12px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
+          '<div style="font-size:13px;font-weight:800;color:#1a2a3a;flex:1">'+(t.title||'—')+'</div>'+
+          '<span style="font-size:9px;font-weight:800;background:'+statusColor+'22;color:'+statusColor+';padding:2px 8px;border-radius:10px;flex-shrink:0">'+statusLabel+'</span>'+
         '</div>'+
-        '<div class="adm-rows">'+
-          '<div class="adm-row"><span class="adm-lbl">الجهة</span><span class="adm-val">'+(t.org||'—')+'</span></div>'+
-          '<div class="adm-row"><span class="adm-lbl">الميزانية</span><span class="adm-val">'+(t.budget||'—')+'</span></div>'+
-          '<div class="adm-row"><span class="adm-lbl">الموعد</span><span class="adm-val">'+(t.dl||'—')+'</span></div>'+
-          (t.link?'<div class="adm-row"><span class="adm-lbl">اللينك</span><span class="adm-val" style="font-size:10px;direction:ltr;word-break:break-all">'+t.link+'</span></div>':'')+
-        '</div>'+
+        '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:8px">'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px;width:35%">🏢 الجهة</td><td style="padding:2px 4px;font-weight:600">'+(t.org||'—')+'</td></tr>'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px">📋 النوع</td><td style="padding:2px 4px">'+(t.type||'—')+'</td></tr>'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px">📍 الموقع</td><td style="padding:2px 4px">'+(t.loc||'—')+'</td></tr>'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px">💰 الميزانية</td><td style="padding:2px 4px">'+(t.budget||'—')+'</td></tr>'+
+          '<tr><td style="color:#6b7a8d;padding:2px 4px">⏰ الموعد</td><td style="padding:2px 4px">'+(t.dl||'—')+'</td></tr>'+
+          (t.desc?'<tr><td style="color:#6b7a8d;padding:2px 4px">📝 الوصف</td><td style="padding:2px 4px;font-size:10px">'+t.desc.substring(0,100)+'</td></tr>':'')+
+          (t.req?'<tr><td style="color:#6b7a8d;padding:2px 4px">📌 المتطلبات</td><td style="padding:2px 4px;font-size:10px">'+t.req.substring(0,80)+'</td></tr>':'')+
+          (t.link?'<tr><td style="color:#6b7a8d;padding:2px 4px">🔗 اللينك</td><td style="padding:2px 4px;font-size:10px;direction:ltr;word-break:break-all">'+t.link+'</td></tr>':'')+
+        '</table>'+
         '<div class="adm-actions">'+
-          '<button class="adm-btn" style="background:#fef3e8;color:var(--orange)" onclick="editTender('+i+',\''+(t.fbId||'')+'\')" >✏️ تعديل</button>'+
+          '<button class="adm-btn" style="background:#fef3e8;color:var(--orange)" onclick="editTender('+i+',\''+(t.fbId||'')+'\')">✏️ تعديل</button>'+
           '<button class="adm-btn adm-btn-del" onclick="deleteTender('+i+',\''+(t.fbId||'')+'\')">🗑️ حذف</button>'+
         '</div>'+
       '</div>';
@@ -5726,22 +5734,32 @@ async function loadAdminVols(){
     window._adminVols = vols;
     list.innerHTML = vols.map(function(v,i){
       var interests = Array.isArray(v.interests)?v.interests.join(" / "):(v.interests||"—");
-      return "<div class='adm-card' style='border-right-color:#00703a'>" +
-        "<div class='adm-card-top'><div class='adm-name'>"+(v.name||"—")+"</div><span class='adm-type' style='background:#e7faf3;color:#00703a'>🙋 متطوع</span></div>" +
-        "<div class='adm-rows'>" +
-          "<div class='adm-row'><span class='adm-lbl'>المحافظة</span><span class='adm-val'>"+(v.gov||"—")+"</span></div>" +
-          "<div class='adm-row'><span class='adm-lbl'>الموبايل</span><span class='adm-val' style='direction:ltr'>"+(v.phone||"—")+"</span></div>" +
-          "<div class='adm-row'><span class='adm-lbl'>الإيميل</span><span class='adm-val' style='font-size:10px;direction:ltr'>"+(v.email||"—")+"</span></div>" +
-          "<div class='adm-row'><span class='adm-lbl'>الاهتمامات</span><span class='adm-val'>"+interests+"</span></div>" +
+      return "<div class='adm-card' style='border-right:3px solid #00703a;padding:12px'>" +
+        "<div style='display:flex;align-items:center;gap:8px;margin-bottom:8px'>" +
+          "<div style='font-size:20px'>🙋</div>" +
+          "<div style='flex:1'>" +
+            "<div style='font-size:13px;font-weight:800;color:#1a2a3a'>"+(v.name||"—")+"</div>" +
+            "<div style='font-size:10px;color:#00703a'>متطوع</div>" +
+          "</div>" +
         "</div>" +
+        "<table style='width:100%;font-size:11px;border-collapse:collapse;margin-bottom:8px'>" +
+          (v.gov ? "<tr><td style='color:#6b7a8d;padding:2px 4px;width:35%'>📍 المحافظة</td><td style='padding:2px 4px;font-weight:600'>"+v.gov+"</td></tr>" : "") +
+          (v.phone ? "<tr><td style='color:#6b7a8d;padding:2px 4px'>📞 الموبايل</td><td style='padding:2px 4px;font-weight:600;direction:ltr;text-align:right'>"+v.phone+"</td></tr>" : "") +
+          (v.email ? "<tr><td style='color:#6b7a8d;padding:2px 4px'>✉️ الإيميل</td><td style='padding:2px 4px;font-size:10px;direction:ltr;text-align:right'>"+v.email+"</td></tr>" : "") +
+          "<tr><td style='color:#6b7a8d;padding:2px 4px'>🎯 الاهتمامات</td><td style='padding:2px 4px;font-size:10px'>"+interests+"</td></tr>" +
+          (v.skills ? "<tr><td style='color:#6b7a8d;padding:2px 4px'>🛠 المهارات</td><td style='padding:2px 4px;font-size:10px'>"+v.skills+"</td></tr>" : "") +
+          (v.hours ? "<tr><td style='color:#6b7a8d;padding:2px 4px'>⏰ الساعات</td><td style='padding:2px 4px'>"+v.hours+"</td></tr>" : "") +
+          (v.worktype ? "<tr><td style='color:#6b7a8d;padding:2px 4px'>💼 نوع العمل</td><td style='padding:2px 4px'>"+v.worktype+"</td></tr>" : "") +
+          (v.travel ? "<tr><td style='color:#6b7a8d;padding:2px 4px'>✈️ السفر</td><td style='padding:2px 4px'>"+v.travel+"</td></tr>" : "") +
+          (v.langs ? "<tr><td style='color:#6b7a8d;padding:2px 4px'>🌍 اللغات</td><td style='padding:2px 4px'>"+v.langs+"</td></tr>" : "") +
+          (v.date ? "<tr><td style='color:#6b7a8d;padding:2px 4px'>📅 التاريخ</td><td style='padding:2px 4px'>"+v.date+"</td></tr>" : "") +
+        "</table>" +
         "<div class='adm-actions'>" +
-          (v.phone?"<a href='tel:"+v.phone+"' class='adm-btn' style='background:#e8f0fe;color:var(--p);text-decoration:none;text-align:center'>📞 اتصال</a>":"") +
-          (v.phone?"<a href='"+waNum(v.phone)+"' target='_blank' class='adm-btn' style='background:#e7faf3;color:#00703a;text-decoration:none;text-align:center'>💬 واتساب</a>":"") +
-          (v.email?"<a href='mailto:"+v.email+"' class='adm-btn' style='background:#fff3cd;color:#c06010;text-decoration:none;text-align:center'>✉️ إيميل</a>":"") +
-        "</div>" +
-        "<div class='adm-actions' style='margin-top:4px'>" +
+          (v.phone?"<a href='tel:"+v.phone+"' class='adm-btn' style='background:#e8f0fe;color:var(--p);text-decoration:none;text-align:center'>📞</a>":"") +
+          (v.phone?"<a href='"+waNum(v.phone)+"' target='_blank' class='adm-btn' style='background:#e7faf3;color:#00703a;text-decoration:none;text-align:center'>💬</a>":"") +
+          (v.email?"<a href='mailto:"+v.email+"' class='adm-btn' style='background:#fff3cd;color:#c06010;text-decoration:none;text-align:center'>✉️</a>":"") +
           "<button class='adm-btn' style='background:#e7faf3;color:#00703a' onclick='editVolunteerAdmin("+i+")'>✏️ تعديل</button>" +
-          "<button class='adm-btn adm-btn-del' onclick='deleteVolunteerAdmin(\""+v.fbId+"\")'>🗑️ حذف</button>" +
+          "<button class='adm-btn adm-btn-del' onclick='deleteVolunteerAdmin(\""+v.fbId+"\")'>🗑️</button>" +
         "</div>" +
       "</div>";
     }).join("");

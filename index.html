@@ -886,6 +886,83 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div id="orgs-list" style="padding:0 12px 160px"></div>
 </div>
 
+<!-- صفحة التواصل -->
+<div id="contact-screen" class="scr">
+  <div style="background:linear-gradient(135deg,#1a3a6e,#0094cc);padding:20px 16px 16px;color:white">
+    <button onclick="history.back()" style="background:rgba(255,255,255,.15);border:none;color:white;padding:6px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;cursor:pointer;margin-bottom:10px">← رجوع</button>
+    <div style="font-size:20px;font-weight:900">📧 تواصل مع الإدارة</div>
+    <div style="font-size:11px;opacity:.8;margin-top:4px">مشكلة أو اقتراح؟ نحن هنا للمساعدة</div>
+  </div>
+
+  <div style="padding:16px">
+
+    <!-- طرق التواصل -->
+    <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px">
+      <div style="font-size:13px;font-weight:800;color:#1a2a3a;margin-bottom:12px">📬 طرق التواصل المباشر</div>
+
+      <a href="mailto:elzieni2007@gmail.com" style="display:flex;align-items:center;gap:12px;padding:12px;background:#fff3cd;border-radius:12px;text-decoration:none;margin-bottom:8px">
+        <div style="font-size:22px">✉️</div>
+        <div>
+          <div style="font-size:12px;font-weight:800;color:#1a2a3a">البريد الإلكتروني</div>
+          <div style="font-size:11px;color:#c06010;direction:ltr">elzieni2007@gmail.com</div>
+        </div>
+      </a>
+
+      <a href="https://wa.me/201122230020?text=السلام عليكم، تواصلت معك من تطبيق تنمويين مصر" target="_blank" style="display:flex;align-items:center;gap:12px;padding:12px;background:#e7faf3;border-radius:12px;text-decoration:none;margin-bottom:8px">
+        <div style="font-size:22px">💬</div>
+        <div>
+          <div style="font-size:12px;font-weight:800;color:#1a2a3a">واتساب</div>
+          <div style="font-size:11px;color:#00703a">تواصل مباشر مع الإدارة</div>
+        </div>
+      </a>
+
+      <a href="https://www.facebook.com/groups/346107035759429" target="_blank" style="display:flex;align-items:center;gap:12px;padding:12px;background:#e8f0fe;border-radius:12px;text-decoration:none">
+        <div style="font-size:22px">📘</div>
+        <div>
+          <div style="font-size:12px;font-weight:800;color:#1a2a3a">مجموعة فيسبوك</div>
+          <div style="font-size:11px;color:#1877f2">اكتب في المجموعة أو راسل الأدمن</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- فورم التواصل -->
+    <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px">
+      <div style="font-size:13px;font-weight:800;color:#1a2a3a;margin-bottom:12px">📝 أرسل رسالة</div>
+
+      <div class="fg">
+        <label class="fl">الاسم</label>
+        <input class="fi" id="contact-name" type="text" placeholder="اسمك الكامل">
+      </div>
+      <div class="fg">
+        <label class="fl">الإيميل أو الموبايل</label>
+        <input class="fi" id="contact-info" type="text" placeholder="للرد عليك">
+      </div>
+      <div class="fg">
+        <label class="fl">نوع الرسالة</label>
+        <select class="fi" id="contact-type">
+          <option value="مشكلة تقنية">🔧 مشكلة تقنية</option>
+          <option value="اقتراح">💡 اقتراح</option>
+          <option value="شكوى">⚠️ شكوى</option>
+          <option value="حذف بيانات">🗑️ طلب حذف بيانات</option>
+          <option value="استفسار">❓ استفسار عام</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">الرسالة</label>
+        <textarea class="fi" id="contact-msg" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
+      </div>
+
+      <button onclick="sendContactMsg()" style="width:100%;padding:13px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;cursor:pointer">
+        📨 إرسال الرسالة
+      </button>
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:var(--muted);padding-bottom:100px">
+      سيتم الرد خلال 48 ساعة 🕐
+    </div>
+  </div>
+</div>
+
 <div id="nexus-screen" class="scr">
 
   <!-- هيدر -->
@@ -1615,6 +1692,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="mstit">الإعدادات</div>
       <div class="mitem" onclick="window.open('https://www.facebook.com/groups/346107035759429/?ref=share&mibextid=NSMWBT','_blank')"><div class="mico" style="background:#e8f0fe">📘</div><div class="mtxt"><div class="mtt">مجموعة فيسبوك</div><div class="mst">٢٥,٠٠٠ عضو - انضم الآن</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="window.open(WA_GROUP_URL,'_blank')"><div class="mico" style="background:#e7faf3">👥</div><div class="mtxt"><div class="mtt">جروب واتساب</div><div class="mst">انضم لجروب تنمويين مصر</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div class="mitem" onclick="go('contact-screen')"><div class="mico" style="background:#fef3e8">📧</div><div class="mtxt"><div class="mtt">تواصل مع الإدارة</div><div class="mst">مشكلة أو اقتراح؟ راسلنا</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
     </div>
   </div>
 </div>
@@ -1698,6 +1776,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" style="background:#e7faf3;color:#00703a;border-color:#00b894" onclick="setAdmTab(this,'volunteers-adm')">🤝 متطوعين</div>
       <div class="adm-tab" style="background:#fef3e8;color:#c06010;border-color:#c06010" onclick="setAdmTab(this,'consultations-adm')">📋 استشارات</div>
       <div class="adm-tab" style="background:#dcfce7;color:#00703a;border-color:#00703a" onclick="setAdmTab(this,'broadcast')">💬 واتساب</div>
+      <div class="adm-tab" onclick="setAdmTab(this,'contact')">📧 رسايل</div>
       <div class="adm-tab" style="background:#f3e8ff;color:#7c3aed;border-color:#7c3aed" onclick="setAdmTab(this,'settings')">⚙️ إعدادات</div>
     </div>
     <div style="font-size:10px;color:var(--muted);padding:0 12px 8px;text-align:left">← اسحب للمزيد من التبويبات</div>
@@ -1900,6 +1979,13 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   </div>
 
   <div id="adm-consult-list"></div>
+</div>
+
+<div id="adm-form-contact" style="display:none;padding:0 16px;padding-bottom:100px">
+  <div style="font-size:13px;font-weight:800;color:#1a3a6e;margin:12px 0 8px">📧 رسائل التواصل</div>
+  <div id="contact-msgs-list">
+    <div style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل...</div>
+  </div>
 </div>
 
 <div id="adm-form-broadcast" style="display:none;padding:0 16px;padding-bottom:100px">
@@ -2119,12 +2205,25 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <!-- المميزون -->
     <div id="adm-form-featured" style="display:none;padding:0 16px">
       <div style="background:#e7faf3;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-right:3px solid var(--green);font-size:12px;color:#007a50">
-        ⭐ <strong>اختر المميزين:</strong> حدد من يظهر في الصفحة الرئيسية
+        ⭐ <strong>اختر المميزين:</strong> حدد من يظهر في الصفحة الرئيسية للمستخدمين
       </div>
-      <div style="font-size:12px;font-weight:800;color:var(--p);margin-bottom:8px">👨‍💼 استشاريون مميزون</div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:12px;font-weight:800;color:var(--p)">👨‍💼 استشاريون مميزون</div>
+        <span id="feat-cons-count" style="font-size:10px;color:var(--green);font-weight:700">0 محدد</span>
+      </div>
+      <input id="feat-cons-search" type="text" placeholder="🔍 ابحث باسم أو تخصص أو محافظة..." oninput="renderFeaturedSelector()"
+        style="width:100%;padding:8px 12px;border:1px solid #dde6f0;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;margin-bottom:6px;box-sizing:border-box">
       <div id="featured-cons-list" style="max-height:220px;overflow-y:auto;background:white;border-radius:12px;padding:8px;box-shadow:var(--sh);margin-bottom:14px"></div>
-      <div style="font-size:12px;font-weight:800;color:var(--green);margin-bottom:8px">🏭 موردون مميزون</div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:12px;font-weight:800;color:var(--green)">🏭 موردون مميزون</div>
+        <span id="feat-sups-count" style="font-size:10px;color:var(--green);font-weight:700">0 محدد</span>
+      </div>
+      <input id="feat-sups-search" type="text" placeholder="🔍 ابحث باسم أو نشاط أو محافظة..." oninput="renderFeaturedSelector()"
+        style="width:100%;padding:8px 12px;border:1px solid #dde6f0;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;margin-bottom:6px;box-sizing:border-box">
       <div id="featured-sups-list" style="max-height:220px;overflow-y:auto;background:white;border-radius:12px;padding:8px;box-shadow:var(--sh);margin-bottom:14px"></div>
+
       <button onclick="saveFeatured()" style="width:100%;padding:13px;background:linear-gradient(135deg,var(--green),#009974);color:white;border:none;border-radius:12px;font-size:13px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
         💾 حفظ وتطبيق
       </button>
@@ -2601,7 +2700,7 @@ let jFilt='all', tFilt='all', cFilt='all', sFilt='all';
 let logoTaps=0, logoTimer=null;
 
 // ============ NAVIGATION ============
-const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus'};
+const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus','contact-screen':'n-home'};
 function go(id){
   // تأكد إن الـ splash مش ظاهرة
   var splash = document.getElementById('splash');
@@ -2804,50 +2903,71 @@ function deduplicateArray(arr, fields){
 }
 
 function renderDash(){
-  var _fc=[];try{_fc=JSON.parse(localStorage.getItem('featured_cons')||'[]');}catch(e){}
-  var _cl=_fc.length>0?CONS.filter(c=>_fc.includes(c.id)).slice(0,6):CONS.slice(0,6);
-  document.getElementById('dash-cons').innerHTML=(_cl||[]).map(c=>`
-    <div class="strip-card" onclick="openCon('${c.id}')" style="min-width:120px;max-width:130px;text-align:center;padding:14px 10px;border-radius:14px;border-top:3px solid ${c.bg||'#e8f0fe'}">
-      <div style="width:48px;height:48px;border-radius:14px;background:${c.bg||'#e8f0fe'};display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">${c.av||'👨‍💼'}</div>
-      <div style="font-size:11px;font-weight:900;color:#1a2a3a;line-height:1.3;margin-bottom:4px">${(c.name||'').split(' ').slice(0,3).join(' ')}</div>
-      <div style="font-size:9px;color:var(--a);font-weight:700;margin-bottom:3px">${(c.spec||'').slice(0,22)}</div>
-      <div style="font-size:9px;color:var(--muted)">📍 ${c.gov||'—'}</div>
-    </div>`).join('');
+  var fc=[];var fs=[];
+  try{fc=JSON.parse(localStorage.getItem('featured_cons')||'[]');}catch(e){}
+  try{fs=JSON.parse(localStorage.getItem('featured_sups')||'[]');}catch(e){}
 
-  var _fs=[];try{_fs=JSON.parse(localStorage.getItem('featured_sups')||'[]');}catch(e){}
-  var _sl=_fs.length>0?SUPS.filter(s=>_fs.includes(s.id)).slice(0,6):SUPS.slice(0,6);
+  // جيب من Firebase لو متاح
+  if(typeof db !== 'undefined'){
+    db.collection('settings').doc('featured').get().then(function(doc){
+      if(doc.exists){
+        fc = doc.data().cons || [];
+        fs = doc.data().sups || [];
+        localStorage.setItem('featured_cons', JSON.stringify(fc));
+        localStorage.setItem('featured_sups', JSON.stringify(fs));
+      }
+      _renderDashCards(fc, fs);
+    }).catch(function(){ _renderDashCards(fc, fs); });
+  } else {
+    _renderDashCards(fc, fs);
+  }
 
+  // الأرقام
   var uniqueCons = deduplicateArray(CONS, ['phone','email','name']);
   var uniqueSups = deduplicateArray(SUPS, ['phone','email','name']);
-  // بس حدّث لو Firebase لسه مش حمّل
   if(!window._fb_consultants){
-    var el1 = document.getElementById('dash-cons-n'); if(el1) el1.textContent = uniqueCons.length;
-    var el2 = document.getElementById('con-cnt'); if(el2) el2.textContent = uniqueCons.length + ' مسجّل';
+    var e1=document.getElementById('dash-cons-n'); if(e1) e1.textContent=uniqueCons.length;
+    var e2=document.getElementById('con-cnt'); if(e2) e2.textContent=uniqueCons.length+' مسجّل';
   }
   if(!window._fb_suppliers){
-    var el2b = document.getElementById('dash-sups-n'); if(el2b) el2b.textContent = uniqueSups.length;
-    var el2c = document.getElementById('sup-cnt'); if(el2c) el2c.textContent = uniqueSups.length + ' مورد';
+    var e3=document.getElementById('dash-sups-n'); if(e3) e3.textContent=uniqueSups.length;
+    var e4=document.getElementById('sup-cnt'); if(e4) e4.textContent=uniqueSups.length+' مورد';
   }
-  var volsTotal = (typeof VOLUNTEERS_DATA!=='undefined'&&VOLUNTEERS_DATA.length>0) ? VOLUNTEERS_DATA.length : (VOLUNTEERS_PRELOAD||[]).length;
-  var el3 = document.getElementById('dash-vols-n');
-  if(el3) el3.textContent = volsTotal;
-  var volDash = document.getElementById('vol-dash-count');
-  if(volDash) volDash.textContent = volsTotal + ' متطوع';
+  var volsTotal=(typeof VOLUNTEERS_DATA!=='undefined'&&VOLUNTEERS_DATA.length>0)?VOLUNTEERS_DATA.length:(VOLUNTEERS_PRELOAD||[]).length;
+  var e5=document.getElementById('dash-vols-n'); if(e5) e5.textContent=volsTotal;
+  var e6=document.getElementById('vol-dash-count'); if(e6) e6.textContent=volsTotal+' متطوع';
+}
 
-  document.getElementById('dash-sups').innerHTML=(_sl||[]).map(s=>`
-    <div class="strip-card" onclick="openSup('${s.id}')" style="min-width:155px;max-width:170px;padding:14px 12px;border-radius:14px;border-top:3px solid #7c3aed22">
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
-        <div style="width:40px;height:40px;border-radius:12px;background:#f0e8fe;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 2px 6px rgba(124,58,237,.15)">${s.logo||'🏭'}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:11px;font-weight:900;color:#1a2a3a;line-height:1.3">${(s.name||'').slice(0,20)}</div>
-          <div style="font-size:9px;color:#7c3aed;font-weight:700;margin-top:2px">${(s.cat||'').slice(0,18)}</div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;padding-top:6px">
-        <div style="font-size:9px;color:var(--muted)">📍 ${(s.gov||'').slice(0,10)}</div>
-        <div style="font-size:9px;color:#00703a;font-weight:700">✅ مرخّص</div>
-      </div>
-    </div>`).join('');
+function _renderDashCards(fc, fs){
+  var _cl = fc.length>0 ? CONS.filter(function(c){ return fc.includes(c.id); }).slice(0,6) : CONS.slice(0,6);
+  var _sl = fs.length>0 ? SUPS.filter(function(s){ return fs.includes(s.id); }).slice(0,6) : SUPS.slice(0,6);
+
+  var consEl = document.getElementById('dash-cons');
+  if(consEl) consEl.innerHTML=(_cl||[]).map(function(c){
+    return '<div class="strip-card" onclick="openCon(\''+c.id+'\')" style="min-width:120px;max-width:130px;text-align:center;padding:14px 10px;border-radius:14px;border-top:3px solid '+(c.bg||'#e8f0fe')+'">' +
+      '<div style="width:48px;height:48px;border-radius:14px;background:'+(c.bg||'#e8f0fe')+';display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">'+(c.av||'👨‍💼')+'</div>' +
+      '<div style="font-size:11px;font-weight:900;color:#1a2a3a;line-height:1.3;margin-bottom:4px">'+(c.name||'').split(' ').slice(0,3).join(' ')+'</div>' +
+      '<div style="font-size:9px;color:var(--a);font-weight:700;margin-bottom:3px">'+(c.spec||'').slice(0,22)+'</div>' +
+      '<div style="font-size:9px;color:var(--muted)">📍 '+(c.gov||'—')+'</div>' +
+    '</div>';
+  }).join('');
+
+  var supsEl = document.getElementById('dash-sups');
+  if(supsEl) supsEl.innerHTML=(_sl||[]).map(function(s){
+    return '<div class="strip-card" onclick="openSup(\''+s.id+'\')" style="min-width:155px;max-width:170px;padding:14px 12px;border-radius:14px;border-top:3px solid #7c3aed22">' +
+      '<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">' +
+        '<div style="width:40px;height:40px;border-radius:12px;background:#f0e8fe;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 2px 6px rgba(124,58,237,.15)">'+(s.logo||'🏭')+'</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:11px;font-weight:900;color:#1a2a3a;line-height:1.3">'+(s.name||'').slice(0,20)+'</div>' +
+          '<div style="font-size:9px;color:#7c3aed;font-weight:700;margin-top:2px">'+(s.cat||'').slice(0,18)+'</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;padding-top:6px">' +
+        '<div style="font-size:9px;color:var(--muted)">📍 '+(s.gov||'').slice(0,10)+'</div>' +
+        '<div style="font-size:9px;color:#00703a;font-weight:700">✅ مرخّص</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 // ============ CONSULTANTS ============
@@ -3511,17 +3631,7 @@ const JOBSEEKERS = [];
 
 function renderJobseekers(){
   const all = [...JOBSEEKERS];
-  // اضف من localStorage
-  try{
-    const stored = JSON.parse(localStorage.getItem('registrations') || '[]');
-    stored.filter(r=>r.type==='jobseeker').forEach(r=>{
-      if(!all.find(j=>j.phone===r.phone)){
-        all.push({id:r.date,name:r.name,spec:r.spec||'باحث عن عمل',
-          gov:r.gov,exp:r.exp,phone:r.phone,email:r.email,
-          jobType:r.jobType,notes:r.notes,date:r.date,av:'🔍',bg:'#e8f4fd'});
-      }
-    });
-  }catch(e){}
+  // Firebase only - no localStorage
   return all;
 }
 
@@ -3649,20 +3759,90 @@ function submitJobReport(){
 
 function renderFeaturedSelector(){
   var featCons=[];var featSups=[];
-  try{featCons=JSON.parse(localStorage.getItem('featured_cons')||'[]');}catch(e){}
-  try{featSups=JSON.parse(localStorage.getItem('featured_sups')||'[]');}catch(e){}
-  var cl=document.getElementById('featured-cons-list');
-  var sl=document.getElementById('featured-sups-list');
-  if(cl) cl.innerHTML=CONS.map(c=>'<label style="display:flex;align-items:center;gap:8px;padding:7px;border-bottom:1px solid var(--border);cursor:pointer;font-size:11px"><input type="checkbox" class="feat-con-cb" value="'+c.id+'"'+(featCons.includes(c.id)?' checked':'')+' style="width:15px;height:15px"><span style="font-weight:600">'+c.name+'</span><span style="color:var(--muted);font-size:9px;margin-right:auto">'+c.spec.slice(0,18)+'</span></label>').join('');
-  if(sl) sl.innerHTML=SUPS.map(s=>'<label style="display:flex;align-items:center;gap:8px;padding:7px;border-bottom:1px solid var(--border);cursor:pointer;font-size:11px"><input type="checkbox" class="feat-sup-cb" value="'+s.id+'"'+(featSups.includes(s.id)?' checked':'')+' style="width:15px;height:15px"><span style="font-weight:600">'+s.name.slice(0,18)+'</span><span style="color:var(--muted);font-size:9px;margin-right:auto">'+s.cat.slice(0,14)+'</span></label>').join('');
+  // جيب من Firebase أول، لو مش موجود خد من localStorage
+  var loadAndRender = function(fc, fs){
+    var cl=document.getElementById('featured-cons-list');
+    var sl=document.getElementById('featured-sups-list');
+
+    // بحث
+    var searchCons = (document.getElementById('feat-cons-search')||{}).value||'';
+    var searchSups = (document.getElementById('feat-sups-search')||{}).value||'';
+
+    var filteredCons = CONS.filter(function(c){
+      return !searchCons || (c.name||'').includes(searchCons) || (c.spec||'').includes(searchCons) || (c.gov||'').includes(searchCons);
+    });
+    var filteredSups = SUPS.filter(function(s){
+      return !searchSups || (s.name||'').includes(searchSups) || (s.cat||'').includes(searchSups) || (s.gov||'').includes(searchSups);
+    });
+
+    if(cl) cl.innerHTML = filteredCons.map(function(c){
+      return '<label style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--border);cursor:pointer;font-size:11px">'+
+        '<input type="checkbox" class="feat-con-cb" value="'+c.id+'"'+(fc.includes(c.id)?' checked':'')+' style="width:15px;height:15px">'+
+        '<div style="flex:1">'+
+          '<div style="font-weight:700">'+c.name+'</div>'+
+          '<div style="color:var(--muted);font-size:9px">'+c.spec.slice(0,24)+' | 📍 '+c.gov+'</div>'+
+        '</div>'+
+      '</label>';
+    }).join('');
+
+    if(sl) sl.innerHTML = filteredSups.map(function(s){
+      return '<label style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--border);cursor:pointer;font-size:11px">'+
+        '<input type="checkbox" class="feat-sup-cb" value="'+s.id+'"'+(fs.includes(s.id)?' checked':'')+' style="width:15px;height:15px">'+
+        '<div style="flex:1">'+
+          '<div style="font-weight:700">'+s.name.slice(0,24)+'</div>'+
+          '<div style="color:var(--muted);font-size:9px">'+s.cat.slice(0,20)+' | 📍 '+s.gov+'</div>'+
+        '</div>'+
+      '</label>';
+    }).join('');
+
+    // عداد المحدد
+    var consCount = document.getElementById('feat-cons-count');
+    var supsCount = document.getElementById('feat-sups-count');
+    if(consCount) consCount.textContent = fc.length + ' محدد';
+    if(supsCount) supsCount.textContent = fs.length + ' محدد';
+  };
+
+  // جيب من Firebase
+  if(typeof db !== 'undefined'){
+    db.collection('settings').doc('featured').get().then(function(doc){
+      if(doc.exists){
+        featCons = doc.data().cons || [];
+        featSups = doc.data().sups || [];
+      } else {
+        try{featCons=JSON.parse(localStorage.getItem('featured_cons')||'[]');}catch(e){}
+        try{featSups=JSON.parse(localStorage.getItem('featured_sups')||'[]');}catch(e){}
+      }
+      loadAndRender(featCons, featSups);
+    }).catch(function(){
+      try{featCons=JSON.parse(localStorage.getItem('featured_cons')||'[]');}catch(e){}
+      try{featSups=JSON.parse(localStorage.getItem('featured_sups')||'[]');}catch(e){}
+      loadAndRender(featCons, featSups);
+    });
+  } else {
+    try{featCons=JSON.parse(localStorage.getItem('featured_cons')||'[]');}catch(e){}
+    try{featSups=JSON.parse(localStorage.getItem('featured_sups')||'[]');}catch(e){}
+    loadAndRender(featCons, featSups);
+  }
 }
-function saveFeatured(){
-  var fc=Array.from(document.querySelectorAll('.feat-con-cb:checked')).map(cb=>parseInt(cb.value));
-  var fs=Array.from(document.querySelectorAll('.feat-sup-cb:checked')).map(cb=>parseInt(cb.value));
-  localStorage.setItem('featured_cons',JSON.stringify(fc));
-  localStorage.setItem('featured_sups',JSON.stringify(fs));
-  toast('✅ تم حفظ المميزين!');
-  renderDash();
+
+async function saveFeatured(){
+  var fc = Array.from(document.querySelectorAll('.feat-con-cb:checked')).map(function(cb){ return parseInt(cb.value); });
+  var fs = Array.from(document.querySelectorAll('.feat-sup-cb:checked')).map(function(cb){ return parseInt(cb.value); });
+
+  // حفظ في Firebase
+  try {
+    await db.collection('settings').doc('featured').set({
+      cons: fc, sups: fs,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // حفظ احتياطي في localStorage
+    localStorage.setItem('featured_cons', JSON.stringify(fc));
+    localStorage.setItem('featured_sups', JSON.stringify(fs));
+    toast('✅ تم حفظ المميزين! (' + fc.length + ' استشاري, ' + fs.length + ' مورد)');
+    renderDash();
+  } catch(e) {
+    toast('❌ خطأ: ' + e.message);
+  }
 }
 function updatePendingBadge(){
   if(typeof db === 'undefined') return;
@@ -4058,7 +4238,7 @@ var volFilter = 'all';
 
 function loadVolunteers(){
   var stored = [];
-  try{ stored = JSON.parse(localStorage.getItem('volunteers') || '[]'); }catch(e){}
+  try{ stored = []; }catch(e){}
   // Firebase data takes priority
   var fbData = window.VOLUNTEERS_PRELOAD || [];
   var merged;
@@ -4234,9 +4414,9 @@ function submitVolunteer(){
 
   // حفظ
   var stored = [];
-  try{ stored = JSON.parse(localStorage.getItem('volunteers')||'[]'); }catch(e){}
+  // Firebase only
   stored.unshift(vol);
-  localStorage.setItem('volunteers', JSON.stringify(stored));
+  // Firebase only
 
   // حفظ في Firebase
   console.log('Saving volunteer to Firebase...');
@@ -4730,6 +4910,11 @@ function setAdmTab(el, tab){
     if(formPending){ formPending.style.display = 'block'; formPending.style.visibility = 'visible'; }
     renderPendingJobs();
     updatePendingBadge();
+  } else if(tab === 'contact'){
+    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    var cEl=document.getElementById('adm-form-contact');
+    if(cEl){ cEl.style.display='block'; loadContactMsgs(); }
   } else if(tab === 'broadcast'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
     ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
@@ -6005,7 +6190,63 @@ function manualRefresh(){
   });
 }
 
-// ============ ONESIGNAL NOTIFICATIONS ============
+// ============ CONTACT ADMIN ============
+async function loadContactMsgs(){
+  var list = document.getElementById('contact-msgs-list');
+  if(!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل...</div>';
+  try{
+    var snap = await db.collection('contact_messages').orderBy('timestamp','desc').limit(50).get();
+    if(snap.empty){ list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">📭 لا توجد رسائل</div>'; return; }
+    list.innerHTML = snap.docs.map(function(d){
+      var r = d.data();
+      var date = r.timestamp ? new Date(r.timestamp.toMillis()).toLocaleDateString('ar-EG') : '—';
+      return '<div style="background:white;border-radius:12px;padding:14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-right:3px solid '+(r.status==='unread'?'#e05050':'#00b894')+'">' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:12px;font-weight:800">'+(r.name||'—')+'</div><div style="font-size:10px;color:var(--muted)">'+date+'</div></div>' +
+        '<div style="font-size:10px;color:var(--a);margin-bottom:4px">'+r.type+'</div>' +
+        '<div style="font-size:11px;color:#444;margin-bottom:8px">'+r.msg+'</div>' +
+        (r.info?'<div style="font-size:10px;direction:ltr;color:var(--muted)">📞 '+r.info+'</div>':'') +
+        '<div style="display:flex;gap:6px;margin-top:8px">' +
+          (r.info&&r.info.includes('@')?'<a href="mailto:'+r.info+'" style="flex:1;padding:6px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ رد</a>':'') +
+          (r.info&&!r.info.includes('@')?'<a href="'+waNum(r.info)+'" target="_blank" style="flex:1;padding:6px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 رد</a>':'') +
+          '<button onclick="markContactRead(\''+d.id+'\')" style="flex:1;padding:6px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">✅ مقروء</button>' +
+          '<button onclick="deleteContactMsg(\''+d.id+'\')" style="flex:1;padding:6px;background:#feeaea;color:#e05050;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">🗑️</button>' +
+        '</div></div>';
+    }).join('');
+  }catch(e){ list.innerHTML = '<div style="color:#e05050;padding:12px">❌ '+e.message+'</div>'; }
+}
+function markContactRead(id){ db.collection('contact_messages').doc(id).update({status:'read'}).then(function(){ toast('✅ مقروء'); loadContactMsgs(); }).catch(function(e){ toast('❌ '+e.message); }); }
+function deleteContactMsg(id){ if(!confirm('هتحذف الرسالة؟')) return; db.collection('contact_messages').doc(id).delete().then(function(){ toast('🗑️ تم الحذف'); loadContactMsgs(); }).catch(function(e){ toast('❌ '+e.message); }); }
+
+async function sendContactMsg(){
+  var name = (document.getElementById('contact-name')||{}).value||'';
+  var info = (document.getElementById('contact-info')||{}).value||'';
+  var type = (document.getElementById('contact-type')||{}).value||'';
+  var msg  = (document.getElementById('contact-msg')||{}).value||'';
+
+  if(!name.trim()){ toast('❌ اكتب اسمك'); return; }
+  if(!msg.trim()) { toast('❌ اكتب رسالتك'); return; }
+
+  try{
+    await db.collection('contact_messages').add({
+      name: name.trim(),
+      info: info.trim(),
+      type: type,
+      msg:  msg.trim(),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'unread'
+    });
+    toast('✅ تم إرسال رسالتك! سنرد عليك قريباً');
+    document.getElementById('contact-name').value = '';
+    document.getElementById('contact-info').value = '';
+    document.getElementById('contact-msg').value  = '';
+  }catch(e){
+    // fallback - فتح الإيميل مباشرة
+    var subject = encodeURIComponent('تواصل من تنمويين مصر - ' + type);
+    var body = encodeURIComponent('الاسم: ' + name + '\nالتواصل: ' + info + '\n\n' + msg);
+    window.open('mailto:elzieni2007@gmail.com?subject='+subject+'&body='+body);
+  }
+}
 const ONESIGNAL_APP_ID = "8dfa5d04-3fc5-448d-b72d-52d2ed5dc5d9";
 // الإرسال يتم من Firebase Cloud Function - مش من هنا
 

@@ -6202,22 +6202,48 @@ async function loadContactMsgs(){
   if(!list) return;
   list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل...</div>';
   try{
-    var snap = await db.collection('contact_messages').orderBy('timestamp','desc').limit(50).get();
+    var snap = await db.collection('contact_messages').get();
     if(snap.empty){ list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">📭 لا توجد رسائل</div>'; return; }
-    list.innerHTML = snap.docs.map(function(d){
+    
+    // ترتيب يدوي بدون orderBy
+    var docs = snap.docs.sort(function(a,b){
+      var ta = a.data().timestamp ? a.data().timestamp.toMillis() : 0;
+      var tb = b.data().timestamp ? b.data().timestamp.toMillis() : 0;
+      return tb - ta;
+    });
+
+    list.innerHTML = docs.map(function(d){
       var r = d.data();
       var date = r.timestamp ? new Date(r.timestamp.toMillis()).toLocaleDateString('ar-EG') : '—';
-      return '<div style="background:white;border-radius:12px;padding:14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-right:3px solid '+(r.status==='unread'?'#e05050':'#00b894')+'">' +
-        '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:12px;font-weight:800">'+(r.name||'—')+'</div><div style="font-size:10px;color:var(--muted)">'+date+'</div></div>' +
-        '<div style="font-size:10px;color:var(--a);margin-bottom:4px">'+r.type+'</div>' +
-        '<div style="font-size:11px;color:#444;margin-bottom:8px">'+r.msg+'</div>' +
-        (r.info?'<div style="font-size:10px;direction:ltr;color:var(--muted)">📞 '+r.info+'</div>':'') +
-        '<div style="display:flex;gap:6px;margin-top:8px">' +
-          (r.info&&r.info.includes('@')?'<a href="mailto:'+r.info+'" style="flex:1;padding:6px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ رد</a>':'') +
-          (r.info&&!r.info.includes('@')?'<a href="'+waNum(r.info)+'" target="_blank" style="flex:1;padding:6px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 رد</a>':'') +
-          '<button onclick="markContactRead(\''+d.id+'\')" style="flex:1;padding:6px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">✅ مقروء</button>' +
-          '<button onclick="deleteContactMsg(\''+d.id+'\')" style="flex:1;padding:6px;background:#feeaea;color:#e05050;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">🗑️</button>' +
-        '</div></div>';
+      var msgId = 'msg-'+d.id;
+      var shortMsg = (r.msg||'').slice(0,80);
+      var fullMsg = r.msg||'';
+      var isLong = fullMsg.length > 80;
+      return '<div style="background:white;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-right:4px solid '+(r.status==='unread'?'#e05050':'#00b894')+'">' +
+        // Header
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">' +
+          '<div>' +
+            '<div style="font-size:13px;font-weight:800;color:#1a2a3a">'+(r.name||'—')+'</div>' +
+            '<div style="font-size:10px;color:var(--a);margin-top:2px">'+r.type+'</div>' +
+          '</div>' +
+          '<div style="text-align:left">' +
+            '<div style="font-size:10px;color:var(--muted)">'+date+'</div>' +
+            '<div style="font-size:9px;font-weight:700;color:'+(r.status==='unread'?'#e05050':'#00b894')+'">'+(r.status==='unread'?'● غير مقروء':'● مقروء')+'</div>' +
+          '</div>' +
+        '</div>' +
+        // التواصل
+        (r.info?'<div style="font-size:11px;padding:6px 10px;background:#f8f9fa;border-radius:8px;margin-bottom:8px;direction:ltr;text-align:right">📞 '+r.info+'</div>':'') +
+        // الرسالة
+        '<div id="'+msgId+'" style="font-size:12px;color:#333;line-height:1.6;background:#f8f9fa;padding:10px;border-radius:8px;margin-bottom:8px;white-space:pre-wrap">'+(isLong?shortMsg+'...':fullMsg)+'</div>' +
+        (isLong?'<button onclick="document.getElementById(\''+msgId+'\').textContent=\''+fullMsg.replace(/'/g,"\\'").replace(/\n/g,'\\n')+'\';this.style.display=\'none\'" style="font-size:10px;color:var(--a);background:none;border:none;cursor:pointer;padding:0;font-family:Cairo,sans-serif;margin-bottom:8px">← عرض الرسالة كاملة</button>':'') +
+        // الأزرار
+        '<div style="display:flex;gap:6px">' +
+          (r.info&&r.info.includes('@')?'<a href="mailto:'+r.info+'" style="flex:1;padding:7px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ رد بإيميل</a>':'') +
+          (r.info&&!r.info.includes('@')?'<a href="'+waNum(r.info)+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 رد واتساب</a>':'') +
+          '<button onclick="markContactRead(\''+d.id+'\')" style="padding:7px 10px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">✅</button>' +
+          '<button onclick="deleteContactMsg(\''+d.id+'\')" style="padding:7px 10px;background:#feeaea;color:#e05050;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">🗑️</button>' +
+        '</div>' +
+      '</div>';
     }).join('');
   }catch(e){ list.innerHTML = '<div style="color:#e05050;padding:12px">❌ '+e.message+'</div>'; }
 }
@@ -6233,6 +6259,9 @@ async function sendContactMsg(){
   if(!name.trim()){ toast('❌ اكتب اسمك'); return; }
   if(!msg.trim()) { toast('❌ اكتب رسالتك'); return; }
 
+  var btn = document.querySelector('#contact-screen button[onclick="sendContactMsg()"]');
+  if(btn){ btn.textContent = '⏳ جاري الإرسال...'; btn.disabled = true; }
+
   try{
     await db.collection('contact_messages').add({
       name: name.trim(),
@@ -6242,11 +6271,17 @@ async function sendContactMsg(){
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       status: 'unread'
     });
-    toast('✅ تم إرسال رسالتك! سنرد عليك قريباً');
+    // شاشة تأكيد واضحة
     document.getElementById('contact-name').value = '';
     document.getElementById('contact-info').value = '';
     document.getElementById('contact-msg').value  = '';
+    if(btn){ btn.textContent = '✅ تم الإرسال بنجاح!'; btn.style.background = '#00703a'; }
+    setTimeout(function(){ 
+      if(btn){ btn.textContent = '📨 إرسال الرسالة'; btn.style.background = ''; btn.disabled = false; }
+    }, 3000);
+    alert('✅ تم إرسال رسالتك بنجاح!\nسنرد عليك في أقرب وقت 🙏');
   }catch(e){
+    if(btn){ btn.textContent = '📨 إرسال الرسالة'; btn.disabled = false; }
     // fallback - فتح الإيميل مباشرة
     var subject = encodeURIComponent('تواصل من تنمويين مصر - ' + type);
     var body = encodeURIComponent('الاسم: ' + name + '\nالتواصل: ' + info + '\n\n' + msg);

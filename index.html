@@ -15,6 +15,9 @@
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <!-- OneSignal -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>emailjs.init("rDGGadB5Kv6SSx3uZ");</script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
@@ -3719,8 +3722,13 @@ function submitJobReport(){
   if(typeof db !== 'undefined'){
     db.collection('pending_jobs').add(Object.assign({}, job, {
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    })).then(function(){ console.log('✅ Job saved to Firebase'); })
-    .catch(function(e){ console.log('Firebase job error:', e); });
+    })).then(function(){
+      console.log('✅ Job saved to Firebase');
+      sendEmailNotif(
+        '💼 وظيفة جديدة للمراجعة - ' + title,
+        'المقدم: ' + reporter + '\nالجهة: ' + org + '\nالمحافظة: ' + gov + '\nالعنوان: ' + title + '\nالتواصل: ' + contact
+      );
+    }).catch(function(e){ console.log('Firebase job error:', e); });
   }
 
   // ابعت للـ Sheets
@@ -4120,8 +4128,13 @@ function submitTenderReport(){
     db.collection('pending_jobs').add(Object.assign({}, tender, {
       _ptype: 'tender',
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    })).then(function(){ console.log('✅ Tender saved to Firebase'); })
-    .catch(function(e){ console.log('Firebase tender error:', e); });
+    })).then(function(){
+      console.log('✅ Tender saved to Firebase');
+      sendEmailNotif(
+        '📋 مناقصة جديدة للمراجعة - ' + tender.title,
+        'الجهة: ' + tender.org + '\nالموقع: ' + tender.loc + '\nالعنوان: ' + tender.title
+      );
+    }).catch(function(e){ console.log('Firebase tender error:', e); });
   }
 
   // ابعت للـ Sheets
@@ -4714,6 +4727,11 @@ async function submitConsultation(){
     // Fallback if overlay not found
     toast('✅ تم استلام طلبك! سيتم التواصل معك خلال 48 ساعة');
   }
+  // إيميل للأدمن
+  sendEmailNotif(
+    '📋 طلب استشارة جديد - ' + (typeEl?typeEl.value:''),
+    'الجمعية: ' + orgName + '\nالمحافظة: ' + gov + '\nالتليفون: ' + phone + '\n\nالموضوع:\n' + desc
+  );
 }
 
 function shareApp(){
@@ -6280,6 +6298,10 @@ async function sendContactMsg(){
       if(btn){ btn.textContent = '📨 إرسال الرسالة'; btn.style.background = ''; btn.disabled = false; }
     }, 3000);
     alert('✅ تم إرسال رسالتك بنجاح!\nسنرد عليك في أقرب وقت 🙏');
+    sendEmailNotif(
+      '📧 رسالة جديدة - ' + type,
+      'الاسم: ' + name + '\nالتواصل: ' + info + '\nالنوع: ' + type + '\n\nالرسالة:\n' + msg
+    );
   }catch(e){
     if(btn){ btn.textContent = '📨 إرسال الرسالة'; btn.disabled = false; }
     // fallback - فتح الإيميل مباشرة
@@ -6288,6 +6310,17 @@ async function sendContactMsg(){
     window.open('mailto:elzieni2007@gmail.com?subject='+subject+'&body='+body);
   }
 }
+// ============ EMAILJS ============
+function sendEmailNotif(subject, body){
+  if(typeof emailjs === 'undefined') return;
+  emailjs.send('service_j1hs2ap', 'template_l15xags', {
+    subject: subject,
+    message: body,
+    to_email: 'elzieni2007@gmail.com'
+  }).then(function(){ console.log('✅ Email sent'); })
+    .catch(function(e){ console.log('❌ Email error:', e); });
+}
+
 const ONESIGNAL_APP_ID = "8dfa5d04-3fc5-448d-b72d-52d2ed5dc5d9";
 // الإرسال يتم من Firebase Cloud Function - مش من هنا
 

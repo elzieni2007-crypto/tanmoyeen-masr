@@ -6256,27 +6256,61 @@ function addNewReg(data, type, icon){
 
 // مراقبة التسجيلات الجديدة
 var _lastCheck = Date.now() - (24 * 60 * 60 * 1000); // آخر 24 ساعة
+var _notifListeners = [];
 
 function checkNewRegs(){
   if(typeof db === 'undefined') return;
+
+  // امسح الـ listeners القديمة
+  _notifListeners.forEach(function(u){ u(); });
+  _notifListeners = [];
+
   var cols = [
-    {col:'volunteers',   type:'متطوع جديد',    icon:'🙋'},
-    {col:'consultants',  type:'استشاري جديد',  icon:'👨‍💼'},
-    {col:'suppliers',    type:'مورد جديد',      icon:'🏭'},
-    {col:'organizations',type:'مؤسسة جديدة',   icon:'🏢'},
+    {col:'volunteers',   type:'متطوع جديد',      icon:'🙋'},
+    {col:'consultants',  type:'استشاري جديد',    icon:'👨‍💼'},
+    {col:'suppliers',    type:'مورد جديد',        icon:'🏭'},
+    {col:'organizations',type:'مؤسسة جديدة',     icon:'🏢'},
+    {col:'jobseekers',   type:'باحث عمل جديد',   icon:'🔍'},
   ];
+
   cols.forEach(function(c){
-    db.collection(c.col).orderBy('timestamp','desc').limit(5).get().then(function(snap){
-      snap.docs.forEach(function(d){
-        var r = d.data();
-        var ts = r.timestamp ? r.timestamp.toMillis() : 0;
-        if(ts > _lastCheck && r.name) addNewReg(r, c.type, c.icon);
-      });
-      updateBellBadge();
-      renderNewRegs();
-    }).catch(function(){});
+    try{
+      // onSnapshot عشان يجيب تسجيلات جديدة فوراً
+      var unsub = db.collection(c.col)
+        .orderBy('timestamp','desc')
+        .limit(3)
+        .onSnapshot(function(snap){
+          snap.docChanges().forEach(function(change){
+            if(change.type === 'added'){
+              var r = change.doc.data();
+              var ts = r.timestamp ? r.timestamp.toMillis() : 0;
+              if(ts > _lastCheck){
+                // بدون اسم - بس النوع والمحافظة
+                var notifData = {
+                  name: c.type,
+                  gov: r.gov || '',
+                };
+                addNewReg(notifData, c.type, c.icon);
+                updateBellBadge();
+                renderNewRegs();
+              }
+            }
+          });
+        }, function(){ 
+          // fallback لو onSnapshot ما شتغلش
+          db.collection(c.col).orderBy('timestamp','desc').limit(5).get().then(function(snap){
+            snap.docs.forEach(function(d){
+              var r = d.data();
+              var ts = r.timestamp ? r.timestamp.toMillis() : 0;
+              if(ts > _lastCheck) addNewReg({name:c.type, gov:r.gov||''}, c.type, c.icon);
+            });
+            updateBellBadge();
+            renderNewRegs();
+          }).catch(function(){});
+        });
+      _notifListeners.push(unsub);
+    }catch(e){}
   });
-  _lastCheck = Date.now();
 }
 
 // تحقق عند الفتح بعد ما Firebase يتحمل

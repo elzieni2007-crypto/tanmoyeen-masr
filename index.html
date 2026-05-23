@@ -2742,32 +2742,36 @@ function updateAllCounts(){
   // Firebase live registrations - direct counts
   if(typeof db !== 'undefined'){
     var fbCollections = [
-      {col:'jobseekers',   el:'adm-n-js',  dashEl:'dash-js-n',   suffix:''},
-      {col:'consultants',  el:'adm-n-exp', dashEl:'dash-cons-n', suffix:''},
-      {col:'suppliers',    el:'adm-n-sup', dashEl:'dash-sups-n', suffix:''},
-      {col:'organizations',el:'adm-n-org', dashEl:'dash-orgs-n', suffix:''},
-      {col:'volunteers',   el:null,        dashEl:'dash-vols-n', suffix:''},
-      {col:'pending_jobs', el:'pending-count-badge', dashEl:null, suffix:''},
+      {col:'consultants',  el:'adm-n-exp', dashEl:'dash-cons-n', cntEl:'con-cnt',   suffix:' مسجّل'},
+      {col:'suppliers',    el:'adm-n-sup', dashEl:'dash-sups-n', cntEl:'sup-cnt',   suffix:' مورد'},
+      {col:'organizations',el:'adm-n-org', dashEl:'dash-orgs-n', cntEl:'org-cnt',   suffix:' مؤسسة'},
+      {col:'volunteers',   el:null,        dashEl:'dash-vols-n', cntEl:'vol-dash-count', suffix:' متطوع'},
+      {col:'pending_jobs', el:'pending-count-badge', dashEl:null, cntEl:null, suffix:''},
     ];
     fbCollections.forEach(function(item){
       db.collection(item.col).get().then(function(snap){
-        if(item.el){
-          var el2 = document.getElementById(item.el);
-          if(el2) el2.textContent = snap.size;
-        }
-        if(item.dashEl){
-          var el3 = document.getElementById(item.dashEl);
-          if(el3) el3.textContent = snap.size;
-        }
-        if(item.col === 'pending_jobs'){
-          var count = snap.docs.filter(function(d){ return d.data().status === 'pending'; }).length;
-          var badge = document.getElementById('pending-count-badge');
-          if(badge){ badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none'; }
+        var count = item.col === 'pending_jobs'
+          ? snap.docs.filter(function(d){ return d.data().status === 'pending'; }).length
+          : snap.size;
+        if(item.el){ var e=document.getElementById(item.el); if(e) e.textContent=count; }
+        if(item.dashEl){ var e=document.getElementById(item.dashEl); if(e) e.textContent=count; }
+        if(item.cntEl){ var e=document.getElementById(item.cntEl); if(e) e.textContent=count+item.suffix; }
+        if(item.col==='pending_jobs'){
+          var badge=document.getElementById('pending-count-badge');
+          if(badge){ badge.textContent=count; badge.style.display=count>0?'flex':'none'; }
         }
         window['_fb_'+item.col] = snap.size;
         updateFBStats();
       }).catch(function(){});
     });
+
+    // باحثو عمل
+    db.collection('jobseekers').get().then(function(snap){
+      window._fb_jobseekers = snap.size;
+      var e1=document.getElementById('dash-js-n'); if(e1) e1.textContent=snap.size;
+      var e2=document.getElementById('adm-n-js');  if(e2) e2.textContent=snap.size;
+      updateFBStats();
+    }).catch(function(){});
   }
 }
 
@@ -2810,10 +2814,15 @@ function renderDash(){
 
   var uniqueCons = deduplicateArray(CONS, ['phone','email','name']);
   var uniqueSups = deduplicateArray(SUPS, ['phone','email','name']);
-  var el1 = document.getElementById('dash-cons-n');
-  if(el1) el1.textContent = uniqueCons.length;
-  var el2 = document.getElementById('dash-sups-n');
-  if(el2) el2.textContent = uniqueSups.length;
+  // بس حدّث لو Firebase لسه مش حمّل
+  if(!window._fb_consultants){
+    var el1 = document.getElementById('dash-cons-n'); if(el1) el1.textContent = uniqueCons.length;
+    var el2 = document.getElementById('con-cnt'); if(el2) el2.textContent = uniqueCons.length + ' مسجّل';
+  }
+  if(!window._fb_suppliers){
+    var el2b = document.getElementById('dash-sups-n'); if(el2b) el2b.textContent = uniqueSups.length;
+    var el2c = document.getElementById('sup-cnt'); if(el2c) el2c.textContent = uniqueSups.length + ' مورد';
+  }
   var volsTotal = (typeof VOLUNTEERS_DATA!=='undefined'&&VOLUNTEERS_DATA.length>0) ? VOLUNTEERS_DATA.length : (VOLUNTEERS_PRELOAD||[]).length;
   var el3 = document.getElementById('dash-vols-n');
   if(el3) el3.textContent = volsTotal;

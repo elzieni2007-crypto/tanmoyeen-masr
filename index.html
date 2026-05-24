@@ -3121,8 +3121,8 @@ function openJob(id){
     <div class="mt">${j.title}</div>
     <div class="mo">${j.logo} ${j.org}</div>
     <div class="mig"><div class="mii"><div class="mil">الراتب</div><div class="miv">${j.sal}</div></div><div class="mii"><div class="mil">الموعد النهائي</div><div class="miv">${j.dl}</div></div></div>
-    <div class="ms-t">📋 وصف الوظيفة</div><div class="ms-d">${j.desc}</div>
-    <div class="ms-t">✅ المتطلبات</div><div class="ms-d">${j.req}</div>
+    <div class="ms-t">📋 وصف الوظيفة</div><div class="ms-d">${j.desc||'—'}</div>
+    ${j.req && j.req !== 'يُحدد لاحقاً' && j.req.trim() ? '<div class="ms-t">✅ المتطلبات</div><div class="ms-d">'+j.req+'</div>' : ''}
     ${j.skills ? '<div class="ms-t">🎯 المهارات المطلوبة</div><div class="ms-d">'+j.skills+'</div>' : ''}
     ${j.benefits ? '<div class="ms-t">🌟 مميزات الوظيفة</div><div class="ms-d">'+j.benefits+'</div>' : ''}
     ${j.applyHow ? '<div class="ms-t">📩 طريقة التقديم</div><div class="ms-d">'+j.applyHow+(j.contact?' - '+j.contact:'')+'</div>' : ''}
@@ -5315,14 +5315,18 @@ function renderPublishedTenders(){ renderPublishedTendersNew(); }
 
 function _renderJobsList(el, jobs){
   if(!jobs.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا توجد وظائف</div>'; return; }
-  el.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--p)">💼 الوظائف ('+jobs.length+')</div>' +
+  el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 4px 8px">💼 الوظائف ('+jobs.length+')</div>' +
     jobs.map(function(j,i){
       var statusColor = j.status==='approved' ? '#00b894' : j.status==='rejected' ? '#e05050' : '#f0c040';
       var statusLabel = j.status==='approved' ? '✅ منشورة' : j.status==='rejected' ? '❌ مرفوضة' : '⏳ انتظار';
-      return '<div class="adm-card" style="border-right:3px solid var(--p);padding:12px">'+
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
-          '<div style="font-size:13px;font-weight:800;color:#1a2a3a;flex:1">'+(j.title||'—')+'</div>'+
-          '<span style="font-size:9px;font-weight:800;background:'+statusColor+'22;color:'+statusColor+';padding:2px 8px;border-radius:10px;flex-shrink:0">'+statusLabel+'</span>'+
+      return '<div class="adm-card" style="border-right:3px solid #1a3a6e;padding:12px">'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+          '<div style="font-size:20px">💼</div>'+
+          '<div style="flex:1">'+
+            '<div style="font-size:13px;font-weight:800;color:#1a2a3a">'+(j.title||'—')+'</div>'+
+            '<div style="font-size:10px;color:#1a3a6e">'+(j.org||'—')+'</div>'+
+          '</div>'+
+          '<span style="font-size:9px;background:'+statusColor+'22;color:'+statusColor+';padding:2px 6px;border-radius:8px;font-weight:700">'+statusLabel+'</span>'+
         '</div>'+
         '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:8px">'+
           '<tr><td style="color:#6b7a8d;padding:2px 4px;width:35%">🏢 الجهة</td><td style="padding:2px 4px;font-weight:600">'+(j.org||'—')+'</td></tr>'+
@@ -5398,55 +5402,59 @@ function deleteTender(idx, fbId){
 
 // ===== تعديل =====
 function editJob(idx, fbId){
-  var jobs = window._adminJobs || [];
-  // ابحث بالـ fbId أول، لو مش لاقيه استخدم idx
-  var j = jobs.find(function(job){ return job.fbId === fbId; }) || jobs[idx];
-  console.log('editJob:', idx, fbId, 'found:', !!j);
-  if(!j){ toast('❌ لم يتم العثور على الوظيفة - أعد تحميل الصفحة'); return; }
-  document.getElementById('mbody').innerHTML =
-    '<div style="padding:16px">' +
-    '<div style="font-size:14px;font-weight:800;color:var(--p);margin-bottom:14px">✏️ تعديل الوظيفة</div>' +
-    '<div class="fg"><label class="fl">عنوان الوظيفة</label><input class="fi" id="ej-title" value="'+( j.title||'').replace(/"/g,'&quot;')+'"></div>' +
-    '<div class="fg"><label class="fl">الجهة المعلنة</label><input class="fi" id="ej-org" value="'+(j.org||'').replace(/"/g,'&quot;')+'"></div>' +
-    '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ej-gov" value="'+(j.gov||'')+'"></div>' +
-    '<div class="fg"><label class="fl">نوع العمل</label><input class="fi" id="ej-type" value="'+(j.type||'')+'"></div>' +
-    '<div class="fg"><label class="fl">الراتب</label><input class="fi" id="ej-sal" value="'+(j.sal||'')+'"></div>' +
-    '<div class="fg"><label class="fl">الموعد النهائي</label><input class="fi" id="ej-dl" value="'+(j.dl||'')+'"></div>' +
-    '<div class="fg"><label class="fl">الوصف</label><textarea class="fi" id="ej-desc" rows="3">'+(j.desc||'')+'</textarea></div>' +
-    '<div class="fg"><label class="fl">المتطلبات</label><textarea class="fi" id="ej-req" rows="2">'+(j.req||'')+'</textarea></div>' +
-    '<div class="fg"><label class="fl">🔗 اللينك</label><input class="fi" id="ej-link" value="'+(j.link||'')+'" style="direction:ltr"></div>' +
-    '<div style="display:flex;gap:8px;margin-top:14px">' +
-      '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--p),var(--a));color:white;padding:12px" onclick="saveJobEdit(\''+fbId+'\','+idx+')">💾 حفظ وإعادة النشر</button>' +
-      '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
-    '</div></div>';
-  document.getElementById('modal').classList.add('op');
+  if(!fbId){ toast('❌ مفيش ID'); return; }
+  
+  // جيب من Firebase مباشرة
+  db.collection('jobs').doc(fbId).get().then(function(doc){
+    if(!doc.exists){ toast('❌ الوظيفة مش موجودة'); return; }
+    var j = Object.assign({}, doc.data(), {fbId: doc.id});
+    
+    document.getElementById('mbody').innerHTML =
+      '<div style="padding:16px">' +
+      '<div style="font-size:14px;font-weight:800;color:var(--p);margin-bottom:14px">✏️ تعديل الوظيفة</div>' +
+      '<div class="fg"><label class="fl">عنوان الوظيفة</label><input class="fi" id="ej-title" value="'+(j.title||'').replace(/"/g,'&quot;')+'"></div>' +
+      '<div class="fg"><label class="fl">الجهة المعلنة</label><input class="fi" id="ej-org" value="'+(j.org||'').replace(/"/g,'&quot;')+'"></div>' +
+      '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ej-gov" value="'+(j.gov||'')+'"></div>' +
+      '<div class="fg"><label class="fl">نوع العمل</label><input class="fi" id="ej-type" value="'+(j.type||'')+'"></div>' +
+      '<div class="fg"><label class="fl">الراتب</label><input class="fi" id="ej-sal" value="'+(j.sal||'')+'"></div>' +
+      '<div class="fg"><label class="fl">الموعد النهائي</label><input class="fi" id="ej-dl" value="'+(j.dl||'')+'"></div>' +
+      '<div class="fg"><label class="fl">الوصف</label><textarea class="fi" id="ej-desc" rows="3">'+(j.desc||'')+'</textarea></div>' +
+      '<div class="fg"><label class="fl">🔗 اللينك</label><input class="fi" id="ej-link" value="'+(j.link||'')+'" style="direction:ltr"></div>' +
+      '<div style="display:flex;gap:8px;margin-top:14px">' +
+        '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--p),var(--a));color:white;padding:12px" onclick="saveJobEdit(\''+fbId+'\')">💾 حفظ وإعادة النشر</button>' +
+        '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
+      '</div></div>';
+    document.getElementById('modal').classList.add('op');
+  }).catch(function(e){ toast('❌ ' + e.message); });
 }
 
 function editTender(idx, fbId){
-  var tenders = window._adminTenders || [];
-  var t = tenders.find(function(tender){ return tender.fbId === fbId; }) || tenders[idx];
-  if(!t){ toast('❌ لم يتم العثور على المناقصة - أعد تحميل الصفحة'); return; }
-  document.getElementById('mbody').innerHTML =
-    '<div style="padding:16px">' +
-    '<div style="font-size:14px;font-weight:800;color:var(--orange);margin-bottom:14px">✏️ تعديل المناقصة</div>' +
-    '<div class="fg"><label class="fl">عنوان المناقصة</label><input class="fi" id="et-title" value="'+(t.title||'').replace(/"/g,'&quot;')+'"></div>' +
-    '<div class="fg"><label class="fl">الجهة المعلنة</label><input class="fi" id="et-org" value="'+(t.org||'').replace(/"/g,'&quot;')+'"></div>' +
-    '<div class="fg"><label class="fl">نوع المناقصة</label><input class="fi" id="et-type" value="'+(t.type||'')+'"></div>' +
-    '<div class="fg"><label class="fl">الميزانية</label><input class="fi" id="et-budget" value="'+(t.budget||'')+'"></div>' +
-    '<div class="fg"><label class="fl">الموقع</label><input class="fi" id="et-loc" value="'+(t.loc||'')+'"></div>' +
-    '<div class="fg"><label class="fl">الموعد النهائي</label><input class="fi" id="et-dl" value="'+(t.dl||'')+'"></div>' +
-    '<div class="fg"><label class="fl">الوصف</label><textarea class="fi" id="et-desc" rows="3">'+(t.desc||'')+'</textarea></div>' +
-    '<div class="fg"><label class="fl">المتطلبات</label><textarea class="fi" id="et-req" rows="2">'+(t.req||'')+'</textarea></div>' +
-    '<div class="fg"><label class="fl">🔗 اللينك</label><input class="fi" id="et-link" value="'+(t.link||'')+'" style="direction:ltr"></div>' +
-    '<div style="display:flex;gap:8px;margin-top:14px">' +
-      '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--orange),#c06010);color:white;padding:12px" onclick="saveTenderEdit(\''+fbId+'\','+idx+')">💾 حفظ وإعادة النشر</button>' +
-      '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
-    '</div></div>';
-  document.getElementById('modal').classList.add('op');
+  if(!fbId){ toast('❌ مفيش ID'); return; }
+  
+  db.collection('tenders').doc(fbId).get().then(function(doc){
+    if(!doc.exists){ toast('❌ المناقصة مش موجودة'); return; }
+    var t = Object.assign({}, doc.data(), {fbId: doc.id});
+    
+    document.getElementById('mbody').innerHTML =
+      '<div style="padding:16px">' +
+      '<div style="font-size:14px;font-weight:800;color:var(--orange);margin-bottom:14px">✏️ تعديل المناقصة</div>' +
+      '<div class="fg"><label class="fl">عنوان المناقصة</label><input class="fi" id="et-title" value="'+(t.title||'').replace(/"/g,'&quot;')+'"></div>' +
+      '<div class="fg"><label class="fl">الجهة المعلنة</label><input class="fi" id="et-org" value="'+(t.org||'').replace(/"/g,'&quot;')+'"></div>' +
+      '<div class="fg"><label class="fl">نوع المناقصة</label><input class="fi" id="et-type" value="'+(t.type||'')+'"></div>' +
+      '<div class="fg"><label class="fl">الميزانية</label><input class="fi" id="et-budget" value="'+(t.budget||'')+'"></div>' +
+      '<div class="fg"><label class="fl">الموقع</label><input class="fi" id="et-loc" value="'+(t.loc||'')+'"></div>' +
+      '<div class="fg"><label class="fl">الموعد النهائي</label><input class="fi" id="et-dl" value="'+(t.dl||'')+'"></div>' +
+      '<div class="fg"><label class="fl">الوصف</label><textarea class="fi" id="et-desc" rows="3">'+(t.desc||'')+'</textarea></div>' +
+      '<div class="fg"><label class="fl">🔗 اللينك</label><input class="fi" id="et-link" value="'+(t.link||'')+'" style="direction:ltr"></div>' +
+      '<div style="display:flex;gap:8px;margin-top:14px">' +
+        '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--orange),#c06010);color:white;padding:12px" onclick="saveTenderEdit(\''+fbId+'\')">💾 حفظ وإعادة النشر</button>' +
+        '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
+      '</div></div>';
+    document.getElementById('modal').classList.add('op');
+  }).catch(function(e){ toast('❌ ' + e.message); });
 }
-
 // ===== حفظ التعديل =====
-function saveJobEdit(fbId, idx){
+function saveJobEdit(fbId){
   var updated = {
     title: document.getElementById('ej-title').value.trim(),
     org:   document.getElementById('ej-org').value.trim(),
@@ -5468,7 +5476,7 @@ function saveJobEdit(fbId, idx){
   } else { toast('❌ مفيش Firebase ID'); }
 }
 
-function saveTenderEdit(fbId, idx){
+function saveTenderEdit(fbId){
   var updated = {
     title:  document.getElementById('et-title').value.trim(),
     org:    document.getElementById('et-org').value.trim(),

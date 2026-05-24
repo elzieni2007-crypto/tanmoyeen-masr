@@ -3220,7 +3220,8 @@ function shareTenderFB(){
   var msg = 'وجدت فرصة مناقصة وفكرت إنها تهمك! 📋\n' +
     t.title + ' - ' + (t.org||'') + '\n' +
     '📍 ' + (t.loc||'') + ' | 💰 ' + (t.budget||'') + ' | ⏰ ' + (t.dl||'') + '\n\n' +
-    'وانت كمان تقدر تشارك مناقصتك على تنمويين مصر';
+    'وانت كمان تقدر تشارك مناقصتك على تنمويين مصر\n\n' +
+    '📱 حمّل التطبيق:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd';
   window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link), '_blank');
 }
 
@@ -3624,7 +3625,8 @@ function shareSuccessWA(){
   var regLink = regLinks[type] || baseUrl;
   var msg = '✅ سجّلت للتو على منصة تنمويين مصر كـ ' + typeName + '\n\n' +
     'المنصة الشاملة للعمل التنموي في مصر 🌟\n\n' +
-    'سجّل أنت كمان:\n' + regLink;
+    'سجّل أنت كمان:\n' + regLink + '\n\n' +
+    '📱 حمّل التطبيق:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd';
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
   document.getElementById('success-overlay').classList.remove('on');
 }
@@ -4549,7 +4551,7 @@ function openVolunteer(idx){
 const FB_GROUP_URL = 'https://www.facebook.com/groups/346107035759429/?ref=share&mibextid=NSMWBT';
 const WA_GROUP_URL = 'https://chat.whatsapp.com/FsJ8jmAQStP805Jptm3Khi';
 const APP_SHARE_URL = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
-const APP_SHARE_TEXT = 'تنمويين مصر - منصة العمل التنموي في مصر\nاستشاريين | موردين | وظائف ومناقصات يومياً\n\nانضم دلوقتي:';
+const APP_SHARE_TEXT = 'تنمويين مصر - منصة العمل التنموي في مصر\nاستشاريين | موردين | وظائف ومناقصات يومياً\n\n📱 حمّل التطبيق:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd\n\nانضم دلوقتي:';
 
 function shareWA(){
   var consultUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=consult';
@@ -4559,6 +4561,7 @@ function shareWA(){
     '👇 افتح الرابط وسجّل طلبك:\n' +
     consultUrl + '\n\n' +
     '⏱ سيتم التواصل معك خلال 48 ساعة\n\n' +
+    '📱 حمّل التطبيق:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd\n\n' +
     'تنمويين مصر 🌟 لكل تنموي في مصر';
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
@@ -5143,7 +5146,7 @@ function saveAdmRecord(fbId, col){
   }).catch(function(e){ toast('❌ '+e.message); });
 }
 function admDelete(idx){ toast('استخدم زرار الحذف الجديد'); }
-    loadAdminData();
+
 // ============ PUBLISH JOB / TENDER ============
 const EMOJIS = {
   'M&E':'📊','التدريب':'🎯','الصحة':'🏥','التعليم':'📚',
@@ -5807,6 +5810,7 @@ function sendConsultWA(type){
       '• تسوية المتأخرات الضريبية\n\n' +
       '📋 سجّل طلبك الآن:\n' +
       formUrl + '\n\n' +
+      '📱 حمّل التطبيق:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd\n\n' +
       'تنمويين مصر 🌟 لكل تنموي في مصر',
 
     ins: '🛡 *استشارة تأمينية مجانية لجمعيتك!*\n\n' +

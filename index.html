@@ -5336,8 +5336,8 @@ function _renderJobsList(el, jobs){
           (j.link?'<tr><td style="color:#6b7a8d;padding:2px 4px">🔗 اللينك</td><td style="padding:2px 4px;font-size:10px;direction:ltr;word-break:break-all">'+j.link+'</td></tr>':'')+
         '</table>'+
         '<div class="adm-actions">'+
-          '<button class="adm-btn" style="background:#e8f0fe;color:var(--p)" onclick="editJob('+i+',\''+(j.fbId||'')+'\')">✏️ تعديل</button>'+
-          '<button class="adm-btn adm-btn-del" onclick="deleteJob('+i+',\''+(j.fbId||'')+'\')">🗑️ حذف</button>'+
+          '<button class="adm-btn" style="background:#e8f0fe;color:var(--p)" onclick="editJob('+i+',\''+j.fbId+'\')">✏️ تعديل</button>'+
+          '<button class="adm-btn adm-btn-del" onclick="deleteJob('+i+',\''+j.fbId+'\')">🗑️ حذف</button>'+
         '</div>'+
       '</div>';
     }).join('');
@@ -5399,8 +5399,10 @@ function deleteTender(idx, fbId){
 // ===== تعديل =====
 function editJob(idx, fbId){
   var jobs = window._adminJobs || [];
-  var j = jobs[idx];
-  if(!j) return;
+  // ابحث بالـ fbId أول، لو مش لاقيه استخدم idx
+  var j = jobs.find(function(job){ return job.fbId === fbId; }) || jobs[idx];
+  console.log('editJob:', idx, fbId, 'found:', !!j);
+  if(!j){ toast('❌ لم يتم العثور على الوظيفة - أعد تحميل الصفحة'); return; }
   document.getElementById('mbody').innerHTML =
     '<div style="padding:16px">' +
     '<div style="font-size:14px;font-weight:800;color:var(--p);margin-bottom:14px">✏️ تعديل الوظيفة</div>' +
@@ -5422,8 +5424,8 @@ function editJob(idx, fbId){
 
 function editTender(idx, fbId){
   var tenders = window._adminTenders || [];
-  var t = tenders[idx];
-  if(!t) return;
+  var t = tenders.find(function(tender){ return tender.fbId === fbId; }) || tenders[idx];
+  if(!t){ toast('❌ لم يتم العثور على المناقصة - أعد تحميل الصفحة'); return; }
   document.getElementById('mbody').innerHTML =
     '<div style="padding:16px">' +
     '<div style="font-size:14px;font-weight:800;color:var(--orange);margin-bottom:14px">✏️ تعديل المناقصة</div>' +

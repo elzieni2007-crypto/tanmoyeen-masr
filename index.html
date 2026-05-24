@@ -2584,6 +2584,8 @@ function loadFromFirebase(){
         window.SUPS=fresh;
         try{localStorage.setItem('cache_sups',JSON.stringify(fresh.slice(0,100)));}catch(e){}
         renderSups();renderDash();updateAllCounts();
+        // تأكيد إن الكروت اتعرضت
+        setTimeout(renderDash, 500);
       }
     }).catch(function(){
       try{ var s=JSON.parse(localStorage.getItem('cache_sups')||'[]'); if(s.length){window.SUPS=s;renderSups();renderDash();} }catch(e){}
@@ -2937,8 +2939,12 @@ function renderDash(){
 }
 
 function _renderDashCards(fc, fs){
-  var _cl = fc.length>0 ? CONS.filter(function(c){ return fc.includes(c.id); }).slice(0,6) : CONS.slice(0,6);
-  var _sl = fs.length>0 ? SUPS.filter(function(s){ return fs.includes(s.id); }).slice(0,6) : SUPS.slice(0,6);
+  // نحول كل الـ ids لـ string عشان المقارنة تشتغل صح
+  var fcStr = fc.map(function(x){ return String(x); });
+  var fsStr = fs.map(function(x){ return String(x); });
+  
+  var _cl = fcStr.length>0 ? CONS.filter(function(c){ return fcStr.includes(String(c.id)); }).slice(0,6) : CONS.slice(0,6);
+  var _sl = fsStr.length>0 ? SUPS.filter(function(s){ return fsStr.includes(String(s.id)); }).slice(0,6) : SUPS.slice(0,6);
 
   var consEl = document.getElementById('dash-cons');
   if(consEl) consEl.innerHTML=(_cl||[]).map(function(c){

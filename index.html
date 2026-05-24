@@ -5456,46 +5456,62 @@ function editTender(idx, fbId){
 // ===== حفظ التعديل =====
 function saveJobEdit(fbId){
   var updated = {
-    title: document.getElementById('ej-title').value.trim(),
-    org:   document.getElementById('ej-org').value.trim(),
-    gov:   document.getElementById('ej-gov').value.trim(),
-    type:  document.getElementById('ej-type').value.trim(),
-    sal:   document.getElementById('ej-sal').value.trim(),
-    dl:    document.getElementById('ej-dl').value.trim(),
-    desc:  document.getElementById('ej-desc').value.trim(),
-    req:   document.getElementById('ej-req').value.trim(),
-    link:  document.getElementById('ej-link').value.trim(),
+    title: (document.getElementById('ej-title')||{}).value||'',
+    org:   (document.getElementById('ej-org')||{}).value||'',
+    gov:   (document.getElementById('ej-gov')||{}).value||'',
+    type:  (document.getElementById('ej-type')||{}).value||'',
+    sal:   (document.getElementById('ej-sal')||{}).value||'',
+    dl:    (document.getElementById('ej-dl')||{}).value||'',
+    desc:  (document.getElementById('ej-desc')||{}).value||'',
+    link:  (document.getElementById('ej-link')||{}).value||'',
     status:'approved'
   };
-  if(fbId && typeof db !== 'undefined'){
-    db.collection('jobs').doc(fbId).update(updated).then(function(){
-      toast('✅ تم التعديل والنشر!');
+  if(!fbId){ toast('❌ مفيش ID'); return; }
+  if(typeof db === 'undefined'){ toast('❌ Firebase مش متصل'); return; }
+  
+  var btn = document.querySelector('#mbody button');
+  if(btn){ btn.textContent = '⏳ جاري الحفظ...'; btn.disabled = true; }
+  
+  db.collection('jobs').doc(fbId).update(updated)
+    .then(function(){
+      toast('✅ تم التعديل!');
       document.getElementById('modal').classList.remove('op');
       renderPublishedJobs();
-    }).catch(function(){ toast('❌ خطأ في التعديل'); });
-  } else { toast('❌ مفيش Firebase ID'); }
+    })
+    .catch(function(e){
+      toast('❌ ' + e.message);
+      if(btn){ btn.textContent = '💾 حفظ وإعادة النشر'; btn.disabled = false; }
+    });
 }
 
 function saveTenderEdit(fbId){
   var updated = {
-    title:  document.getElementById('et-title').value.trim(),
-    org:    document.getElementById('et-org').value.trim(),
-    type:   document.getElementById('et-type').value.trim(),
-    budget: document.getElementById('et-budget').value.trim(),
-    loc:    document.getElementById('et-loc').value.trim(),
-    dl:     document.getElementById('et-dl').value.trim(),
-    desc:   document.getElementById('et-desc').value.trim(),
-    req:    document.getElementById('et-req').value.trim(),
-    link:   document.getElementById('et-link').value.trim(),
+    title:  (document.getElementById('et-title')||{}).value||'',
+    org:    (document.getElementById('et-org')||{}).value||'',
+    type:   (document.getElementById('et-type')||{}).value||'',
+    budget: (document.getElementById('et-budget')||{}).value||'',
+    loc:    (document.getElementById('et-loc')||{}).value||'',
+    dl:     (document.getElementById('et-dl')||{}).value||'',
+    desc:   (document.getElementById('et-desc')||{}).value||'',
+    link:   (document.getElementById('et-link')||{}).value||'',
     status:'approved'
   };
-  if(fbId && typeof db !== 'undefined'){
-    db.collection('tenders').doc(fbId).update(updated).then(function(){
-      toast('✅ تم التعديل والنشر!');
+  if(!fbId){ toast('❌ مفيش ID'); return; }
+  if(typeof db === 'undefined'){ toast('❌ Firebase مش متصل'); return; }
+
+  var btn = document.querySelector('#mbody button');
+  if(btn){ btn.textContent = '⏳ جاري الحفظ...'; btn.disabled = true; }
+
+  db.collection('tenders').doc(fbId).update(updated)
+    .then(function(){
+      toast('✅ تم التعديل!');
       document.getElementById('modal').classList.remove('op');
       renderPublishedTenders();
-    }).catch(function(){ toast('❌ خطأ في التعديل'); });
-  } else { toast('❌ مفيش Firebase ID'); }
+    })
+    .catch(function(e){
+      toast('❌ ' + e.message);
+      if(btn){ btn.textContent = '💾 حفظ وإعادة النشر'; btn.disabled = false; }
+    });
 }
 
 function deleteCustomJob(idx){ deleteJob(idx,''); }

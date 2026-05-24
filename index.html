@@ -5277,30 +5277,37 @@ function renderPublishedJobsNew(){
   var el = document.getElementById('published-jobs-list-new');
   if(!el) return;
   el.innerHTML = skeletonCards(3);
-  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
-    db.collection('jobs').orderBy('timestamp','desc').get().then(function(snap){
+  if(typeof db === 'undefined'){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ Firebase غير متصل</div>'; return; }
+  db.collection('jobs').orderBy('timestamp','desc').get().then(function(snap){
+    var jobs=[];
+    snap.docs.forEach(function(d){ jobs.push(Object.assign({},d.data(),{fbId:d.id})); });
+    _renderJobsList(el, jobs);
+  }).catch(function(e){ 
+    // بدون orderBy لو في مشكلة
+    db.collection('jobs').get().then(function(snap){
       var jobs=[];
       snap.docs.forEach(function(d){ jobs.push(Object.assign({},d.data(),{fbId:d.id})); });
       _renderJobsList(el, jobs);
-    }).catch(function(e){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ خطأ: '+e.message+'</div>'; });
-  } else {
-    el.innerHTML='<div style="color:#e05050;padding:16px">❌ يجب تسجيل الدخول أولاً</div>';
-  }
+    }).catch(function(e2){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ '+e2.message+'</div>'; });
+  });
 }
 
 function renderPublishedTendersNew(){
   var el = document.getElementById('published-tenders-list-new');
   if(!el) return;
   el.innerHTML = skeletonCards(3);
-  if(typeof db !== 'undefined' && typeof auth !== 'undefined' && auth.currentUser){
-    db.collection('tenders').orderBy('timestamp','desc').get().then(function(snap){
+  if(typeof db === 'undefined'){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ Firebase غير متصل</div>'; return; }
+  db.collection('tenders').orderBy('timestamp','desc').get().then(function(snap){
+    var tenders=[];
+    snap.docs.forEach(function(d){ tenders.push(Object.assign({},d.data(),{fbId:d.id})); });
+    _renderTendersList(el, tenders);
+  }).catch(function(e){
+    db.collection('tenders').get().then(function(snap){
       var tenders=[];
       snap.docs.forEach(function(d){ tenders.push(Object.assign({},d.data(),{fbId:d.id})); });
       _renderTendersList(el, tenders);
-    }).catch(function(e){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ خطأ: '+e.message+'</div>'; });
-  } else {
-    el.innerHTML='<div style="color:#e05050;padding:16px">❌ يجب تسجيل الدخول أولاً</div>';
-  }
+    }).catch(function(e2){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ '+e2.message+'</div>'; });
+  });
 }
 
 function renderPublishedJobs(){ renderPublishedJobsNew(); }

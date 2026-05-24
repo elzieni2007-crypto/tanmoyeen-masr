@@ -3151,7 +3151,7 @@ function shareJobWADirect(){
     '💰 ' + (j.sal||'—') + '\n' +
     '⏰ آخر موعد: ' + (j.dl||'—') + '\n\n' +
     '🔗 رابط الإعلان الأصلي:\n' + link + '\n\n' +
-    'وانت كمان تقدر تشارك إعلانك على تنمويين مصر 👇\n' + formUrl;
+    'وانت كمان تقدر تشارك إعلانك على تنمويين مصر 👇\n' + formUrl + APP_FOOTER;
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 
@@ -3220,8 +3220,7 @@ function shareTenderFB(){
   var msg = 'وجدت فرصة مناقصة وفكرت إنها تهمك! 📋\n' +
     t.title + ' - ' + (t.org||'') + '\n' +
     '📍 ' + (t.loc||'') + ' | 💰 ' + (t.budget||'') + ' | ⏰ ' + (t.dl||'') + '\n\n' +
-    'وانت كمان تقدر تشارك مناقصتك على تنمويين مصر\n\n' +
-    '📱 حمّل التطبيق:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd';
+    'وانت كمان تقدر تشارك مناقصتك على تنمويين مصر' + APP_FOOTER;
   window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link), '_blank');
 }
 
@@ -3626,7 +3625,7 @@ function shareSuccessWA(){
   var msg = '✅ سجّلت للتو على منصة تنمويين مصر كـ ' + typeName + '\n\n' +
     'المنصة الشاملة للعمل التنموي في مصر 🌟\n\n' +
     'سجّل أنت كمان:\n' + regLink + '\n\n' +
-    '📱 حمّل التطبيق:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd';
+    APP_FOOTER.trim();
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
   document.getElementById('success-overlay').classList.remove('on');
 }
@@ -4080,7 +4079,7 @@ function shareJobWA(){
     '⏱ في دقيقتين بس!\n\n' +
     '👇 افتح الرابط وسجّل الإعلان:\n' +
     url + '\n\n' +
-    'تنمويين مصر 🌟 لكل تنموي في مصر';
+    'تنمويين مصر 🌟 لكل تنموي في مصر' + APP_FOOTER;
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 function shareJobFB(){
@@ -4551,7 +4550,8 @@ function openVolunteer(idx){
 const FB_GROUP_URL = 'https://www.facebook.com/groups/346107035759429/?ref=share&mibextid=NSMWBT';
 const WA_GROUP_URL = 'https://chat.whatsapp.com/FsJ8jmAQStP805Jptm3Khi';
 const APP_SHARE_URL = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr';
-const APP_SHARE_TEXT = 'تنمويين مصر - منصة العمل التنموي في مصر\nاستشاريين | موردين | وظائف ومناقصات يومياً\n\n📱 حمّل التطبيق:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd\n\nانضم دلوقتي:';
+const APP_FOOTER = '\n\n📱 حمّل تطبيق تنمويين مصر:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd\nوتابع الفرص أولاً بأول 🌟';
+const APP_SHARE_TEXT = 'تنمويين مصر - منصة العمل التنموي في مصر\nاستشاريين | موردين | وظائف ومناقصات يومياً\n\nانضم دلوقتي:' + APP_FOOTER;
 
 function shareWA(){
   var consultUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=consult';
@@ -4561,8 +4561,7 @@ function shareWA(){
     '👇 افتح الرابط وسجّل طلبك:\n' +
     consultUrl + '\n\n' +
     '⏱ سيتم التواصل معك خلال 48 ساعة\n\n' +
-    '📱 حمّل التطبيق:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd\n\n' +
-    'تنمويين مصر 🌟 لكل تنموي في مصر';
+    'تنمويين مصر 🌟 لكل تنموي في مصر' + APP_FOOTER;
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
 
@@ -5811,7 +5810,7 @@ function sendConsultWA(type){
       '📋 سجّل طلبك الآن:\n' +
       formUrl + '\n\n' +
       '📱 حمّل التطبيق:\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd\n\n' +
-      'تنمويين مصر 🌟 لكل تنموي في مصر',
+      'تنمويين مصر 🌟 لكل تنموي في مصر' + APP_FOOTER,
 
     ins: '🛡 *استشارة تأمينية مجانية لجمعيتك!*\n\n' +
       'تنمويين مصر تقدم خدمة الاستشارات التأمينية للجمعيات والمؤسسات الأهلية\n\n' +
@@ -5822,7 +5821,7 @@ function sendConsultWA(type){
       '• الاستفسار عن الاشتراكات\n\n' +
       '📋 سجّل طلبك الآن:\n' +
       formUrl + '\n\n' +
-      'تنمويين مصر 🌟 لكل تنموي في مصر',
+      'تنمويين مصر 🌟 لكل تنموي في مصر' + APP_FOOTER,
 
     link: '📋 *اطلب استشارتك الضريبية أو التأمينية الآن!*\n\n' +
       'منصة تنمويين مصر تقدم استشارات مجانية للجمعيات والمؤسسات في:\n' +
@@ -5830,7 +5829,7 @@ function sendConsultWA(type){
       '👇 افتح الرابط وسجّل طلبك:\n' +
       formUrl + '\n\n' +
       '⏱ سيتم التواصل معك خلال 48 ساعة\n\n' +
-      'تنمويين مصر 🌟 لكل تنموي في مصر'
+      'تنمويين مصر 🌟 لكل تنموي في مصر' + APP_FOOTER
   };
 
   var msg = msgs[type];

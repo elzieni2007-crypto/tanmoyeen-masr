@@ -48,6 +48,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 /* SCREENS */
 .scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
 .scr.on{display:block;animation:fi .28s ease;position:relative}
+#admin.on{position:fixed;inset:0;z-index:1000;overflow-y:auto;background:var(--bg)}
 #home{overflow-y:visible}
 html,body{scroll-behavior:auto;overflow-x:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -120,9 +121,9 @@ html,body{scroll-behavior:auto;overflow-x:hidden}
 .sh{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 8px}
 .sh-t{font-size:15px;font-weight:700}
 .sh-a{font-size:11px;color:var(--a);font-weight:600;cursor:pointer}
-.strip{display:flex;gap:8px;padding:0 12px;overflow-x:auto;scrollbar-width:none}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 12px}
 .strip::-webkit-scrollbar{display:none}
-.strip-card{min-width:180px;background:white;border-radius:12px;padding:10px;box-shadow:var(--sh);cursor:pointer;transition:.2s;border:1.5px solid transparent;flex-shrink:0}
+.strip-card{background:white;border-radius:12px;padding:10px;box-shadow:var(--sh);cursor:pointer;transition:.2s;border:1.5px solid transparent}
 .strip-card:hover{border-color:var(--a)}
 .sc-top{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
 .sc-logo{width:38px;height:38px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -755,13 +756,6 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div style="padding:8px 10px 2px" id="push-btn-wrap">
     <button onclick="enablePush()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;border:none;border-radius:11px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
       🔔 فعّل إشعارات الوظائف والمناقصات
-    </button>
-  </div>
-
-  <!-- تواصل مع الإدارة -->
-  <div style="padding:4px 10px 8px">
-    <button onclick="go('contact-screen')" style="width:100%;padding:10px;background:white;color:#c06010;border:1px solid #f0d0a0;border-radius:11px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
-      📧 تواصل مع الإدارة — مشكلة أو اقتراح؟
     </button>
   </div>
     <div class="sh-t" style="font-size:12px">👨‍💼 استشاريون مميزون</div>
@@ -4885,7 +4879,7 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings'].forEach(function(id){
+  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
@@ -4941,7 +4935,7 @@ function setAdmTab(el, tab){
     if(cEl){ cEl.style.display='block'; loadContactMsgs(); }
   } else if(tab === 'broadcast'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var bEl=document.getElementById('adm-form-broadcast');
     if(bEl){ bEl.style.display='block'; }
     // حط الرابط الافتراضي
@@ -4950,7 +4944,7 @@ function setAdmTab(el, tab){
     loadBroadcastHistory();
   } else if(tab === 'settings'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var sEl = document.getElementById('adm-form-settings');
     if(sEl){ sEl.style.display='block'; loadVisibilitySettings(); }
   } else if(tab === 'volunteers-adm'){
@@ -4960,7 +4954,7 @@ function setAdmTab(el, tab){
     loadAdminVols();
   } else if(tab === 'consultations-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-consultations-adm');
     if(cEl){cEl.style.display='block';}
     loadAdminConsultations();
@@ -4969,7 +4963,7 @@ function setAdmTab(el, tab){
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
     // Hide all special forms
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings'].forEach(function(id){
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
     // إظهار القائمة

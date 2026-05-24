@@ -5339,9 +5339,9 @@ function _renderJobsList(el, jobs){
           (j.desc?'<tr><td style="color:#6b7a8d;padding:2px 4px">📝 الوصف</td><td style="padding:2px 4px;font-size:10px">'+j.desc.substring(0,100)+'</td></tr>':'')+
           (j.link?'<tr><td style="color:#6b7a8d;padding:2px 4px">🔗 اللينك</td><td style="padding:2px 4px;font-size:10px;direction:ltr;word-break:break-all">'+j.link+'</td></tr>':'')+
         '</table>'+
-        '<div class="adm-actions">'+
-          '<button class="adm-btn" style="background:#e8f0fe;color:var(--p)" onclick="editJob('+i+',\''+j.fbId+'\')">✏️ تعديل</button>'+
-          '<button class="adm-btn adm-btn-del" onclick="deleteJob('+i+',\''+j.fbId+'\')">🗑️ حذف</button>'+
+        '<div style="display:flex;gap:4px;margin-top:8px">'+
+          '<button style="flex:2;padding:6px;background:#e8f0fe;color:#1a3a6e;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="editJob('+i+',\''+j.fbId+'\')">✏️ تعديل</button>'+
+          '<button style="flex:1;padding:6px;background:#feeaea;color:#e05050;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer" onclick="deleteJob('+i+',\''+j.fbId+'\')">🗑️</button>'+
         '</div>'+
       '</div>';
     }).join('');
@@ -5369,9 +5369,9 @@ function _renderTendersList(el, tenders){
           (t.req?'<tr><td style="color:#6b7a8d;padding:2px 4px">📌 المتطلبات</td><td style="padding:2px 4px;font-size:10px">'+t.req.substring(0,80)+'</td></tr>':'')+
           (t.link?'<tr><td style="color:#6b7a8d;padding:2px 4px">🔗 اللينك</td><td style="padding:2px 4px;font-size:10px;direction:ltr;word-break:break-all">'+t.link+'</td></tr>':'')+
         '</table>'+
-        '<div class="adm-actions">'+
-          '<button class="adm-btn" style="background:#fef3e8;color:var(--orange)" onclick="editTender('+i+',\''+(t.fbId||'')+'\')">✏️ تعديل</button>'+
-          '<button class="adm-btn adm-btn-del" onclick="deleteTender('+i+',\''+(t.fbId||'')+'\')">🗑️ حذف</button>'+
+        '<div style="display:flex;gap:4px;margin-top:8px">'+
+          '<button style="flex:2;padding:6px;background:#fef3e8;color:#c06010;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="editTender('+i+',\''+t.fbId+'\')">✏️ تعديل</button>'+
+          '<button style="flex:1;padding:6px;background:#feeaea;color:#e05050;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer" onclick="deleteTender('+i+',\''+t.fbId+'\')">🗑️</button>'+
         '</div>'+
       '</div>';
     }).join('');
@@ -5827,9 +5827,15 @@ async function loadAdminConsultations(){
   list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل...</div>';
   if(typeof db === 'undefined'){ list.innerHTML = '<div style="color:#e05050;padding:16px">❌ Firebase غير متصل</div>'; return; }
   try {
-    var snap = await db.collection('consultations').orderBy('timestamp','desc').get();
+    var snap = await db.collection('consultations').get();
     var items = [];
     snap.docs.forEach(function(d){ items.push(Object.assign({}, d.data(), {fbId:d.id})); });
+    // ترتيب يدوي
+    items.sort(function(a,b){
+      var ta = a.timestamp ? a.timestamp.toMillis() : 0;
+      var tb = b.timestamp ? b.timestamp.toMillis() : 0;
+      return tb - ta;
+    });
     if(countEl) countEl.textContent = items.length;
     if(!items.length){
       list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">لا توجد طلبات استشارة</div>';
@@ -5850,9 +5856,9 @@ async function loadAdminConsultations(){
           '<div class="adm-row"><span class="adm-lbl">المحافظة</span><span class="adm-val">'+(c.gov||'—')+'</span></div>' +
           '<div class="adm-row"><span class="adm-lbl">الموبايل</span><span class="adm-val" style="direction:ltr">'+(c.phone||'—')+'</span></div>' +
         '</div>' +
-        '<div class="adm-actions" onclick="event.stopPropagation()">' +
-          '<button class="adm-btn" style="background:'+bg+';color:'+col+'" onclick="editConsultAdmin('+i+')">✏️ تعديل</button>' +
-          '<button class="adm-btn adm-btn-del" onclick="deleteConsultAdmin(\''+c.fbId+'\')">🗑️ حذف</button>' +
+        '<div style="display:flex;gap:4px;margin-top:8px" onclick="event.stopPropagation()">' +
+          '<button style="flex:2;padding:6px;background:'+bg+';color:'+col+';border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer" onclick="editConsultAdmin('+i+')">✏️ تعديل</button>' +
+          '<button style="flex:1;padding:6px;background:#feeaea;color:#e05050;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer" onclick="deleteConsultAdmin(\''+c.fbId+'\')">🗑️</button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -5981,11 +5987,11 @@ async function loadAdminVols(){
           (v.langs ? "<tr><td style='color:#6b7a8d;padding:2px 4px'>🌍 اللغات</td><td style='padding:2px 4px'>"+v.langs+"</td></tr>" : "") +
           (v.date ? "<tr><td style='color:#6b7a8d;padding:2px 4px'>📅 التاريخ</td><td style='padding:2px 4px'>"+v.date+"</td></tr>" : "") +
         "</table>" +
-        "<div class='adm-actions'>" +
+        "<div style='display:flex;gap:4px;margin-top:8px'>" +
           (v.phone?"<a href='tel:"+v.phone+"' class='adm-btn' style='background:#e8f0fe;color:var(--p);text-decoration:none;text-align:center'>📞</a>":"") +
           (v.phone?"<a href='"+waNum(v.phone)+"' target='_blank' class='adm-btn' style='background:#e7faf3;color:#00703a;text-decoration:none;text-align:center'>💬</a>":"") +
           (v.email?"<a href='mailto:"+v.email+"' class='adm-btn' style='background:#fff3cd;color:#c06010;text-decoration:none;text-align:center'>✉️</a>":"") +
-          "<button class='adm-btn' style='background:#e7faf3;color:#00703a' onclick='editVolunteerAdmin("+i+")'>✏️ تعديل</button>" +
+          "<button style='flex:2;padding:6px;background:#e7faf3;color:#00703a;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer' onclick='editVolunteerAdmin("+i+")'>✏️ تعديل</button>" +
           "<button class='adm-btn adm-btn-del' onclick='deleteVolunteerAdmin(\""+v.fbId+"\")'>🗑️</button>" +
         "</div>" +
       "</div>";

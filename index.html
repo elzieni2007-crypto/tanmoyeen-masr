@@ -752,12 +752,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <button onclick="shareApp()" style="flex:1;padding:9px 4px;background:var(--p);color:white;border:none;border-radius:11px;font-size:10px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🔗 شارك</button>
   </div>
 
-  <!-- زرار تفعيل الإشعارات -->
-  <div style="padding:8px 10px 2px" id="push-btn-wrap">
-    <button onclick="enablePush()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;border:none;border-radius:11px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
-      🔔 فعّل إشعارات الوظائف والمناقصات
-    </button>
-  </div>
+  <div class="sh" style="margin-top:4px;padding:3px 14px 2px">
     <div class="sh-t" style="font-size:12px">👨‍💼 استشاريون مميزون</div>
     <div class="sh-a" onclick="go('consultants')">عرض الكل ←</div>
   </div>
@@ -2437,15 +2432,14 @@ async function loadConsFromSheet(){
     });
 
     if(newCons.length > 10){
-      // Replace CONS with live data
       window.CONS = newCons;
-      // Update count
       var el = document.getElementById('dash-cons-n');
       if(el) el.textContent = newCons.length;
       var dg = document.getElementById('cons-dg-count');
       if(dg) dg.textContent = newCons.length + ' مسجّل';
       console.log('✅ Loaded ' + newCons.length + ' consultants from sheet');
       setTimeout(updateAllCounts, 100);
+      renderDash();
     }
   } catch(e) {
     console.log('Sheet load failed, using local data:', e);
@@ -2477,6 +2471,7 @@ async function loadSupsFromSheet(){
       var dg=document.getElementById('sups-dg-count'); if(dg) dg.textContent=newSups.length+' مورد';
       console.log('✅ Loaded '+newSups.length+' suppliers');
       setTimeout(updateAllCounts, 100);
+      renderDash();
     }
   } catch(e){ console.log('Sups sheet failed:',e); }
 }
@@ -6364,12 +6359,35 @@ function sendPushNotification(title, message, url){
 
 async function enablePush(){
   try{
-    await OneSignalDeferred.push(async function(OneSignal){
+    // جرب OneSignal أول
+    if(typeof OneSignal !== 'undefined'){
       await OneSignal.Notifications.requestPermission();
-      toast('🔔 تم تفعيل الإشعارات بنجاح!');
-    });
+      toast('🔔 تم تفعيل الإشعارات!');
+      document.getElementById('push-btn-wrap').style.display='none';
+      return;
+    }
+    if(typeof OneSignalDeferred !== 'undefined'){
+      await OneSignalDeferred.push(async function(OS){
+        await OS.Notifications.requestPermission();
+        toast('🔔 تم تفعيل الإشعارات!');
+        document.getElementById('push-btn-wrap').style.display='none';
+      });
+      return;
+    }
+    // Fallback - browser native
+    if('Notification' in window){
+      var perm = await Notification.requestPermission();
+      if(perm === 'granted'){
+        toast('🔔 تم تفعيل الإشعارات!');
+        document.getElementById('push-btn-wrap').style.display='none';
+      } else {
+        toast('⚠️ لم يتم السماح بالإشعارات');
+      }
+    } else {
+      toast('⚠️ المتصفح لا يدعم الإشعارات');
+    }
   }catch(e){
-    toast('⚠️ لم يتم تفعيل الإشعارات');
+    toast('⚠️ ' + e.message);
   }
 }
 function exportToExcel(data, filename){

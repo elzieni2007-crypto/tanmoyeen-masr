@@ -1543,6 +1543,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="fg"><label class="fl">البريد الإلكتروني *</label><input id="exp-email" class="fi" type="email" placeholder="example@email.com" style="direction:ltr;text-align:left"></div>
     <label class="vis-check"><input type="checkbox" id="exp-show-email" checked> 👁️ اظهر إيميلي للمستخدمين</label>
     <div class="fg"><label class="fl">نبذة مختصرة</label><textarea id="exp-notes" class="fi" rows="3" placeholder="اكتب نبذة عن خبراتك والجهات التي عملت معها..."></textarea></div>
+    <div class="fg"><label class="fl">💼 رابط LinkedIn (اختياري)</label><input id="exp-linkedin" class="fi" type="url" placeholder="https://linkedin.com/in/..." style="direction:ltr"></div>
     <button class="sbtn" onclick="doReg('expert')">👨‍💼 تسجيل كاستشاري</button>
   </div>
 
@@ -1802,7 +1803,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
         <div style="font-size:11px;opacity:.8;margin-top:3px">📋 ستظهر فوراً للمستخدمين</div>
       </div>
 
-      <div class="fg"><label class="fl">عنوان الوظيفة *</label>
+      <div class="fg"><label class="fl">المسمى الوظيفي *</label>
         <input class="fi" id="nj-title" type="text" placeholder="مثال: استشاري رصد وتقييم M&E">
       </div>
 
@@ -2565,7 +2566,7 @@ function loadFromFirebase(){
 
     db.collection('consultants').orderBy('timestamp','desc').limit(500).get().then(function(snap){
       var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||r.notes||'',exp:r.exp||'',orgs:r.orgs||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||'',showPhone:r.showPhone!==false,showEmail:r.showEmail!==false});});
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||r.notes||'',exp:r.exp||'',orgs:r.orgs||'',linkedin:r.linkedin||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||'',showPhone:r.showPhone!==false,showEmail:r.showEmail!==false});});
       if(fresh.length){
         window.CONS=fresh;
         try{localStorage.setItem('cache_cons',JSON.stringify(fresh.slice(0,100)));}catch(e){}
@@ -2916,8 +2917,17 @@ function renderDash(){
         localStorage.setItem('featured_cons', JSON.stringify(fc));
         localStorage.setItem('featured_sups', JSON.stringify(fs));
       }
-      _renderDashCards(fc, fs);
-    }).catch(function(){ _renderDashCards(fc, fs); });
+      // بس نعرض لو في بيانات
+      if(CONS.length > 0 || SUPS.length > 0){
+        _renderDashCards(fc, fs);
+      } else {
+        // استنى البيانات تتحمل
+        setTimeout(function(){ _renderDashCards(fc, fs); }, 2000);
+      }
+    }).catch(function(){ 
+      if(CONS.length > 0 || SUPS.length > 0) _renderDashCards(fc, fs);
+      else setTimeout(function(){ _renderDashCards(fc, fs); }, 2000);
+    });
   } else {
     _renderDashCards(fc, fs);
   }
@@ -3119,6 +3129,7 @@ function openJob(id){
     <div class="mt">${j.title}</div>
     <div class="mo">${j.logo} ${j.org}</div>
     <div class="mig"><div class="mii"><div class="mil">الراتب</div><div class="miv">${j.sal}</div></div><div class="mii"><div class="mil">الموعد النهائي</div><div class="miv">${j.dl}</div></div></div>
+    <div class="ms-t">💼 المسمى الوظيفي</div><div class="ms-d">${j.title||'—'}</div>
     <div class="ms-t">📋 وصف الوظيفة</div><div class="ms-d">${j.desc||'—'}</div>
     ${j.req && j.req !== 'يُحدد لاحقاً' && j.req.trim() ? '<div class="ms-t">✅ المتطلبات</div><div class="ms-d">'+j.req+'</div>' : ''}
     ${j.skills ? '<div class="ms-t">🎯 المهارات المطلوبة</div><div class="ms-d">'+j.skills+'</div>' : ''}
@@ -3240,18 +3251,20 @@ function openCon(id){
         <tr><td>الاسم</td><td>${c.name}</td></tr>
         <tr><td>المحافظة</td><td>${c.gov}</td></tr>
         <tr><td>التخصص الرئيسي</td><td>${c.spec}</td></tr>
+        ${c.spec2?`<tr><td>التخصص الثانوي</td><td>${c.spec2}</td></tr>`:''}
         <tr><td>سنوات الخبرة</td><td>${c.exp||'—'}</td></tr>
         ${showPhone?`<tr><td>رقم الموبايل</td><td style="direction:ltr;text-align:right">${c.phone||'—'}</td></tr>`:''}
         ${showEmail?`<tr><td>البريد الإلكتروني</td><td style="direction:ltr;text-align:right;font-size:10px;word-break:break-all">${c.email||'—'}</td></tr>`:''}
-        <tr><td>نبذة مختصرة</td><td>${c.bio||'—'}</td></tr>
-        <tr><td>مجالات التخصص</td><td>${(c.specs||[c.spec2||c.spec]).map(s=>'• '+s).join('<br>')}</td></tr>
-        <tr><td>سابقة الأعمال</td><td>${typeof c.orgs==='string'?c.orgs:(c.orgs||[]).join('، ')}</td></tr>
+        ${c.bio?`<tr><td>نبذة مختصرة</td><td>${c.bio}</td></tr>`:''}
+        ${c.orgs?`<tr><td>سابقة الأعمال</td><td>${typeof c.orgs==='string'?c.orgs:(c.orgs||[]).join('، ')}</td></tr>`:''}
+        ${c.linkedin?`<tr><td>LinkedIn</td><td style="direction:ltr;text-align:right;font-size:10px;word-break:break-all"><a href="${c.linkedin}" target="_blank" style="color:#0077b5">🔗 عرض الملف</a></td></tr>`:''}
       </table>
     </div>
     <div class="call-strip">
       ${showPhone?`<button class="call-btn call-btn-p" onclick="callCon('${c.phone}')">📞 اتصال</button>`:''}
       ${showPhone?`<button class="call-btn" style="background:#25d366;color:white" onclick="waContact('${c.phone}','${c.name}')">💬 واتساب</button>`:''}
       ${showEmail?`<button class="call-btn call-btn-g" onclick="mailCon('${c.email}')">✉️ إيميل</button>`:''}
+      ${c.linkedin?`<button class="call-btn" style="background:#0077b5;color:white" onclick="window.open('${c.linkedin}','_blank')">💼 LinkedIn</button>`:''}
     </div>`;
   document.getElementById('modal').classList.add('op');
 }
@@ -3466,8 +3479,9 @@ function doReg(type){
     data.gov     = getVal('exp-gov');
     data.phone   = getVal('exp-phone');
     data.email   = getVal('exp-email');
-    data.bio     = getVal('exp-notes');
-    data.notes   = getVal('exp-notes');
+    data.bio      = getVal('exp-notes');
+    data.notes    = getVal('exp-notes');
+    data.linkedin = getVal('exp-linkedin');
     data.showPhone = document.getElementById('exp-show-phone') ? document.getElementById('exp-show-phone').checked : true;
     data.showEmail = document.getElementById('exp-show-email') ? document.getElementById('exp-show-email').checked : true;
   } else if(type === 'org'){
@@ -3694,7 +3708,7 @@ function submitJobReport(){
   const link     = document.getElementById('sj-link').value.trim();
 
   if(!reporter){ toast('⚠️ من فضلك أدخل اسمك'); return; }
-  if(!title)   { toast('⚠️ أدخل عنوان الوظيفة'); return; }
+  if(!title)   { toast('⚠️ أدخل المسمى الوظيفي'); return; }
   if(!org)     { toast('⚠️ أدخل اسم الجهة المعلنة'); return; }
   if(!gov)     { toast('⚠️ اختر المحافظة'); return; }
   if(!type)    { toast('⚠️ اختر نوع العمل'); return; }
@@ -5171,9 +5185,10 @@ function publishJob(){
   const urg     = document.getElementById('nj-urg').checked;
 
   if(!title || !org || !gov || !type || !desc){
-    toast('⚠️ اكمل الحقول المطلوبة: العنوان، الجهة، المحافظة، النوع، الوصف');
+    toast('⚠️ اكمل الحقول المطلوبة: المسمى الوظيفي، الجهة، المحافظة، النوع، الوصف');
     return;
   }
+  if(!dl || dl === '—'){ toast('⚠️ أدخل موعد التقديم النهائي'); return; }
 
   const newJob = {
     title, org, gov, type, sec,
@@ -5413,7 +5428,7 @@ function editJob(idx, fbId){
     document.getElementById('mbody').innerHTML =
       '<div style="padding:16px">' +
       '<div style="font-size:14px;font-weight:800;color:var(--p);margin-bottom:14px">✏️ تعديل الوظيفة</div>' +
-      '<div class="fg"><label class="fl">عنوان الوظيفة</label><input class="fi" id="ej-title" value="'+(j.title||'').replace(/"/g,'&quot;')+'"></div>' +
+      '<div class="fg"><label class="fl">المسمى الوظيفي</label><input class="fi" id="ej-title" value="'+(j.title||'').replace(/"/g,'&quot;')+'"></div>' +
       '<div class="fg"><label class="fl">الجهة المعلنة</label><input class="fi" id="ej-org" value="'+(j.org||'').replace(/"/g,'&quot;')+'"></div>' +
       '<div class="fg"><label class="fl">المحافظة</label><input class="fi" id="ej-gov" value="'+(j.gov||'')+'"></div>' +
       '<div class="fg"><label class="fl">نوع العمل</label><input class="fi" id="ej-type" value="'+(j.type||'')+'"></div>' +
@@ -6478,7 +6493,7 @@ function formatDateAr(dateStr){
 }
 function getDeadline(id){
   var el = document.getElementById(id);
-  if(!el || !el.value) return '—';
+  if(!el || !el.value) return '';
   return formatDateAr(el.value);
 }
 
@@ -6732,7 +6747,7 @@ window.addEventListener('load',()=>{
       </div>
 
       <!-- بيانات الوظيفة -->
-      <div class="fg"><label class="fl">عنوان الوظيفة *</label>
+      <div class="fg"><label class="fl">المسمى الوظيفي *</label>
         <input class="fi" id="sj-title" type="text" placeholder="مثال: استشاري رصد وتقييم">
       </div>
 

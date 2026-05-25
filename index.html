@@ -5092,7 +5092,8 @@ function editAdmRecord(idx, col){
       '<label class="vis-check"><input type="checkbox" id="ea-show-phone" '+(r.showPhone!==false?'checked':'')+'>  👁️ اظهر الموبايل للمستخدمين</label>' +
       '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ea-email" value="'+(r.email||'')+'" style="direction:ltr"></div>' +
       '<label class="vis-check"><input type="checkbox" id="ea-show-email" '+(r.showEmail!==false?'checked':'')+'>  👁️ اظهر الإيميل للمستخدمين</label>' +
-      '<div class="fg"><label class="fl">نبذة</label><textarea class="fi" id="ea-bio" rows="2">'+(r.bio||r.notes||'')+'</textarea></div>';
+      '<div class="fg"><label class="fl">نبذة</label><textarea class="fi" id="ea-bio" rows="2">'+(r.bio||r.notes||'')+'</textarea></div>' +
+      '<div class="fg"><label class="fl">💼 LinkedIn (اختياري)</label><input class="fi" id="ea-linkedin" value="'+(r.linkedin||'')+'" placeholder="https://linkedin.com/in/..." style="direction:ltr"></div>';
   } else if(col === 'suppliers'){
     fields =
       '<div class="fg"><label class="fl">اسم المورد</label><input class="fi" id="ea-name" value="'+(r.name||'').replace(/"/g,'&quot;')+'"></div>' +
@@ -5142,9 +5143,11 @@ function saveAdmRecord(fbId, col){
     var specEl = document.getElementById('ea-spec');
     var expEl  = document.getElementById('ea-exp');
     var bioEl  = document.getElementById('ea-bio');
+    var linkedinEl = document.getElementById('ea-linkedin');
     if(specEl) updated.spec = specEl.value.trim();
     if(expEl)  updated.exp  = expEl.value.trim();
     if(bioEl)  updated.bio  = bioEl.value.trim();
+    if(linkedinEl) updated.linkedin = linkedinEl.value.trim();
   } else if(col==='suppliers'){
     var catEl  = document.getElementById('ea-cat');
     var certEl = document.getElementById('ea-cert');

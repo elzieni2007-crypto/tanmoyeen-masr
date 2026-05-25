@@ -2565,7 +2565,7 @@ function loadFromFirebase(){
 
     db.collection('consultants').orderBy('timestamp','desc').limit(500).get().then(function(snap){
       var fresh=[];
-      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||'',exp:r.exp||'',orgs:r.orgs||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||'',showPhone:r.showPhone!==false,showEmail:r.showEmail!==false});});
+      snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push({id:d.id,name:r.name||'',spec:r.spec||'',specs:r.specs||[r.spec||''],gov:r.gov||'',phone:r.phone||'',email:r.email||'',bio:r.bio||r.notes||'',exp:r.exp||'',orgs:r.orgs||'',av:'👨‍💼',bg:'#e8f0fe',spec2:r.spec2||'',showPhone:r.showPhone!==false,showEmail:r.showEmail!==false});});
       if(fresh.length){
         window.CONS=fresh;
         try{localStorage.setItem('cache_cons',JSON.stringify(fresh.slice(0,100)));}catch(e){}
@@ -3466,6 +3466,7 @@ function doReg(type){
     data.gov     = getVal('exp-gov');
     data.phone   = getVal('exp-phone');
     data.email   = getVal('exp-email');
+    data.bio     = getVal('exp-notes');
     data.notes   = getVal('exp-notes');
     data.showPhone = document.getElementById('exp-show-phone') ? document.getElementById('exp-show-phone').checked : true;
     data.showEmail = document.getElementById('exp-show-email') ? document.getElementById('exp-show-email').checked : true;

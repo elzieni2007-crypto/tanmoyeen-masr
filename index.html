@@ -252,10 +252,10 @@ textarea.fi{resize:none}
 /* MODAL */
 .moverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:none;align-items:flex-end;backdrop-filter:blur(3px)}
 .moverlay.op{display:flex}
-.msheet{background:white;border-radius:26px 26px 0 0;width:100%;max-width:430px;margin:0 auto;max-height:90vh;overflow-y:auto;animation:shu .32s cubic-bezier(.34,1.2,.64,1)}
+.msheet{background:white;border-radius:26px 26px 0 0;width:100%;max-width:430px;margin:0 auto;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;animation:shu .32s cubic-bezier(.34,1.2,.64,1)}
 @keyframes shu{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .mhandle{width:38px;height:4px;background:var(--border);border-radius:4px;margin:11px auto}
-.mcon{padding:6px 18px 36px}
+.mcon{padding:6px 18px 80px}
 .mt-tags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
 .mt{font-size:19px;font-weight:900;margin-bottom:5px;line-height:1.3}
 .mo{font-size:13px;color:var(--muted);margin-bottom:14px}
@@ -704,7 +704,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
     <div class="dh-title" style="padding-right:54px;font-size:12px;margin-bottom:4px">منصتك الشاملة للعمل التنموي في مصر</div>
     <!-- عداد التسجيلات -->
-    <div id="fb-new-regs" style="position:relative;z-index:1;padding:5px 12px;background:rgba(0,184,148,.25);border-radius:10px;margin:0 0 8px;font-size:11px;color:white;font-weight:700;display:inline-block">🔥 جاري التحميل...</div>
+    <div id="fb-new-regs" style="position:relative;z-index:1;padding:5px 12px;background:rgba(0,184,148,.25);border-radius:10px;margin:0 0 8px;font-size:11px;color:white;font-weight:700;display:inline-block;opacity:0">🔥 جاري التحميل...</div>
     <div class="dh-stats">
       <div class="ds"><div class="ds-n" id="dash-cons-n">—</div><div class="ds-l">استشاري</div></div>
       <div class="ds"><div class="ds-n" id="dash-sups-n">—</div><div class="ds-l">مورد</div></div>
@@ -2887,8 +2887,8 @@ function updateFBStats(){
   var el = document.getElementById('fb-new-regs');
   if(el && total > 0){
     el.textContent = '🔥 ' + total + ' تسجيل عبر التطبيق';
+    el.style.opacity = '1';
   }
-  // Update jobseekers count word
   var jsEl = document.getElementById('dash-js-n');
   if(jsEl && window._fb_jobseekers > 0) jsEl.textContent = window._fb_jobseekers;
 }

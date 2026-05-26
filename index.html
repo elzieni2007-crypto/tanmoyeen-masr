@@ -1670,59 +1670,16 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <button class="sbtn" onclick="doReg('sup')">🏭 تسجيل كمورد</button>
   </div>
 
-  <!-- VOLUNTEER FORM -->
+  <!-- VOLUNTEER FORM - redirect to original form -->
   <div id="form-volunteer" class="reg-form" style="display:none">
-    <div class="fg"><label class="fl">الاسم الكامل *</label>
-      <input class="fi" id="vol-reg-name" type="text" placeholder="اسمك الكامل">
+    <div style="text-align:center;padding:20px 16px">
+      <div style="font-size:48px;margin-bottom:12px">🤝</div>
+      <div style="font-size:16px;font-weight:900;color:#00703a;margin-bottom:8px">سجّل كمتطوع</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:20px">انضم لقاعدة متطوعي تنمويين مصر وتواصل مع المؤسسات التنموية</div>
+      <button onclick="go('volunteers');setTimeout(openVolunteerForm,300)" style="width:100%;padding:14px;background:linear-gradient(135deg,#00703a,#00b894);color:white;border:none;border-radius:13px;font-size:14px;font-weight:900;font-family:Cairo,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(0,112,58,.3)">
+        🤝 افتح فورم التسجيل كمتطوع
+      </button>
     </div>
-    <div class="fg"><label class="fl">المحافظة *</label>
-      <select class="fi" id="vol-reg-gov">
-        <option value="">اختر المحافظة</option>
-        <option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option>
-        <option>الدقهلية</option><option>البحيرة</option><option>الفيوم</option>
-        <option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option>
-        <option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option>
-        <option>السويس</option><option>أسوان</option><option>أسيوط</option>
-        <option>بني سويف</option><option>بورسعيد</option><option>دمياط</option>
-        <option>جنوب سيناء</option><option>شمال سيناء</option><option>سوهاج</option>
-        <option>قنا</option><option>كفر الشيخ</option><option>مطروح</option>
-        <option>الأقصر</option><option>البحر الأحمر</option><option>الشرقية</option>
-      </select>
-    </div>
-    <div class="fg"><label class="fl">مجالات الاهتمام *</label>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:#f8f9fa;border-radius:10px" id="vol-reg-interests">
-        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="التعليم"> التعليم</label>
-        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="الصحة"> الصحة</label>
-        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="البيئة"> البيئة</label>
-        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="المرأة"> المرأة</label>
-        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="الطفل"> الطفل</label>
-        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="الشباب"> الشباب</label>
-        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="ذوي الاحتياجات"> ذوي الاحتياجات</label>
-        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="التنمية المجتمعية"> التنمية المجتمعية</label>
-        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="حقوق الإنسان"> حقوق الإنسان</label>
-        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="الإغاثة"> الإغاثة</label>
-      </div>
-    </div>
-    <div class="fg"><label class="fl">المهارات</label>
-      <input class="fi" id="vol-reg-skills" type="text" placeholder="مثال: التصوير، التصميم، الترجمة...">
-    </div>
-    <div class="fg"><label class="fl">الساعات المتاحة أسبوعياً</label>
-      <select class="fi" id="vol-reg-hours">
-        <option value="">اختر</option>
-        <option>1-5 ساعات</option>
-        <option>5-10 ساعات</option>
-        <option>10-20 ساعة</option>
-        <option>أكثر من 20 ساعة</option>
-      </select>
-    </div>
-    <div class="fg"><label class="fl">الموبايل *</label>
-      <input class="fi" id="vol-reg-phone" type="tel" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right">
-    </div>
-    <div class="fg"><label class="fl">البريد الإلكتروني</label>
-      <input class="fi" id="vol-reg-email" type="email" placeholder="example@gmail.com" style="direction:ltr;text-align:right">
-    </div>
-    <label class="vis-check"><input type="checkbox" id="vol-reg-show-email" checked> 👁️ اظهر إيميلي للمؤسسات</label>
-    <button class="sbtn" onclick="doReg('volunteer')">🤝 تسجيل كمتطوع</button>
   </div>
 
   <div style="height:100px"></div>

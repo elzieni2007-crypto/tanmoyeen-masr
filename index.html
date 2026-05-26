@@ -2007,6 +2007,13 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div id="consult-wa-preview" style="display:none;background:white;border-radius:10px;padding:10px;font-size:11px;color:#333;border:1px solid #00703a;white-space:pre-wrap;direction:rtl;line-height:1.8;margin-bottom:8px"></div>
   </div>
 
+  <!-- دعوة التطوع -->
+  <div style="background:#e8f4fd;border-radius:14px;padding:14px;margin-bottom:14px;border:1.5px solid #0094cc">
+    <div style="font-size:13px;font-weight:800;color:#0094cc;margin-bottom:10px">🤝 رسالة دعوة للتطوع</div>
+    <button onclick="sendVolunteerInviteWA()" style="width:100%;padding:10px;background:#0094cc;color:white;border:none;border-radius:10px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">💬 إرسال دعوة التطوع</button>
+    <div id="vol-invite-preview" style="display:none;background:white;border-radius:10px;padding:10px;font-size:11px;color:#333;border:1px solid #0094cc;white-space:pre-wrap;direction:rtl;line-height:1.8;margin-top:8px"></div>
+  </div>
+
   <div id="adm-consult-list"></div>
 </div>
 
@@ -5870,6 +5877,25 @@ function sendWAMain(){
       loadBroadcastHistory();
     }).catch(function(){});
   }
+}
+
+function sendVolunteerInviteWA(){
+  var regUrl = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=volunteer';
+  var msg = 
+    '🤝 دعوة للتطوع في قطاع التنمية\n\n' +
+    'تنمويين مصر تدعوك للانضمام لقاعدة المتطوعين!\n\n' +
+    '✅ سجّل ملفك كمتطوع وتواصل مع المؤسسات التنموية في مصر\n\n' +
+    '🔒 خصوصيتك محفوظة:\n' +
+    '• بياناتك لن تُعرض إلا للمؤسسات المسجلة\n' +
+    '• يمكنك التحكم في إظهار بياناتك\n\n' +
+    '📧 للتواصل: elzieni2007@gmail.com\n\n' +
+    '👇 سجّل الآن مجاناً:\n' +
+    regUrl + APP_FOOTER;
+
+  var preview = document.getElementById('vol-invite-preview');
+  if(preview){ preview.style.display='block'; preview.textContent=msg; }
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  toast('✅ تم فتح واتساب!');
 }
 
 function sendConsultWA(type){

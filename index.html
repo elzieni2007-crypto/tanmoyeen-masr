@@ -2911,7 +2911,12 @@ function renderDash(){
   try{fc=JSON.parse(localStorage.getItem('featured_cons')||'[]');}catch(e){}
   try{fs=JSON.parse(localStorage.getItem('featured_sups')||'[]');}catch(e){}
 
-  // جيب من Firebase لو متاح
+  // لو في بيانات اعرضها فوراً
+  if(CONS.length > 0 || SUPS.length > 0){
+    _renderDashCards(fc, fs);
+  }
+
+  // حدّث من Firebase وأعد العرض
   if(typeof db !== 'undefined'){
     db.collection('settings').doc('featured').get().then(function(doc){
       if(doc.exists){
@@ -2919,20 +2924,12 @@ function renderDash(){
         fs = doc.data().sups || [];
         localStorage.setItem('featured_cons', JSON.stringify(fc));
         localStorage.setItem('featured_sups', JSON.stringify(fs));
+        // أعد العرض بالـ featured الصح
+        if(CONS.length > 0 || SUPS.length > 0){
+          _renderDashCards(fc, fs);
+        }
       }
-      // بس نعرض لو في بيانات
-      if(CONS.length > 0 || SUPS.length > 0){
-        _renderDashCards(fc, fs);
-      } else {
-        // استنى البيانات تتحمل
-        setTimeout(function(){ _renderDashCards(fc, fs); }, 2000);
-      }
-    }).catch(function(){ 
-      if(CONS.length > 0 || SUPS.length > 0) _renderDashCards(fc, fs);
-      else setTimeout(function(){ _renderDashCards(fc, fs); }, 2000);
-    });
-  } else {
-    _renderDashCards(fc, fs);
+    }).catch(function(){});
   }
 
   // الأرقام
@@ -2961,8 +2958,11 @@ function _renderDashCards(fc, fs){
   var fcStr = fc.map(function(x){ return String(x); });
   var fsStr = fs.map(function(x){ return String(x); });
   
-  var _cl = fcStr.length>0 ? CONS.filter(function(c){ return fcStr.includes(String(c.id)); }).slice(0,6) : CONS.slice(0,6);
-  var _sl = fsStr.length>0 ? SUPS.filter(function(s){ return fsStr.includes(String(s.id)); }).slice(0,6) : SUPS.slice(0,6);
+  var _cl = fcStr.length>0 ? CONS.filter(function(c){ return fcStr.includes(String(c.id)); }) : [];
+  if(_cl.length === 0) _cl = CONS.slice(0,6); else _cl = _cl.slice(0,6);
+  
+  var _sl = fsStr.length>0 ? SUPS.filter(function(s){ return fsStr.includes(String(s.id)); }) : [];
+  if(_sl.length === 0) _sl = SUPS.slice(0,6); else _sl = _sl.slice(0,6);
 
   var consEl = document.getElementById('dash-cons');
   if(consEl) consEl.innerHTML=(_cl||[]).map(function(c){

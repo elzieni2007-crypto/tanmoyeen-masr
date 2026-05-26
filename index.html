@@ -254,10 +254,10 @@ textarea.fi{resize:none}
 /* MODAL */
 .moverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:none;align-items:flex-end;backdrop-filter:blur(3px)}
 .moverlay.op{display:flex}
-.msheet{background:white;border-radius:26px 26px 0 0;width:100%;max-width:430px;margin:0 auto;max-height:88vh;display:flex;flex-direction:column;animation:shu .32s cubic-bezier(.34,1.2,.64,1)}
+.msheet{background:white;border-radius:26px 26px 0 0;width:100%;max-width:430px;margin:0 auto;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;animation:shu .32s cubic-bezier(.34,1.2,.64,1)}
 @keyframes shu{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .mhandle{width:38px;height:4px;background:var(--border);border-radius:4px;margin:11px auto}
-.mcon{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 18px 20px}
+.mcon{flex:1;overflow-y:scroll;-webkit-overflow-scrolling:touch;padding:6px 18px 20px;overscroll-behavior:contain}
 .mt-tags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
 .mt{font-size:19px;font-weight:900;margin-bottom:5px;line-height:1.3}
 .mo{font-size:13px;color:var(--muted);margin-bottom:14px}
@@ -295,7 +295,7 @@ textarea.fi{resize:none}
 .prof-spec{color:rgba(255,255,255,.75);font-size:11px}
 .prof-date{color:rgba(255,255,255,.6);font-size:10px;margin-top:3px}
 .ptable-wrap{padding:0}
-.call-strip{display:flex;gap:8px;padding:14px 16px;background:#f8fbff;border-top:1px solid var(--border);flex-shrink:0}
+.call-strip{display:flex;gap:8px;padding:12px 16px;background:#f8fbff;border-top:1px solid var(--border);flex-shrink:0;position:sticky;bottom:0}
 .call-btn{flex:1;padding:11px;border-radius:11px;border:none;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
 .call-btn-p{background:var(--p);color:white}
 .call-btn-g{background:#e7faf3;color:var(--green)}
@@ -1545,6 +1545,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="fg"><label class="fl">البريد الإلكتروني *</label><input id="exp-email" class="fi" type="email" placeholder="example@email.com" style="direction:ltr;text-align:left"></div>
     <label class="vis-check"><input type="checkbox" id="exp-show-email" checked> 👁️ اظهر إيميلي للمستخدمين</label>
     <div class="fg"><label class="fl">نبذة مختصرة</label><textarea id="exp-notes" class="fi" rows="3" placeholder="اكتب نبذة عن خبراتك والجهات التي عملت معها..."></textarea></div>
+    <div class="fg"><label class="fl">سابقة الأعمال (اختياري)</label><textarea id="exp-orgs" class="fi" rows="2" placeholder="اذكر الجهات والمنظمات التي عملت معها..."></textarea></div>
     <div class="fg"><label class="fl">💼 رابط LinkedIn (اختياري)</label><input id="exp-linkedin" class="fi" type="url" placeholder="https://linkedin.com/in/..." style="direction:ltr"></div>
     <button class="sbtn" onclick="doReg('expert')">👨‍💼 تسجيل كاستشاري</button>
   </div>
@@ -2336,7 +2337,7 @@ async function saveToFirebase(type, data){
         .replace(/</g,'&lt;').replace(/>/g,'&gt;')
         .replace(/"/g,'&quot;').replace(/'/g,'&#x27;')
         .replace(/\//g,'&#x2F;')
-        .substring(0, 500);
+        .substring(0, 2000);
     }
     var cleanData = {};
     Object.keys(data).forEach(function(k){
@@ -2951,7 +2952,12 @@ function renderDash(){
 }
 
 function _renderDashCards(fc, fs){
-  // نحول كل الـ ids لـ string عشان المقارنة تشتغل صح
+  // لو البيانات مش جاهزة استنى
+  if(CONS.length === 0 && SUPS.length === 0){
+    setTimeout(function(){ renderDash(); }, 1000);
+    return;
+  }
+
   var fcStr = fc.map(function(x){ return String(x); });
   var fsStr = fs.map(function(x){ return String(x); });
   
@@ -3145,7 +3151,7 @@ function openJob(id){
       <button style="flex:1;min-width:80px;padding:11px;background:#0077b5;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="shareJobLI()">💼 LinkedIn</button>
       ${j.link ? '<button style="flex:1;min-width:80px;padding:11px;background:var(--orange);color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open(window._currentJob.link,\'_blank\')">🔗 الإعلان</button>' : ''}
     </div>`;
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
+  var mc=document.getElementById('mcall');if(mc)mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
   _currentJobOrg=j.org; _currentJobTitle=j.title;
 }
@@ -3204,7 +3210,6 @@ function openTender(id){
       <button style="flex:1;min-width:80px;padding:11px;background:#0077b5;color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="shareTenderLI()">💼 LinkedIn</button>
       ${t.link ? '<button style="flex:1;min-width:80px;padding:11px;background:var(--orange);color:white;border:none;border-radius:11px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer" onclick="window.open(window._currentTender.link,\'_blank\')">🔗 الإعلان</button>' : ''}
     </div>`;
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
 }
 
@@ -3271,7 +3276,6 @@ function openCon(id){
       ${showEmail?`<button class="call-btn call-btn-g" onclick="mailCon('${c.email}')">✉️ إيميل</button>`:''}
       ${c.linkedin?`<button class="call-btn" style="background:#0077b5;color:white" onclick="window.open('${c.linkedin}','_blank')">💼 LinkedIn</button>`:''}
     </div>`;
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
 }
 
@@ -3305,7 +3309,6 @@ function openSup(id){
       ${showPhone?`<button class="call-btn" style="background:#25d366;color:white" onclick="waContact('${s.phone}','${s.name}')">💬 واتساب</button>`:''}
       ${showEmail?`<button class="call-btn call-btn-g" onclick="mailCon('${s.email}')">✉️ إيميل</button>`:''}
     </div>`;
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
 }
 
@@ -3488,6 +3491,7 @@ function doReg(type){
     data.email   = getVal('exp-email');
     data.bio      = getVal('exp-notes');
     data.notes    = getVal('exp-notes');
+    data.orgs     = getVal('exp-orgs');
     data.linkedin = getVal('exp-linkedin');
     data.showPhone = document.getElementById('exp-show-phone') ? document.getElementById('exp-show-phone').checked : true;
     data.showEmail = document.getElementById('exp-show-email') ? document.getElementById('exp-show-email').checked : true;
@@ -3686,7 +3690,6 @@ function openJobseeker(js){
       <button class="call-btn call-btn-p" onclick="callCon('${js.phone}')">📞 اتصال</button>
       <button class="call-btn call-btn-g" onclick="mailCon('${js.email||''}')">✉️ إيميل</button>
     </div>`;
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
 }
 
@@ -4262,7 +4265,6 @@ function openOrg(idx){
       (showPhone&&o.phone ? '<button class="call-btn" style="background:#25d366;color:white" onclick="waContact(\''+o.phone+'\',\''+o.name+'\')">💬 واتساب</button>' : '') +
       (showEmail&&o.email ? '<button class="call-btn call-btn-g" onclick="mailCon(\''+o.email+'\')">✉️ إيميل</button>' : '') +
     '</div>';
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
 }
 
@@ -4565,7 +4567,6 @@ function openVolunteer(idx){
       (v.showEmail !== false && v.email ? '<a href="mailto:'+v.email+'" class="call-btn call-btn-g" style="flex:1">✉️ تواصل بالإيميل</a>' : '<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px">📧 بيانات التواصل غير متاحة</div>') +
     '</div>';
 
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
 }
 
@@ -5103,6 +5104,7 @@ function editAdmRecord(idx, col){
       '<div class="fg"><label class="fl">الإيميل</label><input class="fi" id="ea-email" value="'+(r.email||'')+'" style="direction:ltr"></div>' +
       '<label class="vis-check"><input type="checkbox" id="ea-show-email" '+(r.showEmail!==false?'checked':'')+'>  👁️ اظهر الإيميل للمستخدمين</label>' +
       '<div class="fg"><label class="fl">نبذة</label><textarea class="fi" id="ea-bio" rows="2">'+(r.bio||r.notes||'')+'</textarea></div>' +
+      '<div class="fg"><label class="fl">سابقة الأعمال</label><textarea class="fi" id="ea-orgs" rows="2">'+(r.orgs||'')+'</textarea></div>' +
       '<div class="fg"><label class="fl">💼 LinkedIn (اختياري)</label><input class="fi" id="ea-linkedin" value="'+(r.linkedin||'')+'" placeholder="https://linkedin.com/in/..." style="direction:ltr"></div>';
   } else if(col === 'suppliers'){
     fields =
@@ -5131,7 +5133,6 @@ function editAdmRecord(idx, col){
       '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--p),var(--a));color:white;padding:12px" onclick="saveAdmRecord(\''+fbId+'\',\''+col+'\')">💾 حفظ</button>' +
       '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
     '</div></div>';
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
 }
 
@@ -5154,10 +5155,12 @@ function saveAdmRecord(fbId, col){
     var specEl = document.getElementById('ea-spec');
     var expEl  = document.getElementById('ea-exp');
     var bioEl  = document.getElementById('ea-bio');
+    var orgsEl = document.getElementById('ea-orgs');
     var linkedinEl = document.getElementById('ea-linkedin');
     if(specEl) updated.spec = specEl.value.trim();
     if(expEl)  updated.exp  = expEl.value.trim();
     if(bioEl)  updated.bio  = bioEl.value.trim();
+    if(orgsEl) updated.orgs = orgsEl.value.trim();
     if(linkedinEl) updated.linkedin = linkedinEl.value.trim();
   } else if(col==='suppliers'){
     var catEl  = document.getElementById('ea-cat');
@@ -5454,7 +5457,7 @@ function editJob(idx, fbId){
         '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--p),var(--a));color:white;padding:12px" onclick="saveJobEdit(\''+fbId+'\')">💾 حفظ وإعادة النشر</button>' +
         '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
       '</div></div>';
-    var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
+    var mc=document.getElementById('mcall');if(mc)mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
   }).catch(function(e){ toast('❌ ' + e.message); });
 }
@@ -5481,7 +5484,7 @@ function editTender(idx, fbId){
         '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--orange),#c06010);color:white;padding:12px" onclick="saveTenderEdit(\''+fbId+'\')">💾 حفظ وإعادة النشر</button>' +
         '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
       '</div></div>';
-    var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
+    var mc=document.getElementById('mcall');if(mc)mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
   }).catch(function(e){ toast('❌ ' + e.message); });
 }
@@ -5951,7 +5954,6 @@ function viewConsultAdmin(idx){
       '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--orange),#c06010);color:white;padding:11px" onclick="editConsultAdmin('+idx+');document.getElementById(\'modal\').classList.remove(\'op\')">✏️ تعديل</button>' +
       '<button class="adm-btn adm-btn-del" style="flex:0.5" onclick="deleteConsultAdmin(\''+c.fbId+'\');document.getElementById(\'modal\').classList.remove(\'op\')">🗑️ حذف</button>' +
     '</div>';
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
 }
 
@@ -5972,7 +5974,6 @@ function editConsultAdmin(idx){
       '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,var(--orange),#c06010);color:white;padding:12px" onclick="saveConsultAdmin(\''+c.fbId+'\')">💾 حفظ</button>' +
       '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
     '</div></div>';
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
 }
 
@@ -6067,7 +6068,6 @@ function editVolunteerAdmin(idx){
       '<button class="adm-btn" style="flex:1;background:linear-gradient(135deg,#00703a,#00b894);color:white;padding:12px" onclick="saveVolunteerAdmin(\''+v.fbId+'\')">💾 حفظ</button>' +
       '<button class="adm-btn adm-btn-del" style="flex:0.4" onclick="document.getElementById(\'modal\').classList.remove(\'op\')">إلغاء</button>' +
     '</div></div>';
-  var mc=document.getElementById('mcall');if(mc&&!mc.querySelector('.call-strip'))mc.innerHTML='';
   document.getElementById('modal').classList.add('op');
 }
 

@@ -708,11 +708,11 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <!-- عداد التسجيلات -->
     <div id="fb-new-regs" style="position:relative;z-index:1;padding:5px 12px;background:rgba(0,184,148,.25);border-radius:10px;margin:0 0 8px;font-size:11px;color:white;font-weight:700;display:inline-block;opacity:0">🔥 جاري التحميل...</div>
     <div class="dh-stats">
-      <div class="ds"><div class="ds-n" id="dash-cons-n">—</div><div class="ds-l">استشاري</div></div>
-      <div class="ds"><div class="ds-n" id="dash-sups-n">—</div><div class="ds-l">مورد</div></div>
-      <div class="ds"><div class="ds-n" id="dash-orgs-n">—</div><div class="ds-l">مؤسسة</div></div>
-      <div class="ds"><div class="ds-n" id="dash-vols-n">—</div><div class="ds-l">متطوع</div></div>
-      <div class="ds"><div class="ds-n" id="dash-js-n">—</div><div class="ds-l">باحث عمل</div></div>
+      <div class="ds"><div class="ds-n" id="dash-cons-n">...</div><div class="ds-l">استشاري</div></div>
+      <div class="ds"><div class="ds-n" id="dash-sups-n">...</div><div class="ds-l">مورد</div></div>
+      <div class="ds"><div class="ds-n" id="dash-orgs-n">...</div><div class="ds-l">مؤسسة</div></div>
+      <div class="ds"><div class="ds-n" id="dash-vols-n">...</div><div class="ds-l">متطوع</div></div>
+      <div class="ds"><div class="ds-n" id="dash-js-n">...</div><div class="ds-l">باحث عمل</div></div>
       <div class="ds"><div class="ds-n">25K</div><div class="ds-l">عضو FB</div></div>
     </div>
   </div>
@@ -1137,9 +1137,19 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div style="font-size:12px;opacity:.85">تواصل مع المتطوعين من كل محافظات مصر</div>
       <div style="display:flex;gap:8px;margin-top:12px">
         <div style="background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700" id="vol-count-badge">0 متطوع</div>
-        <button onclick="openVolunteerForm()" style="background:white;color:#00703a;border:none;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:800;font-family:Cairo,sans-serif;cursor:pointer">+ سجّل كمتطوع</button>
+        <button onclick="go('register');setTimeout(function(){switchRegType('volunteer')},200)" style="background:white;color:#00703a;border:none;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:800;font-family:Cairo,sans-serif;cursor:pointer">✨ سجّل كمتطوع</button>
       </div>
     </div>
+  </div>
+
+  <!-- بانر تسجيل مميز -->
+  <div style="margin:12px 12px 0;background:linear-gradient(135deg,#004d29,#00703a);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 4px 16px rgba(0,112,58,.3)" onclick="go('register');setTimeout(function(){switchRegType('volunteer')},200)">
+    <div style="font-size:28px">🤝</div>
+    <div style="flex:1">
+      <div style="color:white;font-size:13px;font-weight:900;margin-bottom:2px">سجّل ملفك كمتطوع مجاناً</div>
+      <div style="color:rgba(255,255,255,.75);font-size:10px">تواصل مع المؤسسات التنموية في مصر</div>
+    </div>
+    <div style="color:white;font-size:18px">←</div>
   </div>
 
   <!-- بحث وفلتر -->
@@ -1377,6 +1387,11 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
         <div class="rt-icon">🏭</div>
         <div class="rt-title">مورد / شركة</div>
         <div class="rt-sub">توريدات وخدمات</div>
+      </div>
+      <div class="reg-type-card" id="rt-volunteer" onclick="switchRegType('volunteer')" style="grid-column:span 2">
+        <div class="rt-icon">🤝</div>
+        <div class="rt-title">متطوع</div>
+        <div class="rt-sub">أريد التطوع في مجال التنمية</div>
       </div>
     </div>
   </div>
@@ -1653,6 +1668,61 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <label class="vis-check"><input type="checkbox" id="sup-show-email" checked> 👁️ اظهر إيميلي للمستخدمين</label>
     <div class="fg"><label class="fl">معلومات إضافية</label><textarea class="fi" rows="3" id="sup-notes" placeholder="اكتب نبذة عن خدماتك وسابقة أعمالك..."></textarea></div>
     <button class="sbtn" onclick="doReg('sup')">🏭 تسجيل كمورد</button>
+  </div>
+
+  <!-- VOLUNTEER FORM -->
+  <div id="form-volunteer" class="reg-form" style="display:none">
+    <div class="fg"><label class="fl">الاسم الكامل *</label>
+      <input class="fi" id="vol-reg-name" type="text" placeholder="اسمك الكامل">
+    </div>
+    <div class="fg"><label class="fl">المحافظة *</label>
+      <select class="fi" id="vol-reg-gov">
+        <option value="">اختر المحافظة</option>
+        <option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option>
+        <option>الدقهلية</option><option>البحيرة</option><option>الفيوم</option>
+        <option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option>
+        <option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option>
+        <option>السويس</option><option>أسوان</option><option>أسيوط</option>
+        <option>بني سويف</option><option>بورسعيد</option><option>دمياط</option>
+        <option>جنوب سيناء</option><option>شمال سيناء</option><option>سوهاج</option>
+        <option>قنا</option><option>كفر الشيخ</option><option>مطروح</option>
+        <option>الأقصر</option><option>البحر الأحمر</option><option>الشرقية</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">مجالات الاهتمام *</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:#f8f9fa;border-radius:10px" id="vol-reg-interests">
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="التعليم"> التعليم</label>
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="الصحة"> الصحة</label>
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="البيئة"> البيئة</label>
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="المرأة"> المرأة</label>
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="الطفل"> الطفل</label>
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="الشباب"> الشباب</label>
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="ذوي الاحتياجات"> ذوي الاحتياجات</label>
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="التنمية المجتمعية"> التنمية المجتمعية</label>
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="حقوق الإنسان"> حقوق الإنسان</label>
+        <label style="font-size:11px;display:flex;align-items:center;gap:4px"><input type="checkbox" value="الإغاثة"> الإغاثة</label>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">المهارات</label>
+      <input class="fi" id="vol-reg-skills" type="text" placeholder="مثال: التصوير، التصميم، الترجمة...">
+    </div>
+    <div class="fg"><label class="fl">الساعات المتاحة أسبوعياً</label>
+      <select class="fi" id="vol-reg-hours">
+        <option value="">اختر</option>
+        <option>1-5 ساعات</option>
+        <option>5-10 ساعات</option>
+        <option>10-20 ساعة</option>
+        <option>أكثر من 20 ساعة</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">الموبايل *</label>
+      <input class="fi" id="vol-reg-phone" type="tel" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right">
+    </div>
+    <div class="fg"><label class="fl">البريد الإلكتروني</label>
+      <input class="fi" id="vol-reg-email" type="email" placeholder="example@gmail.com" style="direction:ltr;text-align:right">
+    </div>
+    <label class="vis-check"><input type="checkbox" id="vol-reg-show-email" checked> 👁️ اظهر إيميلي للمؤسسات</label>
+    <button class="sbtn" onclick="doReg('volunteer')">🤝 تسجيل كمتطوع</button>
   </div>
 
   <div style="height:100px"></div>
@@ -3436,13 +3506,11 @@ function selectRegType(type){
 }
 
 function switchRegType(type){
-  // Update cards
-  ['jobseeker','expert','org','sup'].forEach(t=>{
+  ['jobseeker','expert','org','sup','volunteer'].forEach(t=>{
     const card=document.getElementById('rt-'+t);
     if(card) card.classList.toggle('on', t===type);
   });
-  // Show/hide forms
-  ['jobseeker','expert','org','sup'].forEach(t=>{
+  ['jobseeker','expert','org','sup','volunteer'].forEach(t=>{
     const form=document.getElementById('form-'+t);
     if(form) form.style.display = t===type ? 'block' : 'none';
   });
@@ -3517,6 +3585,23 @@ function doReg(type){
     data.notes   = getVal('sup-notes');
     data.showPhone = document.getElementById('sup-show-phone') ? document.getElementById('sup-show-phone').checked : true;
     data.showEmail = document.getElementById('sup-show-email') ? document.getElementById('sup-show-email').checked : true;
+  } else if(type === 'volunteer'){
+    data.name    = getVal('vol-reg-name');
+    data.gov     = getVal('vol-reg-gov');
+    data.phone   = getVal('vol-reg-phone');
+    data.email   = getVal('vol-reg-email');
+    data.skills  = getVal('vol-reg-skills');
+    data.hours   = getVal('vol-reg-hours');
+    data.showEmail = document.getElementById('vol-reg-show-email') ? document.getElementById('vol-reg-show-email').checked : true;
+    // جمع الاهتمامات
+    var interests = [];
+    document.querySelectorAll('#vol-reg-interests input:checked').forEach(function(cb){ interests.push(cb.value); });
+    data.interests = interests.join(' / ');
+    // validation
+    if(!data.name){ toast('⚠️ أدخل اسمك'); return; }
+    if(!data.gov){ toast('⚠️ اختر المحافظة'); return; }
+    if(!data.phone){ toast('⚠️ أدخل رقم الموبايل'); return; }
+    if(interests.length === 0){ toast('⚠️ اختر مجال اهتمام واحد على الأقل'); return; }
   }
 
   // إرسال لـ Google Sheets (لو الـ URL متحوط)

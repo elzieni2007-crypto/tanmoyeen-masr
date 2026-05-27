@@ -1034,12 +1034,28 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       </div>
 
       <!-- Status -->
-      <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;padding:14px;text-align:center;border:1.5px solid #f59e0b">
+      <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;padding:14px;text-align:center;border:1.5px solid #f59e0b;margin-bottom:14px">
         <div style="font-size:14px;font-weight:800;color:#92400e;margin-bottom:4px">🚀 قريباً جداً!</div>
         <div style="font-size:11px;color:#78350f;line-height:1.6">
           نعمل على إطلاق هذه الشراكة قريباً<br>
           ترقّب الإعلان الرسمي على منصة تنمويين مصر
         </div>
+      </div>
+
+      <!-- مراجعة السيرة الذاتية -->
+      <div style="background:linear-gradient(135deg,#0d1b2a,#1a3a6e);border-radius:14px;padding:16px;text-align:center">
+        <div style="font-size:13px;font-weight:900;color:#f59e0b;margin-bottom:6px">⚡ عرض محدود - مراجعة السيرة الذاتية</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.8);line-height:1.7;margin-bottom:12px">
+          سجّل الآن واحصل على مراجعة مجانية لسيرتك الذاتية<br>
+          من فريق Nexus Talent المتخصص في القطاع التنموي
+        </div>
+        <div style="background:rgba(245,158,11,.15);border-radius:8px;padding:6px 12px;display:inline-block;margin-bottom:12px">
+          <span style="font-size:10px;color:#f59e0b;font-weight:700">⏳ الأماكن محدودة - لا تفوّت الفرصة!</span>
+        </div>
+        <a href="https://forms.gle/eBmQCmQoo4J4VDdM6" target="_blank"
+          style="display:block;padding:13px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#0d1b2a;text-decoration:none;border-radius:12px;font-size:13px;font-weight:900;box-shadow:0 4px 14px rgba(245,158,11,.4)">
+          ✍️ سجّل الآن مجاناً
+        </a>
       </div>
 
     </div>
@@ -2005,6 +2021,14 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <button onclick="sendConsultWA('link')" style="padding:8px 14px;background:#c06010;color:white;border:none;border-radius:10px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🔗 رابط الفورم</button>
     </div>
     <div id="consult-wa-preview" style="display:none;background:white;border-radius:10px;padding:10px;font-size:11px;color:#333;border:1px solid #00703a;white-space:pre-wrap;direction:rtl;line-height:1.8;margin-bottom:8px"></div>
+  </div>
+
+  <!-- دعوة Nexus Talent -->
+  <div style="background:linear-gradient(135deg,#0d1b2a22,#1a3a6e22);border-radius:14px;padding:14px;margin-bottom:14px;border:1.5px solid #0d1b2a">
+    <div style="font-size:13px;font-weight:800;color:#0d1b2a;margin-bottom:6px">⚡ رسالة Nexus Talent - مراجعة السيرة الذاتية</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:10px">أماكن محدودة — رسالة قوية للمستهدفين</div>
+    <button onclick="sendNexusWA()" style="width:100%;padding:10px;background:linear-gradient(135deg,#0d1b2a,#1a3a6e);color:white;border:none;border-radius:10px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">💼 إرسال دعوة Nexus Talent</button>
+    <div id="nexus-wa-preview" style="display:none;background:white;border-radius:10px;padding:10px;font-size:11px;color:#333;border:1px solid #0d1b2a;white-space:pre-wrap;direction:rtl;line-height:1.8;margin-top:8px"></div>
   </div>
 
   <!-- دعوة التطوع -->
@@ -5877,6 +5901,26 @@ function sendWAMain(){
       loadBroadcastHistory();
     }).catch(function(){});
   }
+}
+
+function sendNexusWA(){
+  var msg =
+    '⚡ فرصة حصرية ومحدودة!\n\n' +
+    '🎯 Nexus Talent × تنمويين مصر\n' +
+    'مراجعة مجانية لسيرتك الذاتية من متخصصين في القطاع التنموي\n\n' +
+    '✅ ماذا ستحصل عليه؟\n' +
+    '• مراجعة شاملة لسيرتك الذاتية\n' +
+    '• نصائح من خبراء متخصصين في التوظيف التنموي\n' +
+    '• تحسين فرصك أمام المنظمات الدولية والمحلية\n\n' +
+    '⏳ تنبيه: الأماكن محدودة جداً!\n' +
+    'سارع بالتسجيل قبل امتلاء الأماكن\n\n' +
+    '👇 سجّل الآن مجاناً:\n' +
+    'https://forms.gle/eBmQCmQoo4J4VDdM6' + APP_FOOTER;
+
+  var preview = document.getElementById('nexus-wa-preview');
+  if(preview){ preview.style.display='block'; preview.textContent=msg; }
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  toast('✅ تم فتح واتساب!');
 }
 
 function sendVolunteerInviteWA(){

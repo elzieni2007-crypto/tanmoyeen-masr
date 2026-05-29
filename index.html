@@ -6443,13 +6443,15 @@ function loadCustomContent(){
 
 // إعادة توجيه لشاشة الدخول لو مش logged in - تم الإصلاح
 function goAdmin(){
-  // إظهار شاشة الأدمن
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  document.getElementById('admin').classList.add('on');
+  var adminEl = document.getElementById('admin');
+  adminEl.classList.add('on');
+  adminEl.style.display = 'block';
+  adminEl.style.zIndex = '1000';
   window.scrollTo(0,0);
+  document.body.scrollTop = 0;
 
-  // تحقق من Firebase Auth أول
   if(typeof auth !== 'undefined' && auth.currentUser){
     isLoggedIn = true;
   }

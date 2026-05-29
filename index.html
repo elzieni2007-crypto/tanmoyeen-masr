@@ -48,7 +48,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 /* SCREENS */
 .scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
 .scr.on{display:block;animation:fi .28s ease;position:relative}
-#admin.on{display:block!important;position:fixed!important;inset:0!important;z-index:9000!important;overflow-y:auto;background:var(--bg);min-height:unset;padding-bottom:0}
+#admin{display:none}#admin.on{display:block!important;position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;z-index:99999!important;overflow-y:auto!important;background:var(--bg)!important;min-height:100vh!important;width:100%!important}
 #home{overflow-y:visible}
 html,body{scroll-behavior:auto;overflow-x:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -994,7 +994,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 </div>
 
 <!-- شاشة أثر -->
-<div id="athar-screen" class="scr">
+<div id="athar-screen" class="scr" style="position:relative;z-index:1">
 
   <!-- هيدر -->
   <div style="background:linear-gradient(135deg,#004d29,#00703a,#00b894);padding:24px 16px 20px;color:white;text-align:center;position:relative;overflow:hidden">
@@ -6619,6 +6619,13 @@ async function submitAthar(){
 async function loadAtharTrials(){
   var list = document.getElementById('athar-trials-list');
   if(!list) return;
+
+  // تحقق من الـ auth
+  if(typeof auth === 'undefined' || !auth.currentUser){
+    list.innerHTML='<div style="text-align:center;padding:20px;color:#e05050">❌ يجب تسجيل دخول الأدمن أولاً</div>';
+    return;
+  }
+
   list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل...</div>';
   try{
     var snap = await db.collection('athar_trials').get();

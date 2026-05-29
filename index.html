@@ -730,6 +730,22 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
   </div>
 
+  <!-- بانر أثر -->
+  <div style="padding:0 12px 6px">
+    <div onclick="go('athar-screen')" style="background:linear-gradient(135deg,#004d29,#00703a);border-radius:16px;padding:12px 16px;cursor:pointer;box-shadow:0 4px 16px rgba(0,112,58,.3);display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.1)">
+      <div style="width:38px;height:38px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.15)">
+        <img src="https://raw.githubusercontent.com/elzieni2007-crypto/athar-ngo/56a9d7998da26638b257fab6900fc5a994c3aedd/file_000000002df07246ada08d5bf6048297.png"
+          style="width:28px;height:28px;object-fit:contain"
+          onerror="this.style.display='none';this.parentElement.innerHTML='<span style=font-size:16px;font-weight:900;color:#00703a>أثر</span>'">
+      </div>
+      <div style="flex:1">
+        <div style="color:white;font-size:12px;font-weight:900;margin-bottom:2px">🌿 برنامج أثر — نسخة تجريبية مجانية</div>
+        <div style="color:rgba(255,255,255,.75);font-size:10px">الحلول المالية للجمعيات الأهلية | سجّل الآن</div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;flex-shrink:0">←</div>
+    </div>
+  </div>
+
   <div class="dash-grid">
     <div class="dg-card" onclick="go('jobs')"><div class="dg-icon" style="background:#e8f0fe">💼</div><div class="dg-t">الوظائف</div><div class="dg-c" id="dash-jobs-count">جديد يومياً</div></div>
     <div class="dg-card" onclick="go('tenders')"><div class="dg-icon" style="background:#fef3e8">📋</div><div class="dg-t">المناقصات</div><div class="dg-c" id="dash-tenders-count">جديد يومياً</div></div>
@@ -738,6 +754,13 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="dg-card" onclick="go('suppliers')"><div class="dg-icon" style="background:#f0e8fe">🏭</div><div class="dg-t">الموردون</div><div class="dg-c" id="sup-cnt">—</div></div>
     <div class="dg-card" onclick="go('volunteers')"><div class="dg-icon" style="background:#e7faf3">🤝</div><div class="dg-t">متطوعون</div><div class="dg-c" id="vol-dash-count">—</div></div>
     <div class="dg-card" onclick="go('consult-screen')" style="border:2px solid #c06010;background:linear-gradient(135deg,#fef3e8,#fff8f0)"><div class="dg-icon" style="background:#c06010">📋</div><div class="dg-t" style="color:#c06010;font-weight:900">استشارة</div><div class="dg-c" style="color:#c06010;font-weight:700">ضريبية / تأمينية</div></div>
+    <div class="dg-card" onclick="go('athar-screen')" style="border:2px solid #00703a;background:linear-gradient(135deg,#e7faf3,#f0fdf8)">
+      <div class="dg-icon" style="background:#00703a;display:flex;align-items:center;justify-content:center">
+        <img src="https://raw.githubusercontent.com/elzieni2007-crypto/athar-ngo/56a9d7998da26638b257fab6900fc5a994c3aedd/file_000000002df07246ada08d5bf6048297.png" style="width:22px;height:22px;object-fit:contain;filter:brightness(10)" onerror="this.style.display='none';this.parentElement.innerHTML+='💰'">
+      </div>
+      <div class="dg-t" style="color:#00703a;font-weight:900">أثر</div>
+      <div class="dg-c" style="color:#00703a;font-weight:700">حلول مالية 🆓</div>
+    </div>
     <div class="dg-card" onclick="go('nexus-screen')" style="border:2px solid #0d1b2a;background:linear-gradient(135deg,#0d1b2a,#1a2f4a)">
       <img src="https://i.ibb.co/Lz1cNZZQ/file-00000000c47c720aa2b32868309a3136.png" style="width:38px;height:38px;object-fit:contain;border-radius:8px" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div style="display:none;width:38px;height:38px;background:#1a2f4a;border-radius:8px;align-items:center;justify-content:center"><span style="color:#f59e0b;font-size:18px;font-weight:900">N</span></div>
@@ -960,6 +983,118 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div style="text-align:center;font-size:11px;color:var(--muted);padding-bottom:100px">
       سيتم الرد خلال 48 ساعة 🕐
     </div>
+  </div>
+</div>
+
+<!-- شاشة أثر -->
+<div id="athar-screen" class="scr">
+
+  <!-- هيدر -->
+  <div style="background:linear-gradient(135deg,#004d29,#00703a,#00b894);padding:24px 16px 20px;color:white;text-align:center;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
+    <button onclick="history.back()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;padding:6px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;cursor:pointer">← رجوع</button>
+    <div style="width:70px;height:70px;background:white;border-radius:16px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2)">
+      <img src="https://raw.githubusercontent.com/elzieni2007-crypto/athar-ngo/56a9d7998da26638b257fab6900fc5a994c3aedd/file_000000002df07246ada08d5bf6048297.png"
+        style="width:52px;height:52px;object-fit:contain"
+        onerror="this.parentElement.innerHTML='<span style=font-size:28px;font-weight:900;color:#00703a>أثر</span>'">
+    </div>
+    <h1 style="font-size:20px;font-weight:900;margin-bottom:6px">برنامج أثر</h1>
+    <p style="font-size:12px;opacity:.85;line-height:1.7">الحلول المالية المتكاملة<br>للجمعيات الأهلية في مصر</p>
+    <div style="display:inline-block;background:rgba(255,255,255,.2);border-radius:20px;padding:5px 16px;margin-top:12px;font-size:11px;font-weight:800">
+      🎁 نسخة تجريبية مجانية شهر كامل
+    </div>
+  </div>
+
+  <div style="padding:16px">
+
+    <!-- مميزات -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:white;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center;border-top:3px solid #00703a">
+        <div style="font-size:22px;margin-bottom:4px">📊</div>
+        <div style="font-size:11px;font-weight:800;color:#1a2a3a">إدارة مالية</div>
+        <div style="font-size:9px;color:#6b7a8d">تقارير وميزانيات</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center;border-top:3px solid #00703a">
+        <div style="font-size:22px;margin-bottom:4px">🏛️</div>
+        <div style="font-size:11px;font-weight:800;color:#1a2a3a">متوافق مع اللوائح</div>
+        <div style="font-size:9px;color:#6b7a8d">قانون الجمعيات</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center;border-top:3px solid #00703a">
+        <div style="font-size:22px;margin-bottom:4px">🔒</div>
+        <div style="font-size:11px;font-weight:800;color:#1a2a3a">آمن وموثوق</div>
+        <div style="font-size:9px;color:#6b7a8d">حماية كاملة</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center;border-top:3px solid #00703a">
+        <div style="font-size:22px;margin-bottom:4px">📱</div>
+        <div style="font-size:11px;font-weight:800;color:#1a2a3a">سهل الاستخدام</div>
+        <div style="font-size:9px;color:#6b7a8d">واجهة عربية</div>
+      </div>
+    </div>
+
+    <!-- ملاحظة -->
+    <div style="background:#e7faf3;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-right:3px solid #00703a;font-size:11px;color:#004d29;line-height:1.8">
+      ⏳ <strong>الأماكن محدودة!</strong> سجّل الآن للحصول على نسخة تجريبية مجانية لمدة شهر كامل.
+      بعد انتهاء التجربة سيتم التواصل معك لتقييم التجربة واحتياجاتك.
+    </div>
+
+    <!-- فورم التسجيل -->
+    <div id="athar-form-wrap">
+
+      <!-- بيانات الجمعية -->
+      <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px">
+        <div style="font-size:13px;font-weight:900;color:#00703a;margin-bottom:14px;border-bottom:2px solid #f0f0f0;padding-bottom:8px">🏢 بيانات الجمعية</div>
+        <div class="fg"><label class="fl">اسم الجمعية <span style="color:#e05050">*</span></label><input class="fi" id="at-name" type="text" placeholder="الاسم الرسمي للجمعية"></div>
+        <div class="fg"><label class="fl">رقم الإشهار أو الرقم الموحد <span style="color:#e05050">*</span></label><input class="fi" id="at-reg" type="text" placeholder="رقم الإشهار / الرقم الموحد"></div>
+        <div class="fg"><label class="fl">المحافظة <span style="color:#e05050">*</span></label>
+          <select class="fi" id="at-gov">
+            <option value="">اختر المحافظة</option>
+            <option>القاهرة</option><option>الجيزة</option><option>الإسكندرية</option>
+            <option>الدقهلية</option><option>البحيرة</option><option>الفيوم</option>
+            <option>الغربية</option><option>الإسماعيلية</option><option>المنوفية</option>
+            <option>المنيا</option><option>القليوبية</option><option>الوادي الجديد</option>
+            <option>السويس</option><option>أسوان</option><option>أسيوط</option>
+            <option>بني سويف</option><option>بورسعيد</option><option>دمياط</option>
+            <option>جنوب سيناء</option><option>شمال سيناء</option><option>سوهاج</option>
+            <option>قنا</option><option>كفر الشيخ</option><option>مطروح</option>
+            <option>الأقصر</option><option>البحر الأحمر</option><option>الشرقية</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">رقم التليفون <span style="color:#e05050">*</span></label><input class="fi" id="at-phone" type="tel" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right"></div>
+        <div class="fg"><label class="fl">البريد الإلكتروني للجمعية</label><input class="fi" id="at-org-email" type="email" placeholder="info@org.com" style="direction:ltr"></div>
+      </div>
+
+      <!-- بيانات المسؤول -->
+      <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px">
+        <div style="font-size:13px;font-weight:900;color:#00703a;margin-bottom:14px;border-bottom:2px solid #f0f0f0;padding-bottom:8px">👤 بيانات مسؤول التواصل</div>
+        <div class="fg"><label class="fl">اسم مسؤول التواصل <span style="color:#e05050">*</span></label><input class="fi" id="at-contact-name" type="text" placeholder="الاسم الكامل"></div>
+        <div class="fg"><label class="fl">البريد الإلكتروني الشخصي <span style="color:#e05050">*</span></label><input class="fi" id="at-contact-email" type="email" placeholder="example@gmail.com" style="direction:ltr"></div>
+      </div>
+
+      <!-- ملاحظات -->
+      <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:14px">
+        <div style="font-size:13px;font-weight:900;color:#00703a;margin-bottom:14px;border-bottom:2px solid #f0f0f0;padding-bottom:8px">📝 توصيات وملاحظات</div>
+        <div class="fg"><label class="fl">توصيات أو طلبات خاصة</label><textarea class="fi" id="at-requests" rows="3" placeholder="أي متطلبات خاصة أو احتياجات..."></textarea></div>
+        <div class="fg"><label class="fl">ملاحظات إضافية</label><textarea class="fi" id="at-notes" rows="2" placeholder="أي ملاحظات أخرى..."></textarea></div>
+      </div>
+
+      <div id="athar-error" style="color:#e05050;font-size:12px;text-align:center;margin-bottom:10px;display:none"></div>
+      <button onclick="submitAthar()" id="athar-btn" style="width:100%;padding:14px;background:linear-gradient(135deg,#004d29,#00703a);color:white;border:none;border-radius:13px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 6px 20px rgba(0,112,58,.3);margin-bottom:100px">
+        🚀 أطلب نسختك التجريبية المجانية
+      </button>
+
+    </div>
+
+    <!-- Success -->
+    <div id="athar-success" style="display:none;text-align:center;padding:30px 0">
+      <div style="font-size:56px;margin-bottom:14px">✅</div>
+      <div style="font-size:18px;font-weight:900;color:#00703a;margin-bottom:8px">تم التسجيل بنجاح!</div>
+      <div style="font-size:12px;color:#6b7a8d;line-height:1.9">
+        شكراً لاهتمامك ببرنامج أثر<br>
+        سيتم التواصل معك خلال 48 ساعة<br>
+        لتفعيل نسختك التجريبية المجانية 🎯
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2762,7 +2897,7 @@ let jFilt='all', tFilt='all', cFilt='all', sFilt='all';
 let logoTaps=0, logoTimer=null;
 
 // ============ NAVIGATION ============
-const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus','contact-screen':'n-home'};
+const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus','contact-screen':'n-home','athar-screen':'n-home'};
 function go(id){
   // تأكد إن الـ splash مش ظاهرة
   var splash = document.getElementById('splash');
@@ -6393,6 +6528,50 @@ function manualRefresh(){
     if(btn) btn.textContent='🔄';
     toast('⚠️ تحقق من الإنترنت');
   });
+}
+
+// ============ ATHAR TRIAL REGISTRATION ============
+async function submitAthar(){
+  var name         = (document.getElementById('at-name')||{}).value||'';
+  var reg          = (document.getElementById('at-reg')||{}).value||'';
+  var gov          = (document.getElementById('at-gov')||{}).value||'';
+  var phone        = (document.getElementById('at-phone')||{}).value||'';
+  var orgEmail     = (document.getElementById('at-org-email')||{}).value||'';
+  var contactName  = (document.getElementById('at-contact-name')||{}).value||'';
+  var contactEmail = (document.getElementById('at-contact-email')||{}).value||'';
+  var requests     = (document.getElementById('at-requests')||{}).value||'';
+  var notes        = (document.getElementById('at-notes')||{}).value||'';
+
+  var err = document.getElementById('athar-error');
+  err.style.display='none';
+  if(!name.trim())        { err.textContent='⚠️ أدخل اسم الجمعية'; err.style.display='block'; return; }
+  if(!reg.trim())         { err.textContent='⚠️ أدخل رقم الإشهار'; err.style.display='block'; return; }
+  if(!gov)                { err.textContent='⚠️ اختر المحافظة'; err.style.display='block'; return; }
+  if(!phone.trim())       { err.textContent='⚠️ أدخل رقم التليفون'; err.style.display='block'; return; }
+  if(!contactName.trim()) { err.textContent='⚠️ أدخل اسم مسؤول التواصل'; err.style.display='block'; return; }
+  if(!contactEmail.trim()){ err.textContent='⚠️ أدخل البريد الإلكتروني الشخصي'; err.style.display='block'; return; }
+
+  var btn = document.getElementById('athar-btn');
+  btn.textContent='⏳ جاري الإرسال...'; btn.disabled=true;
+
+  try{
+    await db.collection('athar_trials').add({
+      orgName: name.trim(), regNumber: reg.trim(), gov: gov,
+      phone: phone.trim(), orgEmail: orgEmail.trim(),
+      contactName: contactName.trim(), contactEmail: contactEmail.trim(),
+      requests: requests.trim(), notes: notes.trim(),
+      status: 'pending', source: 'tanmoyeen_masr',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('athar-form-wrap').style.display='none';
+    document.getElementById('athar-success').style.display='block';
+    sendEmailNotif('🌿 طلب تجربة أثر جديد - '+name.trim(), 'الجمعية: '+name+'\nرقم الإشهار: '+reg+'\nالمحافظة: '+gov+'\nالتليفون: '+phone+'\nمسؤول التواصل: '+contactName+'\nإيميل: '+contactEmail);
+  }catch(e){
+    err.textContent='❌ حدث خطأ، حاول مرة أخرى';
+    err.style.display='block';
+    btn.textContent='🚀 أطلب نسختك التجريبية المجانية';
+    btn.disabled=false;
+  }
 }
 
 // ============ CONTACT ADMIN ============

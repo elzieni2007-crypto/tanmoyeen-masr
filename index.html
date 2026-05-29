@@ -686,12 +686,19 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="tb-ico"><img id="logo-tb" src="" alt="logo"></div>
     <div><div class="tb-t">تنمويين مصر</div><div class="tb-s">لكل تنموي في مصر</div></div>
   </div>
-  <div class="tb-acts">
-    <button class="ib" id="notif-bell-btn" onclick="go('notifs')" style="position:relative">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <div class="nd" id="notif-dot" style="display:none"></div>
-      <div id="notif-badge" style="display:none;position:absolute;top:-4px;left:-4px;background:#e05050;color:white;font-size:9px;font-weight:900;font-family:Cairo,sans-serif;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--p)">0</div>
-    </button>
+  <div style="display:flex;align-items:center;gap:8px">
+    <a href="https://play.google.com/store/apps/details?id=co.median.android.xlpkzqd" target="_blank"
+      style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border-radius:20px;padding:5px 10px;text-decoration:none;border:1px solid rgba(255,255,255,.25)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M3 20.5v-17c0-.83 1-.96 1.45-.43l16 8.5a.5.5 0 0 1 0 .86l-16 8.5C3.98 21.46 3 21.33 3 20.5z"/></svg>
+      <span style="color:white;font-size:10px;font-weight:700;font-family:Cairo,sans-serif">تحميل</span>
+    </a>
+    <div class="tb-acts">
+      <button class="ib" id="notif-bell-btn" onclick="go('notifs')" style="position:relative">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="nd" id="notif-dot" style="display:none"></div>
+        <div id="notif-badge" style="display:none;position:absolute;top:-4px;left:-4px;background:#e05050;color:white;font-size:9px;font-weight:900;font-family:Cairo,sans-serif;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--p)">0</div>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1088,11 +1095,19 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div id="athar-success" style="display:none;text-align:center;padding:30px 0">
       <div style="font-size:56px;margin-bottom:14px">✅</div>
       <div style="font-size:18px;font-weight:900;color:#00703a;margin-bottom:8px">تم التسجيل بنجاح!</div>
-      <div style="font-size:12px;color:#6b7a8d;line-height:1.9">
+      <div style="font-size:12px;color:#6b7a8d;line-height:1.9;margin-bottom:20px">
         شكراً لاهتمامك ببرنامج أثر<br>
         سيتم التواصل معك خلال 48 ساعة<br>
         لتفعيل نسختك التجريبية المجانية 🎯
       </div>
+      <a href="https://play.google.com/store/apps/details?id=co.median.android.xlpkzqd" target="_blank"
+        style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#1a3a6e,#0094cc);border-radius:14px;padding:14px 16px;text-decoration:none;margin-bottom:100px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M3 20.5v-17c0-.83 1-.96 1.45-.43l16 8.5a.5.5 0 0 1 0 .86l-16 8.5C3.98 21.46 3 21.33 3 20.5z"/></svg>
+        <div style="flex:1;text-align:right">
+          <div style="color:white;font-size:13px;font-weight:900">حمّل تطبيق تنمويين مصر</div>
+          <div style="color:rgba(255,255,255,.75);font-size:10px">تابع الفرص والمستجدات أولاً بأول</div>
+        </div>
+      </a>
     </div>
 
   </div>

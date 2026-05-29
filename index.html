@@ -48,7 +48,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 /* SCREENS */
 .scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
 .scr.on{display:block;animation:fi .28s ease;position:relative}
-#admin.on{display:block!important;position:fixed;inset:0;z-index:1000;overflow-y:auto;background:var(--bg)}
+#admin.on{display:block!important;position:fixed!important;inset:0!important;z-index:1000!important;overflow-y:auto;background:var(--bg);min-height:unset;padding-bottom:0}
 #home{overflow-y:visible}
 html,body{scroll-behavior:auto;overflow-x:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}

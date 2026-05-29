@@ -2903,6 +2903,7 @@ function handleUrlParams(){
   if(fp==='job'){setTimeout(()=>{go('jobs');setTimeout(openSubmitJob,400);},300);}
   else if(fp==='tender'){setTimeout(()=>{go('tenders');setTimeout(openSubmitTender,400);},300);}
   else if(fp==='consult'){setTimeout(()=>{go('consult-screen');},300);}
+  else if(fp==='athar'){setTimeout(()=>{go('athar-screen');},300);}
   else if(fp==='expert'||fp==='sup'||fp==='org'||fp==='jobseeker'||fp==='volunteer'){
     setTimeout(()=>{go('register');setTimeout(function(){ selectRegType(fp); },400);},300);
   }

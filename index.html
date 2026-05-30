@@ -56,7 +56,7 @@ html,body{scroll-behavior:auto;overflow-x:hidden}
 /* SPLASH */
 #splash{
   background:linear-gradient(150deg,#0d2654 0%,#1a3a6e 45%,#0094cc 100%);
-  display:flex!important;flex-direction:column;align-items:center;justify-content:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
   min-height:100vh;padding-bottom:0;position:relative;overflow:hidden;
 }
 .sp-ring{position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
@@ -5111,7 +5111,7 @@ function doLogout(){
   document.getElementById('adm-pass').value = '';
 }
 
-async async function loadAdminData(){
+async async async function loadAdminData(){
   var allData = [];
   var collections = ['jobseekers','consultants','suppliers','organizations','volunteers'];
   var labels = {

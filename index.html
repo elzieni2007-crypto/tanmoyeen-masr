@@ -4528,26 +4528,28 @@ const VOLUNTEERS_PRELOAD = [];
 var VOLUNTEERS_DATA = [];
 var volFilter = 'all';
 
-function loadVolunteers(){
-  var stored = [];
-  try{ stored = []; }catch(e){}
-  // Firebase data takes priority
-  var fbData = window.VOLUNTEERS_PRELOAD || [];
-  var merged;
-  if(fbData.length > 0){
-    // Firebase هو المصدر الرئيسي — نضيف التسجيلات الجديدة من localStorage فقط لو مش موجودة
-    var fbPhones = fbData.map(function(v){ return v.phone; });
-    var newOnly = stored.filter(function(v){ return v.phone && !fbPhones.includes(v.phone); });
-    merged = fbData.concat(newOnly);
-  } else {
-    merged = stored;
+async function loadVolunteers(){
+  try {
+    if(typeof db === 'undefined') return;
+    var snap = await db.collection('volunteers').limit(300).get();
+    var fresh = [];
+    snap.docs.forEach(function(d){
+      var r = d.data();
+      if(r.name) fresh.push(Object.assign({}, r, {id:d.id, interests:r.interests||[], badges:r.badges||[], photo:r.photo||''}));
+    });
+    VOLUNTEERS_DATA = fresh;
+    window.VOLUNTEERS_PRELOAD = fresh;
+    try{ localStorage.setItem('cache_vols', JSON.stringify(fresh.slice(0,100))); }catch(e){}
+  } catch(e) {
+    console.error('loadVolunteers error:', e);
+    // fallback to cache
+    try{ var v=JSON.parse(localStorage.getItem('cache_vols')||'[]'); VOLUNTEERS_DATA=v; window.VOLUNTEERS_PRELOAD=v; }catch(e2){}
   }
-  VOLUNTEERS_DATA = merged;
   renderVolunteers();
   var badge = document.getElementById('vol-count-badge');
-  if(badge) badge.textContent = merged.length + ' متطوع';
+  if(badge) badge.textContent = VOLUNTEERS_DATA.length + ' متطوع';
   var dashCount = document.getElementById('vol-dash-count');
-  if(dashCount) dashCount.textContent = merged.length + ' متطوع';
+  if(dashCount) dashCount.textContent = VOLUNTEERS_DATA.length + ' متطوع';
   updateAllCounts();
 }
 
@@ -5117,6 +5119,15 @@ async function loadAdminData(){
     jobseekers:'باحثين عمل', consultants:'استشاريين',
     suppliers:'موردين', organizations:'مؤسسات', volunteers:'متطوعين'
   };
+
+  // انتظر Firebase
+  if(typeof db === 'undefined'){
+    var retries = 0;
+    while(typeof db === 'undefined' && retries < 10){
+      await new Promise(function(r){ setTimeout(r, 300); });
+      retries++;
+    }
+  }
 
   if(typeof db !== 'undefined'){
     try {

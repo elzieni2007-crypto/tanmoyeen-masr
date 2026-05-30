@@ -2980,7 +2980,11 @@ function go(id){
     var dot=document.getElementById('notif-dot');
     if(dot) dot.style.display='none';
   }
-  if(id==='volunteers') loadVolunteers();
+  if(id==='volunteers'){ 
+    var vlist = document.getElementById('volunteers-list');
+    if(vlist) vlist.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">⏳ جاري التحميل...</div>';
+    loadVolunteers(); 
+  }
   if(id==='orgs-screen') setTimeout(renderOrgs,50);
   if(id==='home') setupHeroShrink();
 }
@@ -6477,17 +6481,13 @@ function goAdmin(){
   var a = document.getElementById('admin');
   a.style.display = 'block';
   a.style.position = 'fixed';
-  a.style.top = '0';
-  a.style.left = '0';
-  a.style.right = '0';
-  a.style.bottom = '0';
-  a.style.zIndex = '99999';
-  a.style.overflowY = 'auto';
-  a.style.background = '#f0f4f9';
-  a.style.width = '100%';
-  a.style.minHeight = '100vh';
+  a.style.top = '0'; a.style.left = '0'; a.style.right = '0'; a.style.bottom = '0';
+  a.style.zIndex = '99999'; a.style.overflowY = 'auto';
+  a.style.background = '#f0f4f9'; a.style.width = '100%'; a.style.minHeight = '100vh';
 
-  if(typeof auth !== 'undefined' && auth.currentUser) isLoggedIn = true;
+  // تحقق من Auth
+  var user = (typeof auth !== 'undefined') ? auth.currentUser : null;
+  if(user) isLoggedIn = true;
 
   if(!isLoggedIn){
     document.getElementById('admin-login-screen').style.display = 'block';

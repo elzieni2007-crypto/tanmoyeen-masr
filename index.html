@@ -6469,9 +6469,12 @@ function goAdmin(){
   a.style.display = 'block';
   a.classList.add('on');
 
-  document.getElementById('admin-login-screen').style.display = 'block';
-  document.getElementById('admin-dashboard').style.display = 'none';
+  var ls = document.getElementById('admin-login-screen');
+  var db2 = document.getElementById('admin-dashboard');
+  ls.style.display = 'block';
+  db2.style.display = 'none';
 
+  alert('admin display: ' + a.style.display + ' | login: ' + ls.style.display);
   window.scrollTo(0,0);
 }
 

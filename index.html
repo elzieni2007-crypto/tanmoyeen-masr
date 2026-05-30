@@ -2596,7 +2596,7 @@ async function saveToFirebase(type, data){
 async function loadPendingFromFirebase(){
   try {
     var snap = await db.collection('pending_jobs')
-      .orderBy('timestamp','desc')
+      
       .get();
     return snap.docs
       .filter(function(d){ return d.data().status === 'pending'; })
@@ -5577,7 +5577,7 @@ function renderPublishedJobsNew(){
   if(!el) return;
   el.innerHTML = skeletonCards(3);
   if(typeof db === 'undefined'){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ Firebase غير متصل</div>'; return; }
-  db.collection('jobs').orderBy('timestamp','desc').get().then(function(snap){
+  db.collection('jobs').get().then(function(snap){
     var jobs=[];
     snap.docs.forEach(function(d){ jobs.push(Object.assign({},d.data(),{fbId:d.id})); });
     _renderJobsList(el, jobs);
@@ -5596,7 +5596,7 @@ function renderPublishedTendersNew(){
   if(!el) return;
   el.innerHTML = skeletonCards(3);
   if(typeof db === 'undefined'){ el.innerHTML='<div style="color:#e05050;padding:16px">❌ Firebase غير متصل</div>'; return; }
-  db.collection('tenders').orderBy('timestamp','desc').get().then(function(snap){
+  db.collection('tenders').get().then(function(snap){
     var tenders=[];
     snap.docs.forEach(function(d){ tenders.push(Object.assign({},d.data(),{fbId:d.id})); });
     _renderTendersList(el, tenders);
@@ -6316,7 +6316,7 @@ async function loadAdminVols(){
   list.innerHTML = "<div style='text-align:center;padding:20px;color:var(--muted)'>⏳ جاري التحميل...</div>";
   if(typeof db === 'undefined'){ list.innerHTML = '<div style="color:#e05050;padding:16px">❌ Firebase غير متصل</div>'; return; }
   try {
-    var snap = await db.collection("volunteers").orderBy("timestamp","desc").get();
+    var snap = await db.collection("volunteers").get();
     var vols = [];
     snap.docs.forEach(function(d){ vols.push(Object.assign({},d.data(),{fbId:d.id})); });
     if(countEl) countEl.textContent = vols.length;
@@ -6406,7 +6406,7 @@ async function loadBroadcastHistory(){
   if(!hist || typeof db === 'undefined') return;
   try {
     var snap = await db.collection('broadcasts')
-      .orderBy('timestamp','desc').limit(10).get();
+      .limit(10).get();
     if(snap.empty){
       hist.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center;padding:20px">لا توجد إشعارات سابقة</div>';
       return;
@@ -6465,6 +6465,7 @@ function goAdmin(){
   document.getElementById('splash').style.display = 'none';
 
   var a = document.getElementById('admin');
+  a.classList.add('on');
   a.style.cssText = 'display:block;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;overflow-y:auto;background:#f0f4f9;width:100%;min-height:100vh';
 
   var ls = document.getElementById('admin-login-screen');
@@ -7100,7 +7101,7 @@ function checkNewRegs(){
     try{
       // onSnapshot عشان يجيب تسجيلات جديدة فوراً
       var unsub = db.collection(c.col)
-        .orderBy('timestamp','desc')
+        
         .limit(3)
         .onSnapshot(function(snap){
           snap.docChanges().forEach(function(change){
@@ -7121,7 +7122,7 @@ function checkNewRegs(){
           });
         }, function(){ 
           // fallback لو onSnapshot ما شتغلش
-          db.collection(c.col).orderBy('timestamp','desc').limit(5).get().then(function(snap){
+          db.collection(c.col).limit(5).get().then(function(snap){
             snap.docs.forEach(function(d){
               var r = d.data();
               var ts = r.timestamp ? r.timestamp.toMillis() : 0;

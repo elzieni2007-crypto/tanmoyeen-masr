@@ -48,7 +48,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 /* SCREENS */
 .scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
 .scr.on{display:block;animation:fi .28s ease;position:relative}
-#admin{display:none;position:fixed;inset:0;z-index:99999;overflow-y:auto;background:var(--bg);width:100%;min-height:100vh}#admin.on{display:block}
+#admin{display:none;position:fixed;inset:0;z-index:99999;overflow-y:auto;background:#f0f4f9;width:100%;min-height:100vh}#admin.on{display:block}
 #home{overflow-y:visible}
 html,body{scroll-behavior:auto;overflow-x:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -6459,6 +6459,7 @@ function goAdmin(){
   document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('on'); });
 
   var adminEl = document.getElementById('admin');
+  adminEl.classList.add('on');
   adminEl.style.display = 'block';
   adminEl.style.position = 'fixed';
   adminEl.style.top = '0';

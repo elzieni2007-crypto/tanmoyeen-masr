@@ -687,10 +687,10 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div><div class="tb-t">تنمويين مصر</div><div class="tb-s">لكل تنموي في مصر</div></div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <a href="https://play.google.com/store/apps/details?id=co.median.android.xlpkzqd" target="_blank"
+    <a href="https://play.google.com/store/apps/details?id=co.median.android.xlpkzqd" target="_blank" id="dl-btn"
       style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border-radius:20px;padding:5px 10px;text-decoration:none;border:1px solid rgba(255,255,255,.25)">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M3 20.5v-17c0-.83 1-.96 1.45-.43l16 8.5a.5.5 0 0 1 0 .86l-16 8.5C3.98 21.46 3 21.33 3 20.5z"/></svg>
-      <span style="color:white;font-size:10px;font-weight:700;font-family:Cairo,sans-serif">📱 تحميل التطبيق</span>
+      <span style="color:white;font-size:10px;font-weight:700;font-family:Cairo,sans-serif">📱 تحميل</span>
     </a>
     <div class="tb-acts">
       <button class="ib" id="notif-bell-btn" onclick="go('notifs')" style="position:relative">
@@ -2895,6 +2895,14 @@ function loadFromFirebase(){
     });
   }
   setTimeout(setupHeroShrink, 100);
+  // إخفاء زرار التحميل لو على التطبيق
+  if(window.navigator.userAgent.indexOf('gonative') > -1 || window.navigator.userAgent.indexOf('median') > -1 || window.gonative){
+    var dlBtn = document.getElementById('dl-btn');
+    if(dlBtn) dlBtn.style.display = 'none';
+  }
+  // فتح الأدمن لو URL فيه admin=1
+  var urlP = new URLSearchParams(window.location.search);
+  if(urlP.get('admin')==='1'){ setTimeout(goAdmin, 800); }
 
 // Handle URL params - called after app loads
 function handleUrlParams(){
@@ -2986,7 +2994,11 @@ function logoTap(){
   logoTaps++;
   clearTimeout(logoTimer);
   logoTimer=setTimeout(()=>logoTaps=0,2000);
-  if(logoTaps>=5){logoTaps=0;goAdmin();toast('🛡️ وصول الأدمن');}
+  if(logoTaps>=5){
+    logoTaps=0;
+    toast('🛡️ وصول الأدمن');
+    window.open(window.location.href.split('?')[0]+'?admin=1','_blank');
+  }
 }
 
 // ============ DASHBOARD ============

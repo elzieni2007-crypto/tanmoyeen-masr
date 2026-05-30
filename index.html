@@ -48,7 +48,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 /* SCREENS */
 .scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
 .scr.on{display:block;animation:fi .28s ease;position:relative}
-#admin{display:none}#admin.on{display:block!important;position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;z-index:99999!important;overflow-y:auto!important;background:var(--bg)!important;min-height:100vh!important;width:100%!important}
+#admin{display:none;position:fixed;inset:0;z-index:99999;overflow-y:auto;background:var(--bg);width:100%;min-height:100vh}#admin.on{display:block}
 #home{overflow-y:visible}
 html,body{scroll-behavior:auto;overflow-x:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -994,7 +994,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 </div>
 
 <!-- شاشة أثر -->
-<div id="athar-screen" class="scr" style="position:relative;z-index:1">
+<div id="athar-screen" class="scr">
 
   <!-- هيدر -->
   <div style="background:linear-gradient(135deg,#004d29,#00703a,#00b894);padding:24px 16px 20px;color:white;text-align:center;position:relative;overflow:hidden">
@@ -1903,7 +1903,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 </div>
 
 <!-- ADMIN LOGIN + DASHBOARD -->
-<div id="admin" class="scr">
+<div id="admin">
 
   <!-- شاشة الدخول -->
   <div id="admin-login-screen">
@@ -2942,9 +2942,17 @@ function go(id){
   const el = document.getElementById(id);
   if(!el) return;
 
+  // اقفل الأدمن لو مفتوح
+  var adminEl = document.getElementById('admin');
+  if(adminEl && id !== 'admin'){
+    adminEl.classList.remove('on');
+    adminEl.style.cssText = 'display:none';
+  }
+
   document.querySelectorAll('.scr').forEach(s=>{
     s.classList.remove('on');
     s.scrollTop = 0;
+    if(s.id !== 'admin') s.style.display = '';
   });
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
 
@@ -6443,14 +6451,17 @@ function loadCustomContent(){
 
 // إعادة توجيه لشاشة الدخول لو مش logged in - تم الإصلاح
 function goAdmin(){
-  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  // اخفي كل الشاشات بالقوة
+  document.querySelectorAll('.scr').forEach(function(s){
+    s.classList.remove('on');
+    if(s.id !== 'admin') s.style.display = 'none';
+  });
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+
   var adminEl = document.getElementById('admin');
   adminEl.classList.add('on');
-  adminEl.style.display = 'block';
-  adminEl.style.zIndex = '1000';
+  adminEl.style.cssText = 'display:block!important;position:fixed!important;top:0;left:0;right:0;bottom:0;z-index:99999;overflow-y:auto;background:var(--bg);width:100%;min-height:100vh';
   window.scrollTo(0,0);
-  document.body.scrollTop = 0;
 
   if(typeof auth !== 'undefined' && auth.currentUser){
     isLoggedIn = true;
@@ -6464,6 +6475,13 @@ function goAdmin(){
     document.getElementById('admin-dashboard').style.display = 'block';
     loadAdminData();
   }
+}
+
+function closeAdmin(){
+  var adminEl = document.getElementById('admin');
+  adminEl.classList.remove('on');
+  adminEl.style.cssText = 'display:none';
+  go('home');
 }
 
 

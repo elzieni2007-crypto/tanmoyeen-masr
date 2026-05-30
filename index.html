@@ -2765,10 +2765,7 @@ function enterApp(){
   var splash = document.getElementById('splash');
   var app = document.getElementById('app');
   if(!splash || !app) return;
-  // إخفاء دائم للـ splash
   splash.style.display = 'none';
-  splash.style.visibility = 'hidden';
-  splash.style.pointerEvents = 'none';
   app.style.display = 'block';
   window.scrollTo(0,0);
   document.body.scrollTop = 0;
@@ -7146,13 +7143,12 @@ window.addEventListener('load',function(){setTimeout(renderNewRegs,1000);});
 window.addEventListener('load',()=>{
   // بعد 5 ثواني الـ splash تصغر وتظهر الرئيسية
   setTimeout(()=>{
-    // لو المستخدم لسه في الـ splash
     var splash = document.getElementById('splash');
-    if(splash && splash.style.display !== 'none'){
-      enterApp();
-      handleUrlParams();
-    }
-  }, 5000);
+    if(splash){ splash.style.display='none'; }
+    var app = document.getElementById('app');
+    if(app) app.style.display = 'block';
+    handleUrlParams();
+  }, 3000);
 });
 </script>
 

@@ -6463,18 +6463,15 @@ function loadCustomContent(){
 // إعادة توجيه لشاشة الدخول لو مش logged in - تم الإصلاح
 function goAdmin(){
   document.getElementById('splash').style.display = 'none';
-  document.getElementById('app').style.display = 'none';
 
   var a = document.getElementById('admin');
-  a.style.display = 'block';
-  a.classList.add('on');
+  a.style.cssText = 'display:block;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;overflow-y:auto;background:#f0f4f9;width:100%;min-height:100vh';
 
   var ls = document.getElementById('admin-login-screen');
   var db2 = document.getElementById('admin-dashboard');
   ls.style.display = 'block';
   db2.style.display = 'none';
 
-  alert('admin display: ' + a.style.display + ' | login: ' + ls.style.display);
   window.scrollTo(0,0);
 }
 

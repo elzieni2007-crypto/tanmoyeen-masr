@@ -1921,7 +1921,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
         <div class="fg"><label class="fl">كلمة المرور</label>
           <input class="fi" id="adm-pass" type="password" placeholder="••••••••" style="direction:ltr;text-align:left" onkeydown="if(event.key==='Enter')doLogin()">
         </div>
-        <button class="sbtn" onclick="doLogin()">🔓 دخول لوحة التحكم</button>
+        <button id="login-btn" class="sbtn" onclick="doLogin()">🔓 دخول لوحة التحكم</button>
         <div class="adm-pw-hint">💡 اضغط على الشعار 5 مرات للوصول</div>
       </div>
     </div>
@@ -5070,7 +5070,7 @@ function doLogin(){
         err.classList.remove('on');
         if(btn) btn.textContent = 'دخول';
         document.getElementById('admin-login-screen').style.display = 'none';
-        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('admin-dashboard').style.display = 'block';
         loadAdminData();
         toast('✅ مرحباً ' + (cred.user.email||''));
       })
@@ -5080,7 +5080,7 @@ function doLogin(){
           isLoggedIn = true;
           err.classList.remove('on');
           document.getElementById('admin-login-screen').style.display = 'none';
-          document.getElementById('admin-panel').style.display = 'block';
+          document.getElementById('admin-dashboard').style.display = 'block';
           loadAdminData();
         } else {
           err.classList.add('on');
@@ -5094,7 +5094,7 @@ function doLogin(){
       isLoggedIn = true;
       err.classList.remove('on');
       document.getElementById('admin-login-screen').style.display = 'none';
-      document.getElementById('admin-panel').style.display = 'block';
+      document.getElementById('admin-dashboard').style.display = 'block';
       loadAdminData();
     } else {
       err.classList.add('on');

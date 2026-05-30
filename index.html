@@ -5125,7 +5125,13 @@ async function loadAdminData(){
         var col = collections[i];
         try {
           var snap = await db.collection(col).limit(200).get();
-          snap.docs.forEach(function(d){
+          var docs = snap.docs.sort(function(a,b){
+            var ta = a.data().timestamp ? a.data().timestamp.toMillis() : 0;
+            var tb = b.data().timestamp ? b.data().timestamp.toMillis() : 0;
+            return tb - ta;
+          });
+          console.log('✅ '+col+':', docs.length, 'records');
+          docs.forEach(function(d){
             var typeKey = col==='consultants'?'expert':col==='suppliers'?'sup':col==='organizations'?'org':col==='jobseekers'?'jobseeker':col;
             allData.push(Object.assign({}, d.data(), {fbId:d.id, _type:typeKey, _col:col, _label:labels[col]||col}));
           });

@@ -6451,16 +6451,25 @@ function loadCustomContent(){
 
 // إعادة توجيه لشاشة الدخول لو مش logged in - تم الإصلاح
 function goAdmin(){
-  // اخفي كل الشاشات بالقوة
+  // اخفي كل الشاشات
   document.querySelectorAll('.scr').forEach(function(s){
     s.classList.remove('on');
-    if(s.id !== 'admin') s.style.display = 'none';
+    s.style.display = 'none';
   });
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('on'); });
 
   var adminEl = document.getElementById('admin');
-  adminEl.classList.add('on');
-  adminEl.style.cssText = 'display:block!important;position:fixed!important;top:0;left:0;right:0;bottom:0;z-index:99999;overflow-y:auto;background:var(--bg);width:100%;min-height:100vh';
+  adminEl.style.display = 'block';
+  adminEl.style.position = 'fixed';
+  adminEl.style.top = '0';
+  adminEl.style.left = '0';
+  adminEl.style.right = '0';
+  adminEl.style.bottom = '0';
+  adminEl.style.zIndex = '99999';
+  adminEl.style.overflowY = 'auto';
+  adminEl.style.background = '#f0f4f9';
+  adminEl.style.width = '100%';
+  adminEl.style.minHeight = '100vh';
   window.scrollTo(0,0);
 
   if(typeof auth !== 'undefined' && auth.currentUser){

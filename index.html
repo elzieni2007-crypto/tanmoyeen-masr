@@ -5124,7 +5124,7 @@ async function loadAdminData(){
       for(var i=0; i<collections.length; i++){
         var col = collections[i];
         try {
-          var snap = await db.collection(col).orderBy('timestamp','desc').limit(200).get();
+          var snap = await db.collection(col).limit(200).get();
           snap.docs.forEach(function(d){
             var typeKey = col==='consultants'?'expert':col==='suppliers'?'sup':col==='organizations'?'org':col==='jobseekers'?'jobseeker':col;
             allData.push(Object.assign({}, d.data(), {fbId:d.id, _type:typeKey, _col:col, _label:labels[col]||col}));

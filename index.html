@@ -2945,41 +2945,14 @@ let logoTaps=0, logoTimer=null;
 // ============ NAVIGATION ============
 const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus','contact-screen':'n-home','athar-screen':'n-home'};
 function go(id){
-  var splash = document.getElementById('splash');
-  if(splash) splash.style.display = 'none';
-  var app = document.getElementById('app');
-  if(app) app.style.display = 'block';
-
+  document.querySelectorAll('.scr').forEach(function(s){ s.classList.remove('on'); });
+  document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('on'); });
   var el = document.getElementById(id);
   if(!el) return;
-
-  // اخفي الأدمن بالكامل
-  var adm = document.getElementById('admin');
-  if(adm){ 
-    adm.style.display='none'; 
-    adm.style.position='static'; 
-    adm.style.zIndex='-1';
-    adm.style.visibility='hidden';
-  }
-
-  // اخفي كل الشاشات
-  document.querySelectorAll('.scr').forEach(function(s){
-    s.classList.remove('on');
-    s.scrollTop = 0;
-  });
-
-  document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('on'); });
-
-  // اظهر الشاشة المطلوبة
   el.classList.add('on');
-  el.scrollTop = 0;
-
   var nid = navMap[id];
   if(nid){ var nel=document.getElementById(nid); if(nel) nel.classList.add('on'); }
-
   window.scrollTo(0,0);
-  document.body.scrollTop = 0;
-
   if(id==='consultants') renderCons();
   if(id==='suppliers') renderSups();
   if(id==='tenders') renderTenders();
@@ -2990,34 +2963,7 @@ function go(id){
     var dot=document.getElementById('notif-dot');
     if(dot) dot.style.display='none';
   }
-  if(id==='volunteers'){
-    var vlist = document.getElementById('volunteers-list');
-    if(vlist) vlist.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">⏳ جاري التحميل...</div>';
-    if(typeof db !== 'undefined'){
-      db.collection('volunteers').limit(300).get().then(function(snap){
-        var fresh=[];
-        snap.docs.forEach(function(d){
-          var r=d.data();
-          if(r.name) fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[],photo:r.photo||''}));
-        });
-        if(fresh.length > 0){
-          VOLUNTEERS_DATA = fresh;
-          window.VOLUNTEERS_PRELOAD = fresh;
-        } else if(window.VOLUNTEERS_PRELOAD && window.VOLUNTEERS_PRELOAD.length > 0){
-          VOLUNTEERS_DATA = window.VOLUNTEERS_PRELOAD;
-        }
-        renderVolunteers();
-        updateAllCounts();
-      }).catch(function(){
-        if(window.VOLUNTEERS_PRELOAD && window.VOLUNTEERS_PRELOAD.length > 0){
-          VOLUNTEERS_DATA = window.VOLUNTEERS_PRELOAD;
-        }
-        renderVolunteers();
-      });
-    } else {
-      renderVolunteers();
-    }
-  }
+  if(id==='volunteers') loadVolsFromSheet().then(function(){ loadVolunteers(); });
   if(id==='orgs-screen') setTimeout(renderOrgs,50);
   if(id==='register') setTimeout(function(){ switchRegType('jobseeker'); },100);
   if(id==='home') setupHeroShrink();

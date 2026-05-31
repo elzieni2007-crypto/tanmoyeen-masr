@@ -48,7 +48,7 @@ input,select,textarea{font-family:'Cairo',sans-serif}
 /* SCREENS */
 .scr{display:none;min-height:100vh;padding-bottom:calc(var(--bot)+160px)}
 .scr.on{display:block;animation:fi .28s ease;position:relative}
-#admin{display:none;position:fixed;inset:0;z-index:99999;overflow-y:auto;background:#f0f4f9;width:100%;min-height:100vh}#admin.on{display:block}
+#admin.on{position:fixed;inset:0;z-index:1000;overflow-y:auto;background:var(--bg)}
 #home{overflow-y:visible}
 html,body{scroll-behavior:auto;overflow-x:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -1903,7 +1903,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 </div>
 
 <!-- ADMIN LOGIN + DASHBOARD -->
-<div id="admin">
+<div id="admin" class="scr">
 
   <!-- شاشة الدخول -->
   <div id="admin-login-screen">
@@ -6443,24 +6443,19 @@ function loadCustomContent(){
 
 // إعادة توجيه لشاشة الدخول لو مش logged in - تم الإصلاح
 function goAdmin(){
-  document.getElementById('splash').style.display = 'none';
-  var a = document.getElementById('admin');
-  a.style.visibility = 'visible';
-  a.style.display = 'block';
-  a.style.position = 'fixed';
-  a.style.top = '0'; a.style.left = '0'; a.style.right = '0'; a.style.bottom = '0';
-  a.style.zIndex = '99999'; a.style.overflowY = 'auto';
-  a.style.background = '#f0f4f9'; a.style.width = '100%'; a.style.minHeight = '100vh';
-  if(typeof auth!=='undefined'&&auth.currentUser) isLoggedIn=true;
+  document.querySelectorAll('.scr').forEach(function(s){ s.classList.remove('on'); });
+  document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('on'); });
+  document.getElementById('admin').classList.add('on');
+  window.scrollTo(0,0);
+  if(typeof auth !== 'undefined' && auth.currentUser) isLoggedIn = true;
   if(!isLoggedIn){
-    document.getElementById('admin-login-screen').style.display='block';
-    document.getElementById('admin-dashboard').style.display='none';
+    document.getElementById('admin-login-screen').style.display = 'block';
+    document.getElementById('admin-dashboard').style.display = 'none';
   } else {
-    document.getElementById('admin-login-screen').style.display='none';
-    document.getElementById('admin-dashboard').style.display='block';
+    document.getElementById('admin-login-screen').style.display = 'none';
+    document.getElementById('admin-dashboard').style.display = 'block';
     loadAdminData();
   }
-  window.scrollTo(0,0);
 }
 
 function closeAdmin(){

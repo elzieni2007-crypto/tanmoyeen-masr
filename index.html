@@ -2988,7 +2988,27 @@ function go(id){
   if(id==='volunteers'){
     var vlist = document.getElementById('volunteers-list');
     if(vlist) vlist.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">⏳ جاري التحميل...</div>';
-    loadVolunteers();
+    // جيب مباشرة من Firebase
+    if(typeof db !== 'undefined'){
+      db.collection('volunteers').limit(300).get().then(function(snap){
+        var fresh=[];
+        snap.docs.forEach(function(d){
+          var r=d.data();
+          if(r.name) fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[],photo:r.photo||''}));
+        });
+        if(fresh.length > 0){
+          VOLUNTEERS_DATA = fresh;
+          window.VOLUNTEERS_PRELOAD = fresh;
+        }
+        renderVolunteers();
+        updateAllCounts();
+      }).catch(function(e){
+        console.error('volunteers direct:', e.message);
+        renderVolunteers();
+      });
+    } else {
+      renderVolunteers();
+    }
   }
   if(id==='orgs-screen') setTimeout(renderOrgs,50);
   if(id==='register') setTimeout(function(){ switchRegType('jobseeker'); },100);

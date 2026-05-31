@@ -2988,7 +2988,6 @@ function go(id){
   if(id==='volunteers'){
     var vlist = document.getElementById('volunteers-list');
     if(vlist) vlist.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">⏳ جاري التحميل...</div>';
-    // جيب مباشرة من Firebase
     if(typeof db !== 'undefined'){
       db.collection('volunteers').limit(300).get().then(function(snap){
         var fresh=[];
@@ -2999,11 +2998,15 @@ function go(id){
         if(fresh.length > 0){
           VOLUNTEERS_DATA = fresh;
           window.VOLUNTEERS_PRELOAD = fresh;
+        } else if(window.VOLUNTEERS_PRELOAD && window.VOLUNTEERS_PRELOAD.length > 0){
+          VOLUNTEERS_DATA = window.VOLUNTEERS_PRELOAD;
         }
         renderVolunteers();
         updateAllCounts();
-      }).catch(function(e){
-        console.error('volunteers direct:', e.message);
+      }).catch(function(){
+        if(window.VOLUNTEERS_PRELOAD && window.VOLUNTEERS_PRELOAD.length > 0){
+          VOLUNTEERS_DATA = window.VOLUNTEERS_PRELOAD;
+        }
         renderVolunteers();
       });
     } else {
@@ -4553,41 +4556,21 @@ function openOrg(idx){
 }
 
 
-window.VOLUNTEERS_PRELOAD = window.VOLUNTEERS_PRELOAD || [];
+var VOLUNTEERS_PRELOAD = [];
 
 var VOLUNTEERS_DATA = [];
 var volFilter = 'all';
 
-async function loadVolunteers(){
-  var list = document.getElementById('volunteers-list');
-  try {
-    if(typeof db !== 'undefined'){
-      var snap = await db.collection('volunteers').limit(300).get();
-      var fresh = [];
-      snap.docs.forEach(function(d){
-        var r = d.data();
-        if(r.name) fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[],photo:r.photo||''}));
-      });
-      if(fresh.length > 0){
-        VOLUNTEERS_DATA = fresh;
-        window.VOLUNTEERS_PRELOAD = fresh;
-        try{localStorage.setItem('cache_vols',JSON.stringify(fresh.slice(0,100)));}catch(e){}
-        renderVolunteers(); updateAllCounts(); return;
-      }
-    }
-    await loadVolsFromSheet();
-    if(window.VOLUNTEERS_PRELOAD && window.VOLUNTEERS_PRELOAD.length > 0){
-      VOLUNTEERS_DATA = window.VOLUNTEERS_PRELOAD;
-    }
-    renderVolunteers(); updateAllCounts();
-  } catch(e) {
-    console.error('loadVolunteers error:', e);
-    try{
-      var cache = JSON.parse(localStorage.getItem('cache_vols')||'[]');
-      if(cache.length > 0) VOLUNTEERS_DATA = cache;
-    }catch(e2){}
-    renderVolunteers(); updateAllCounts();
-  }
+function loadVolunteers(){
+  var fbData = window.VOLUNTEERS_PRELOAD || [];
+  var merged = fbData;
+  VOLUNTEERS_DATA = merged;
+  renderVolunteers();
+  var badge = document.getElementById('vol-count-badge');
+  if(badge) badge.textContent = merged.length + ' متطوع';
+  var dashCount = document.getElementById('vol-dash-count');
+  if(dashCount) dashCount.textContent = merged.length + ' متطوع';
+  updateAllCounts();
 }
 
 function previewVolPhoto(url){

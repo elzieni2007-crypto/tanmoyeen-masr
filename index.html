@@ -4535,20 +4535,27 @@ var volFilter = 'all';
 async function loadVolunteers(){
   try {
     if(typeof db === 'undefined') return;
-    var snap = await db.collection('volunteers').limit(300).get();
-    var fresh = [];
-    snap.docs.forEach(function(d){
-      var r = d.data();
-      if(r.name) fresh.push(Object.assign({}, r, {id:d.id, interests:r.interests||[], badges:r.badges||[], photo:r.photo||''}));
-    });
-    VOLUNTEERS_DATA = fresh;
-    window.VOLUNTEERS_PRELOAD = fresh;
-    try{ localStorage.setItem('cache_vols', JSON.stringify(fresh.slice(0,100))); }catch(e){}
+    
+    // لو البيانات موجودة في الـ preload استخدمها
+    if(window.VOLUNTEERS_PRELOAD && window.VOLUNTEERS_PRELOAD.length > 0){
+      VOLUNTEERS_DATA = window.VOLUNTEERS_PRELOAD;
+    } else {
+      // جيب من Firebase
+      var snap = await db.collection('volunteers').limit(300).get();
+      var fresh = [];
+      snap.docs.forEach(function(d){
+        var r = d.data();
+        if(r.name) fresh.push(Object.assign({}, r, {id:d.id, interests:r.interests||[], badges:r.badges||[], photo:r.photo||''}));
+      });
+      VOLUNTEERS_DATA = fresh;
+      window.VOLUNTEERS_PRELOAD = fresh;
+      try{ localStorage.setItem('cache_vols', JSON.stringify(fresh.slice(0,100))); }catch(e){}
+    }
   } catch(e) {
-    console.error('loadVolunteers error:', e);
-    // fallback to cache
-    try{ var v=JSON.parse(localStorage.getItem('cache_vols')||'[]'); VOLUNTEERS_DATA=v; window.VOLUNTEERS_PRELOAD=v; }catch(e2){}
+    console.error('loadVolunteers:', e.message);
+    try{ var v=JSON.parse(localStorage.getItem('cache_vols')||'[]'); VOLUNTEERS_DATA=v; }catch(e2){}
   }
+  
   renderVolunteers();
   var badge = document.getElementById('vol-count-badge');
   if(badge) badge.textContent = VOLUNTEERS_DATA.length + ' متطوع';

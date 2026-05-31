@@ -1684,6 +1684,10 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" style="background:#e7faf3;color:#00703a;border-color:#00b894" onclick="setAdmTab(this,'volunteers-adm')">🤝 متطوعين</div>
       <div class="adm-tab" style="background:#fef3e8;color:#c06010;border-color:#c06010" onclick="setAdmTab(this,'consultations-adm')">📋 استشارات</div>
       <div class="adm-tab" style="background:#dcfce7;color:#00703a;border-color:#00703a" onclick="setAdmTab(this,'broadcast')">💬 واتساب</div>
+      <div class="adm-tab" style="background:#e7faf3;color:#00703a;border-color:#004d29;position:relative" onclick="setAdmTab(this,'athar-adm')">
+        🌿 أثر
+        <span id="athar-count-badge" style="position:absolute;top:-6px;left:-6px;background:#00703a;color:white;border-radius:50%;width:18px;height:18px;font-size:9px;display:none;align-items:center;justify-content:center;font-weight:700"></span>
+      </div>
     </div>
     <div style="font-size:10px;color:var(--muted);padding:0 12px 8px;text-align:left">← اسحب للمزيد من التبويبات</div>
 
@@ -1960,6 +1964,20 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div style="font-size:13px;font-weight:800;color:#0d1b2a;margin-bottom:6px">⚡ رسالة Nexus Talent</div>
     <button onclick="sendNexusWA()" style="width:100%;padding:10px;background:linear-gradient(135deg,#0d1b2a,#1a3a6e);color:white;border:none;border-radius:10px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">💼 إرسال دعوة Nexus Talent</button>
   </div>
+  <!-- دعوة متطوعين -->
+  <div style="background:#e7faf3;border-radius:14px;padding:14px;margin-bottom:14px;border:1.5px solid #00703a">
+    <div style="font-size:13px;font-weight:800;color:#00703a;margin-bottom:6px">🤝 رسالة دعوة متطوعين</div>
+    <button onclick="sendVolWA()" style="width:100%;padding:10px;background:linear-gradient(135deg,#00703a,#00b894);color:white;border:none;border-radius:10px;font-size:12px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">🤝 إرسال دعوة تطوع</button>
+  </div>
+
+<!-- فورم أثر للأدمن -->
+<div id="adm-form-athar-adm" style="display:none;padding:0 16px;padding-bottom:100px">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px">
+    <div style="font-size:15px;font-weight:800;color:#00703a">🌿 طلبات أثر التجريبية</div>
+    <span id="adm-athar-count" style="background:#00703a;color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
+  </div>
+  <div id="adm-athar-list"></div>
+</div>
 
 <div id="adm-form-broadcast" style="display:none;padding:0 16px;padding-bottom:100px">
   <div style="margin-top:16px">
@@ -4891,7 +4909,7 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm'].forEach(function(id){
+  ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-athar-adm'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
@@ -4942,16 +4960,22 @@ function setAdmTab(el, tab){
     loadAdminVols();
   } else if(tab === 'consultations-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-athar-adm'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-consultations-adm');
     if(cEl){cEl.style.display='block';}
     loadAdminConsultations();
+  } else if(tab === 'athar-adm'){
+    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    var aEl=document.getElementById('adm-form-athar-adm');
+    if(aEl){aEl.style.display='block';}
+    loadAdminAthar();
   } else {
     listEl.style.display   = 'flex';
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
     // Hide all special forms
-    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm'].forEach(function(id){
+    ['adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-athar-adm'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
     renderAdmList();
@@ -5603,9 +5627,93 @@ async function loadAdminVols(){
   }).join("");
 }
 
+async function loadAdminAthar(){
+  var list = document.getElementById('adm-athar-list');
+  var countEl = document.getElementById('adm-athar-count');
+  var badge = document.getElementById('athar-count-badge');
+  if(!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل...</div>';
+  var items = [];
+  if(typeof db !== 'undefined'){
+    try {
+      var snap = await db.collection('athar_trials').orderBy('timestamp','desc').limit(100).get();
+      snap.docs.forEach(function(d){ items.push(Object.assign({}, d.data(), {fbId:d.id})); });
+    } catch(e){ console.log('Athar trials:', e.code); }
+  }
+  if(countEl) countEl.textContent = items.length;
+  if(badge){ badge.textContent=items.length; badge.style.display=items.length?'flex':'none'; }
+  if(!items.length){
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">لا توجد طلبات أثر حتى الآن</div>';
+    return;
+  }
+  list.innerHTML = items.map(function(c){
+    var date = c.timestamp ? new Date(c.timestamp.seconds*1000).toLocaleDateString('ar-EG') : '—';
+    var statusCol = c.status==='approved' ? '#00703a' : c.status==='rejected' ? '#e05050' : '#c06010';
+    var statusBg  = c.status==='approved' ? '#e7faf3' : c.status==='rejected' ? '#feeaea' : '#fef3e8';
+    var statusTxt = c.status==='approved' ? '✅ مفعّل' : c.status==='rejected' ? '❌ مرفوض' : '⏳ انتظار';
+    return '<div class="adm-row" style="margin-bottom:10px;border-right:3px solid #00703a">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+        '<div style="font-weight:800;font-size:13px">'+(c.orgName||'—')+'</div>' +
+        '<span style="background:'+statusBg+';color:'+statusCol+';font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px">'+statusTxt+'</span>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--muted)">🔢 '+(c.regNum||'—')+' · 📍 '+(c.gov||'—')+'</div>' +
+      '<div style="font-size:11px;color:var(--muted)">👤 '+(c.delegate||'—')+' · 📅 '+date+'</div>' +
+      (c.notes ? '<div style="font-size:11px;background:var(--bg);padding:8px;border-radius:8px;margin-top:6px;line-height:1.6">📝 '+c.notes.substring(0,150)+'</div>' : '') +
+      '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">' +
+        (c.phone ? '<a href="tel:'+c.phone+'" style="flex:1;min-width:70px;padding:7px;background:#e8f0fe;color:var(--p);border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">📞 اتصال</a>' : '') +
+        (c.phone ? '<a href="https://wa.me/2'+c.phone+'" target="_blank" style="flex:1;min-width:70px;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>' : '') +
+        (c.personalEmail||c.email ? '<a href="mailto:'+(c.personalEmail||c.email)+'" style="flex:1;min-width:70px;padding:7px;background:#fef3e8;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ إيميل</a>' : '') +
+        '<button onclick="updateAtharStatus(\''+c.fbId+'\',\'approved\')" style="flex:1;min-width:70px;padding:7px;background:#e7faf3;color:#00703a;border:none;border-radius:8px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">✅ تفعيل</button>' +
+        '<button onclick="updateAtharStatus(\''+c.fbId+'\',\'rejected\')" style="flex:1;min-width:70px;padding:7px;background:#feeaea;color:#c03030;border:none;border-radius:8px;font-size:11px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">❌ رفض</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function updateAtharStatus(docId, status){
+  if(!docId || typeof db === 'undefined') return;
+  try {
+    await db.collection('athar_trials').doc(docId).update({status: status, updatedAt: new Date()});
+    toast(status==='approved' ? '✅ تم تفعيل الطلب' : '❌ تم رفض الطلب');
+    loadAdminAthar();
+  } catch(e){ toast('❌ خطأ في التحديث: ' + e.message); }
+}
+
+function sendNexusWA(){
+  var msg = '💼 *Nexus Talent × تنمويين مصر*\n\n' +
+    'شراكة استراتيجية لتطوير كوادر القطاع التنموي في مصر\n\n' +
+    '🎁 عرض مجاني محدود:\n' +
+    'مراجعة سيرتك الذاتية مجاناً من فريق Nexus Talent\n\n' +
+    '✅ الخدمات:\n' +
+    '• فرص التوظيف في القطاع التنموي\n' +
+    '• التطوير المهني وبناء القدرات\n' +
+    '• استشارات HR للمؤسسات\n' +
+    '• تقييم الكفاءات والمهارات\n\n' +
+    '📝 سجّل الآن مجاناً:\n' +
+    'https://forms.gle/eBmQCmQoo4J4VDdM6\n\n' +
+    '⏳ الأماكن محدودة - لا تفوّت الفرصة!\n\n' +
+    'تنمويين مصر 🌟 لكل تنموي في مصر';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  toast('✅ تم فتح واتساب!');
+}
+
+function sendVolWA(){
+    'هل لديك وقت ومهارات تريد توظيفها في خدمة القطاع التنموي؟\n\n' +
+    '✅ فرص التطوع تشمل:\n' +
+    '• التنسيق والمتابعة للفعاليات\n' +
+    '• دعم المحتوى والتواصل الاجتماعي\n' +
+    '• الترجمة والتحرير\n' +
+    '• بناء القدرات والتدريب\n' +
+    '• المساعدة التقنية والبرمجة\n\n' +
+    '📱 سجّل بياناتك الآن:\n' +
+    'https://elzieni2007-crypto.github.io/tanmoyeen-masr/\n\n' +
+    '⏱ سيتم التواصل معك خلال 48 ساعة\n\n' +
+    'تنمويين مصر 🌟 لكل تنموي في مصر';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  toast('✅ تم فتح واتساب!');
+}
+
 async function loadBroadcastHistory(){
-  var hist = document.getElementById('broadcast-history');
-  if(!hist || typeof db === 'undefined') return;
   try {
     var snap = await db.collection('broadcasts')
       .orderBy('timestamp','desc').limit(10).get();

@@ -2953,9 +2953,14 @@ function go(id){
   var el = document.getElementById(id);
   if(!el) return;
 
-  // اخفي الأدمن
+  // اخفي الأدمن بالكامل
   var adm = document.getElementById('admin');
-  if(adm){ adm.style.display='none'; adm.style.position=''; adm.style.zIndex=''; }
+  if(adm){ 
+    adm.style.display='none'; 
+    adm.style.position='static'; 
+    adm.style.zIndex='-1';
+    adm.style.visibility='hidden';
+  }
 
   // اخفي كل الشاشات
   document.querySelectorAll('.scr').forEach(function(s){
@@ -6494,6 +6499,7 @@ function loadCustomContent(){
 function goAdmin(){
   document.getElementById('splash').style.display = 'none';
   var a = document.getElementById('admin');
+  a.style.visibility = 'visible';
   a.style.display = 'block';
   a.style.position = 'fixed';
   a.style.top = '0'; a.style.left = '0'; a.style.right = '0'; a.style.bottom = '0';

@@ -2766,23 +2766,118 @@ async function loadOrgsFromSheet(){
 }
 
 function enterApp(){
-  var splash = document.getElementById('splash');
-  var app = document.getElementById('app');
-  if(!splash || !app) return;
-  splash.style.display = 'none';
-  app.style.display = 'block';
-  window.scrollTo(0,0);
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
+  document.getElementById('splash').style.display='none';
+  document.getElementById('app').style.display='block';
   setAllLogos();
-  initDarkMode();
-  loadCustomContent();
-  renderDash();
-  setTimeout(updateAllCounts, 500);
-  setTimeout(updateFBStats, 1000);
-  updateJobseekersList();
-  setTimeout(loadFromFirebase, 300);
-  setTimeout(loadVolsFromSheet, 600);
+  initDarkMode();loadCustomContent();renderDash();setTimeout(updateAllCounts,500);renderJobs();renderTenders();updateJobseekersList();
+  // Load live data from sheets
+  // Load sheets on start
+  setTimeout(function(){
+    Promise.all([
+      loadConsFromSheet(),
+      loadSupsFromSheet(),
+      loadVolsFromSheet(),
+      loadOrgsFromSheet()
+    ]).then(function(){
+      renderDash();
+      loadVolunteers();
+      updateAllCounts();
+      console.log('All sheets loaded');
+    });
+  }, 500);
+
+  // Auto refresh sheets every 5 minutes
+  setInterval(function(){
+    console.log('Auto refreshing data...');
+    Promise.all([
+      loadConsFromSheet(),
+      loadSupsFromSheet(),
+      loadVolsFromSheet(),
+      loadOrgsFromSheet()
+    ]).then(function(){
+      renderDash();
+      loadVolunteers();
+      updateAllCounts();
+      // Refresh current screen
+      var curScreen = document.querySelector('.scr.on');
+      if(curScreen){
+        var id = curScreen.id;
+        if(id==='consultants') renderCons();
+        if(id==='suppliers') renderSups();
+        if(id==='volunteers') renderVolunteers();
+        if(id==='orgs-screen') renderOrgs();
+      }
+      console.log('Data refreshed');
+    });
+  }, 5 * 60 * 1000);
+
+  // Firebase real-time listener - only when admin logged in
+  if(typeof db !== 'undefined' && typeof auth !== 'undefined'){
+    auth.onAuthStateChanged(function(user){
+      if(user){
+        // Admin logged in - start listeners
+        db.collection('volunteers')
+      .orderBy('timestamp','desc')
+      .limit(50)
+      .onSnapshot(function(snap){
+        if(snap.docChanges().length > 0){
+          snap.docChanges().forEach(function(change){
+            if(change.type === 'added'){
+              var data = change.doc.data();
+              // Add to VOLUNTEERS_PRELOAD if not exists
+              var exists = (VOLUNTEERS_PRELOAD||[]).some(function(v){
+                return v.phone === data.phone;
+              });
+              if(!exists && data.name){
+                if(!window.VOLUNTEERS_PRELOAD) window.VOLUNTEERS_PRELOAD = [];
+                VOLUNTEERS_PRELOAD.unshift(Object.assign({}, data, {
+                  id: Date.now(),
+                  interests: data.interests || [],
+                  badges: data.badges || []
+                }));
+                loadVolunteers();
+                updateAllCounts();
+                console.log('New volunteer added:', data.name);
+              }
+            }
+          });
+        }
+      }, function(err){ console.log('Volunteer listener:', err.code); });
+
+    // Listen for new consultants
+    db.collection('consultants')
+      .orderBy('timestamp','desc')
+      .limit(20)
+      .onSnapshot(function(snap){
+        snap.docChanges().forEach(function(change){
+          if(change.type === 'added'){
+            var data = change.doc.data();
+            if(data.name && data.spec){
+              var exists = (CONS||[]).some(function(c){ return c.phone===data.phone; });
+              if(!exists){
+                var newCon = {
+                  id: (CONS||[]).length + 1,
+                  name: data.name,
+                  spec: data.spec || '',
+                  gov: data.gov || '',
+                  phone: data.phone || '',
+                  email: data.email || '',
+                  bio: data.bio || '',
+                  av: '👨‍💼', bg: '#e8f0fe',
+                  spec2: '', orgs: ''
+                };
+                if(window.CONS) CONS.unshift(newCon);
+                updateAllCounts();
+              }
+            }
+          }
+        });
+      }, function(err){ console.log('Cons listener:', err.code); });
+      } // end if(user)
+    }); // end onAuthStateChanged
+  }
+  setTimeout(setupHeroShrink,100);
+  // URL params handled separately after load
 }
 
 function loadFromFirebase(){
@@ -2945,28 +3040,25 @@ let logoTaps=0, logoTimer=null;
 // ============ NAVIGATION ============
 const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus','contact-screen':'n-home','athar-screen':'n-home'};
 function go(id){
-  document.querySelectorAll('.scr').forEach(function(s){ s.classList.remove('on'); });
-  document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('on'); });
-  var el = document.getElementById(id);
-  if(!el) return;
-  el.classList.add('on');
-  var nid = navMap[id];
-  if(nid){ var nel=document.getElementById(nid); if(nel) nel.classList.add('on'); }
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  const nid=navMap[id];
+  if(nid){const nel=document.getElementById(nid);if(nel)nel.classList.add('on');}
   window.scrollTo(0,0);
-  if(id==='consultants') renderCons();
-  if(id==='suppliers') renderSups();
-  if(id==='tenders') renderTenders();
-  if(id==='jobs') renderJobs();
+  if(id==='consultants'){ loadConsFromSheet().then(renderCons); }
+  if(id==='suppliers'){ loadSupsFromSheet().then(renderSups); }
+  if(id==='tenders')renderTenders();
   if(id==='notifs'){
     renderNotifs();
+    // Mark all as read
     NOTIFS.forEach(function(n){ n.unr=false; });
-    var dot=document.getElementById('notif-dot');
-    if(dot) dot.style.display='none';
+    var dot = document.getElementById('notif-dot');
+    if(dot) dot.style.display = 'none';
   }
-  if(id==='volunteers') loadVolsFromSheet().then(function(){ loadVolunteers(); });
-  if(id==='orgs-screen') setTimeout(renderOrgs,50);
-  if(id==='register') setTimeout(function(){ switchRegType('jobseeker'); },100);
-  if(id==='home') setupHeroShrink();
+  if(id==='volunteers'){ loadVolsFromSheet().then(function(){ loadVolunteers(); }); }
+  if(id==='orgs-screen'){ loadOrgsFromSheet().then(function(){ setTimeout(renderOrgs,50); }); }
+  if(id==='home')setupHeroShrink();
 }
 
 // ============ LOGO TAP (admin access) ============
@@ -3659,11 +3751,13 @@ function selectRegType(type){
 }
 
 function switchRegType(type){
-  ['jobseeker','expert','org','sup','volunteer'].forEach(t=>{
+  // Update cards
+  ['jobseeker','expert','org','sup'].forEach(t=>{
     const card=document.getElementById('rt-'+t);
     if(card) card.classList.toggle('on', t===type);
   });
-  ['jobseeker','expert','org','sup','volunteer'].forEach(t=>{
+  // Show/hide forms
+  ['jobseeker','expert','org','sup'].forEach(t=>{
     const form=document.getElementById('form-'+t);
     if(form) form.style.display = t===type ? 'block' : 'none';
   });
@@ -4513,8 +4607,15 @@ var VOLUNTEERS_DATA = [];
 var volFilter = 'all';
 
 function loadVolunteers(){
-  var fbData = window.VOLUNTEERS_PRELOAD || [];
-  var merged = fbData;
+  var stored = [];
+  try{ stored = JSON.parse(localStorage.getItem('volunteers') || '[]'); }catch(e){}
+  // Merge preloaded data with new registrations
+  var preIds = stored.map(function(v){ return v.phone; });
+  var merged = stored.concat(
+    (VOLUNTEERS_PRELOAD||[]).filter(function(v){
+      return !preIds.includes(v.phone);
+    })
+  );
   VOLUNTEERS_DATA = merged;
   renderVolunteers();
   var badge = document.getElementById('vol-count-badge');

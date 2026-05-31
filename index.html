@@ -2936,40 +2936,35 @@ let logoTaps=0, logoTimer=null;
 // ============ NAVIGATION ============
 const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus','contact-screen':'n-home','athar-screen':'n-home'};
 function go(id){
-  // تأكد إن الـ splash مش ظاهرة
   var splash = document.getElementById('splash');
   if(splash) splash.style.display = 'none';
   var app = document.getElementById('app');
   if(app) app.style.display = 'block';
 
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if(!el) return;
 
-  // اقفل الأدمن لو مفتوح
-  var adminEl = document.getElementById('admin');
-  if(adminEl && id !== 'admin'){
-    adminEl.classList.remove('on');
-    adminEl.style.cssText = 'display:none';
-  }
+  // اخفي الأدمن
+  var adm = document.getElementById('admin');
+  if(adm){ adm.style.display='none'; adm.style.position=''; adm.style.zIndex=''; }
 
-  document.querySelectorAll('.scr').forEach(s=>{
+  // اخفي كل الشاشات
+  document.querySelectorAll('.scr').forEach(function(s){
     s.classList.remove('on');
     s.scrollTop = 0;
-    s.style.display = '';
   });
-  var adminEl = document.getElementById('admin');
-  if(adminEl){ adminEl.style.display='none'; adminEl.style.position=''; adminEl.style.zIndex=''; }
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
 
+  document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('on'); });
+
+  // اظهر الشاشة المطلوبة
   el.classList.add('on');
   el.scrollTop = 0;
 
-  const nid = navMap[id];
-  if(nid){ const nel=document.getElementById(nid); if(nel) nel.classList.add('on'); }
+  var nid = navMap[id];
+  if(nid){ var nel=document.getElementById(nid); if(nel) nel.classList.add('on'); }
 
   window.scrollTo(0,0);
   document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
 
   if(id==='consultants') renderCons();
   if(id==='suppliers') renderSups();
@@ -2981,10 +2976,10 @@ function go(id){
     var dot=document.getElementById('notif-dot');
     if(dot) dot.style.display='none';
   }
-  if(id==='volunteers'){ 
+  if(id==='volunteers'){
     var vlist = document.getElementById('volunteers-list');
     if(vlist) vlist.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">⏳ جاري التحميل...</div>';
-    loadVolunteers(); 
+    loadVolunteers();
   }
   if(id==='orgs-screen') setTimeout(renderOrgs,50);
   if(id==='home') setupHeroShrink();

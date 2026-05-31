@@ -2730,6 +2730,10 @@ async function loadVolsFromSheet(){
     });
     if(newVols.length > 0){
       window.VOLUNTEERS_PRELOAD = newVols;
+      VOLUNTEERS_DATA = newVols;
+      try{localStorage.setItem('cache_vols', JSON.stringify(newVols.slice(0,100)));}catch(e){}
+      renderVolunteers();
+      updateAllCounts();
       console.log('✅ Loaded '+newVols.length+' volunteers');
     }
   } catch(e){ console.log('Vols sheet failed:',e); }
@@ -2778,6 +2782,7 @@ function enterApp(){
   setTimeout(updateFBStats, 1000);
   updateJobseekersList();
   setTimeout(loadFromFirebase, 300);
+  setTimeout(loadVolsFromSheet, 600);
 }
 
 function loadFromFirebase(){
@@ -2821,14 +2826,18 @@ function loadFromFirebase(){
     db.collection('volunteers').limit(300).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[],photo:r.photo||''}));});
-      window.VOLUNTEERS_PRELOAD = fresh;
-      VOLUNTEERS_DATA = fresh;
-      try{localStorage.setItem('cache_vols',JSON.stringify(fresh.slice(0,100)));}catch(e){}
-      loadVolunteers();
-      updateAllCounts();
+      if(fresh.length > 0){
+        window.VOLUNTEERS_PRELOAD = fresh;
+        VOLUNTEERS_DATA = fresh;
+        try{localStorage.setItem('cache_vols',JSON.stringify(fresh.slice(0,100)));}catch(e){}
+        renderVolunteers();
+        updateAllCounts();
+      } else {
+        loadVolsFromSheet();
+      }
     }).catch(function(e){
       console.error('volunteers:', e.message);
-      try{ var v=JSON.parse(localStorage.getItem('cache_vols')||'[]'); if(v.length){window.VOLUNTEERS_PRELOAD=v;VOLUNTEERS_DATA=v;loadVolunteers();} }catch(e2){}
+      loadVolsFromSheet();
     });
 
     db.collection('organizations').limit(300).get().then(function(snap){
@@ -2982,6 +2991,7 @@ function go(id){
     loadVolunteers();
   }
   if(id==='orgs-screen') setTimeout(renderOrgs,50);
+  if(id==='register') setTimeout(function(){ switchRegType('jobseeker'); },100);
   if(id==='home') setupHeroShrink();
 }
 

@@ -4539,35 +4539,39 @@ var VOLUNTEERS_DATA = [];
 var volFilter = 'all';
 
 async function loadVolunteers(){
+  var list = document.getElementById('volunteers-list');
   try {
-    if(typeof db === 'undefined') return;
-    
-    // لو البيانات موجودة في الـ preload استخدمها
     if(window.VOLUNTEERS_PRELOAD && window.VOLUNTEERS_PRELOAD.length > 0){
       VOLUNTEERS_DATA = window.VOLUNTEERS_PRELOAD;
-    } else {
-      // جيب من Firebase
+      renderVolunteers(); updateAllCounts(); return;
+    }
+    if(typeof db !== 'undefined'){
       var snap = await db.collection('volunteers').limit(300).get();
       var fresh = [];
       snap.docs.forEach(function(d){
         var r = d.data();
-        if(r.name) fresh.push(Object.assign({}, r, {id:d.id, interests:r.interests||[], badges:r.badges||[], photo:r.photo||''}));
+        if(r.name) fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[],photo:r.photo||''}));
       });
-      VOLUNTEERS_DATA = fresh;
-      window.VOLUNTEERS_PRELOAD = fresh;
-      try{ localStorage.setItem('cache_vols', JSON.stringify(fresh.slice(0,100))); }catch(e){}
+      if(fresh.length > 0){
+        VOLUNTEERS_DATA = fresh;
+        window.VOLUNTEERS_PRELOAD = fresh;
+        try{localStorage.setItem('cache_vols',JSON.stringify(fresh.slice(0,100)));}catch(e){}
+        renderVolunteers(); updateAllCounts(); return;
+      }
     }
+    await loadVolsFromSheet();
+    if(window.VOLUNTEERS_PRELOAD && window.VOLUNTEERS_PRELOAD.length > 0){
+      VOLUNTEERS_DATA = window.VOLUNTEERS_PRELOAD;
+    }
+    renderVolunteers(); updateAllCounts();
   } catch(e) {
-    console.error('loadVolunteers:', e.message);
-    try{ var v=JSON.parse(localStorage.getItem('cache_vols')||'[]'); VOLUNTEERS_DATA=v; }catch(e2){}
+    console.error('loadVolunteers error:', e);
+    try{
+      var cache = JSON.parse(localStorage.getItem('cache_vols')||'[]');
+      if(cache.length > 0) VOLUNTEERS_DATA = cache;
+    }catch(e2){}
+    renderVolunteers(); updateAllCounts();
   }
-  
-  renderVolunteers();
-  var badge = document.getElementById('vol-count-badge');
-  if(badge) badge.textContent = VOLUNTEERS_DATA.length + ' متطوع';
-  var dashCount = document.getElementById('vol-dash-count');
-  if(dashCount) dashCount.textContent = VOLUNTEERS_DATA.length + ' متطوع';
-  updateAllCounts();
 }
 
 function previewVolPhoto(url){

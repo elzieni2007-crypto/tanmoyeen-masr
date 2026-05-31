@@ -4533,7 +4533,7 @@ function openOrg(idx){
 }
 
 
-const VOLUNTEERS_PRELOAD = [];
+window.VOLUNTEERS_PRELOAD = window.VOLUNTEERS_PRELOAD || [];
 
 var VOLUNTEERS_DATA = [];
 var volFilter = 'all';
@@ -4541,10 +4541,6 @@ var volFilter = 'all';
 async function loadVolunteers(){
   var list = document.getElementById('volunteers-list');
   try {
-    if(window.VOLUNTEERS_PRELOAD && window.VOLUNTEERS_PRELOAD.length > 0){
-      VOLUNTEERS_DATA = window.VOLUNTEERS_PRELOAD;
-      renderVolunteers(); updateAllCounts(); return;
-    }
     if(typeof db !== 'undefined'){
       var snap = await db.collection('volunteers').limit(300).get();
       var fresh = [];

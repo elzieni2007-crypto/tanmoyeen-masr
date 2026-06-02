@@ -2590,6 +2590,11 @@ async function saveToFirebase(type, data){
     return true;
   } catch(e) {
     console.log('Firebase save failed - code:', e.code, 'msg:', e.message);
+    if(e.code === 'permission-denied'){
+      toast('❌ خطأ في الصلاحيات - تواصل مع الدعم');
+    } else {
+      toast('❌ حدث خطأ في الحفظ، حاول مرة أخرى');
+    }
     return false;
   }
 }
@@ -3752,6 +3757,8 @@ function doReg(type){
   } else if(type === 'sup'){
     data.name    = getVal('sup-name');
     data.spec    = getVal('sup-cat');
+    data.cat     = getVal('sup-cat');
+    data.desc    = getVal('sup-notes');
     data.gov     = getVal('sup-gov');
     data.address = getVal('sup-address');
     data.delivery= getVal('sup-delivery');
@@ -3761,6 +3768,10 @@ function doReg(type){
     data.notes   = getVal('sup-notes');
     data.showPhone = document.getElementById('sup-show-phone') ? document.getElementById('sup-show-phone').checked : true;
     data.showEmail = document.getElementById('sup-show-email') ? document.getElementById('sup-show-email').checked : true;
+    // validation مبكر
+    if(!data.name){ toast('⚠️ أدخل اسم الشركة / المورد'); return; }
+    if(!data.phone){ toast('⚠️ أدخل رقم الموبايل'); return; }
+    if(!data.cat){ toast('⚠️ اختر نشاط المورد'); return; }
   } else if(type === 'volunteer'){
     data.name    = getVal('vol-reg-name');
     data.gov     = getVal('vol-reg-gov');
@@ -3808,16 +3819,16 @@ function doReg(type){
     });
   }
 
+  // التحقق من الاسم ورقم الهاتف (قبل مسح الفورم)
+  if(!data.name){ toast('⚠️ من فضلك أدخل اسمك الكامل'); return; }
+  if(!data.phone){ toast('⚠️ من فضلك أدخل رقم الهاتف'); return; }
+
   // مسح الفورم
   const formEl = document.getElementById('form-' + type);
   if(formEl){
     formEl.querySelectorAll('input, textarea').forEach(i => i.value = '');
     formEl.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
   }
-
-  // التحقق من الاسم ورقم الهاتف
-  if(!data.name){ toast('⚠️ من فضلك أدخل اسمك الكامل'); return; }
-  if(!data.phone){ toast('⚠️ من فضلك أدخل رقم الهاتف'); return; }
 
   // حفظ في Firebase
   saveToFirebase(type, data);
@@ -3831,19 +3842,21 @@ function doReg(type){
 
 function showSuccess(type, data){
   const icons = {
-    jobseeker: '🎉', expert: '👨‍💼', sup: '🏭', org: '🏢'
+    jobseeker: '🎉', expert: '👨‍💼', sup: '🏭', org: '🏢', volunteer: '🤝'
   };
   const titles = {
     jobseeker: 'تم تسجيلك كباحث عن عمل!',
     expert:    'تم تسجيلك كاستشاري!',
     sup:       'تم تسجيلك كمورد!',
-    org:       'تم تسجيل مؤسستك!'
+    org:       'تم تسجيل مؤسستك!',
+    volunteer: 'تم تسجيلك كمتطوع!'
   };
   const subs = {
     jobseeker: 'بياناتك اتحفظت في قاعدة تنمويين مصر\nسيتواصل معك أصحاب العمل عند توفر فرصة مناسبة 🌟',
     expert:    'ملفك الاستشاري اتحفظ في قاعدة تنمويين مصر\nستظهر بياناتك للجهات الممولة والمنظمات الدولية 🌟',
     sup:       'شركتك اتسجلت في قاعدة الموردين\nستظهر بياناتك للجمعيات والمنظمات الدولية 🌟',
     org:       'مؤسستك اتسجلت في قاعدة تنمويين مصر\nستظهر بياناتك لفرص التمويل والشراكة 🌟',
+    volunteer: 'انضممت لقاعدة المتطوعين في تنمويين مصر\nسيتواصل معك لفرص التطوع المناسبة 🌟'
   };
 
   document.getElementById('success-icon').textContent  = icons[type]  || '✅';
@@ -3851,24 +3864,18 @@ function showSuccess(type, data){
   document.getElementById('success-sub').textContent   = subs[type]   || 'تم حفظ بياناتك بنجاح';
 
   // بيانات التأكيد
-  document.getElementById('success-info').innerHTML = `
-    <div class="success-info-row">
-      <span class="success-info-lbl">الاسم</span>
-      <span class="success-info-val">${data.name || '—'}</span>
-    </div>
-    <div class="success-info-row">
-      <span class="success-info-lbl">المحافظة</span>
-      <span class="success-info-val">${data.gov || '—'}</span>
-    </div>
-    <div class="success-info-row">
-      <span class="success-info-lbl">الموبايل</span>
-      <span class="success-info-val" style="direction:ltr">${data.phone || '—'}</span>
-    </div>
-    <div class="success-info-row">
-      <span class="success-info-lbl">رقم التسجيل</span>
-      <span class="success-info-val" style="color:var(--a)">#${Date.now().toString().slice(-6)}</span>
-    </div>
-  `;
+  var extraRow = '';
+  if(type==='expert')    extraRow = '<div class="success-info-row"><span class="success-info-lbl">التخصص</span><span class="success-info-val">'+(data.spec||'—')+'</span></div>';
+  if(type==='sup')       extraRow = '<div class="success-info-row"><span class="success-info-lbl">نشاط المورد</span><span class="success-info-val">'+(data.cat||data.spec||'—')+'</span></div>';
+  if(type==='org')       extraRow = '<div class="success-info-row"><span class="success-info-lbl">مجال العمل</span><span class="success-info-val">'+(data.field||data.spec||'—')+'</span></div>';
+  if(type==='volunteer') extraRow = '<div class="success-info-row"><span class="success-info-lbl">مجالات الاهتمام</span><span class="success-info-val">'+(data.interests||'—')+'</span></div>';
+  if(type==='jobseeker') extraRow = '<div class="success-info-row"><span class="success-info-lbl">المجال المطلوب</span><span class="success-info-val">'+(data.spec||'—')+'</span></div>';
+  document.getElementById('success-info').innerHTML =
+    '<div class="success-info-row"><span class="success-info-lbl">الاسم</span><span class="success-info-val">'+(data.name||'—')+'</span></div>' +
+    '<div class="success-info-row"><span class="success-info-lbl">المحافظة</span><span class="success-info-val">'+(data.gov||'—')+'</span></div>' +
+    extraRow +
+    '<div class="success-info-row"><span class="success-info-lbl">الموبايل</span><span class="success-info-val" style="direction:ltr">'+(data.phone||'—')+'</span></div>' +
+    '<div class="success-info-row"><span class="success-info-lbl">رقم التسجيل</span><span class="success-info-val" style="color:var(--a)">#'+Date.now().toString().slice(-6)+'</span></div>';
 
   // احفظ data للمشاركة
   window._lastRegData = data;

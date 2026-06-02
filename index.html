@@ -1122,6 +1122,8 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
   </div>
 </div>
+</div>
+</div>
 
 <div id="nexus-screen" class="scr">
 
@@ -5073,7 +5075,7 @@ function doLogin(){
         err.classList.remove('on');
         if(btn) btn.textContent = 'دخول';
         document.getElementById('admin-login-screen').style.display = 'none';
-        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('admin-dashboard').style.display = 'block';
         loadAdminData();
         toast('✅ مرحباً ' + (cred.user.email||''));
       })
@@ -5083,7 +5085,7 @@ function doLogin(){
           isLoggedIn = true;
           err.classList.remove('on');
           document.getElementById('admin-login-screen').style.display = 'none';
-          document.getElementById('admin-panel').style.display = 'block';
+          document.getElementById('admin-dashboard').style.display = 'block';
           loadAdminData();
         } else {
           err.classList.add('on');
@@ -5097,7 +5099,7 @@ function doLogin(){
       isLoggedIn = true;
       err.classList.remove('on');
       document.getElementById('admin-login-screen').style.display = 'none';
-      document.getElementById('admin-panel').style.display = 'block';
+      document.getElementById('admin-dashboard').style.display = 'block';
       loadAdminData();
     } else {
       err.classList.add('on');

@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'elzieni2007@gmail.com';
+    }
+    function isOwner(resource) {
+      return isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+    function isNewOwner() {
+      return isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /jobs/{doc} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin() || isOwner(resource);
+    }
+    match /tenders/{doc} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin() || isOwner(resource);
+    }
+    match /consultants/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /suppliers/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /volunteers/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /jobseekers/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /settings/{doc} { allow read: if true; allow write: if isAdmin(); }
+
+    match /organizations/{doc} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() || isOwner(resource);
+      allow delete: if isAdmin();
+    }
+
+    // Public submissions are accepted only into moderation queues.
+    // Organization accounts must bind the ownerUid to the authenticated user.
+    match /pending_jobs/{doc} {
+      allow create: if !isSignedIn() || isNewOwner();
+      allow read: if isAdmin() || isOwner(resource);
+      allow update, delete: if isAdmin();
+    }
+    match /pending_tenders/{doc} {
+      allow create: if !isSignedIn() || isNewOwner();
+      allow read: if isAdmin() || isOwner(resource);
+      allow update, delete: if isAdmin();
+    }
+    match /org_requests/{doc} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    match /registration_requests/{doc} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    match /consultations/{doc} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}

@@ -841,13 +841,58 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
       <select id="j-sector" onchange="setJobAdvanced('sector',this.value)" style="padding:9px;border:1px solid #dde6f0;border-radius:9px;font-family:Cairo,sans-serif;font-size:11px;background:#fff">
-        <option value="all">كل القطاعات</option><option value="المالية">المالية</option><option value="الموارد البشرية">الموارد البشرية</option><option value="M&E">الرصد والتقييم</option><option value="التعليم">التعليم</option><option value="الصحة">الصحة</option><option value="الحماية">الحماية</option><option value="التمكين الاقتصادي">التمكين الاقتصادي</option>
+        <option value="all">كل القطاعات</option>
+        <option value="المالية">المالية والمحاسبة</option>
+        <option value="المشتريات">المشتريات</option>
+        <option value="سلاسل الإمداد">سلاسل الإمداد واللوجستيات</option>
+        <option value="الموارد البشرية">الموارد البشرية</option>
+        <option value="الإدارة">الإدارة والشؤون الإدارية</option>
+        <option value="البرامج والمشروعات">البرامج والمشروعات</option>
+        <option value="إدارة المشروعات">إدارة المشروعات</option>
+        <option value="الرصد والتقييم">الرصد والتقييم (M&amp;E)</option>
+        <option value="البحث والدراسات">البحث والدراسات</option>
+        <option value="التعليم والتدريب">التعليم والتدريب</option>
+        <option value="الصحة">الصحة</option>
+        <option value="الصحة النفسية">الصحة النفسية</option>
+        <option value="الحماية">الحماية</option>
+        <option value="حماية الطفل">حماية الطفل</option>
+        <option value="العنف القائم على النوع الاجتماعي">العنف القائم على النوع الاجتماعي</option>
+        <option value="الإغاثة والطوارئ">الإغاثة والطوارئ</option>
+        <option value="الأمن الغذائي">الأمن الغذائي والتغذية</option>
+        <option value="سبل العيش">سبل العيش والتمكين الاقتصادي</option>
+        <option value="التنمية المجتمعية">التنمية المجتمعية</option>
+        <option value="التنمية المحلية">التنمية المحلية</option>
+        <option value="الشباب">الشباب</option>
+        <option value="المرأة">المرأة</option>
+        <option value="الطفل والأسرة">الطفل والأسرة</option>
+        <option value="ذوي الإعاقة">ذوي الإعاقة وإعادة التأهيل</option>
+        <option value="حقوق الإنسان">حقوق الإنسان</option>
+        <option value="الحوكمة والمساءلة">الحوكمة والمساءلة</option>
+        <option value="المجتمع المدني">المجتمع المدني</option>
+        <option value="المناصرة والسياسات">المناصرة والسياسات</option>
+        <option value="الاتصالات والإعلام">الاتصالات والإعلام</option>
+        <option value="العلاقات العامة">العلاقات العامة</option>
+        <option value="جمع التبرعات">جمع التبرعات وتنمية الموارد</option>
+        <option value="الشراكات">الشراكات والعلاقات المؤسسية</option>
+        <option value="تكنولوجيا المعلومات">تكنولوجيا المعلومات</option>
+        <option value="البيانات والتحول الرقمي">البيانات والتحول الرقمي</option>
+        <option value="الهندسة والإنشاءات">الهندسة والإنشاءات</option>
+        <option value="البيئة وتغير المناخ">البيئة وتغير المناخ</option>
+        <option value="المياه والإصحاح والنظافة">المياه والإصحاح والنظافة (WASH)</option>
+        <option value="الزراعة والتنمية الريفية">الزراعة والتنمية الريفية</option>
+        <option value="التغذية">التغذية</option>
+        <option value="الشؤون القانونية">الشؤون القانونية</option>
+        <option value="الامتثال">الامتثال وإدارة المخاطر</option>
+        <option value="الجودة">الجودة</option>
+        <option value="الخدمات الاجتماعية">الخدمات الاجتماعية</option>
+        <option value="العمل الميداني">العمل الميداني</option>
+        <option value="التطوع">التطوع</option>
       </select>
       <select id="j-workmode" onchange="setJobAdvanced('workmode',this.value)" style="padding:9px;border:1px solid #dde6f0;border-radius:9px;font-family:Cairo,sans-serif;font-size:11px;background:#fff">
         <option value="all">كل أنماط العمل</option><option value="عن بُعد">عن بُعد</option><option value="هجين">هجين</option><option value="من المكتب">من المكتب</option>
       </select>
       <select id="j-comp" onchange="setJobAdvanced('comp',this.value)" style="padding:9px;border:1px solid #dde6f0;border-radius:9px;font-family:Cairo,sans-serif;font-size:11px;background:#fff">
-        <option value="all">كل مستويات التعويض</option><option value="مدفوع">مدفوع</option><option value="غير محدد">غير محدد</option>
+        <option value="all">كل أنواع التعاقد</option><option value="مدفوع">مدفوع</option><option value="تطوع">تطوع</option><option value="غير محدد">غير محدد</option>
       </select>
       <input id="j-before" type="date" onchange="setJobAdvanced('before',this.value)" style="padding:9px;border:1px solid #dde6f0;border-radius:9px;font-family:Cairo,sans-serif;font-size:11px;box-sizing:border-box" title="آخر موعد في أو قبل">
     </div>
@@ -3420,7 +3465,7 @@ window.JOBS_STATIC = [];
 var jobAdvanced={type:'all',sector:'all',workmode:'all',comp:'all',before:''};
 var jobView='card';
 function jobDeadlineDate(raw){var s=String(raw||'').trim(),d=null,m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);if(m)d=new Date(Number(m[3]),Number(m[2])-1,Number(m[1]),23,59,59);else if(/^\d{4}-\d{2}-\d{2}$/.test(s))d=new Date(s+'T23:59:59');return d&&!isNaN(d.getTime())?d:null;}
-function renderJobs(){const q=(document.getElementById('ji')||{}).value||'';let list=JOBS.filter(function(j){if(j.status&&!['approved','active'].includes(String(j.status)))return false;var d=jobDeadlineDate(j.dl);if(d&&d<new Date())return false;return true;});if(jFilt!=='all')list=list.filter(j=>j.gov===jFilt);if(q)list=list.filter(j=>{var hay=[j.title,j.org,j.sec,j.desc,j.gov,j.type,j.source].filter(Boolean).join(' ').toLowerCase();return hay.includes(q.toLowerCase());});if(jobAdvanced.type!=='all')list=list.filter(j=>String(j.type||'').includes(jobAdvanced.type));if(jobAdvanced.sector!=='all')list=list.filter(j=>String(j.sec||'').includes(jobAdvanced.sector)||String(j.desc||'').includes(jobAdvanced.sector));if(jobAdvanced.workmode!=='all')list=list.filter(j=>[j.type,j.desc,j.title].filter(Boolean).join(' ').includes(jobAdvanced.workmode));if(jobAdvanced.comp==='مدفوع')list=list.filter(j=>j.sal&&j.sal!=='غير محدد'&&j.sal!=='يُحدد لاحقاً'&&j.sal!=='تنافسي');if(jobAdvanced.comp==='غير محدد')list=list.filter(j=>!j.sal||['غير محدد','يُحدد لاحقاً','تنافسي'].includes(j.sal));if(jobAdvanced.before){var max=new Date(jobAdvanced.before+'T23:59:59');list=list.filter(j=>{var d=jobDeadlineDate(j.dl);return d&&d<=max;});}var jcnt=document.getElementById('jcnt'),jlist=document.getElementById('jlist');if(jcnt)jcnt.innerHTML=list.length>0?'عرض <strong>'+list.length+'</strong> فرصة':'لا توجد نتائج';var summary=[];if(jFilt!=='all')summary.push(jFilt);if(jobAdvanced.type!=='all')summary.push(jobAdvanced.type);if(jobAdvanced.sector!=='all')summary.push(jobAdvanced.sector);var js=document.getElementById('jfilter-summary');if(js)js.textContent=summary.join(' · ');if(!jlist)return;jlist.classList.toggle('grid',jobView==='card');if(list.length===0){var isLoading=(typeof db!=='undefined')&&JOBS.length===0;jlist.innerHTML=isLoading?skeletonCards(3,'job'):'<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">💼</div><div style="font-size:13px;font-weight:600">لا توجد فرص مطابقة للفلاتر الحالية</div></div>';return;}jlist.innerHTML=list.map(j=>`<div class="jcard" onclick="openJob('${j.id}')"><div class="jc-top"><div class="jc-logo">${j.logo||'💼'}</div><div class="jc-info"><div class="jc-t">${j.title}</div><div class="jc-o">${j.org}</div><div class="jc-tags"><span class="tag tg">📍 ${j.gov}</span><span class="tag tt">${j.type}</span><span class="tag ts">${j.sec||'قطاع تنموي'}</span>${j.urg?'<span class="tag tu">⚡ عاجل</span>':''}</div></div></div><div class="jc-foot"><div class="jc-dl">📅 ${j.dl||'—'}</div><button class="jsave ${saved.has(j.id)?'sv':''}" onclick="event.stopPropagation();tog('${j.id}',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="${saved.has(j.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button></div></div>`).join('');}
+function renderJobs(){const q=(document.getElementById('ji')||{}).value||'';let list=JOBS.filter(function(j){if(j.status&&!['approved','active'].includes(String(j.status)))return false;var d=jobDeadlineDate(j.dl);if(d&&d<new Date())return false;return true;});if(jFilt!=='all')list=list.filter(j=>j.gov===jFilt);if(q)list=list.filter(j=>{var hay=[j.title,j.org,j.sec,j.desc,j.gov,j.type,j.source].filter(Boolean).join(' ').toLowerCase();return hay.includes(q.toLowerCase());});if(jobAdvanced.type!=='all')list=list.filter(j=>String(j.type||'').includes(jobAdvanced.type));if(jobAdvanced.sector!=='all')list=list.filter(j=>String(j.sec||'').includes(jobAdvanced.sector)||String(j.desc||'').includes(jobAdvanced.sector));if(jobAdvanced.workmode!=='all')list=list.filter(j=>[j.type,j.desc,j.title].filter(Boolean).join(' ').includes(jobAdvanced.workmode));if(jobAdvanced.comp!=='all')list=list.filter(j=>{var hay=[j.title,j.org,j.type,j.sec,j.desc,j.source].filter(Boolean).join(' ').toLowerCase();var sal=String(j.sal||'').trim();var volunteer=/(\bvolunteer\b|\bvolunteering\b|تطوع|متطوع|متطوعة|عمل تطوعي)/i.test(hay);var undefinedPay=!sal||['غير محدد','يُحدد لاحقاً','يحدد لاحقاً','—','-'].includes(sal);var contract=volunteer?'تطوع':(undefinedPay?'غير محدد':'مدفوع');return contract===jobAdvanced.comp;});if(jobAdvanced.before){var max=new Date(jobAdvanced.before+'T23:59:59');list=list.filter(j=>{var d=jobDeadlineDate(j.dl);return d&&d<=max;});}var jcnt=document.getElementById('jcnt'),jlist=document.getElementById('jlist');if(jcnt)jcnt.innerHTML=list.length>0?'عرض <strong>'+list.length+'</strong> فرصة':'لا توجد نتائج';var summary=[];if(jFilt!=='all')summary.push(jFilt);if(jobAdvanced.type!=='all')summary.push(jobAdvanced.type);if(jobAdvanced.sector!=='all')summary.push(jobAdvanced.sector);var js=document.getElementById('jfilter-summary');if(js)js.textContent=summary.join(' · ');if(!jlist)return;jlist.classList.toggle('grid',jobView==='card');if(list.length===0){var isLoading=(typeof db!=='undefined')&&JOBS.length===0;jlist.innerHTML=isLoading?skeletonCards(3,'job'):'<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">💼</div><div style="font-size:13px;font-weight:600">لا توجد فرص مطابقة للفلاتر الحالية</div></div>';return;}jlist.innerHTML=list.map(j=>`<div class="jcard" onclick="openJob('${j.id}')"><div class="jc-top"><div class="jc-logo">${j.logo||'💼'}</div><div class="jc-info"><div class="jc-t">${j.title}</div><div class="jc-o">${j.org}</div><div class="jc-tags"><span class="tag tg">📍 ${j.gov}</span><span class="tag tt">${j.type}</span><span class="tag ts">${j.sec||'قطاع تنموي'}</span>${j.urg?'<span class="tag tu">⚡ عاجل</span>':''}</div></div></div><div class="jc-foot"><div class="jc-dl">📅 ${j.dl||'—'}</div><button class="jsave ${saved.has(j.id)?'sv':''}" onclick="event.stopPropagation();tog('${j.id}',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="${saved.has(j.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button></div></div>`).join('');}
 function setjf(el,v){jFilt=v;document.querySelectorAll('#j-govs .fchip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderJobs();}function fj(){renderJobs();}
 function setJobAdvanced(key,value,el){jobAdvanced[key]=value;if(el){var row=el.parentElement;row.querySelectorAll('.fchip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}renderJobs();}
 function clearJobAdvanced(){jobAdvanced={type:'all',sector:'all',workmode:'all',comp:'all',before:''};['j-sector','j-workmode','j-comp','j-before'].forEach(id=>{var e=document.getElementById(id);if(e)e.value=id==='j-before'?'':'all';});document.querySelectorAll('[data-jtype]').forEach(c=>c.classList.toggle('on',c.dataset.jtype==='all'));renderJobs();}

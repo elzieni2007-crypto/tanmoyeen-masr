@@ -2089,7 +2089,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       </div>
       <div style="background:#fff7e6;border:1px solid #ffd27a;border-radius:12px;padding:12px;margin-bottom:14px;color:#6b4a00">
         <div style="font-weight:800;font-size:13px;margin-bottom:4px">📦 التجميعة الحالية</div>
-        <div style="font-size:10px;line-height:1.6;margin-bottom:10px">استيراد الوظائف التي سبق نشرها وما زالت متاحة إلى قائمة المراجعة. لن يتم نشر أي وظيفة تلقائيا.</div>
+        <div style="font-size:10px;line-height:1.6;margin-bottom:10px">استيراد الوظائف الموجودة حاليا إلى قائمة المراجعة. لن يتم نشر أي وظيفة تلقائيا.</div>
         <button class="sbtn" onclick="bulkImportCurrentJobs()" style="background:#f59e0b;color:#fff;font-size:13px;padding:12px">📥 استيراد التجميعة الحالية</button>
         <div id="bulk-import-progress" style="margin-top:8px;font-size:10px;color:#6b4a00"></div>
       </div>
@@ -2099,6 +2099,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
           <button type="button" onclick="testJobLink('imp-link','imp-link-status')" style="padding:7px 10px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;font-family:Cairo,sans-serif;font-size:10px;font-weight:700">🔗 اختبار الرابط</button>
           <span id="imp-link-status" style="font-size:10px;color:var(--muted)"></span>
         </div>
+        <button type="button" onclick="analyzeJobFromLink()" style="margin-top:7px;width:100%;padding:9px 10px;border:0;background:#e8f3ff;color:#1463a5;border-radius:9px;font-family:Cairo,sans-serif;font-size:11px;font-weight:800">🧠 جلب وتحليل الإعلان من الرابط</button>
       </div>
       <div class="fg"><label class="fl">📋 نص الإعلان الأصلي</label>
         <textarea class="fi" id="imp-text" rows="9" placeholder="ألصق هنا نص الإعلان كما وجدته..."></textarea>
@@ -3522,11 +3523,48 @@ function validateJobUrl(url){
   if(/example\.com|test\.com|localhost|127\.0\.0\.1/i.test(u.hostname))return {ok:false,message:'هذا رابط تجريبي وليس رابط إعلان'};
   return {ok:true,message:'الرابط سليم شكليا'};
 }
-function testJobLink(inputId,statusId){
-  const v=(document.getElementById(inputId)||{}).value||''; const st=validateJobUrl(v); const el=document.getElementById(statusId);
-  if(el){el.textContent=st.ok?'✅ '+st.message:'❌ '+st.message;el.style.color=st.ok?'#00703a':'#c03030';}
-  if(v && st.ok){try{window.open(v,'_blank','noopener,noreferrer');}catch(e){}}
-  return st.ok;
+async function testJobLink(inputId,statusId){
+  const v=(document.getElementById(inputId)||{}).value||'';
+  const el=document.getElementById(statusId);
+  const st=validateJobUrl(v);
+  if(!st.ok){if(el){el.textContent='❌ '+st.message;el.style.color='#c03030';}return false;}
+  if(!v){if(el){el.textContent='';}return true;}
+  if(el){el.textContent='⏳ جاري فحص الوصول للرابط...';el.style.color='#8a6500';}
+  const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),8000);
+  try{
+    const r=await fetch(v,{method:'HEAD',mode:'cors',cache:'no-store',signal:controller.signal});
+    clearTimeout(timer);
+    if(r.ok){if(el){el.textContent='✅ الرابط متاح — HTTP '+r.status;el.style.color='#00703a';}return true;}
+    if(el){el.textContent='⚠️ الرابط يستجيب لكن حالته HTTP '+r.status;el.style.color='#9a6700';}
+    return false;
+  }catch(e){
+    clearTimeout(timer);
+    // معظم مواقع الوظائف تمنع طلبات CORS من المتصفح؛ نجرب فتح الرابط بدلا من إعطاء نتيجة مضللة.
+    try{window.open(v,'_blank','noopener,noreferrer');}catch(_){}
+    if(el){el.textContent='ℹ️ تم فتح الرابط للاختبار — الموقع يمنع التحقق المباشر من داخل التطبيق';el.style.color='#1463a5';}
+    return true;
+  }
+}
+async function analyzeJobFromLink(){
+  const input=document.getElementById('imp-link'),box=document.getElementById('imp-result');
+  const url=(input||{}).value||''; const st=validateJobUrl(url);
+  if(!st.ok){toast('❌ '+st.message);return;}
+  if(!url){toast('⚠️ ضع رابط الإعلان أولا');return;}
+  if(box)box.innerHTML='<div style="padding:12px;border-radius:12px;background:#f6f9fc">⏳ جاري جلب الإعلان وتحليله...</div>';
+  try{
+    const proxy='https://r.jina.ai/'+url;
+    const ctl=new AbortController(); const tm=setTimeout(()=>ctl.abort(),15000);
+    const r=await fetch(proxy,{cache:'no-store',signal:ctl.signal}); clearTimeout(tm);
+    if(!r.ok)throw new Error('تعذر جلب الصفحة عبر خدمة القراءة');
+    const txt=(await r.text()).slice(0,50000);
+    if(!txt || txt.length<80)throw new Error('لم يتم العثور على محتوى كاف من صفحة الإعلان');
+    document.getElementById('imp-text').value=txt;
+    if(box)box.innerHTML='<div style="padding:12px;border-radius:12px;background:#e7faf3;color:#006b3c;font-weight:700">✅ تم جلب نص الإعلان من الرابط. اضغط «تحليل الإعلان وفحص التكرار» لاستكمال استخراج البيانات.</div>';
+    return true;
+  }catch(e){
+    if(box)box.innerHTML='<div style="padding:12px;background:#fff3cd;color:#7a5200;border-radius:12px">⚠️ لم نستطع قراءة محتوى الإعلان تلقائيا. افتح الرابط والصق نص الإعلان في الحقل، ثم اضغط «تحليل الإعلان وفحص التكرار».<br><small>'+escapeHtml(e.message||'')+'</small></div>';
+    return false;
+  }
 }
 function validateJobBeforeSave(link){
   const st=validateJobUrl(link); if(!st.ok){toast('❌ '+st.message);return false;} return true;
@@ -5838,7 +5876,7 @@ async function saveImportedJob(){
 }
 
 async function bulkImportCurrentJobs(){
-  const jobs=window.TANMOYEEN_BULK_JOBS_2026_09_30||[];
+  const jobs=window.TANMOYEEN_BULK_JOBS_CURRENT||[];
   const box=document.getElementById('bulk-import-progress');
   if(!jobs.length){if(box)box.textContent='لا توجد بيانات للتجميعة.';return;}
   if(typeof auth==='undefined'||!auth.currentUser){toast('⚠️ يجب تسجيل الدخول كمسؤول قبل استيراد التجميعة');return;}
@@ -7833,7 +7871,184 @@ window.addEventListener('load',()=>{
     <button class="success-btn-wa" onclick="window.open(WA_GROUP_URL,'_blank')" style="background:#128c7e;margin-top:6px">👥 انضم لجروب واتساب تنمويين مصر</button>
   </div>
 </div>
-<script src="jobs-bulk-2026-09-30.js"></script>
+<script>
+// Tanmoyeen Masr - Opportunities discovered on 1 October 2026
+// This file is loaded by index.html and exposes the opportunities to the bulk importer.
+// It does NOT publish automatically; imported items remain pending for admin review.
+
+window.TANMOYEEN_BULK_JOBS_CURRENT = [
+  {
+    "title": "مدير/ة الشؤون الإدارية والتشغيل – قطاع القاهرة",
+    "org": "جمعية كيان للأشخاص ذوي الإعاقة",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الإدارة والتشغيل",
+    "sal": "يحدد لاحقا",
+    "dl": "2026-10-06",
+    "contact": "",
+    "desc": "إدارة وتشغيل مكاتب الجمعية بقطاع القاهرة، مع مسؤوليات إدارية وتشغيلية وقيادة فرق العمل. يفضل وجود خبرة في المجتمع المدني أو القطاع التنموي.",
+    "link": "https://www.kaianegypt.com/index.php/careers",
+    "source": "Kayan Egypt"
+  },
+  {
+    "title": "Program Administrative Assistant",
+    "org": "جمعية خير وبركة والمرأة الجديدة",
+    "gov": "الأسمرات",
+    "type": "دوام كامل",
+    "sec": "الإدارة والبرامج",
+    "sal": "يحدد لاحقا",
+    "dl": "2026-10-08",
+    "contact": "",
+    "desc": "Program Administrative Assistant – الأسمرات.",
+    "link": "https://bit.ly/4rDu6Le",
+    "source": "Khayr wa Baraka & New Woman Association"
+  },
+  {
+    "title": "Program Manager – Health & Safety / IPPF",
+    "org": "جمعية خير وبركة والمرأة الجديدة",
+    "gov": "الأسمرات",
+    "type": "دوام كامل",
+    "sec": "إدارة البرامج والصحة",
+    "sal": "يحدد لاحقا",
+    "dl": "2026-10-08",
+    "contact": "",
+    "desc": "Program Manager – Health & Safety / IPPF – الأسمرات.",
+    "link": "https://bit.ly/4yoqmzV",
+    "source": "Khayr wa Baraka & New Woman Association"
+  },
+  {
+    "title": "Business Development Sector",
+    "org": "جمعية خير وبركة والمرأة الجديدة",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "تطوير الأعمال",
+    "sal": "يحدد لاحقا",
+    "dl": "2026-10-04",
+    "contact": "",
+    "desc": "فرصة ضمن قطاع تطوير الأعمال.",
+    "link": "https://bit.ly/4jrNKaT",
+    "source": "Khayr wa Baraka & New Woman Association"
+  },
+  {
+    "title": "22 معلم/ة – 11 مدرسة مجتمعية",
+    "org": "جمعية الطفولة والتنمية بأسيوط – ACDA",
+    "gov": "مطروح",
+    "type": "دوام كامل",
+    "sec": "التعليم والتنمية",
+    "sal": "يحدد لاحقا",
+    "dl": "2026-10-05",
+    "contact": "jobs@acdaegypt.com",
+    "desc": "مطلوب 22 معلما ومعلمة للعمل في 11 مدرسة مجتمعية ضمن مشروع Schools for Egypt 4 بمحافظة مطروح.",
+    "link": "https://lnkd.in/eVmCbF-H",
+    "source": "ACDA"
+  },
+  {
+    "title": "Senior Program Officer – Refugee and Migrant Rights",
+    "org": "المبادرة المصرية للحقوق الشخصية – EIPR",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "حقوق الإنسان والحماية",
+    "sal": "يحدد لاحقا",
+    "dl": "2026-10-08",
+    "contact": "jobs@eipr.org",
+    "desc": "وظيفة بدوام كامل في القاهرة، مع خبرة متعددة السنوات في حقوق اللاجئين والمهاجرين والبحث وكتابة السياسات، وإجادة العربية والإنجليزية.",
+    "link": "https://eg.linkedin.com/jobs/view/vacancy-senior-program-officer-on-refugee-and-migrant-rights-at-egyptian-initiative-for-personal-rights-eipr-4470963894",
+    "source": "EIPR / LinkedIn"
+  },
+  {
+    "title": "Social Media Specialist",
+    "org": "Mersal",
+    "gov": "المعادي – القاهرة",
+    "type": "دوام كامل",
+    "sec": "الإعلام والتواصل",
+    "sal": "يحدد لاحقا",
+    "dl": "",
+    "contact": "",
+    "desc": "Social Media Specialist – Full Time / Hybrid. لم يظهر موعد إغلاق واضح في المصدر الذي تم التحقق منه.",
+    "link": "https://wuzzuf.net/jobs/careers/Mersal-Egypt-45113",
+    "source": "Wuzzuf / Mersal"
+  },
+  {
+    "title": "Project Manager",
+    "org": "مكتب التنمية الإيبارشي بالإسماعيلية – IDDO",
+    "gov": "الإسماعيلية",
+    "type": "دوام كامل",
+    "sec": "إدارة المشاريع",
+    "sal": "يحدد لاحقا",
+    "dl": "",
+    "contact": "",
+    "desc": "إعلان حديث لوظيفة Project Manager. موعد الإغلاق وطريقة التقديم المباشر لم يتم التحقق منهما من مصدر رسمي.",
+    "link": "https://www.jobs-arab.com/eg/job-location/%D8%A7%D9%84%D8%A7%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84%D9%8A%D9%87/",
+    "source": "Jobs-Arab / IDDO"
+  },
+  {
+    "title": "Accountant",
+    "org": "مكتب التنمية الإيبارشي بالإسماعيلية – IDDO",
+    "gov": "الإسماعيلية",
+    "type": "دوام كامل",
+    "sec": "الإدارة المالية",
+    "sal": "يحدد لاحقا",
+    "dl": "",
+    "contact": "",
+    "desc": "إعلان حديث لوظيفة Accountant. موعد الإغلاق وطريقة التقديم المباشر لم يتم التحقق منهما من مصدر رسمي.",
+    "link": "https://www.jobs-arab.com/eg/job-profession/%D9%85%D8%A7%D9%84-%D9%88%D9%85%D8%AD%D8%A7%D8%B3%D8%A8%D9%87/job-location/%D8%A7%D9%84%D8%A7%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84%D9%8A%D9%87/",
+    "source": "Jobs-Arab / IDDO"
+  },
+  {
+    "title": "Project Officer – Livelihoods Program",
+    "org": "Catholic Relief Services – CRS",
+    "gov": "القاهرة + سفر إلى أسيوط",
+    "type": "دوام كامل",
+    "sec": "سبل العيش والتنمية الاقتصادية",
+    "sal": "يحدد لاحقا",
+    "dl": "2026-10-10",
+    "contact": "",
+    "desc": "شاغر واحد، عقد 12 شهرا contingent on funding، خبرة 3 سنوات، والسفر إلى أسيوط حوالي 60%.",
+    "link": "https://crsegyptjobs.crs.org/job.php?id=992507",
+    "source": "CRS"
+  },
+  {
+    "title": "Volunteers",
+    "org": "Catholic Relief Services – CRS",
+    "gov": "القاهرة",
+    "type": "تطوع",
+    "sec": "التنمية والمجتمع المدني",
+    "sal": "تطوع",
+    "dl": "2026-10-17",
+    "contact": "",
+    "desc": "فرصة تطوع في القاهرة، لمدة تصل إلى 5 أشهر حسب المشروع.",
+    "link": "https://crsegyptjobs.crs.org/",
+    "source": "CRS"
+  },
+  {
+    "title": "Project Officer",
+    "org": "Terre des hommes – Tdh",
+    "gov": "القاهرة الكبرى",
+    "type": "دوام كامل",
+    "sec": "إدارة المشاريع",
+    "sal": "يحدد لاحقا",
+    "dl": "2026-10-05",
+    "contact": "",
+    "desc": "عقد 3 أشهر قابل للتجديد. الإعلان تم رصده عبر LinkedIn، ولم يظهر حاليا في صفحة وظائف Tdh الرسمية.",
+    "link": "https://eg.linkedin.com/in/belal-khaled-1203613b",
+    "source": "LinkedIn / Tdh"
+  },
+  {
+    "title": "Program Associate – Climate, Peace & Development",
+    "org": "CCCPA",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "المناخ والسلام والتنمية",
+    "sal": "يحدد لاحقا",
+    "dl": "2026-10-03",
+    "contact": "applications@cccpa-eg.org",
+    "desc": "متاحة للمصريين، خبرة 3–5 سنوات، وماجستير في مجال ذي صلة، مع إجادة العربية والإنجليزية.",
+    "link": "https://www.cccpa-eg.org/careers-details/1335",
+    "source": "CCCPA"
+  }
+];
+
+</script>
 </body>
 </html>
 <script>

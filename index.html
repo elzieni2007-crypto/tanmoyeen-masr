@@ -2103,7 +2103,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
         <div id="bulk-import-progress" style="margin-top:8px;font-size:10px;color:#6b4a00"></div>
       </div>
       <div class="fg"><label class="fl">🔗 رابط الإعلان الأصلي</label>
-        <input class="fi" id="imp-link" type="text" placeholder="https://..." style="direction:ltr;text-align:left">
+        <input class="fi" id="imp-link" type="text" placeholder="https://..." style="direction:ltr;text-align:left"><button type="button" class="sbtn" onclick="stripTrackingFromInput()" style="margin-top:8px;background:#eef5fb;color:#1463a5">🧹 تنظيف الرابط</button>
       </div>
       <div class="fg"><label class="fl">📋 نص الإعلان الأصلي</label>
         <textarea class="fi" id="imp-text" rows="9" placeholder="ألصق هنا نص الإعلان كما وجدته..."></textarea>
@@ -2113,10 +2113,6 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       </div>
       <div class="fg"><label class="fl">🔎 المصدر</label>
         <input class="fi" id="imp-source" type="text" placeholder="الموقع الرسمي / LinkedIn / WUZZUF / ReliefWeb...">
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;margin:8px 0 12px">
-        <button type="button" class="sbtn" onclick="testImportLink()" style="flex:0 0 auto;background:#fff;color:#1463a5;border:1px solid #cbd8e6;font-size:12px;padding:11px 14px">🔗 اختبار الرابط</button>
-        <div id="imp-link-status" style="font-size:11px;color:#557;flex:1"></div>
       </div>
       <button class="sbtn" onclick="analyzeImportedJob()" style="background:linear-gradient(135deg,#1463a5,#1e88d8);font-size:15px;padding:16px">
         🔍 تحليل الإعلان وفحص التكرار
@@ -5613,27 +5609,43 @@ const TENDER_COLORS = {
 
 // ============ JOB DUPLICATE / SOURCE CONTROL ============
 function normalizeJobText(v){
-  return String(v||'').toLowerCase().replace(/https?:\/\/\S+/g,' ')
-    .replace(/[^\u0600-\u06FFa-z0-9]+/gi,' ').replace(/\s+/g,' ').trim();
+  return String(v||'').toLowerCase().replace(/\s+/g,' ').trim();
+}
+function canonicalizeJobUrl(v){
+  try{
+    let raw=String(v||'').trim();
+    if(!raw) return '';
+    if(!/^https?:\/\//i.test(raw)) raw='https://'+raw;
+    const u=new URL(raw);
+    const drop=['fbclid','gclid','dclid','msclkid','utm_source','utm_medium','utm_campaign','utm_term','utm_content','utm_id','ref','referrer'];
+    [...u.searchParams.keys()].forEach(k=>{ if(drop.includes(k.toLowerCase()) || k.toLowerCase().startsWith('utm_')) u.searchParams.delete(k); });
+    u.hash='';
+    u.hostname=u.hostname.toLowerCase();
+    let p=u.pathname.replace(/\/+/g,'/').replace(/\/$/,'');
+    u.pathname=p||'/';
+    return u.toString();
+  }catch(e){ return String(v||'').trim().replace(/[?#].*$/,'').replace(/\/$/,'').toLowerCase(); }
+}
+function normalizedUrlKey(v){
+  const u=canonicalizeJobUrl(v);
+  return u ? u.replace(/^https?:\/\//,'').replace(/^www\./,'') : '';
 }
 function makeJobDuplicateKey(job){
-  const link=normalizeJobText(job.link);
+  const link=normalizedUrlKey(job.link);
   if(link) return 'url:'+link;
-  return 'job:'+[normalizeJobText(job.org),normalizeJobText(job.title),
-    normalizeJobText(job.gov),normalizeJobText(job.dl)].join('|');
+  return 'job:'+[normalizeJobText(job.org),normalizeJobText(job.title)].join('|');
 }
 async function findExistingJob(job){
   const key=makeJobDuplicateKey(job);
   const exact=await db.collection('jobs').where('duplicateKey','==',key).limit(1).get();
   if(!exact.empty) return Object.assign({id:exact.docs[0].id},exact.docs[0].data());
-  const snap=await db.collection('jobs').limit(500).get();
-  const tt=normalizeJobText(job.title),oo=normalizeJobText(job.org),ll=normalizeJobText(job.link),
-        gg=normalizeJobText(job.gov),dd=normalizeJobText(job.dl);
+  const snap=await db.collection('jobs').limit(1000).get();
+  const tt=normalizeJobText(job.title),oo=normalizeJobText(job.org),ll=normalizedUrlKey(job.link);
   const found=snap.docs.find(d=>{
-    const x=d.data()||{},xl=normalizeJobText(x.link);
+    const x=d.data()||{},xl=normalizedUrlKey(x.link);
     if(ll&&xl&&ll===xl) return true;
-    return normalizeJobText(x.title)===tt&&normalizeJobText(x.org)===oo&&
-           normalizeJobText(x.gov)===gg&&normalizeJobText(x.dl)===dd;
+    const xt=normalizeJobText(x.title), xo=normalizeJobText(x.org);
+    return tt&&oo&&xt===tt&&xo===oo;
   });
   return found?Object.assign({id:found.id},found.data()):null;
 }
@@ -5641,15 +5653,14 @@ async function findExistingPendingJob(job){
   const key=makeJobDuplicateKey(job);
   const exact=await db.collection('pending_jobs').where('duplicateKey','==',key).limit(1).get();
   if(!exact.empty) return Object.assign({id:exact.docs[0].id},exact.docs[0].data());
-  const snap=await db.collection('pending_jobs').limit(500).get();
-  const tt=normalizeJobText(job.title),oo=normalizeJobText(job.org),ll=normalizeJobText(job.link),
-        gg=normalizeJobText(job.gov),dd=normalizeJobText(job.dl);
+  const snap=await db.collection('pending_jobs').limit(1000).get();
+  const tt=normalizeJobText(job.title),oo=normalizeJobText(job.org),ll=normalizedUrlKey(job.link);
   const found=snap.docs.find(d=>{
-    const x=d.data()||{};if(x.status==='rejected')return false;
-    const xl=normalizeJobText(x.link);
-    if(ll&&xl&&ll===xl)return true;
-    return normalizeJobText(x.title)===tt&&normalizeJobText(x.org)===oo&&
-           normalizeJobText(x.gov)===gg&&normalizeJobText(x.dl)===dd;
+    const x=d.data()||{}; if(x.status==='rejected') return false;
+    const xl=normalizedUrlKey(x.link);
+    if(ll&&xl&&ll===xl) return true;
+    const xt=normalizeJobText(x.title), xo=normalizeJobText(x.org);
+    return tt&&oo&&xt===tt&&xo===oo;
   });
   return found?Object.assign({id:found.id},found.data()):null;
 }
@@ -5667,82 +5678,89 @@ async
 // ============ JOB IMPORTER ============
 function parseImportedDeadline(text){
   const t=String(text||'');
-  let m=t.match(/(?:deadline|closing date|last date|application deadline|آخر موعد|موعد التقديم|التقديم حتى)\s*[:\-]?\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/i);
+  let m=t.match(/(?:deadline|closing date|last date|application deadline|آخر موعد|موعد التقديم|التقديم حتى)\s*[:\-]?\s*(\d{1,2})[\s\/-]+(\d{1,2})[\s\/-]+(\d{2,4})/i);
   if(m){let y=Number(m[3]);if(y<100)y+=2000;return y+'-'+String(Number(m[2])).padStart(2,'0')+'-'+String(Number(m[1])).padStart(2,'0');}
-  m=t.match(/(?:deadline|application deadline)[^\n]{0,80}?(\d{1,2})\s+(September|October|November|December|January|February|March|April|May|June|July|August)\s+(\d{4})/i);
+  m=t.match(/(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})/i);
   if(m){const months={january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12};return m[3]+'-'+String(months[m[2].toLowerCase()]).padStart(2,'0')+'-'+String(Number(m[1])).padStart(2,'0');}
-  m=t.match(/(?:deadline|application deadline)[^\n]{0,100}?(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/i);
-  if(m)return m[3]+'-'+String(Number(m[2])).padStart(2,'0')+'-'+String(Number(m[1])).padStart(2,'0');
   return '';
 }
-function cleanImportUrl(url){try{const u=new URL(String(url||'').trim());u.searchParams.delete('fbclid');u.searchParams.delete('utm_source');u.searchParams.delete('utm_medium');u.searchParams.delete('utm_campaign');return u.toString();}catch(e){return String(url||'').trim();}}
-async function fetchImportPage(url){
-  const clean=cleanImportUrl(url);
-  if(!/^https?:\/\//i.test(clean))throw new Error('الرابط يجب أن يبدأ بـ http:// أو https://');
-  const reader='https://r.jina.ai/'+clean;
-  const resp=await fetch(reader,{method:'GET',headers:{'Accept':'text/plain'}});
-  if(!resp.ok)throw new Error('تعذر جلب صفحة الإعلان (HTTP '+resp.status+')');
-  const text=await resp.text();
-  if(!text || text.trim().length<120)throw new Error('تم الوصول للرابط لكن لم يتم العثور على محتوى إعلان قابل للقراءة');
-  return text;
-}
-function parseFetchedJobText(text,url){
-  const t=String(text||'').replace(/\r/g,'').trim();
-  const out={title:'',org:'',gov:'القاهرة',type:'دوام كامل',sec:'',sal:'',dl:parseImportedDeadline(t),contact:'',desc:t,link:cleanImportUrl(url),source:''};
-  const lines=t.split('\n').map(x=>x.trim()).filter(Boolean);
-  let m=t.match(/^#\s+(.+?)(?:\s+\-\s+.+)?$/m); if(m)out.title=m[1].trim();
-  if(!out.title){m=t.match(/(?:^|\n)#+\s*([^\n]+)/);if(m)out.title=m[1].trim();}
-  if(!out.title && lines[0])out.title=lines[0].replace(/^#+\s*/,'').trim();
-  // WUZZUF pattern: Job Title\nFull Time\nOn-site\nOrganization -\nCity, Egypt
-  m=t.match(/(?:\n|^)([^\n]+?)\s*[-–]\s*Greater Cairo[^\n]*\n/i); if(m && /mental|supervisor|officer|manager|coordinator|assistant|specialist|analyst|consultant|psych/i.test(m[1]))out.title=m[1].trim();
-  m=t.match(/(?:\n|^)([^\n]+?)\s*[-–]\s*\n\s*(?:Cairo|Giza|Alexandria|Aswan|Egypt)/i); if(m)out.org=m[1].trim();
-  if(!out.org){m=t.match(/\n([^\n]{2,120})\s*[-–]\s*\n(?:Cairo|Giza|Alexandria|Aswan|Egypt)/i);if(m)out.org=m[1].trim();}
-  if(/\bOn-site\b/i.test(t))out.workMode='On-site';
-  if(/\bHybrid\b/i.test(t))out.workMode='Hybrid';
-  if(/\bRemote\b/i.test(t))out.workMode='Remote';
+function detectGovernorate(t){
   const govs=['القاهرة','الإسكندرية','الجيزة','القليوبية','الشرقية','الدقهلية','البحيرة','الغربية','المنوفية','كفر الشيخ','دمياط','بورسعيد','الإسماعيلية','السويس','شمال سيناء','جنوب سيناء','الفيوم','بني سويف','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','الوادي الجديد','مطروح'];
-  const egMap={Cairo:'القاهرة',Giza:'الجيزة',Alexandria:'الإسكندرية',Aswan:'أسوان',Luxor:'الأقصر',Sohag:'سوهاج',Assiut:'أسيوط',Minya:'المنيا',Fayoum:'الفيوم',Qena:'قنا',Damietta:'دمياط',Mansoura:'الدقهلية',Portsaid:'بورسعيد',Suez:'السويس',Ismailia:'الإسماعيلية'};
-  const locm=t.match(/Location:\s*([^\n]+)/i); if(locm){const loc=locm[1]; const g=govs.find(x=>loc.includes(x)); if(g)out.gov=g; else {for(const k in egMap){if(new RegExp('\\b'+k+'\\b','i').test(loc)){out.gov=egMap[k];break;}}}}
-  if(/Greater Cairo/i.test(t))out.gov='القاهرة';
+  const low=String(t||'').toLowerCase();
+  const aliases={'cairo':'القاهرة','greater cairo':'القاهرة','alexandria':'الإسكندرية','giza':'الجيزة','aswan':'أسوان','sohag':'سوهاج','fayoum':'الفيوم','faiyum':'الفيوم','minya':'المنيا','asyut':'أسيوط','qena':'قنا','luxor':'الأقصر','damietta':'دمياط','port said':'بورسعيد','ismailia':'الإسماعيلية','suez':'السويس','matrouh':'مطروح'};
+  for(const k in aliases) if(low.includes(k)) return aliases[k];
+  return govs.find(g=>String(t||'').includes(g))||'';
+}
+function parseImportedJobText(text){
+  const t=String(text||'').trim();
+  const out={title:'',org:'',gov:detectGovernorate(t)||'القاهرة',type:/part[- ]?time|دوام جزئي/i.test(t)?'دوام جزئي':'دوام كامل',sec:'',sal:'',dl:parseImportedDeadline(t),contact:'',desc:t,link:'',source:''};
+  let m=t.match(/(?:organization|organisation|company|employer|الجهة|المؤسسة|المنظمة)\s*[:\-]\s*([^\n\r]+)/i);if(m)out.org=m[1].trim();
+  m=t.match(/(?:title|position|job title|المسمى الوظيفي|الوظيفة|مطلوب)\s*[:\-]\s*([^\n\r]+)/i);if(m)out.title=m[1].trim();
+  if(!out.title){const lines=t.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);out.title=(lines[0]||'').replace(/^#+\s*/,'').trim();}
+  m=t.match(/(?:location|place|work location|المكان|الموقع|محل العمل)\s*[:\-]\s*([^\n\r]+)/i);if(m)out.gov=detectGovernorate(m[1])||out.gov;
   m=t.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);if(m)out.contact=m[0];
-  const descStart=t.search(/Job Description/i); const reqStart=t.search(/Job Requirements/i); if(descStart>=0){out.desc=t.slice(descStart,reqStart>descStart?reqStart:Math.min(t.length,descStart+12000)).trim();}
-  out.source=/wuzzuf\.net/i.test(url)?'WUZZUF':(new URL(cleanImportUrl(url)).hostname||'مصدر الإعلان');
+  m=t.match(/https?:\/\/[^\s)\]]+/i);if(m)out.link=canonicalizeJobUrl(m[0].replace(/[.,;]+$/,''));
   return out;
 }
-function parseImportedJobText(text){return parseFetchedJobText(text,'');}
+function stripTrackingFromInput(){const e=document.getElementById('imp-link');if(e)e.value=canonicalizeJobUrl(e.value);}
 function fillImportedJobForm(j){
   const map={title:'nj-title',org:'nj-org',gov:'nj-gov',type:'nj-type',sec:'nj-sec',sal:'nj-sal',dl:'nj-dl',contact:'nj-contact',desc:'nj-desc',link:'nj-link',source:'nj-source'};
   Object.keys(map).forEach(k=>{const e=document.getElementById(map[k]);if(e)e.value=j[k]||'';});
 }
-async function testImportLink(){
-  const link=document.getElementById('imp-link').value.trim(),status=document.getElementById('imp-link-status');
-  if(!link){if(status)status.innerHTML='⚠️ أدخل رابط الإعلان أولا';return;}
-  if(status)status.innerHTML='⏳ جاري اختبار الرابط...';
+async function fetchReadableJobPage(url){
+  const clean=canonicalizeJobUrl(url);
+  if(!clean) throw new Error('الرابط فارغ');
+  const proxy='https://r.jina.ai/'+clean;
+  const ctl=new AbortController(); const timer=setTimeout(()=>ctl.abort(),20000);
   try{
-    const text=await fetchImportPage(link);
-    if(status)status.innerHTML='✅ الرابط صالح ويمكن قراءة محتوى الإعلان';
-    const box=document.getElementById('imp-text'); if(box && !box.value.trim())box.value=text;
-  }catch(e){if(status)status.innerHTML='❌ '+escapeHtml(e.message||'تعذر التحقق من الرابط');}
+    const res=await fetch(proxy,{method:'GET',headers:{'Accept':'text/plain'},signal:ctl.signal,cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    if(!text || text.length<80) throw new Error('لم يتم إرجاع محتوى كاف');
+    return text;
+  }finally{clearTimeout(timer);}
+}
+function parseFetchedJobPage(page,url){
+  const t=String(page||'').replace(/\r/g,'').trim();
+  let out=parseImportedJobText(t); out.link=canonicalizeJobUrl(url); out.source=new URL(out.link).hostname.replace(/^www\./,''); out.desc=t.slice(0,12000);
+  const lines=t.split(/\n+/).map(x=>x.trim()).filter(Boolean).filter(x=>!/^[-_*#]+$/.test(x));
+  if(/wuzzuf\.net/i.test(url)){
+    const titleLine=lines.find(x=>/^(?:#\s*)?[^|]{5,100}$/.test(x)&&/Mental|Manager|Officer|Coordinator|Specialist|Assistant|Supervisor|Engineer|Accountant|Psychologist|Director|Consultant|Analyst/i.test(x));
+    if(titleLine) out.title=titleLine.replace(/^#+\s*/,'').trim();
+    const orgLine=lines.find(x=>/Medecins Sans Frontieres|Médecins Sans Frontières|Save the Children|UNDP|UNFPA|WHO|FAO|IOM/i.test(x));
+    if(orgLine) out.org=orgLine.replace(/^[-*]+/,'').trim();
+  }
+  if(!out.org){let m=t.match(/(?:company|organization|employer|الجهة)\s*[:\-]\s*([^\n]+)/i);if(m)out.org=m[1].trim();}
+  if(!out.title){out.title=lines[0]||'';}
+  if(!out.title||!out.org) throw new Error('تم جلب الصفحة لكن تعذر استخراج المسمى والجهة تلقائيا');
+  if(/jobs\??$/i.test(out.link) || /\/jobs$/i.test(new URL(out.link).pathname) || /jobs\?/.test(out.link) && lines.length>20 && !/job detail|apply now/i.test(t)) out._listingPage=true;
+  return out;
 }
 async function analyzeImportedJob(){
-  let text=document.getElementById('imp-text').value.trim(),raw=document.getElementById('imp-json').value.trim(),link=document.getElementById('imp-link').value.trim(),source=document.getElementById('imp-source').value.trim();
+  const text=document.getElementById('imp-text').value.trim(),raw=document.getElementById('imp-json').value.trim(),link=canonicalizeJobUrl(document.getElementById('imp-link').value.trim()),source=document.getElementById('imp-source').value.trim();
   const box=document.getElementById('imp-result');
-  if(!link && !text && !raw){toast('⚠️ أدخل رابط الإعلان أو الصق نص الإعلان');return;}
+  if(box)box.innerHTML='<div style="padding:12px;border-radius:12px;background:#f6f9fc">⏳ جاري قراءة الإعلان وفحص التكرار...</div>';
+  let j={};
   try{
-    if(link && !text && !raw){
-      box.innerHTML='<div style="padding:12px;border-radius:12px;background:#eef7ff;color:#1463a5">⏳ جاري جلب الإعلان وتحليله من الرابط...</div>';
-      text=await fetchImportPage(link);
-      document.getElementById('imp-text').value=text;
+    if(link && !raw && !text){
+      const page=await fetchReadableJobPage(link);
+      j=parseFetchedJobPage(page,link);
+    }else{
+      j=raw?JSON.parse(raw):parseImportedJobText(text);
+      j.link=j.link||link;
     }
-    let j={};
-    if(raw){j=JSON.parse(raw);}else if(link && text){j=parseFetchedJobText(text,link);}else{j=parseImportedJobText(text);}
-    j.link=cleanImportUrl(j.link||link);j.source=j.source||source||'استيراد تنمويين مصر';j.duplicateKey=makeJobDuplicateKey(j);
-    if(!j.title||!j.org){box.innerHTML='<div style="padding:14px;background:#fff3cd;color:#7a5200;border-radius:12px;font-weight:700">⚠️ تم جلب الصفحة، لكن لم نستطع استخراج المسمى والجهة تلقائيا. راجع النص ثم أكمل البيانات.</div>';fillImportedJobForm(j);return;}
+  }catch(e){
+    if(box)box.innerHTML='<div style="padding:14px;background:#fff3cd;color:#7a5200;border-radius:12px;font-weight:700">⚠️ تم فتح الرابط، لكن تعذر قراءة محتوى الإعلان تلقائيا.<br><small>'+escapeHtml(e.message||'تحقق من الرابط أو ألصق نص الإعلان يدويا.')+'</small></div>';
+    return;
+  }
+  j.link=canonicalizeJobUrl(j.link||link); j.source=j.source||source||'استيراد تنمويين مصر'; j.duplicateKey=makeJobDuplicateKey(j);
+  if(!j.title||!j.org){if(box)box.innerHTML='<div style="padding:14px;background:#fde8e8;color:#9b1c1c;border-radius:12px;font-weight:700">❌ لم نتمكن من استخراج المسمى والجهة من الرابط. ألصق نص الإعلان ثم أعد التحليل.</div>';return;}
+  try{
     const existing=await findExistingJob(j),pending=await findExistingPendingJob(j);
-    if(existing||pending){box.innerHTML='<div style="padding:14px;border-radius:12px;background:#fff3cd;color:#7a5200;font-weight:700">⚠️ الإعلان موجود بالفعل أو موجود في انتظار المراجعة.<br><small>لن يتم إنشاء نسخة مكررة.</small></div>';return;}
+    if(existing||pending){box.innerHTML='<div style="padding:14px;border-radius:12px;background:#fff3cd;color:#7a5200;font-weight:700">⚠️ الإعلان موجود بالفعل أو موجود في قائمة المراجعة.<br><small>تم منعه من الإنشاء مرة أخرى.</small></div>';return;}
     window._importedJob=j; fillImportedJobForm(j);
-    box.innerHTML='<div style="padding:14px;border-radius:12px;background:#e7faf3;color:#006b3c"><b>🟢 تم جلب وتحليل الإعلان بنجاح</b><br><br><b>'+escapeHtml(j.title)+'</b><br>'+escapeHtml(j.org)+' — '+escapeHtml(j.gov||'')+'<br>آخر موعد: '+escapeHtml(j.dl||'غير محدد')+'<br><br><button class="sbtn" onclick="saveImportedJob()" style="background:#00703a">✅ إضافة للمسودة</button></div>';
-  }catch(e){box.innerHTML='<div style="padding:12px;background:#fde8e8;color:#9b1c1c;border-radius:12px">❌ تعذر جلب أو تحليل الإعلان: '+escapeHtml(e.message||'')+'</div>';}
+    box.innerHTML='<div style="padding:14px;border-radius:12px;background:#e7faf3;color:#006b3c"><b>🟢 تم تحليل الإعلان بنجاح</b><br><br><b>'+escapeHtml(j.title)+'</b><br>'+escapeHtml(j.org)+' — '+escapeHtml(j.gov||'')+'<br>آخر موعد: '+escapeHtml(j.dl||'غير محدد')+'<br><br><button class="sbtn" onclick="saveImportedJob()" style="background:#00703a">✅ إضافة للمسودة</button></div>';
+  }catch(e){box.innerHTML='<div style="padding:12px;background:#fde8e8;color:#9b1c1c;border-radius:12px">❌ تعذر فحص Firebase: '+escapeHtml(e.message||'')+'</div>';}
 }
 async function saveImportedJob(){
   const j=window._importedJob;
@@ -5792,7 +5810,7 @@ async function bulkImportCurrentJobs(){
   let added=0,dup=0,fail=0;
   if(box)box.textContent='⏳ جاري استيراد '+jobs.length+' فرصة...';
   for(let i=0;i<jobs.length;i++){
-    const j=jobs[i];
+    const j=Object.assign({},jobs[i],{link:canonicalizeJobUrl(jobs[i].link)});
     const payload=Object.assign({},j,{duplicateKey:makeJobDuplicateKey(j),status:'pending',ownerUid:auth.currentUser.uid,submittedBy:auth.currentUser.uid,submittedByEmail:(auth.currentUser.email||''),importMethod:'bulk_admin',timestamp:firebase.firestore.FieldValue.serverTimestamp(),importedAt:firebase.firestore.FieldValue.serverTimestamp()});
     try{
       const existing=await findExistingJob(j); const pending=await findExistingPendingJob(j);
@@ -8213,7 +8231,8 @@ window.TANMOYEEN_BULK_JOBS_2026_09_30 = [
   }
 ];
 
-window.TANMOYEEN_BULK_JOBS_CURRENT=window.TANMOYEEN_BULK_JOBS_2026_09_30;
+// Compatibility alias: the visible name can change without breaking the importer.
+window.TANMOYEEN_BULK_JOBS_CURRENT = window.TANMOYEEN_BULK_JOBS_2026_09_30;
 </script>
 </body>
 </html>

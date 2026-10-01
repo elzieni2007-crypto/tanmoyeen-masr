@@ -5707,18 +5707,56 @@ function fillImportedJobForm(j){
   const map={title:'nj-title',org:'nj-org',gov:'nj-gov',type:'nj-type',sec:'nj-sec',sal:'nj-sal',dl:'nj-dl',contact:'nj-contact',desc:'nj-desc',link:'nj-link',source:'nj-source'};
   Object.keys(map).forEach(k=>{const e=document.getElementById(map[k]);if(e)e.value=j[k]||'';});
 }
-async function fetchReadableJobPage(url){
-  const clean=canonicalizeJobUrl(url);
-  if(!clean) throw new Error('الرابط فارغ');
-  const proxy='https://r.jina.ai/'+clean;
-  const ctl=new AbortController(); const timer=setTimeout(()=>ctl.abort(),20000);
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+async function fetchTextWithTimeout(url,ms=8000,options={}){
+  const ctl=new AbortController();
+  const timer=setTimeout(()=>ctl.abort(),ms);
   try{
-    const res=await fetch(proxy,{method:'GET',headers:{'Accept':'text/plain'},signal:ctl.signal,cache:'no-store'});
+    const res=await fetch(url,Object.assign({method:'GET',cache:'no-store',headers:{'Accept':'text/plain,text/html,*/*'}},options,{signal:ctl.signal}));
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text=await res.text();
-    if(!text || text.length<80) throw new Error('لم يتم إرجاع محتوى كاف');
+    if(!text || text.length<80) throw new Error('محتوى الصفحة غير كاف');
     return text;
+  }catch(e){
+    if(e && e.name==='AbortError') throw new Error('انتهت مهلة قراءة الرابط');
+    throw e;
   }finally{clearTimeout(timer);}
+}
+function extractWuzzufFromSlug(url){
+  try{
+    const u=new URL(url), slug=decodeURIComponent(u.pathname.split('/').pop()||'');
+    if(!/wuzzuf\.net/i.test(u.hostname)||!/^p\//i.test(u.pathname.replace(/^\/jobs\//,'')) && !/\/jobs\/p\//i.test(u.pathname)) return null;
+    const parts=slug.split('-').filter(Boolean);
+    const stop=/^(cairo|egypt|alexandria|giza|greater|cairo|aswan|sohag|remote|egypt)$/i;
+    let core=parts.slice(1);
+    // Known WUZZUF slug pattern: id-title-company-city-country
+    const cityIdx=core.findIndex((x,i)=>/cairo|giza|alexandria|aswan|sohag|mansoura|egypt/i.test(x));
+    let titleParts=cityIdx>0?core.slice(0,cityIdx):core;
+    const knownOrgs=['medecins sans frontieres','save the children','united nations','undp','unfpa','who','iom','fao'];
+    let title=titleParts.join(' ').replace(/\b\w/g,c=>c.toUpperCase());
+    let org='';
+    if(/medecins[- ]sans[- ]frontieres/i.test(slug)) org='Medecins Sans Frontieres';
+    else if(/save[- ]the[- ]children/i.test(slug)) org='Save the Children';
+    if(!title) return null;
+    return {title,org,gov:detectGovernorate(slug),type:'دوام كامل',sec:'',sal:'',dl:'',contact:'',desc:'',link:canonicalizeJobUrl(url),source:u.hostname.replace(/^www\./,'')};
+  }catch(e){return null;}
+}
+async function fetchReadableJobPage(url,onStatus){
+  const clean=canonicalizeJobUrl(url);
+  if(!clean) throw new Error('الرابط فارغ');
+  const candidates=[
+    {name:'القراءة المباشرة',url:clean},
+    {name:'قارئ الإعلان',url:'https://r.jina.ai/'+clean},
+    {name:'قارئ بديل',url:'https://api.allorigins.win/raw?url='+encodeURIComponent(clean)}
+  ];
+  const errors=[];
+  for(const c of candidates){
+    try{
+      if(onStatus) onStatus('⏳ '+c.name+'...');
+      return await fetchTextWithTimeout(c.url,7000);
+    }catch(e){errors.push(c.name+': '+(e.message||e));}
+  }
+  throw new Error('تعذر قراءة الصفحة من داخل التطبيق. '+errors.join(' | '));
 }
 function parseFetchedJobPage(page,url){
   const t=String(page||'').replace(/\r/g,'').trim();
@@ -5733,7 +5771,7 @@ function parseFetchedJobPage(page,url){
   if(!out.org){let m=t.match(/(?:company|organization|employer|الجهة)\s*[:\-]\s*([^\n]+)/i);if(m)out.org=m[1].trim();}
   if(!out.title){out.title=lines[0]||'';}
   if(!out.title||!out.org) throw new Error('تم جلب الصفحة لكن تعذر استخراج المسمى والجهة تلقائيا');
-  if(/jobs\??$/i.test(out.link) || /\/jobs$/i.test(new URL(out.link).pathname) || /jobs\?/.test(out.link) && lines.length>20 && !/job detail|apply now/i.test(t)) out._listingPage=true;
+  if(/\/jobs\/?(?:\?|$)/i.test(out.link) || /\/jobs$/i.test(new URL(out.link).pathname) || /\/jobs\?/i.test(out.link) && lines.length>20 && !/job detail|apply now|vacancy/i.test(t)) out._listingPage=true;
   return out;
 }
 async function analyzeImportedJob(){
@@ -5743,8 +5781,10 @@ async function analyzeImportedJob(){
   let j={};
   try{
     if(link && !raw && !text){
-      const page=await fetchReadableJobPage(link);
+      const quick=extractWuzzufFromSlug(link);
+      const page=await fetchReadableJobPage(link,msg=>{if(box)box.innerHTML='<div style="padding:12px;border-radius:12px;background:#f6f9fc">'+escapeHtml(msg)+'</div>';});
       j=parseFetchedJobPage(page,link);
+      if(quick && (!j.title || !j.org)){j=Object.assign(quick,j);}
     }else{
       j=raw?JSON.parse(raw):parseImportedJobText(text);
       j.link=j.link||link;
@@ -5754,6 +5794,7 @@ async function analyzeImportedJob(){
     return;
   }
   j.link=canonicalizeJobUrl(j.link||link); j.source=j.source||source||'استيراد تنمويين مصر'; j.duplicateKey=makeJobDuplicateKey(j);
+  if(j._listingPage){if(box)box.innerHTML='<div style="padding:14px;background:#fff3cd;color:#7a5200;border-radius:12px;font-weight:700">ℹ️ هذا الرابط صفحة وظائف تحتوي على أكثر من إعلان، وليس رابط وظيفة محددة.<br><small>افتح الوظيفة المطلوبة وانسخ رابطها المباشر ثم أعد التحليل.</small></div>';return;}
   if(!j.title||!j.org){if(box)box.innerHTML='<div style="padding:14px;background:#fde8e8;color:#9b1c1c;border-radius:12px;font-weight:700">❌ لم نتمكن من استخراج المسمى والجهة من الرابط. ألصق نص الإعلان ثم أعد التحليل.</div>';return;}
   try{
     const existing=await findExistingJob(j),pending=await findExistingPendingJob(j);

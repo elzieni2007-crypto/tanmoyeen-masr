@@ -5842,7 +5842,7 @@ async function saveImportedJob(){
 }
 
 async function bulkImportCurrentJobs(){
-  const jobs=window.TANMOYEEN_BULK_JOBS_CURRENT||window.TANMOYEEN_BULK_JOBS_2026_09_30||[];
+  const jobs=window.TANMOYEEN_BULK_JOBS||window.TANMOYEEN_BULK_JOBS_CURRENT||window.TANMOYEEN_BULK_JOBS_2026_09_30||[];
   const box=document.getElementById('bulk-import-progress');
   if(!jobs.length){if(box)box.textContent='لا توجد بيانات للتجميعة.';return;}
   if(typeof auth==='undefined'||!auth.currentUser){toast('⚠️ يجب تسجيل الدخول كمسؤول قبل استيراد التجميعة');return;}
@@ -7826,6 +7826,7 @@ window.addEventListener('load',()=>{
     <button class="success-btn-wa" onclick="window.open(WA_GROUP_URL,'_blank')" style="background:#128c7e;margin-top:6px">👥 انضم لجروب واتساب تنمويين مصر</button>
   </div>
 </div>
+<script src="./jobs-bulk.js?v=20261004-1"></script>
 <script>
 window.TANMOYEEN_BULK_JOBS_2026_09_30 = [
   {
@@ -8273,7 +8274,7 @@ window.TANMOYEEN_BULK_JOBS_2026_09_30 = [
 ];
 
 // Compatibility alias: the visible name can change without breaking the importer.
-window.TANMOYEEN_BULK_JOBS_CURRENT = window.TANMOYEEN_BULK_JOBS_2026_09_30;
+window.TANMOYEEN_BULK_JOBS_CURRENT = window.TANMOYEEN_BULK_JOBS || window.TANMOYEEN_BULK_JOBS_2026_09_30 || [];
 </script>
 </body>
 </html>

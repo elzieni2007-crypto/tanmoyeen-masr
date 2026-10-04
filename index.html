@@ -2983,11 +2983,11 @@ function loadFromFirebase(){
     });
 
     // Jobs
-    db.collection('jobs').orderBy('timestamp','desc').limit(200).get().then(function(snap){
+    db.collection('jobs').orderBy('timestamp','desc').limit(500).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){
         var r=d.data();
-        if(r.title && r.status==='approved')
+        if(r.title && (r.status==='approved' || r.status==='active'))
           fresh.push(Object.assign({},r,{id:d.id,fbId:d.id,logo:r.logo||'💼',urg:r.urg||false,sal:r.sal||'تنافسي'}));
       });
       JOBS.length=0;
@@ -5631,22 +5631,21 @@ function normalizedUrlKey(v){
   return u ? u.replace(/^https?:\/\//,'').replace(/^www\./,'') : '';
 }
 function makeJobDuplicateKey(job){
-  const link=normalizedUrlKey(job.link);
-  if(link) return 'url:'+link;
-  return 'job:'+[normalizeJobText(job.org),normalizeJobText(job.title)].join('|');
+  // لا نعتمد على الرابط وحده: نفس رابط المصدر قد يحتوي عدة وظائف،
+  // مثل منشور فيسبوك أو صفحة وظائف عامة.
+  return 'job:'+[normalizeJobText(job.org),normalizeJobText(job.title),normalizeJobText(job.gov)].join('|');
+}
+function sameJobIdentity(a,b){
+  const at=normalizeJobText(a.title), ao=normalizeJobText(a.org), ag=normalizeJobText(a.gov);
+  const bt=normalizeJobText(b.title), bo=normalizeJobText(b.org), bg=normalizeJobText(b.gov);
+  return !!(at&&ao&&at===bt&&ao===bo&&(!ag||!bg||ag===bg));
 }
 async function findExistingJob(job){
   const key=makeJobDuplicateKey(job);
   const exact=await db.collection('jobs').where('duplicateKey','==',key).limit(1).get();
   if(!exact.empty) return Object.assign({id:exact.docs[0].id},exact.docs[0].data());
   const snap=await db.collection('jobs').limit(1000).get();
-  const tt=normalizeJobText(job.title),oo=normalizeJobText(job.org),ll=normalizedUrlKey(job.link);
-  const found=snap.docs.find(d=>{
-    const x=d.data()||{},xl=normalizedUrlKey(x.link);
-    if(ll&&xl&&ll===xl) return true;
-    const xt=normalizeJobText(x.title), xo=normalizeJobText(x.org);
-    return tt&&oo&&xt===tt&&xo===oo;
-  });
+  const found=snap.docs.find(d=>sameJobIdentity(job,d.data()||{}));
   return found?Object.assign({id:found.id},found.data()):null;
 }
 async function findExistingPendingJob(job){
@@ -5654,13 +5653,10 @@ async function findExistingPendingJob(job){
   const exact=await db.collection('pending_jobs').where('duplicateKey','==',key).limit(1).get();
   if(!exact.empty) return Object.assign({id:exact.docs[0].id},exact.docs[0].data());
   const snap=await db.collection('pending_jobs').limit(1000).get();
-  const tt=normalizeJobText(job.title),oo=normalizeJobText(job.org),ll=normalizedUrlKey(job.link);
   const found=snap.docs.find(d=>{
-    const x=d.data()||{}; if(x.status==='rejected') return false;
-    const xl=normalizedUrlKey(x.link);
-    if(ll&&xl&&ll===xl) return true;
-    const xt=normalizeJobText(x.title), xo=normalizeJobText(x.org);
-    return tt&&oo&&xt===tt&&xo===oo;
+    const x=d.data()||{};
+    if(x.status==='rejected') return false;
+    return sameJobIdentity(job,x);
   });
   return found?Object.assign({id:found.id},found.data()):null;
 }
@@ -7826,7 +7822,7 @@ window.addEventListener('load',()=>{
     <button class="success-btn-wa" onclick="window.open(WA_GROUP_URL,'_blank')" style="background:#128c7e;margin-top:6px">👥 انضم لجروب واتساب تنمويين مصر</button>
   </div>
 </div>
-<script src="./jobs-bulk.js?v=20261004-2"></script>
+<script src="./jobs-bulk.js?v=20261004-3"></script>
 <script>
 window.TANMOYEEN_BULK_JOBS_CURRENT = window.TANMOYEEN_BULK_JOBS || [];
 </script>

@@ -7836,10 +7836,7 @@ window.addEventListener('load',()=>{
     <button class="success-btn-wa" onclick="window.open(WA_GROUP_URL,'_blank')" style="background:#128c7e;margin-top:6px">👥 انضم لجروب واتساب تنمويين مصر</button>
   </div>
 </div>
-<script src="./jobs-bulk.js?v=20261004-3"></script>
-<script>
-window.TANMOYEEN_BULK_JOBS_CURRENT = window.TANMOYEEN_BULK_JOBS || (typeof TANMOYEEN_BULK_JOBS!=='undefined' ? TANMOYEEN_BULK_JOBS : []);
-</script>
+<!-- jobs-bulk.js بيتقري طازة من GitHub وقت الاستيراد (من غير نسخ مخزنة) -->
 <script>
 /* ===== أدوات الأدمن: استيراد الوظائف المجمّع + تصدير Excel/PDF بهوية تنمويين مصر ===== */
 (function(){
@@ -8361,7 +8358,7 @@ async function runBulkImport(rawJobs, sourceLabel){
 }
 
 /* قراءة التجميعة من jobs-bulk.js أيًا كانت طريقة تعريفها */
-var BUNDLE_NAMES=['TANMOYEEN_BULK_JOBS','TANMOYEEN_BULK_JOBS_CURRENT','BULK_JOBS','JOBS_BULK','jobsBulk','bulkJobs','JOBS'];
+var BUNDLE_NAMES=['TANMOYEEN_BULK_JOBS_CURRENT','TANMOYEEN_BULK_JOBS','BULK_JOBS','JOBS_BULK','jobsBulk','bulkJobs','JOBS'];
 function pickArray(v){
   if(Array.isArray(v)) return v;
   if(v&&typeof v==='object'){ var k=['jobs','data','items','list'].filter(function(x){return Array.isArray(v[x]);})[0]; if(k) return v[k]; }
@@ -8376,19 +8373,45 @@ function bundleFromGlobals(){
   }
   return null;
 }
-function extractArrayLiteral(txt){
-  var t=txt.trim();
-  if(t[0]==='['||t[0]==='{'){ try{ var j=JSON.parse(t); var a=pickArray(j); if(a) return a; }catch(e){} }
-  var m=/=\s*\[/.exec(t); if(!m) return null;
-  var i=m.index+m[0].length-1, depth=0, q=null, esc=false;
-  for(var k=i;k<t.length;k++){
-    var c=t[k];
-    if(q){ if(esc){esc=false;} else if(c==='\\'){esc=true;} else if(c===q){q=null;} continue; }
-    if(c==='"'||c==="'"||c==='`'){q=c;continue;}
-    if(c==='['||c==='{') depth++;
-    else if(c===']'||c==='}'){ depth--; if(depth===0){ var lit=t.slice(i,k+1); try{ return (new Function('"use strict";return ('+lit+');'))(); }catch(e){ return null; } } }
+function runInSandbox(code){
+  var fake={};
+  var names=BUNDLE_NAMES.map(function(n){return '"'+n+'":(typeof '+n+'!=="undefined"?'+n+':undefined)';}).join(',');
+  var fn=new Function('window','self','globalThis', code+'\n;return {'+names+'};');
+  var res=fn(fake,fake,fake);
+  for(var i=0;i<BUNDLE_NAMES.length;i++){
+    var a=pickArray(res[BUNDLE_NAMES[i]])||pickArray(fake[BUNDLE_NAMES[i]]);
+    if(a&&a.length) return a;
   }
   return null;
+}
+/* قراءة متسامحة: بتطلع كل وظيفة مكتملة حتى لو الملف مقطوع أو فيه خطأ في آخره */
+function salvageObjects(t){
+  var m=/=\s*\[/.exec(t); if(!m) return {jobs:[],cutLine:0};
+  var i=m.index+m[0].length, depth=0, q=null, escp=false, start=-1, out=[], lineComment=false, blockComment=false;
+  for(var k=i;k<t.length;k++){
+    var c=t[k], n=t[k+1];
+    if(lineComment){ if(c==='\n') lineComment=false; continue; }
+    if(blockComment){ if(c==='*'&&n==='/'){blockComment=false;k++;} continue; }
+    if(q){ if(escp){escp=false;} else if(c==='\\'){escp=true;} else if(c===q){q=null;} continue; }
+    if(c==='/'&&n==='/'){lineComment=true;k++;continue;}
+    if(c==='/'&&n==='*'){blockComment=true;k++;continue;}
+    if(c==='"'||c==="'"||c==='`'){q=c;continue;}
+    if(c==='{'||c==='['){ if(depth===0&&c==='{') start=k; depth++; }
+    else if(c==='}'||c===']'){
+      if(depth===0&&c===']') return {jobs:out,cutLine:0};
+      depth--;
+      if(depth===0&&start>-1){ try{ out.push((new Function('"use strict";return ('+t.slice(start,k+1)+');'))()); }catch(e){} start=-1; }
+    }
+  }
+  var cut=start>-1?t.slice(0,start).split('\n').length:t.split('\n').length;
+  return {jobs:out,cutLine:cut,truncated:true};
+}
+function parseBundle(txt){
+  var t=String(txt||'').trim();
+  if(t[0]==='['||t[0]==='{'){ try{ var j=pickArray(JSON.parse(t)); if(j) return {jobs:j}; }catch(e){} }
+  try{ var a=runInSandbox(t); if(a&&a.length) return {jobs:a}; }catch(e){}
+  var sv=salvageObjects(t);
+  return {jobs:sv.jobs, truncated:!!sv.truncated, cutLine:sv.cutLine};
 }
 var GH_REPO='elzieni2007-crypto/tanmoyeen-masr', GH_FILE='jobs-bulk.js';
 async function fetchText(url,opts,ms){
@@ -8414,13 +8437,13 @@ async function loadBundle(){
   var errs=[];
   for(var i=0;i<sources.length;i++){
     try{
-      var a=extractArrayLiteral(await fetchText(sources[i].url,sources[i].opts));
-      if(a&&a.length) return {jobs:a, from:sources[i].name};
-      errs.push(sources[i].name+': الملف مفيهوش قائمة وظائف');
+      var pb=parseBundle(await fetchText(sources[i].url,sources[i].opts));
+      if(pb.jobs&&pb.jobs.length) return {jobs:pb.jobs, from:sources[i].name, truncated:pb.truncated, cutLine:pb.cutLine};
+      errs.push(sources[i].name+': '+(pb.truncated?'الملف مقطوع ومفيهوش ولا وظيفة كاملة':'الملف مفيهوش قائمة وظائف'));
     }catch(e){ errs.push(sources[i].name+': '+(e.name==='AbortError'?'انتهت المهلة':(e.message||e))); }
   }
   var g=bundleFromGlobals();
-  if(g){ g.from='نسخة مخزنة قديمة في المتصفح'; g.stale=true; return g; }
+  if(g){ g.from='نسخة مخزنة قديمة في المتصفح'; g.stale=true; g.errs=errs; return g; }
   return {jobs:[], err:'تعذر قراءة '+GH_FILE+' — '+errs.join(' | ')};
 }
 window.bulkImportCurrentJobs=async function(){
@@ -8439,7 +8462,7 @@ window.bulkImportCurrentJobs=async function(){
     return;
   }
   var upd=await fileUpdatedAt();
-  window._tmBundleInfo='📦 المصدر: <b>'+esc(b.from)+'</b>'+(upd?' — آخر تحديث للملف: <bdi dir="ltr">'+esc(upd)+'</bdi>':'')+' — عدد الوظائف في الملف: <b>'+b.jobs.length+'</b>'+(b.stale?'<br><span style="color:#b42318">⚠️ ماقدرناش نوصل لـ GitHub، فاستخدمنا نسخة قديمة.</span>':'');
+  window._tmBundleInfo='📦 المصدر: <b>'+esc(b.from)+'</b>'+(upd?' — آخر تحديث للملف: <bdi dir="ltr">'+esc(upd)+'</bdi>':'')+' — عدد الوظائف في الملف: <b>'+b.jobs.length+'</b>'+(b.truncated?'<br><span style="color:#b42318">⚠️ ملف '+GH_FILE+' على GitHub <b>مقطوع</b> عند سطر '+b.cutLine+' — اتقرت الوظائف الكاملة بس. ارفع الملف كامل تاني.</span>':'')+(b.stale?'<br><span style="color:#b42318">⚠️ ماقدرناش نقرا الملف من GitHub ('+esc((b.errs||[]).join(' | '))+')، فاستخدمنا نسخة قديمة.</span>':'');
   runBulkImport(mapped,'jobs-bulk.js ('+b.jobs.length+' وظيفة)');
 };
 function readJobsFile(file){

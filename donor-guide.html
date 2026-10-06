@@ -15,8 +15,7 @@
   box-sizing:border-box;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:calc(118px + env(safe-area-inset-top,0px))}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+html{scroll-padding-top:calc(118px + env(safe-area-inset-top,0px))}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Cairo","Segoe UI",Tahoma,sans-serif;font-size:16px;line-height:1.85}
 
 .top{position:sticky;top:0;z-index:10;background:var(--navy);color:#fff;padding-top:env(safe-area-inset-top,0px)}
@@ -24,7 +23,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Cairo","Segoe U
 .back{color:#fff;text-decoration:none;font-size:22px;line-height:1;padding:4px 6px;border-radius:8px}
 .bar h1{font-size:16px;font-weight:700;margin:0;flex:1;line-height:1.5}
 .dl{background:var(--sky);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:7px 14px;border-radius:10px;white-space:nowrap}
-.nav{display:flex;gap:8px;overflow-x:auto;padding:4px 14px 12px;max-width:900px;margin:0 auto;scrollbar-width:none}
+.nav{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;padding:4px 14px 12px;max-width:900px;margin:0 auto;scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
 .nav a{flex:none;color:#cfe0f3;text-decoration:none;font-size:14px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.22)}
 .nav a.on{background:#fff;color:var(--navy);border-color:#fff}
@@ -67,7 +66,7 @@ ul.check li::before{content:"";position:absolute;right:2px;top:7px;width:16px;he
 .callout.info{background:var(--sky-soft);border-color:var(--sky)}
 .callout .t{display:block;font-weight:800;color:var(--navy);margin-bottom:2px}
 
-.tw{overflow-x:auto;margin:6px 0 16px;border:1px solid var(--line);border-radius:12px;-webkit-overflow-scrolling:touch}
+.tw{overflow-x:auto;overscroll-behavior-x:contain;margin:6px 0 16px;border:1px solid var(--line);border-radius:12px;-webkit-overflow-scrolling:touch}
 table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px;line-height:1.7}
 th{background:var(--navy);color:#fff;text-align:right;font-weight:700;padding:10px 12px;white-space:nowrap}
 td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
@@ -92,7 +91,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 <body>
 <header class="top">
   <div class="bar">
-    <a class="back" href="index.html" aria-label="الرجوع للرئيسية">›</a>
+    <a class="back" href="index.html" aria-label="الرجوع للرئيسية" onclick="if(document.referrer&&new URL(document.referrer).pathname.endsWith('index.html')||document.referrer.endsWith('/')){event.preventDefault();history.back();}">›</a>
     <h1>دليل اشتراطات الجهات المانحة</h1>
     <a class="dl" href="donor-requirements-guide.pdf" download>تحميل PDF</a>
   </div>
@@ -435,7 +434,23 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
   const orig=new Map(secs.map(s=>[s,s.innerHTML]));
 
   // active chip on scroll
-  const setOn=id=>links.forEach(a=>{const on=a.hash==='#'+id;a.classList.toggle('on',on);if(on)a.scrollIntoView({block:'nearest',inline:'center'});});
+  const nav=document.getElementById('nav'); let current=null;
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // يحرك شريط الأقسام أفقيًا فقط، من غير ما يلمس scroll الصفحة
+  const setOn=id=>{
+    if(id===current)return; current=id;
+    links.forEach(a=>{
+      const on=a.hash==='#'+id; a.classList.toggle('on',on);
+      if(on){const ar=a.getBoundingClientRect(), nr=nav.getBoundingClientRect();
+        nav.scrollBy({left:(ar.left+ar.width/2)-(nr.left+nr.width/2),behavior:reduce?'auto':'smooth'});}
+    });
+  };
+  // الضغط على قسم: انتقال ناعم للقسم ده بس
+  links.forEach(a=>a.addEventListener('click',e=>{
+    const t=document.querySelector(a.hash); if(!t)return;
+    e.preventDefault(); t.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+    history.replaceState(null,'',a.hash);
+  }));
   if('IntersectionObserver' in window){
     const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)setOn(e.target.id);});},{rootMargin:'-130px 0px -60% 0px'});
     secs.forEach(s=>io.observe(s));

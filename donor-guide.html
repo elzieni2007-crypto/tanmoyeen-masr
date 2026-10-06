@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دليل اشتراطات الجهات المانحة | تنمويين مصر</title>
+<meta name="description" content="دليل اشتراطات الجهات المانحة الدولية العاملة في مصر: الاتحاد الأوروبي وGIZ والأمم المتحدة وAFD والقانون المصري والمشتريات والتعيين.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1a3a6e; --navy-deep:#122a52; --sky:#00aeef; --sky-soft:#e5f6fd;
+  --ink:#1d2733; --muted:#5d6b7c; --line:#dfe5ec; --bg:#f4f7fa; --surface:#fff; --row:#f7f9fb;
+  box-sizing:border-box;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(118px + env(safe-area-inset-top,0px))}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Cairo","Segoe UI",Tahoma,sans-serif;font-size:16px;line-height:1.85}
+
+.top{position:sticky;top:0;z-index:10;background:var(--navy);color:#fff;padding-top:env(safe-area-inset-top,0px)}
+.bar{display:flex;align-items:center;gap:10px;padding:10px 14px;max-width:900px;margin:0 auto}
+.back{color:#fff;text-decoration:none;font-size:22px;line-height:1;padding:4px 6px;border-radius:8px}
+.bar h1{font-size:16px;font-weight:700;margin:0;flex:1;line-height:1.5}
+.dl{background:var(--sky);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:7px 14px;border-radius:10px;white-space:nowrap}
+.nav{display:flex;gap:8px;overflow-x:auto;padding:4px 14px 12px;max-width:900px;margin:0 auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{flex:none;color:#cfe0f3;text-decoration:none;font-size:14px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.22)}
+.nav a.on{background:#fff;color:var(--navy);border-color:#fff}
+
+.hero{background:var(--navy);color:#fff;padding:22px 18px 30px;position:relative}
+.hero::after{content:"";position:absolute;inset:auto 0 0 0;height:5px;background:var(--sky)}
+.hero .in{max-width:900px;margin:0 auto}
+.hero h2{display:block;color:#fff;font-size:clamp(24px,6vw,34px);font-weight:800;line-height:1.45;margin:0 0 10px}
+.hero p{margin:0;color:#d4e2f2;max-width:62ch}
+.donors{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.donors span{font-size:13px;font-weight:600;background:rgba(0,174,239,.16);color:#bfe9fb;padding:3px 10px;border-radius:6px}
+
+.tools{max-width:900px;margin:-18px auto 0;padding:0 14px;position:relative;z-index:2}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 14px;box-shadow:0 6px 18px rgba(26,58,110,.10)}
+.search input::-webkit-search-cancel-button{display:none;-webkit-appearance:none}
+.search input:focus-visible{outline:none}
+.search input{flex:1;border:0;font:inherit;font-size:16px;padding:10px 0;background:transparent;color:var(--ink);outline:none}
+.search:focus-within{border-color:var(--sky)}
+.count{font-size:13px;color:var(--muted);white-space:nowrap}
+.clear{border:0;background:none;color:var(--muted);font:inherit;font-size:20px;cursor:pointer;display:none}
+
+main{max-width:900px;margin:0 auto;padding:18px 14px 40px}
+section{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 18px 12px;margin-bottom:16px}
+section[hidden]{display:none}
+h2{font-size:20px;font-weight:800;color:var(--navy);margin:0 0 12px;display:flex;align-items:center;gap:10px;line-height:1.5}
+h2 .num{flex:none;display:inline-grid;place-items:center;min-width:32px;height:32px;padding:0 6px;border-radius:9px;background:var(--navy);color:#fff;font-size:15px}
+h3{font-size:17px;color:var(--navy);margin:20px 0 6px;font-weight:700;padding-right:10px;border-right:3px solid var(--sky)}
+p{margin:0 0 12px} .lead{color:var(--muted)}
+b,strong{font-weight:700;color:var(--navy)}
+ul,ol{padding-right:22px;padding-left:0;margin:4px 0 14px} li{margin-bottom:6px}
+ol.steps{list-style:none;padding-right:0;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding-right:40px;margin-bottom:10px}
+ol.steps li::before{content:counter(s);position:absolute;right:0;top:2px;width:28px;height:28px;border-radius:50%;background:var(--sky-soft);color:var(--navy);font-weight:800;font-size:14px;display:grid;place-items:center}
+ul.check{list-style:none;padding-right:0}
+ul.check li{position:relative;padding-right:30px}
+ul.check li::before{content:"";position:absolute;right:2px;top:7px;width:16px;height:16px;border:2px solid var(--sky);border-radius:4px}
+.phase{border:1px solid var(--line);border-radius:12px;padding:12px 14px 2px;margin-bottom:12px}
+.phase h3{margin-top:0}
+.callout{background:#fff8e8;border-right:4px solid #e2a827;border-radius:10px;padding:12px 14px;margin:6px 0 14px}
+.callout.info{background:var(--sky-soft);border-color:var(--sky)}
+.callout .t{display:block;font-weight:800;color:var(--navy);margin-bottom:2px}
+
+.tw{overflow-x:auto;margin:6px 0 16px;border:1px solid var(--line);border-radius:12px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14.5px;line-height:1.7}
+th{background:var(--navy);color:#fff;text-align:right;font-weight:700;padding:10px 12px;white-space:nowrap}
+td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+tbody tr:nth-child(even) td{background:var(--row)}
+td:first-child{font-weight:700;color:var(--navy);min-width:120px}
+table.compare{min-width:760px;font-size:13.5px}
+
+mark{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px}
+.empty{text-align:center;color:var(--muted);padding:30px 10px;display:none}
+.empty b{display:block;color:var(--navy);font-size:17px;margin-bottom:4px}
+
+.soon{display:flex;gap:14px;align-items:center;background:var(--navy);color:#fff;border-radius:16px;padding:18px;margin-top:8px}
+.soon .ic{flex:none;width:46px;height:46px;border-radius:12px;background:var(--sky);display:grid;place-items:center;font-size:24px}
+.soon b{color:#fff;display:block;font-size:16px}
+.soon span{color:#cfe0f3;font-size:14px}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:0 14px calc(28px + env(safe-area-inset-bottom,0px))}
+
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+@media print{.top,.tools,.soon{display:none}section{break-inside:auto;border:0}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <a class="back" href="index.html" aria-label="الرجوع للرئيسية">›</a>
+    <h1>دليل اشتراطات الجهات المانحة</h1>
+    <a class="dl" href="donor-requirements-guide.pdf" download>تحميل PDF</a>
+  </div>
+  <nav class="nav" id="nav" aria-label="أقسام الدليل"><a href="#s1">مقدمة</a><a href="#s2">القانون المصري</a><a href="#s3">الاتحاد الأوروبي</a><a href="#s4">GIZ / BMZ</a><a href="#s5">الأمم المتحدة</a><a href="#s6">جهات أخرى</a><a href="#s7">المقارنة</a><a href="#s8">متطلبات مشتركة</a><a href="#s9">المشتريات</a><a href="#s10">التعيين</a><a href="#s11">قائمة التحقق</a></nav>
+</header>
+
+<div class="hero"><div class="in">
+  <h2>دليل اشتراطات الجهات المانحة الدولية العاملة في مصر</h2>
+  <p>اشتراطات أهم الجهات المانحة مع الإطار القانوني المصري، مختصرة ومنظمة في مكان واحد للمحاسبين ومسؤولي المنح والمديرين الماليين.</p>
+  <div class="donors"><span>الاتحاد الأوروبي</span><span>GIZ</span><span>الأمم المتحدة</span><span>AFD</span><span>البنك الدولي</span><span>FCDO</span><span>القانون المصري</span></div>
+</div></div>
+
+<div class="tools">
+  <label class="search">
+    <span aria-hidden="true">🔍</span>
+    <input id="q" type="search" placeholder="ابحث في الدليل، مثلًا: عروض أسعار" aria-label="ابحث في الدليل">
+    <span class="count" id="count"></span>
+    <button class="clear" id="clear" aria-label="مسح البحث">×</button>
+  </label>
+</div>
+
+<main id="main">
+<section id="s1">
+<h2><span class="num">1</span>مقدمة وكيفية الاستخدام</h2>
+<p>الدليل ده مرجع عملي للمديرين الماليين ومسؤولي المنح في الجمعيات والمنظمات العاملة في مصر، وبيجمع اشتراطات أهم الجهات المانحة مع الإطار القانوني المصري في مكان واحد.</p>
+<div class="callout"><span class="t">القاعدة الذهبية</span>نص اتفاقية المنحة وملاحقها يغلب أي دليل عام. النسب والحدود هنا هي الممارسة المعتادة، لكن كل عقد ممكن يغيرها.</div>
+<p>طريقة الاستخدام: ابدأ بالإطار المصري (بينطبق على كل المنح)، ثم قسم الجهة المانحة، ثم جدول المقارنة، واختم بقائمة التحقق.</p>
+</section>
+<section id="s2">
+<h2><span class="num">2</span>الإطار القانوني المصري (ينطبق على كل المنح)</h2>
+<p class="lead">أي تمويل أجنبي بيخضع للقانون المصري أولًا، ومعظم الجهات المانحة بتشترط الامتثال للتشريعات المحلية (الضرائب والتأمينات) كشرط لأهلية التكلفة.</p>
+<div class="tw"><table class="three">
+<thead><tr><th>المجال</th><th>المرجع</th><th>الاشتراطات العملية</th></tr></thead>
+<tbody>
+<tr><td>الجمعيات والتمويل الأجنبي</td><td>قانون 149 لسنة 2019 ولائحته التنفيذية (قرار رئيس الوزراء 104 لسنة 2021)</td><td>إخطار وزارة التضامن الاجتماعي بالمنحة، وعدم الصرف قبل انقضاء مدة الاعتراض أو صدور الموافقة. استلام الأموال على حساب الجمعية البنكي فقط. المنظمات الأجنبية تحتاج تصريح عمل ومذكرة تفاهم سارية.</td></tr>
+<tr><td>المحاسبة والمراجعة المحلية</td><td>قانون 149/2019 ومعايير المحاسبة المصرية</td><td>دفاتر منتظمة، ميزانية وحساب ختامي سنوي معتمد من مراجع حسابات مقيد، وتقديمها للجمعية العمومية والوزارة في المواعيد.</td></tr>
+<tr><td>ضريبة الدخل والاستقطاع</td><td>قانون 91 لسنة 2005، وقانون الإجراءات الضريبية الموحد 206 لسنة 2020</td><td>استقطاع ضريبة المرتبات وتوريدها، ونماذج الخصم تحت حساب الضريبة على مدفوعات الموردين والاستشاريين. إعفاء الجمعية من ضريبة الأشخاص الاعتبارية مرتبط بالنشاط غير الهادف للربح.</td></tr>
+<tr><td>القيمة المضافة والفاتورة الإلكترونية</td><td>قانون 67 لسنة 2016 ومنظومة الفاتورة والإيصال الإلكتروني</td><td>قبول فواتير ضريبية إلكترونية صحيحة فقط. الضريبة غير المستردة مؤهلة غالبًا لدى المانحين. وقد تسري إعفاءات بموجب اتفاقيات التمويل الثنائية مع الحكومة.</td></tr>
+<tr><td>التأمينات الاجتماعية</td><td>قانون 148 لسنة 2019</td><td>تأمين على كل العاملين (حصة صاحب العمل 18.75% والعامل 11% من أجر الاشتراك) مع مراعاة الحدود الدنيا والقصوى المحدثة سنويًا.</td></tr>
+<tr><td>علاقات العمل</td><td>قانون العمل الجديد 14 لسنة 2025 (سارٍ من سبتمبر 2025)</td><td>عقود مكتوبة، مراجعة شروط العقود محددة المدة المرتبطة بمدة المشروع ومستحقات نهاية الخدمة وتمويلها في الموازنة.</td></tr>
+<tr><td>حماية البيانات</td><td>قانون 151 لسنة 2020 (ويضاف له GDPR مع المانحين الأوروبيين)</td><td>موافقة المستفيدين على جمع بياناتهم ومشاركتها، وتأمين قوائم المستفيدين وكشوف التوزيع.</td></tr>
+<tr><td>مكافحة غسل الأموال وتمويل الإرهاب</td><td>قانون 80 لسنة 2002 وتعديلاته</td><td>معرفة المورد والمستفيد، تقليل المدفوعات النقدية، والتعاون مع اشتراطات البنك في التحويلات الواردة.</td></tr>
+</tbody>
+</table></div>
+</section>
+<section id="s3">
+<h2><span class="num">3</span>الاتحاد الأوروبي (EU)</h2>
+<p class="lead">المرجع الأساسي هو دليل PRAG والشروط العامة لعقد المنحة (الملحق II)، مع الملحق IV للمشتريات والملحق VII لشروط التحقق من الإنفاق. التزم بنسخة الملحق الموقعة مع عقدك لا بأحدث نسخة منشورة.</p>
+<div class="callout info"><span class="t">شروط أهلية التكلفة</span>تم تكبدها خلال فترة التنفيذ، مذكورة في الموازنة، ضرورية للمشروع، مسجلة في الدفاتر ومدعومة بمستندات أصلية، معقولة ومبررة وتحقق مبدأ الاقتصاد والكفاءة، ومتوافقة مع الضرائب والتأمينات المحلية.</div>
+<div class="tw"><table>
+<thead><tr><th>البند</th><th>القاعدة المعتادة</th></tr></thead>
+<tbody>
+<tr><td>التكاليف غير المباشرة</td><td>حد أقصى 7% من التكاليف المباشرة المؤهلة، ولا تحتاج مستندات تفصيلية.</td></tr>
+<tr><td>احتياطي الطوارئ</td><td>حد أقصى 5% من التكاليف المباشرة، واستخدامه بموافقة مسبقة مكتوبة.</td></tr>
+<tr><td>تعديل الموازنة</td><td>تحويلات بين البنود الرئيسية حتى 25% بإخطار مكتوب بدون ملحق عقد، بشرط عدم تغيير الغرض الأساسي. ما يزيد عن ذلك أو يغير الغرض يحتاج Addendum.</td></tr>
+<tr><td>المساهمة المشتركة</td><td>نسبة التمويل الأوروبي المذكورة في العقد تُطبق على التكاليف الفعلية النهائية، فالنقص في المساهمة يخفض المنحة.</td></tr>
+<tr><td>أسعار الصرف</td><td>طبقًا لبند العقد: غالبًا سعر التحويل الفعلي للدفعات المقدمة أو سعر InforEuro الشهري. اختر طريقة واحدة والتزم بها طوال المشروع.</td></tr>
+<tr><td>الفوائد على الدفعات المقدمة</td><td>تُبلغ وقد يُطلب ردها حسب العقد؛ حساب بنكي منفصل أو قابل للتتبع مطلوب.</td></tr>
+<tr><td>المشتريات</td><td>الملحق IV: مبادئ الشفافية والمساواة وأفضل قيمة مقابل المال، بإجراءات متدرجة حسب قيمة العقد (عرض واحد، عروض متعددة، مناقصة). والحدود المالية المعتمدة هي الواردة في نسخة الملحق المرفقة بالعقد.</td></tr>
+<tr><td>التحقق من الإنفاق</td><td>تقرير مراجع مستقل (Expenditure Verification) مطلوب للمنح فوق حد معين مع التقرير النهائي، وأحيانًا مع طلبات الدفع الوسيطة للمنح الكبيرة، بشروط الملحق VII.</td></tr>
+<tr><td>حفظ المستندات</td><td>5 سنوات من الدفعة النهائية (3 سنوات للمنح الصغيرة)، مع حق المفوضية ومحكمة المدققين الأوروبية وOLAF في الفحص.</td></tr>
+<tr><td>المنح الفرعية لأطراف ثالثة</td><td>مسموحة فقط لو منصوص عليها في العقد، مع سقف لكل طرف ومعايير اختيار معلنة.</td></tr>
+<tr><td>الظهور والتواصل</td><td>الالتزام بدليل التواصل والظهور للعمل الخارجي (شعار الاتحاد وعبارة التمويل)، ومخالفته قد تتسبب في تخفيض المنحة.</td></tr>
+</tbody>
+</table></div>
+<h3>تكاليف غير مؤهلة شائعة</h3>
+<p>الديون والخسائر، الفوائد المدينة، خسائر فروق العملة، الممول من مانح آخر (التمويل المزدوج)، شراء أراضٍ أو مبانٍ إلا بنص، والمساهمات العينية كتكلفة مؤهلة إلا لو نص العقد على غير ذلك.</p>
+<div class="callout"><span class="t">أكثر ملاحظات المراجعة تكرارًا</span>غياب كشوف توزيع الوقت (Timesheets) للموظفين الموزعين على أكثر من مشروع، ومشتريات بدون عروض أسعار كافية، وتكاليف خارج فترة التنفيذ، واختلاف أسعار الصرف بين التقارير.</div>
+</section>
+<section id="s4">
+<h2><span class="num">4</span>الوكالة الألمانية GIZ والوزارة الألمانية BMZ</h2>
+<p class="lead">منح GIZ المحلية (Local Subsidy / Grant Agreement) بتبني على منطق قواعد المنح الألمانية، وأهمها الشروط العامة لمنح المشروعات ANBest-P. منح BMZ المباشرة للمنظمات الألمانية وشركائها (مثل خط تمويل المنظمات المدنية عبر bengo) تطبق نفس المنطق مع شروط البرنامج.</p>
+<div class="tw"><table>
+<thead><tr><th>البند</th><th>القاعدة المعتادة</th></tr></thead>
+<tbody>
+<tr><td>طلب الدفعات</td><td>تُطلب الأموال فقط بقدر الاحتياج لمدفوعات مستحقة خلال فترة قصيرة بعد الاستلام (شهرين في ANBest-P، وقد يحدد العقد مدة أقصر). الأرصدة المتراكمة تعرض الجمعية لمطالبة بالفوائد.</td></tr>
+<tr><td>مرونة الموازنة</td><td>تجاوز بند منفرد حتى 20% مسموح لو قابله وفر في بنود أخرى، ما لم ينص العقد على غير ذلك. ما يزيد يحتاج موافقة مسبقة مكتوبة.</td></tr>
+<tr><td>المشتريات</td><td>مبدأ الاقتصاد والكفاءة، وغالبًا ثلاثة عروض أسعار مقارنة فوق حد معين يحدده العقد، مع محضر مقارنة موقع.</td></tr>
+<tr><td>الأصول والمعدات</td><td>قيد الأصول فوق 800 يورو في سجل جرد مستقل، وعدم التصرف فيها خلال فترة الارتباط بالغرض. ملكية الأصول بعد المشروع تُحدد في العقد.</td></tr>
+<tr><td>إثبات الاستخدام <span class="ltr">(Verwendungsnachweis)</span></td><td>تقرير فني + تقرير مالي رقمي، مع قائمة مستندات (Belegliste) مرتبة حسب بنود الموازنة، في المواعيد المحددة للتقارير الوسيطة والنهائية.</td></tr>
+<tr><td>المستندات الأصلية</td><td>ختم أو تأشير المستند باسم المشروع والمانح لمنع التمويل المزدوج، وحفظها لمدة تتراوح عادة بين 5 و 10 سنوات حسب العقد.</td></tr>
+<tr><td>الفحص والتدقيق</td><td>حق GIZ ومحكمة المحاسبات الألمانية في الفحص. العقود الكبيرة غالبًا تتضمن مراجعة خارجية بشروط مرجعية من GIZ.</td></tr>
+<tr><td>التقييم المسبق</td><td>تقييم القدرات المالية والإدارية للشريك قبل التعاقد، ونتيجته تحدد شروط الدفع والرقابة.</td></tr>
+</tbody>
+</table></div>
+<div class="callout"><span class="t">نقاط حساسة مع GIZ</span>التكلفة قبل تاريخ بدء العقد غير مؤهلة، والأرصدة غير المستخدمة تُرد مع التقرير النهائي، وأي إيراد من المشروع (رسوم أو فوائد) يخفض المنحة غالبًا.</div>
+</section>
+<section id="s5">
+<h2><span class="num">5</span>وكالات الأمم المتحدة</h2>
+<p class="lead">أغلب وكالات الأمم المتحدة في مصر (UNDP وUNICEF وUNFPA وجزئيًا WFP) تعمل بالنهج المنسق للتحويلات النقدية HACT، بينما تستخدم UNHCR وUN Women أطرًا خاصة مشابهة في المنطق.</p>
+<h3>دورة HACT</h3>
+<ol class="steps">
+<li><b>التقييم المصغر (Micro-assessment):</b> تقييم من شركة مراجعة لأنظمة الشريك المالية، ينتج عنه تصنيف مخاطر (منخفض / متوسط / مرتفع / مرتفع جدًا) يحدد طريقة التمويل وكثافة الرقابة.</li>
+<li><b>طرق التحويل:</b> دفعة مقدمة (Direct Cash Transfer)، أو استرداد مصروفات (Reimbursement)، أو دفع مباشر للموردين من الوكالة (Direct Payment).</li>
+<li><b>نموذج FACE:</b> نموذج واحد لطلب التمويل والإقرار بالمصروفات. الدفعة المقدمة تغطي عادة ثلاثة أشهر، ولا يُصرف تمويل جديد قبل تسوية جزء كبير من السابق، والمبالغ غير المسواة بعد ستة أشهر تُعد متأخرة.</li>
+<li><b>أنشطة الضمان:</b> زيارات برامجية، وفحوص مفاجئة للمستندات (Spot checks)، ومراجعة مالية مجدولة للشركاء الأكبر من حيث التمويل أو المخاطر.</li>
+</ol>
+<h3>متطلبات إضافية شائعة</h3>
+<ul>
+<li><b>الحماية من الاستغلال والانتهاك الجنسيين (PSEA):</b> تقييم قدرات PSEA الموحد للشركاء شرط للتعاقد، مع سياسة مكتوبة ومدونة سلوك وآلية بلاغات وتدريب موثق.</li>
+<li><b>بوابة شركاء الأمم المتحدة (UN Partner Portal):</b> تسجيل الملف المؤسسي وتحديثه للتقدم للفرص لدى UNICEF وUNHCR وUNFPA وWFP.</li>
+<li><b>الأسعار والعملة:</b> تقارير FACE بعملة التحويل المحلية عادة، لذلك مخاطر فروق العملة أقل، والمرجع النهائي اتفاقية الشراكة.</li>
+<li><b>تكاليف الدعم المؤسسي:</b> لكل وكالة سياستها (نسبة ثابتة للشركاء الوطنيين لدى UNHCR وUNICEF، أو تكاليف مباشرة موزعة)، فتأكد من النسبة في الاتفاقية.</li>
+<li><b>UNHCR:</b> اتفاقية شراكة مشروع (PPA) مع تقارير مالية منتظمة ومراجعة شركاء سنوية حسب المخاطر، وتشدد في التسليم النقدي وحماية بيانات اللاجئين.</li>
+</ul>
+</section>
+<section id="s6">
+<h2><span class="num">6</span>جهات مانحة أخرى</h2>
+<h3>الوكالة الفرنسية للتنمية (AFD)</h3>
+<ul>
+<li>المرجع: اتفاقية التمويل وإرشادات المشتريات للعقود الممولة من AFD، وللمنظمات الأهلية شروط مبادرات المنظمات (Initiatives OSC) أو شروط البرنامج الإقليمي.</li>
+<li>إقرار النزاهة (Déclaration d'intégrité) وفحص قوائم العقوبات والاستبعاد لكل الموردين والشركاء الفرعيين.</li>
+<li>تقارير مالية باليورو مع توضيح طريقة التحويل، ومراجعة خارجية نهائية بشروط مرجعية محددة. المساهمات العينية (Valorisations) مقبولة بسقف وتوثيق.</li>
+<li>في البرامج الممولة بالشراكة مع UfM أو الاتحاد الأوروبي (تمويل مفوض)، غالبًا تُطبق قواعد أهلية الاتحاد الأوروبي إلى جانب شروط AFD.</li>
+</ul>
+<h3>البنك الدولي</h3>
+<ul>
+<li>الجمعيات عادة تتلقى التمويل كجهة منفذة فرعية عبر جهة حكومية (مثل جهاز تنمية المشروعات أو وزارة معنية).</li>
+<li>تُطبق لائحة المشتريات للمقترضين (Procurement Regulations for IPF Borrowers) وإرشادات مكافحة الفساد، مع فحص قائمة الشركات المستبعدة (Debarred firms).</li>
+<li>الإطار البيئي والاجتماعي (ESF) وآلية الشكاوى جزء من الامتثال، وليست شرطًا فنيًا فقط.</li>
+</ul>
+<h3>الحكومة الأمريكية (سابقًا USAID)</h3>
+<ul>
+<li>في 2025 تم تفكيك USAID ونقل وظائفها المتبقية لوزارة الخارجية، وأُنهي عدد كبير من المنح. وتخضع المنح القائمة لشروط الجهة المسؤولة حاليًا.</li>
+<li>المنح الأمريكية الفيدرالية تخضع لـ 2 CFR 200. بعد تعديل 2024: نسبة التكاليف غير المباشرة الافتراضية حتى 15%، وحد المعدات الرأسمالية 10,000 دولار.</li>
+<li>متطلبات معروفة: تسجيل SAM وUEI، المراجعة الخارجية للمنظمات غير الأمريكية فوق حد الإنفاق السنوي، قواعد المنشأ والمورد، وشهادات مكافحة الإرهاب والاتجار بالبشر.</li>
+</ul>
+<h3>المملكة المتحدة (FCDO)</h3>
+<ul>
+<li>إطار العمل البرامجي (PrOF)، تقييم العناية الواجبة للشريك والشركاء الفرعيين، وسياسة عدم التسامح مطلقًا مع الاحتيال مع الإبلاغ الفوري عن الشبهات، ومعايير الحماية (Safeguarding) الصارمة.</li>
+</ul>
+<h3>جهات ثنائية أخرى والمؤسسات الخاصة</h3>
+<div class="tw"><table>
+<thead><tr><th>الجهة</th><th>أبرز نقاط الامتثال</th></tr></thead>
+<tbody>
+<tr><td>سفارات أوروبية (هولندا، سويسرا SDC، السويد Sida، الدنمارك)</td><td>مرونة أعلى في الموازنة مع تشدد في مكافحة الفساد، ومراجعة مستقلة سنوية بخطاب إدارة (Management Letter).</td></tr>
+<tr><td>كندا (GAC)</td><td>المساواة بين الجنسين مدمجة في التقارير، وقواعد دقيقة لأهلية التكاليف والمصروفات الإدارية.</td></tr>
+<tr><td>اليابان (JICA) وكوريا (KOICA ومنح السفارة)</td><td>تركيز على المشتريات والمعدات وملكيتها والظهور، وفترات تنفيذ قصيرة مرتبطة بالسنة المالية للمانح.</td></tr>
+<tr><td>المؤسسات الخاصة والصناديق النسوية</td><td>منح أساسية أو مرنة غالبًا، لكن القانون المصري يبقى ساريًا بالكامل، وقواعد المنظمة الداخلية هي المرجع.</td></tr>
+<tr><td>المنظمات الدولية كمانح وسيط</td><td>الشروط تنتقل لأسفل (Flow-down): الشريك المحلي يلتزم بشروط المانح الأصلي بالإضافة لشروط المنظمة الوسيطة.</td></tr>
+</tbody>
+</table></div>
+</section>
+<section id="s7">
+<h2><span class="num">7</span>جدول المقارنة السريعة</h2>
+<p class="lead">القيم تمثل الممارسة المعتادة، ونص العقد يغلب دائمًا.</p>
+<div class="tw"><table class="compare">
+<thead><tr><th>البند</th><th>الاتحاد الأوروبي</th><th>GIZ / BMZ</th><th>الأمم المتحدة (HACT)</th><th>AFD</th><th>الحكومة الأمريكية</th></tr></thead>
+<tbody>
+<tr><td>المرجع الأساسي</td><td>PRAG + الملحق II</td><td>ANBest-P + عقد المنحة المحلية</td><td>إطار HACT + اتفاقية الشراكة</td><td>اتفاقية التمويل + إرشادات المشتريات</td><td>2 CFR 200 + شروط المنحة</td></tr>
+<tr><td>التكاليف غير المباشرة</td><td>حتى 7%</td><td>حسب العقد، غالبًا محدودة أو مباشرة بالمستند</td><td>حسب سياسة الوكالة</td><td>حسب الاتفاقية</td><td>NICRA أو حتى 15%</td></tr>
+<tr><td>مرونة الموازنة</td><td>25% بين البنود الرئيسية بإخطار</td><td>20% للبند مع التعويض</td><td>تعديل خطة العمل بموافقة</td><td>حسب الاتفاقية</td><td>حسب المنحة وحدود 2 CFR 200</td></tr>
+<tr><td>طريقة الدفع</td><td>دفعات مقدمة على شرائح</td><td>حسب الاحتياج الفوري</td><td>مقدمة لثلاثة أشهر أو استرداد</td><td>شرائح مرتبطة بالتقارير</td><td>مقدمة بقدر الاحتياج أو استرداد</td></tr>
+<tr><td>المراجعة</td><td>تحقق من الإنفاق فوق حد معين</td><td>فحص GIZ ومراجعة خارجية للعقود الكبيرة</td><td>فحوص مفاجئة ومراجعة حسب المخاطر</td><td>مراجعة نهائية بشروط مرجعية</td><td>مراجعة مستقلة فوق حد الإنفاق</td></tr>
+<tr><td>حفظ المستندات</td><td>5 سنوات (3 للصغيرة)</td><td>5–10 سنوات</td><td>حسب الاتفاقية</td><td>حسب الاتفاقية</td><td>3 سنوات من التقرير النهائي</td></tr>
+<tr><td>العملة والصرف</td><td>سعر التحويل الفعلي أو InforEuro</td><td>حسب العقد، غالبًا سعر التحويل</td><td>غالبًا بالعملة المحلية</td><td>تقارير باليورو</td><td>تقارير بالدولار</td></tr>
+</tbody>
+</table></div>
+<div class="callout info"><span class="t">ملاحظة</span>مدة حفظ المستندات في القانون المصري للأغراض الضريبية قد تكون أطول، فطبق المدة الأطول دائمًا.</div>
+</section>
+<section id="s8">
+<h2><span class="num">8</span>المتطلبات المشتركة بين كل الجهات المانحة</h2>
+<p class="lead">لو الجمعية عندها السياسات دي مكتوبة ومطبقة، فهي جاهزة لأغلب التقييمات المسبقة (Due Diligence) والمراجعات.</p>
+<div class="tw"><table class="three">
+<thead><tr><th>المتطلب</th><th>المطلوب عمليًا</th><th>الدليل الذي يطلبه المراجع</th></tr></thead>
+<tbody>
+<tr><td>مكافحة الاحتيال والفساد</td><td>سياسة معتمدة، قناة إبلاغ آمنة، وإبلاغ المانح بالشبهات خلال المدة المحددة في العقد</td><td>السياسة، سجل البلاغات، إقرارات الموظفين</td></tr>
+<tr><td>فحص قوائم العقوبات</td><td>فحص الموردين والموظفين والشركاء الفرعيين على قوائم الأمم المتحدة والاتحاد الأوروبي وOFAC والبنك الدولي قبل التعاقد</td><td>نسخة مؤرخة من نتيجة الفحص في ملف كل مورد</td></tr>
+<tr><td>الحماية وPSEA</td><td>سياسة حماية الأطفال والبالغين، مدونة سلوك موقعة، تدريب سنوي، وفحص مرجعي عند التعيين</td><td>سجلات التدريب والتوقيعات</td></tr>
+<tr><td>تضارب المصالح</td><td>إقرار سنوي للموظفين ومجلس الإدارة، وإقرار خاص لأعضاء لجان المشتريات</td><td>الإقرارات الموقعة في ملفات المشتريات</td></tr>
+<tr><td>الفصل بين المهام</td><td>الطلب والاعتماد والاستلام والدفع بمسؤولين مختلفين، وتوقيعان على الشيكات والتحويلات</td><td>جدول الصلاحيات المعتمد</td></tr>
+<tr><td>توزيع التكاليف المشتركة</td><td>منهجية مكتوبة وموحدة لتوزيع الرواتب والإيجار والمرافق بين المانحين، وكشوف وقت شهرية</td><td>المنهجية + Timesheets موقعة</td></tr>
+<tr><td>منع التمويل المزدوج</td><td>مركز تكلفة لكل منحة في النظام المحاسبي، وتأشير المستند بالمانح</td><td>تقرير حسب مركز التكلفة يطابق التقرير المالي</td></tr>
+<tr><td>أسعار الصرف</td><td>سياسة مكتوبة لكل مانح، وملف بأسعار كل تحويل وارد، والثبات على الطريقة نفسها</td><td>إشعارات البنك + جدول التحويل</td></tr>
+<tr><td>حفظ المستندات</td><td>أرشيف ورقي ورقمي مرتب حسب المنحة والبند، لأطول مدة مطلوبة بين المانح والقانون المصري</td><td>فهرس الأرشيف</td></tr>
+<tr><td>المدفوعات النقدية</td><td>سقف للعهدة النقدية وتسويات دورية، وتفضيل التحويل البنكي أو المحافظ الإلكترونية في دفعات المستفيدين</td><td>محاضر جرد الخزينة وكشوف التوزيع الموقعة</td></tr>
+</tbody>
+</table></div>
+</section>
+<section id="s9">
+<h2><span class="num">9</span>سياسة المشتريات حسب الجهة المانحة</h2>
+<p class="lead">المشتريات هي أكبر مصدر لملاحظات المراجعة والتكاليف المرفوضة. القاعدة العامة: <b>طبّق الأشد</b> بين سياسة الجمعية الداخلية وقواعد المانح، ولو المنحة ممولة من أكتر من جهة طبّق قواعد الجهة الأشد على المشتريات المشتركة. قانون التعاقدات الحكومية 182 لسنة 2018 لا يسري على الجمعيات الأهلية، والمرجع هو لائحة الجمعية الداخلية وعقد المنحة.</p>
+<div class="callout info"><span class="t">نصيحة عملية</span>الحدود الملزمة هي المكتوبة في ملحق المشتريات المرفق بالعقد، ويُفضل نقلها لملف المنحة وسياسة الجمعية قبل أول عملية شراء.</div>
+<h3>المبادئ المشتركة عند كل الممولين</h3>
+<ul>
+<li><b>المنافسة والشفافية:</b> عروض مكتوبة من موردين مستقلين، بمواصفات موحدة ومعايير تقييم معلنة مسبقًا.</li>
+<li><b>أفضل قيمة مقابل المال:</b> مش بالضرورة أقل سعر، لكن أي اختيار لغير الأقل سعرًا لازم يتبرر كتابةً.</li>
+<li><b>منع التجزئة:</b> ممنوع تقسيم شراء واحد على أكتر من أمر شراء عشان تنزل تحت حد معين. المراجعين بيدوروا على ده تحديدًا.</li>
+<li><b>تضارب المصالح:</b> إقرار موقع من كل عضو في لجنة الفحص والترسية.</li>
+<li><b>فحص العقوبات والاستبعاد:</b> لكل مورد قبل الترسية، مع حفظ نتيجة الفحص المؤرخة.</li>
+<li><b>ملف كامل لكل عملية:</b> طلب الشراء، المواصفات، العروض، محضر التقييم، أمر الشراء أو العقد، إذن الاستلام، الفاتورة الإلكترونية، وإثبات الدفع.</li>
+</ul>
+<h3>الاتحاد الأوروبي (الملحق IV لعقد المنحة)</h3>
+<div class="tw"><table class="three">
+<thead><tr><th>نوع العقد</th><th>القيمة</th><th>الإجراء المعتاد</th></tr></thead>
+<tbody>
+<tr><td>خدمات وتوريدات وأعمال</td><td>أقل من 20,000 يورو</td><td>عرض واحد (Single tender) مع التأكد من معقولية السعر</td></tr>
+<tr><td>خدمات</td><td>20,000 إلى أقل من 300,000 يورو</td><td>إجراء تفاوضي تنافسي بـ 3 عروض على الأقل</td></tr>
+<tr><td>خدمات</td><td>300,000 يورو فأكثر</td><td>مناقصة دولية محدودة</td></tr>
+<tr><td>توريدات</td><td>20,000 إلى أقل من 100,000 يورو</td><td>إجراء تفاوضي تنافسي بـ 3 عروض على الأقل</td></tr>
+<tr><td>توريدات</td><td>100,000 إلى أقل من 300,000 يورو</td><td>مناقصة محلية مفتوحة</td></tr>
+<tr><td>توريدات</td><td>300,000 يورو فأكثر</td><td>مناقصة دولية مفتوحة</td></tr>
+<tr><td>أعمال</td><td>20,000 إلى أقل من 300,000 يورو</td><td>إجراء تفاوضي تنافسي بـ 3 عروض على الأقل</td></tr>
+<tr><td>أعمال</td><td>300,000 إلى أقل من 5,000,000 يورو</td><td>مناقصة محلية مفتوحة</td></tr>
+</tbody>
+</table></div>
+<p>اشتراطات إضافية: الالتزام بمعايير الاستبعاد الأوروبية (منها نظام EDES)، وقواعد الجنسية والمنشأ لو العقد ينص عليها، واستخدام إجراء تفاوضي من مصدر واحد بس في حالات استثنائية مبررة كتابةً.</p>
+<h3>GIZ / BMZ</h3>
+<ul>
+<li>غالبًا عقد المنحة المحلية بيطلب <b>3 عروض أسعار مقارنة</b> لأي شراء فوق حد صغير (غالبًا 1,000 يورو صافي)، مع محضر مقارنة موقع.</li>
+<li>المشتريات الكبيرة قد تتطلب إعلانًا عامًا أو موافقة مسبقة من GIZ حسب الحد المذكور في العقد.</li>
+<li>الأصول فوق 800 يورو تتقيد في سجل الجرد (انظر قسم GIZ).</li>
+<li>لو الجمعية بتمنح منحًا فرعية من الأموال، بيطبق عليها نفس الالتزامات بالكامل.</li>
+</ul>
+<h3>وكالات الأمم المتحدة</h3>
+<ul>
+<li><b>UNICEF وUNDP وUNFPA (HACT):</b> الشريك يطبق سياسة مشترياته الداخلية لو التقييم المصغر اعتبرها كافية، مع مبادئ المنافسة وأفضل قيمة. لو السياسة ضعيفة، ممكن الوكالة تشتري بنفسها (Direct Payment أو شراء مباشر).</li>
+<li><b>UNHCR:</b> الشريك محتاج يكون <b>مؤهلًا مسبقًا للشراء (PQP)</b> عشان يشتري بأموال المفوضية فوق 100,000 دولار. تحت الحد ده بيطبق سياسته مع عروض أسعار تنافسية، وفيه أصناف معينة UNHCR بتفضل تشتريها بنفسها.</li>
+</ul>
+<h3>AFD</h3>
+<ul>
+<li>إرشادات المشتريات للعقود الممولة من AFD، مع <b>إقرار النزاهة</b> موقع من كل مورد في العقود فوق الحد المحدد في الاتفاقية.</li>
+<li>في منح المنظمات، غالبًا يُسمح بتطبيق إجراءات الجمعية الداخلية لو بتحقق المنافسة والشفافية، والحدود والإجراءات بتتحدد في الاتفاقية.</li>
+</ul>
+<h3>البنك الدولي</h3>
+<ul>
+<li>الجمعية كجهة منفذة بتلتزم بـ <b>خطة المشتريات</b> المعتمدة للمشروع (عبر نظام STEP) وبالحدود الخاصة بمصر المكتوبة فيها.</li>
+<li>الطرق المعتادة: طلب عروض أسعار (RFQ) للقيم الصغيرة، وطلب عطاءات (RFB) للقيم الأكبر، والاختيار المباشر بمبرر فقط.</li>
+</ul>
+<h3>الحكومة الأمريكية (2 CFR 200)</h3>
+<ul>
+<li><b>مشتريات صغيرة جدًا (Micro-purchase):</b> تحت حد 10,000 دولار أو الحد الأعلى المعتمد وفق القواعد، ويُسمح فيها بالشراء من غير عروض متعددة لو السعر معقول.</li>
+<li><b>مشتريات صغيرة:</b> حتى حد الشراء المبسط (Simplified Acquisition Threshold)، بعروض أسعار من عدد كافٍ من الموردين.</li>
+<li><b>فوق الحد:</b> عطاءات رسمية أو تفاوض تنافسي، مع تحليل للتكلفة أو السعر.</li>
+<li>وتُعدَّل هذه الحدود دوريًا مع تعديلات FAR.</li>
+</ul>
+<h3>سياسة داخلية مقترحة للجمعيات المصرية</h3>
+<p>نموذج مرجعي يغطي أغلب الممولين لو اتطبق بالكامل. الحدود بالجنيه للاسترشاد ويتم تحديثها حسب سعر الصرف والتضخم، ويُطبق دائمًا الأشد بينها وبين المانح.</p>
+<div class="tw"><table class="three">
+<thead><tr><th>الشريحة</th><th>الإجراء المقترح</th><th>المستندات المطلوبة</th></tr></thead>
+<tbody>
+<tr><td>حتى 10,000 جنيه</td><td>شراء مباشر بعرض واحد مع التأكد من معقولية السعر</td><td>فاتورة إلكترونية + موافقة المسؤول</td></tr>
+<tr><td>من 10,000 إلى 100,000 جنيه</td><td>3 عروض أسعار مكتوبة على الأقل</td><td>العروض + جدول مقارنة موقع</td></tr>
+<tr><td>من 100,000 إلى 500,000 جنيه</td><td>طلب عروض مكتوب بمواصفات، وعروض مغلقة تُفتح أمام لجنة</td><td>كراسة الطلب + محضر فتح المظاريف + محضر لجنة البت + إقرارات تضارب المصالح</td></tr>
+<tr><td>أكثر من 500,000 جنيه</td><td>إعلان عام (موقع، صحيفة، منصات) ولجنة فنية ومالية</td><td>الإعلان + محاضر التقييم الفني والمالي + عقد موقع</td></tr>
+</tbody>
+</table></div>
+</section>
+<section id="s10">
+<h2><span class="num">10</span>إجراءات التعيين والتعاقد مع الأفراد</h2>
+<p class="lead">الرواتب غالبًا أكبر بند في الموازنة، ومعظم المانحين بيقبلوها كتكلفة مؤهلة بشرطين: إن التعيين يكون تم بإجراءات تنافسية وموثقة، وإن الرواتب تتماشى مع سلم رواتب الجمعية المعتاد ومستوى السوق.</p>
+<h3>الالتزامات المصرية لأي تعيين</h3>
+<ul>
+<li>عقد عمل مكتوب طبقًا لقانون العمل 14 لسنة 2025.</li>
+<li>تسجيل الموظف في التأمينات الاجتماعية من أول يوم عمل.</li>
+<li>استقطاع ضريبة المرتبات وتوريدها.</li>
+<li>تصريح عمل من وزارة العمل لأي موظف أجنبي قبل بدء العمل.</li>
+<li>صحيفة الحالة الجنائية، وتحديدًا للوظائف اللي فيها تعامل مع أطفال أو فئات معرضة للخطر.</li>
+</ul>
+<h3>خطوات التعيين الموصى بها</h3>
+<ol class="steps">
+<li>الوظيفة موجودة في الموازنة المعتمدة للمنحة (أو موافقة المانح لو جديدة)، مع وصف وظيفي معتمد.</li>
+<li>إعلان مفتوح يحدد المؤهلات ومدة العقد ومصدر التمويل، أو تبرير مكتوب لأي تعيين بدون إعلان.</li>
+<li>لجنة اختيار من شخصين على الأقل، مع إقرار تضارب مصالح من كل عضو.</li>
+<li>قائمة مختصرة ومقابلات بمصفوفة تقييم بدرجات، ومحضر نهائي موقع بالترشيح.</li>
+<li>فحص المراجع، ويشمل سؤال صريح عن أي مخالفات سلوكية أو متعلقة بالحماية.</li>
+<li>خطاب عرض وعقد في حدود سلم الرواتب، ثم تسجيل التأمينات.</li>
+<li>توقيع مدونة السلوك وسياسات الحماية ومكافحة الاحتيال، مع تدريب تعريفي موثق.</li>
+<li>ملف موظف كامل: الإعلان، السيرة الذاتية، محاضر الاختيار، العقد، المؤهلات، استمارات التأمينات، والإقرارات.</li>
+</ol>
+<h3>اشتراطات خاصة حسب الممول</h3>
+<div class="tw"><table>
+<thead><tr><th>الجهة</th><th>أبرز اشتراطات التعيين والرواتب</th></tr></thead>
+<tbody>
+<tr><td>الاتحاد الأوروبي</td><td>الرواتب الفعلية حسب الممارسة المعتادة للجمعية ولا تتجاوز مستوى السوق، وكشوف وقت لأي موظف موزع على أكتر من مشروع، وإثبات الدفع وتوريد التأمينات والضرائب.</td></tr>
+<tr><td>GIZ / BMZ</td><td>مبدأ عدم منح أجور أعلى من المعتاد (Besserstellungsverbot): الرواتب لا تزيد عن سلم الجمعية والمستوى المحلي المقارن، وأي وظيفة غير مذكورة في الموازنة تحتاج موافقة مسبقة.</td></tr>
+<tr><td>وكالات الأمم المتحدة</td><td>تطبيق سياسة الموارد البشرية للشريك، مع اشتراطات PSEA: فحص مراجع، مدونة سلوك موقعة، وعدم تعيين أي شخص له سجل في الاستغلال أو الانتهاك الجنسي.</td></tr>
+<tr><td>FCDO وأغلب المانحين الأوروبيين</td><td>معايير حماية صارمة، وتشجيع المشاركة في نظام الإفصاح عن المخالفات بين المنظمات (Misconduct Disclosure Scheme) عند فحص المراجع.</td></tr>
+<tr><td>الحكومة الأمريكية</td><td>الرواتب معقولة ومتسقة مع سياسة الجمعية، ووثائق توزيع الوقت للموظفين المشتركين، ومراعاة متطلبات المنحة الخاصة بالتعيين.</td></tr>
+</tbody>
+</table></div>
+<h3>الاستشاريون والمتعاقدون الأفراد</h3>
+<p>الاستشاري مش موظف، والتعاقد معاه بيتعامل كـ <b>شراء خدمة</b> ويطبق عليه حدود المشتريات وليس إجراءات التعيين:</p>
+<ul>
+<li>شروط مرجعية (TOR) واضحة بالمخرجات والمدة.</li>
+<li>مقارنة سير ذاتية أو عروض حسب الحد المطبق.</li>
+<li>عقد خدمات بمخرجات محددة، والدفع مقابل تسليمها.</li>
+<li>خصم الضريبة المناسبة على أتعابه وتوريدها.</li>
+<li>تقرير أو مخرج نهائي محفوظ في الملف كدليل على تنفيذ الخدمة.</li>
+</ul>
+</section>
+<section id="s11">
+<h2><span class="num">11</span>قائمة التحقق عبر دورة حياة المنحة</h2>
+<p class="lead">انسخ القائمة دي لكل منحة جديدة وعلّم عليها أثناء التنفيذ.</p>
+<div class="phase"><h3>قبل التوقيع</h3><ul class="check">
+<li>قراءة العقد وكل الملاحق (الشروط العامة، المشتريات، التقارير، المراجعة) وتلخيصها في صفحة واحدة للفريق</li>
+<li>مطابقة بنود الموازنة مع دليل الحسابات وفتح مركز تكلفة للمنحة</li>
+<li>التأكد من تغطية التأمينات ومستحقات نهاية الخدمة والمراجعة الخارجية في الموازنة</li>
+<li>تحديد مصدر المساهمة المشتركة إن وجدت</li>
+</ul></div>
+<div class="phase"><h3>بداية التنفيذ</h3><ul class="check">
+<li>إخطار وزارة التضامن الاجتماعي وانتظار الموافقة أو انقضاء مدة الاعتراض قبل الصرف</li>
+<li>تسجيل سعر صرف الدفعة الأولى واعتماد طريقة التحويل</li>
+<li>إبلاغ الفريق بحدود المشتريات والتكاليف غير المؤهلة وشروط الظهور</li>
+<li>فحص العقوبات للموردين والشركاء الفرعيين وتوقيع العقود الفرعية مع نقل شروط المانح</li>
+</ul></div>
+<div class="phase"><h3>أثناء التنفيذ (شهريًا)</h3><ul class="check">
+<li>تسوية بنكية وتقرير الموازنة مقابل الفعلي مع تفسير الانحرافات</li>
+<li>استكمال كشوف الوقت وقيود توزيع التكاليف المشتركة</li>
+<li>توريد الضرائب المستقطعة والتأمينات في مواعيدها</li>
+<li>طلب موافقة مسبقة لأي تحويل يتجاوز حد المرونة قبل الصرف لا بعده</li>
+<li>تحديث سجل الأصول وسجل المشتريات</li>
+</ul></div>
+<div class="phase"><h3>التقارير والمراجعة</h3><ul class="check">
+<li>مطابقة التقرير المالي مع الدفاتر ومع التقرير الفني قبل الإرسال</li>
+<li>تجهيز ملف المراجعة مسبقًا: قائمة المستندات، العقود، ملفات المشتريات، كشوف الرواتب، وإثباتات التوريد</li>
+<li>الرد على خطاب الإدارة بخطة تصحيحية بمسؤول وتاريخ لكل ملاحظة</li>
+</ul></div>
+<div class="phase"><h3>الإغلاق</h3><ul class="check">
+<li>التأكد من عدم وجود التزامات بعد تاريخ الانتهاء (عدا المسموح به مثل المراجعة النهائية)</li>
+<li>رد الأرصدة غير المستخدمة والفوائد المستحقة</li>
+<li>تسليم الأصول أو توثيق نقل ملكيتها حسب العقد</li>
+<li>أرشفة الملف كاملًا مع تاريخ انتهاء مدة الحفظ</li>
+</ul></div>
+</section>
+  <div class="empty" id="empty"><b>مفيش نتائج للكلمة دي</b>جرّب كلمة أقصر أو اسم جهة مانحة، مثلًا: GIZ أو المشتريات.</div>
+  <div class="soon">
+    <div class="ic" aria-hidden="true">🤖</div>
+    <div><b>المساعد الذكي قريبًا</b><span>هتقدر تسأل عن أي اشتراط ويرد عليك من الدليل.</span></div>
+  </div>
+</main>
+<footer>© تنمويين مصر · الدليل للاسترشاد، ونص اتفاقية المنحة هو المرجع الملزم.</footer>
+
+<script>
+(function(){
+  const secs=[...document.querySelectorAll('main section')];
+  const links=[...document.querySelectorAll('#nav a')];
+  const q=document.getElementById('q'), count=document.getElementById('count'),
+        clear=document.getElementById('clear'), empty=document.getElementById('empty');
+  const orig=new Map(secs.map(s=>[s,s.innerHTML]));
+
+  // active chip on scroll
+  const setOn=id=>links.forEach(a=>{const on=a.hash==='#'+id;a.classList.toggle('on',on);if(on)a.scrollIntoView({block:'nearest',inline:'center'});});
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)setOn(e.target.id);});},{rootMargin:'-130px 0px -60% 0px'});
+    secs.forEach(s=>io.observe(s));
+  }
+
+  const norm=t=>t.replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').toLowerCase();
+  function highlight(sec,term){
+    const nt=norm(term), walker=document.createTreeWalker(sec,NodeFilter.SHOW_TEXT), nodes=[]; let n=0;
+    while(walker.nextNode())nodes.push(walker.currentNode);
+    nodes.forEach(node=>{
+      const txt=node.nodeValue, nn=norm(txt);
+      if(nn.length!==txt.length)return; // skip if normalization shifts offsets
+      let i=nn.indexOf(nt); if(i<0)return;
+      const frag=document.createDocumentFragment(); let last=0;
+      while(i>=0){frag.append(txt.slice(last,i));const m=document.createElement('mark');m.textContent=txt.slice(i,i+term.length);frag.append(m);n++;last=i+term.length;i=nn.indexOf(nt,last);}
+      frag.append(txt.slice(last)); node.replaceWith(frag);
+    });
+    return n;
+  }
+  let timer;
+  function run(){
+    const term=q.value.trim(); let total=0, shown=0;
+    clear.style.display=term?'block':'none';
+    secs.forEach(s=>{
+      s.innerHTML=orig.get(s);
+      if(term.length<2){s.hidden=false;return;}
+      const hit=norm(s.textContent).includes(norm(term));
+      s.hidden=!hit;
+      if(hit){shown++;total+=highlight(s,term)||1;}
+    });
+    if(term.length<2){count.textContent='';empty.style.display='none';return;}
+    count.textContent=shown?`${shown} قسم`:'';
+    empty.style.display=shown?'none':'block';
+    const first=document.querySelector('main mark'); if(first)first.scrollIntoView({block:'center'});
+  }
+  q.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(run,220);});
+  clear.addEventListener('click',()=>{q.value='';run();q.focus();});
+})();
+</script>
+</body>
+</html>

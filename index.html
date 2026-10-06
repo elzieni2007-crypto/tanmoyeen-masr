@@ -559,8 +559,8 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -758,6 +758,18 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
   </div>
 
+  <!-- بانر دليل الاشتراطات -->
+  <div style="padding:0 12px 6px">
+    <div onclick="location.href='donor-guide.html'" style="background:linear-gradient(135deg,#122a52,#1a3a6e);border-radius:16px;padding:12px 16px;cursor:pointer;box-shadow:0 4px 16px rgba(26,58,110,.3);display:flex;align-items:center;gap:12px;border-bottom:3px solid #00aeef">
+      <div style="width:38px;height:38px;background:#00aeef;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">📘</div>
+      <div style="flex:1">
+        <div style="color:white;font-size:12px;font-weight:900;margin-bottom:2px">دليل اشتراطات الجهات المانحة <span style="background:#00aeef;border-radius:6px;padding:0 6px;font-size:9px">جديد</span></div>
+        <div style="color:rgba(255,255,255,.75);font-size:10px">الاتحاد الأوروبي وGIZ والأمم المتحدة والمشتريات والتعيين</div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;flex-shrink:0">←</div>
+    </div>
+  </div>
+
   <div class="dash-grid">
     <div class="dg-card" onclick="go('jobs')"><div class="dg-icon" style="background:#e8f0fe">💼</div><div class="dg-t">الوظائف</div><div class="dg-c" id="dash-jobs-count">جديد يومياً</div></div>
     <div class="dg-card" onclick="go('tenders')"><div class="dg-icon" style="background:#fef3e8">📋</div><div class="dg-t">المناقصات</div><div class="dg-c" id="dash-tenders-count">جديد يومياً</div></div>
@@ -779,6 +791,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="dg-t" style="color:white;font-weight:900;font-size:10px">Nexus Talent</div>
       <div class="dg-c" style="color:#f59e0b;font-weight:700">قريباً ✨</div>
     </div>
+    <div class="dg-card" onclick="location.href='donor-guide.html'" style="border:2px solid #1a3a6e;background:linear-gradient(135deg,#e5f6fd,#f4fbfe)"><div class="dg-icon" style="background:#1a3a6e">📘</div><div class="dg-t" style="color:#1a3a6e;font-weight:900">دليل الاشتراطات</div><div class="dg-c" style="color:#00aeef;font-weight:700">الجهات المانحة 🆕</div></div>
   </div>
 
   <!-- أزرار المشاركة -->
@@ -1973,6 +1986,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="mitem" onclick="go('register')"><div class="mico" style="background:#e8f0fe">📝</div><div class="mtxt"><div class="mtt">تسجيل / تحديث ملفي</div><div class="mst">أضف بياناتك لقاعدة المعلومات</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="go('consultants')"><div class="mico" style="background:#e7faf3">👨‍💼</div><div class="mtxt"><div class="mtt">قاعدة الاستشاريين</div><div class="mst" id="menu-cons-count">استشاريين مسجّلين</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="go('suppliers')"><div class="mico" style="background:#f0e8fe">🏭</div><div class="mtxt"><div class="mtt">قاعدة الموردين</div><div class="mst">87 مورد مسجّل</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div class="mitem" onclick="location.href='donor-guide.html'"><div class="mico" style="background:#e5f6fd">📘</div><div class="mtxt"><div class="mtt">دليل اشتراطات الجهات المانحة</div><div class="mst">EU وGIZ والأمم المتحدة والقانون المصري</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
     </div>
     <div class="msec">
       <div class="mstit">الإعدادات</div>
@@ -2056,6 +2070,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" style="background:#feeaea;color:#c03030;border-color:#e05050" onclick="setAdmTab(this,'email')">📧 إيميل جماعي</div>
       <div class="adm-tab" style="background:#e7faf3;color:#007a50;border-color:#00b894" onclick="setAdmTab(this,'featured')">⭐ مميزون</div>
       <div class="adm-tab" style="background:#e8f0fe;color:#1463a5;border-color:#1463a5" onclick="setAdmTab(this,'import-job')">📥 استيراد إعلان</div>
+      <div class="adm-tab" style="background:#f3e8ff;color:#7c3aed;border-color:#7c3aed" onclick="setAdmTab(this,'exports')">📊 تصدير البيانات</div>
       <div class="adm-tab" style="background:#fff3cd;color:#856404;border-color:#ffc107;position:relative" onclick="setAdmTab(this,'pending')">
         ⏳ انتظار مراجعة
         <span id="pending-count-badge" style="position:absolute;top:-6px;left:-6px;background:#e05050;color:white;border-radius:50%;width:18px;height:18px;font-size:9px;display:none;align-items:center;justify-content:center;font-weight:700"></span>
@@ -2082,17 +2097,25 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
 
     <!-- قائمة السجلات -->
-    <div id="adm-export-bar" style="display:flex;gap:8px;flex-wrap:wrap;padding:4px 16px 10px">
-      <button onclick="exportCurrentAdminSection('excel')" style="flex:1;min-width:140px;padding:10px 12px;background:#e8f0fe;color:var(--p);border:1px solid #c7dcf7;border-radius:10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer">📊 تصدير Excel</button>
-      <button onclick="exportCurrentAdminSection('pdf')" style="flex:1;min-width:140px;padding:10px 12px;background:#fff1f1;color:#b42318;border:1px solid #f0b8b8;border-radius:10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer">📄 تصدير PDF</button>
-    </div>
     <div class="adm-list" id="adm-list" style="display:flex;flex-direction:column;gap:8px"></div>
 
     <!-- طلبات التسجيل -->
     <div id="adm-form-registration-requests" style="display:none;padding:0 16px;padding-bottom:100px">
       <div style="background:linear-gradient(135deg,#4338ca,#6366f1);border-radius:14px;padding:14px;margin-bottom:12px;color:white;text-align:center">
         <div style="font-size:24px">👥</div><div style="font-size:14px;font-weight:800">طلبات التسجيل</div><div style="font-size:11px;opacity:.9">طلبات المؤسسات والباحثين والاستشاريين والموردين والمتطوعين قبل اعتمادها</div>
-      </div><div style="display:flex;gap:8px;margin:10px 0"><button onclick="exportRegistrationRequests('excel')" class="sbtn" style="flex:1">📊 Excel</button><button onclick="exportRegistrationRequests('pdf')" class="sbtn" style="flex:1;background:#fff1f1;color:#b42318">📄 PDF</button></div><div id="registration-requests-list"></div>
+      </div><div id="registration-requests-list"></div>
+    </div>
+
+    <!-- مركز تصدير البيانات -->
+    <div id="adm-form-exports" style="display:none;padding:0 16px;padding-bottom:100px">
+      <div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:14px;padding:16px;margin-bottom:14px;color:white;text-align:center">
+        <div style="font-size:25px">📊</div><div style="font-size:15px;font-weight:900">مركز تصدير بيانات تنمويين مصر</div>
+        <div style="font-size:10px;opacity:.9;margin-top:4px">تصدير كل بيانات كل قسم من Firebase إلى Excel أو PDF رسمي</div>
+      </div>
+      <div id="export-status" style="display:none;background:#eef8ff;border:1px solid #cfe8ff;border-radius:10px;padding:9px 11px;font-size:10px;color:#1463a5;margin-bottom:10px"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px" id="export-center-grid"></div>
+      <button onclick="exportAllAdminSectionsExcel()" style="width:100%;margin-top:12px;padding:13px;background:#00703a;color:white;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-weight:800;cursor:pointer">📦 تصدير كل الأقسام في ملف Excel واحد</button>
+      <button onclick="exportAllAdminSectionsPDF()" style="width:100%;margin-top:8px;padding:13px;background:#7c3aed;color:white;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-weight:800;cursor:pointer">📄 تصدير كل الأقسام في PDF واحد</button>
     </div>
 
     <!-- مستورد الإعلانات -->
@@ -2104,7 +2127,11 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       </div>
       <div style="background:#fff7e6;border:1px solid #ffd27a;border-radius:12px;padding:12px;margin-bottom:14px;color:#6b4a00">
         <div style="font-weight:800;font-size:13px;margin-bottom:4px">📦 التجميعة الحالية</div>
-        <div style="font-size:10px;line-height:1.6;margin-bottom:10px">استيراد الوظائف التي سبق نشرها وما زالت متاحة إلى قائمة المراجعة. لن يتم نشر أي وظيفة تلقائيا.</div>
+        <div style="font-size:10px;line-height:1.6;margin-bottom:10px">يمكن الاستيراد من التجميعة المرفقة بالموقع أو رفع ملف JSON/CSV أو لصق مصفوفة JSON. لن يتم نشر أي وظيفة تلقائيا.</div>
+        <input id="bulk-job-file" type="file" accept=".json,.csv,.txt,.js" style="width:100%;padding:9px;background:white;border:1px solid #ffd27a;border-radius:9px;font-family:Cairo,sans-serif;font-size:10px;margin-bottom:8px">
+        <button class="sbtn" onclick="loadBulkJobsFile()" style="background:#1463a5;color:#fff;font-size:12px;padding:11px">📂 تحميل التجميعة من الملف</button>
+        <textarea id="bulk-job-json" rows="5" dir="ltr" style="width:100%;margin-top:8px;padding:9px;border:1px solid #ffd27a;border-radius:9px;font-family:monospace;font-size:10px" placeholder='[{"title":"...","org":"...","gov":"...","dl":"...","link":"...","desc":"..."}]'></textarea>
+        <button class="sbtn" onclick="loadBulkJobsText()" style="background:#6b4a00;color:#fff;font-size:12px;padding:11px">🧩 تحميل JSON الملصوق</button>
         <button class="sbtn" onclick="bulkImportCurrentJobs()" style="background:#f59e0b;color:#fff;font-size:13px;padding:12px">📥 استيراد التجميعة الحالية</button>
         <div id="bulk-import-progress" style="margin-top:8px;font-size:10px;color:#6b4a00"></div>
       </div>
@@ -2290,7 +2317,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div style="font-size:15px;font-weight:800;color:var(--p)">🤝 المتطوعون</div>
       <span id="adm-vols-count" style="background:var(--a);color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
     </div>
-    <button onclick="exportVols()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button><button onclick="exportVolsPDF()" style="padding:6px 12px;background:#fff1f1;color:#b42318;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📄 PDF</button>
+    <button onclick="exportVols()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button><button onclick="exportAdminData('volunteers','pdf')" style="margin-right:5px;padding:6px 12px;background:#f3e8ff;color:#7c3aed;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📄 PDF</button>
   </div>
   <div id="adm-vols-list"></div>
 </div>
@@ -2301,7 +2328,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div style="font-size:15px;font-weight:800;color:var(--p)">📋 طلبات الاستشارات</div>
       <span id="adm-consult-count" style="background:#c06010;color:white;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700">0</span>
     </div>
-    <button onclick="exportConsults()" style="padding:6px 12px;background:#fef3e8;color:#c06010;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button><button onclick="exportConsultsPDF()" style="padding:6px 12px;background:#fff1f1;color:#b42318;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📄 PDF</button>
+    <button onclick="exportConsults()" style="padding:6px 12px;background:#fef3e8;color:#c06010;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button><button onclick="exportAdminData('consultations','pdf')" style="margin-right:5px;padding:6px 12px;background:#f3e8ff;color:#7c3aed;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📄 PDF</button>
   </div>
 
   <!-- رسائل واتساب مخصصة -->
@@ -2444,7 +2471,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div id="adm-form-jobs-list" style="display:none;padding:0 16px;padding-bottom:100px">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 10px">
         <div style="font-size:15px;font-weight:800;color:var(--p)">💼 الوظائف</div>
-        <button onclick="exportJobsAdmin()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button><button onclick="exportJobsAdminPDF()" style="padding:6px 12px;background:#fff1f1;color:#b42318;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📄 PDF</button>
+        <button onclick="exportJobsAdmin()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button><button onclick="exportAdminData('jobs','pdf')" style="margin-right:5px;padding:6px 12px;background:#f3e8ff;color:#7c3aed;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📄 PDF</button>
       </div>
       <div id="published-jobs-list-new" style="margin-top:8px"></div>
     </div>
@@ -2453,7 +2480,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div id="adm-form-tenders-list" style="display:none;padding:0 16px;padding-bottom:100px">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 10px">
         <div style="font-size:15px;font-weight:800;color:var(--orange)">📋 المناقصات</div>
-        <button onclick="exportTendersAdmin()" style="padding:6px 12px;background:#fef3e8;color:var(--orange);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button><button onclick="exportTendersAdminPDF()" style="padding:6px 12px;background:#fff1f1;color:#b42318;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📄 PDF</button>
+        <button onclick="exportTendersAdmin()" style="padding:6px 12px;background:#fef3e8;color:var(--orange);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button><button onclick="exportAdminData('tenders','pdf')" style="margin-right:5px;padding:6px 12px;background:#f3e8ff;color:#7c3aed;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📄 PDF</button>
       </div>
       <div id="published-tenders-list-new" style="margin-top:8px"></div>
     </div>
@@ -3050,6 +3077,7 @@ function handleUrlParams(){
   else if(fp==='tender'){setTimeout(()=>{go('tenders');setTimeout(openSubmitTender,400);},300);}
   else if(fp==='consult'){setTimeout(()=>{go('consult-screen');},300);}
   else if(fp==='athar'){setTimeout(()=>{go('athar-screen');},300);}
+  else if(fp==='guide'){location.href='donor-guide.html';}
   else if(fp==='expert'||fp==='sup'||fp==='org'||fp==='jobseeker'||fp==='volunteer'){
     setTimeout(()=>{go('register');setTimeout(function(){ selectRegType(fp); },400);},300);
   }
@@ -5318,11 +5346,11 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  ['adm-form-registration-requests','adm-form-import-job','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){
+  ['adm-form-registration-requests','adm-form-import-job','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
-  if(tab === 'registration-requests'){ loadRegistrationRequests(); } else if(tab === 'import-job'){
+  if(tab === 'registration-requests'){ loadRegistrationRequests(); } else if(tab === 'exports'){ listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none'; var ex=document.getElementById('adm-form-exports'); if(ex){ex.style.display='block'; buildExportCenter();} } else if(tab === 'import-job'){
     listEl.style.display='none';
     formJob.style.display='none';
     formTend.style.display='none';
@@ -5375,17 +5403,17 @@ function setAdmTab(el, tab){
     updatePendingBadge();
   } else if(tab === 'athar'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var aEl=document.getElementById('adm-form-athar');
     if(aEl){ aEl.style.display='block'; loadAtharTrials(); }
   } else if(tab === 'contact'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-contact');
     if(cEl){ cEl.style.display='block'; loadContactMsgs(); }
   } else if(tab === 'broadcast'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var bEl=document.getElementById('adm-form-broadcast');
     if(bEl){ bEl.style.display='block'; }
     // حط الرابط الافتراضي
@@ -5394,7 +5422,7 @@ function setAdmTab(el, tab){
     loadBroadcastHistory();
   } else if(tab === 'settings'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var sEl = document.getElementById('adm-form-settings');
     if(sEl){ sEl.style.display='block'; loadVisibilitySettings(); }
   } else if(tab === 'volunteers-adm'){
@@ -5404,7 +5432,7 @@ function setAdmTab(el, tab){
     loadAdminVols();
   } else if(tab === 'consultations-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-consultations-adm');
     if(cEl){cEl.style.display='block';}
     loadAdminConsultations();
@@ -5413,7 +5441,7 @@ function setAdmTab(el, tab){
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
     // Hide all special forms
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){
+    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
     // إظهار القائمة
@@ -5843,24 +5871,40 @@ async function saveImportedJob(){
   }
 }
 
+function normalizeBulkJob(j){
+  if(!j||typeof j!=='object')return null;
+  var x=Object.assign({},j);x.title=(x.title||x.jobTitle||x.position||'').toString().trim();x.org=(x.org||x.organization||x.company||x.employer||'').toString().trim();x.gov=(x.gov||x.location||x.city||'عن بُعد').toString().trim();x.type=(x.type||x.contractType||'دوام كامل').toString().trim();x.sec=(x.sec||x.section||x.category||'').toString().trim();x.sal=(x.sal||x.salary||'تنافسي').toString().trim();x.dl=(x.dl||x.deadline||x.closingDate||'').toString().trim();x.desc=(x.desc||x.description||x.details||'').toString().trim();x.link=canonicalizeJobUrl((x.link||x.url||x.applyUrl||'').toString().trim());x.source=(x.source||x.sourceName||'استيراد تنمويين مصر').toString().trim();return x;
+}
+function parseBulkText(txt){
+  txt=(txt||'').trim();if(!txt)return [];
+  var t=txt.replace(/^```(?:json|javascript|js)?\s*/i,'').replace(/\s*```$/,'').trim();
+  try{var j=JSON.parse(t);if(Array.isArray(j))return j.map(normalizeBulkJob).filter(Boolean);if(j&&Array.isArray(j.jobs))return j.jobs.map(normalizeBulkJob).filter(Boolean);if(j&&typeof j==='object')return [normalizeBulkJob(j)].filter(Boolean);}catch(e){}
+  // Try extracting an array/object from a JS assignment such as window.TANMOYEEN_BULK_JOBS=[...]
+  var m=t.match(/(?:TANMOYEEN_BULK_JOBS\s*=|module\.exports\s*=)\s*(\[[\s\S]*\])\s*;?$/);if(m){try{return JSON.parse(m[1]).map(normalizeBulkJob).filter(Boolean);}catch(e){}}
+  // CSV parser: first row headers, comma or semicolon separated
+  var lines=t.split(/\r?\n/).filter(function(x){return x.trim();});if(lines.length>1){var delim=lines[0].includes(';')?';':',';var heads=lines[0].split(delim).map(function(h){return h.replace(/^\"|\"$/g,'').trim();});return lines.slice(1).map(function(line){var vals=line.split(delim);var o={};heads.forEach(function(h,i){o[h]=vals[i]||'';});return normalizeBulkJob(o);}).filter(function(x){return x&&x.title;});}
+  throw new Error('تعذر قراءة التجميعة. استخدم JSON Array أو CSV.');
+}
+function loadBulkJobsText(){try{var jobs=parseBulkText(document.getElementById('bulk-job-json').value);window.TANMOYEEN_BULK_JOBS=jobs;document.getElementById('bulk-import-progress').innerHTML='✅ تم تحميل <b>'+jobs.length+'</b> وظيفة. جاهزة للاستيراد.';toast('✅ تم تحميل التجميعة');}catch(e){toast('❌ '+e.message);}}
+async function loadBulkJobsFile(){var f=document.getElementById('bulk-job-file').files[0];if(!f){toast('⚠️ اختر ملف التجميعة أولا');return;}try{var txt=await f.text();var jobs=parseBulkText(txt);window.TANMOYEEN_BULK_JOBS=jobs;document.getElementById('bulk-import-progress').innerHTML='✅ تم تحميل <b>'+jobs.length+'</b> وظيفة من '+f.name+'. جاهزة للاستيراد.';toast('✅ تم قراءة ملف التجميعة');}catch(e){toast('❌ '+e.message);}}
+function ensureBulkJobsLoaded(){var jobs=Array.isArray(window.TANMOYEEN_BULK_JOBS)?window.TANMOYEEN_BULK_JOBS:[];if(!jobs.length&&Array.isArray(window.TANMOYEEN_BULK_JOBS_CURRENT))jobs=window.TANMOYEEN_BULK_JOBS_CURRENT;return jobs.map(normalizeBulkJob).filter(Boolean);}
+
 async function bulkImportCurrentJobs(){
-  const jobs = Array.isArray(window.TANMOYEEN_BULK_JOBS_CURRENT) ? window.TANMOYEEN_BULK_JOBS_CURRENT : (Array.isArray(window.TANMOYEEN_BULK_JOBS) ? window.TANMOYEEN_BULK_JOBS : []);
+  const jobs=ensureBulkJobsLoaded();
   const box=document.getElementById('bulk-import-progress');
-  if(!jobs.length){if(box)box.innerHTML='❌ لم يتم تحميل jobs-bulk.js أو أن التجميعة فارغة. تأكد من وجود الملف بجوار index.html.';return;}
+  if(!jobs.length){if(box)box.textContent='لا توجد بيانات للتجميعة.';return;}
   if(typeof auth==='undefined'||!auth.currentUser){toast('⚠️ يجب تسجيل الدخول كمسؤول قبل استيراد التجميعة');return;}
   if(typeof db==='undefined'){toast('❌ Firebase غير متصل');return;}
   if(!confirm('سيتم إرسال '+jobs.length+' فرصة إلى قائمة المراجعة، مع منع التكرار. هل تريد المتابعة؟'))return;
   let added=0,dup=0,fail=0;
-  if(box)box.innerHTML='⏳ جاري استيراد '+jobs.length+' فرصة...';
+  if(box)box.textContent='⏳ جاري استيراد '+jobs.length+' فرصة...';
   for(let i=0;i<jobs.length;i++){
-    const j=Object.assign({},jobs[i],{link:canonicalizeJobUrl(jobs[i].link||'')});
+    const j=Object.assign({},jobs[i],{link:canonicalizeJobUrl(jobs[i].link)});
+    const payload=Object.assign({},j,{duplicateKey:makeJobDuplicateKey(j),status:'pending',ownerUid:auth.currentUser.uid,submittedBy:auth.currentUser.uid,submittedByEmail:(auth.currentUser.email||''),importMethod:'bulk_admin',timestamp:firebase.firestore.FieldValue.serverTimestamp(),importedAt:firebase.firestore.FieldValue.serverTimestamp()});
     try{
       const existing=await findExistingJob(j); const pending=await findExistingPendingJob(j);
       if(existing||pending){dup++;}
-      else {
-        const payload=Object.assign({},j,{duplicateKey:makeJobDuplicateKey(j),status:'pending',ownerUid:auth.currentUser.uid,submittedBy:auth.currentUser.uid,submittedByEmail:(auth.currentUser.email||''),importMethod:'bulk_admin',timestamp:firebase.firestore.FieldValue.serverTimestamp(),importedAt:firebase.firestore.FieldValue.serverTimestamp()});
-        await db.collection('pending_jobs').add(payload); added++;
-      }
+      else {await db.collection('pending_jobs').add(payload);added++;}
     }catch(e){console.error('bulk import',i,e);fail++;}
     if(box)box.textContent='⏳ '+(i+1)+' / '+jobs.length+' — تمت: '+added+' | موجود: '+dup+' | أخطاء: '+fail;
   }
@@ -7241,46 +7285,80 @@ async function enablePush(){
     toast('⚠️ ' + e.message);
   }
 }
-function _exportRowsFromSnap(snap){var data=[];snap.docs.forEach(function(d){data.push(Object.assign({},d.data(),{fbId:d.id}));});return data;}
-function _flatExportValue(v){if(v&&typeof v==='object'&&v.seconds)return new Date(v.seconds*1000).toLocaleString('ar-EG');if(Array.isArray(v))return v.join(' / ');if(v&&typeof v==='object')return JSON.stringify(v);return v==null?'':String(v);}
+function exportNormalizeValue(v){
+  if(v===null||v===undefined) return '';
+  if(v && typeof v==='object' && typeof v.toDate==='function') v=v.toDate();
+  if(v && typeof v==='object' && v.seconds) v=new Date(v.seconds*1000);
+  if(v instanceof Date) return v.toLocaleString('ar-EG');
+  if(Array.isArray(v)) return v.join(' / ');
+  if(typeof v==='object') return JSON.stringify(v);
+  return String(v);
+}
+function exportPrepareData(data){
+  var rows=Array.isArray(data)?data:[]; var keys=[];
+  rows.forEach(function(r){Object.keys(r||{}).forEach(function(k){if(k!=='fbId'&&k!=='_id'&&!keys.includes(k))keys.push(k);});});
+  return {keys:keys, rows:rows.map(function(r){return keys.map(function(k){return exportNormalizeValue(r[k]);});})};
+}
 function exportToExcel(data, filename){
-  if(!data||!data.length){toast('❌ مفيش بيانات للتصدير');return;}
-  var keys=[];data.forEach(function(r){Object.keys(r).forEach(function(k){if(!keys.includes(k)&&k!=='fbId'&&k!=='_id')keys.push(k);});});
-  var wsData=[keys];data.forEach(function(r){wsData.push(keys.map(function(k){return _flatExportValue(r[k]);}));});
-  var ws=XLSX.utils.aoa_to_sheet(wsData);ws['!cols']=keys.map(function(k){return {wch:Math.min(45,Math.max(12,k.length+4))};});
-  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,filename);
-  XLSX.writeFile(wb,'تنمويين_مصر_'+filename+'_'+new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')+'.xlsx');toast('✅ تم تصدير '+data.length+' سجل!');
+  if(!data || !data.length){toast('❌ مفيش بيانات للتصدير');return false;}
+  try{
+    var p=exportPrepareData(data), wsData=[p.keys].concat(p.rows), ws=XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols']=p.keys.map(function(k){return {wch:Math.min(40,Math.max(12,k.length+5))};});
+    ws['!freeze']={xSplit:0,ySplit:1};
+    var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,filename.substring(0,31));
+    XLSX.writeFile(wb,'تنمويين_مصر_'+filename+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    toast('✅ تم تصدير '+data.length+' سجل إلى Excel'); return true;
+  }catch(e){console.error(e);toast('❌ فشل تصدير Excel: '+e.message);return false;}
 }
-async function exportDataByCollection(collection,name,format){
-  if(typeof db==='undefined'){toast('❌ Firebase غير متصل');return;}
-  try{toast('⏳ جاري تجهيز التصدير...');var snap=await db.collection(collection).get();var data=_exportRowsFromSnap(snap);if(format==='pdf')await exportToPDF(data,name);else exportToExcel(data,name);}catch(e){toast('❌ '+e.message);}
+var ADMIN_EXPORTS={
+  expert:{col:'consultants',name:'استشاريين',icon:'👨‍💼'},sup:{col:'suppliers',name:'موردين',icon:'🏢'},org:{col:'organizations',name:'مؤسسات',icon:'🏛️'},
+  jobseeker:{col:'jobseekers',name:'باحثي عمل',icon:'💼'},volunteers:{col:'volunteers',name:'متطوعين',icon:'🤝'},consultations:{col:'consultations',name:'استشارات',icon:'📋'},
+  jobs:{col:'jobs',name:'وظائف',icon:'💼'},tenders:{col:'tenders',name:'مناقصات',icon:'📑'},registration_requests:{col:'registration_requests',name:'طلبات التسجيل',icon:'👥'},pending_jobs:{col:'pending_jobs',name:'وظائف معلقة',icon:'⏳'},
+  contact_messages:{col:'contact_messages',name:'رسائل التواصل',icon:'📧'}
+};
+function adminExportStatus(msg,err){var el=document.getElementById('export-status');if(el){el.style.display='block';el.style.background=err?'#fff1f2':'#eef8ff';el.style.color=err?'#b42318':'#1463a5';el.textContent=msg;}}
+async function getAdminCollectionData(col){
+  if(typeof db==='undefined') throw new Error('Firebase غير متصل');
+  var snap=await db.collection(col).get();
+  return snap.docs.map(function(d){return Object.assign({},d.data(),{fbId:d.id});});
 }
-function exportAdminSection(){var map={expert:['consultants','استشاريين'],sup:['suppliers','موردين'],org:['organizations','مؤسسات'],jobseeker:['jobseekers','باحثو عمل']};var x=map[admTab];if(x)exportDataByCollection(x[0],x[1],'excel');}
-function exportCurrentAdminSection(format){var map={expert:['consultants','استشاريين'],sup:['suppliers','موردين'],org:['organizations','مؤسسات'],jobseeker:['jobseekers','باحثو عمل']};var x=map[admTab];if(x)exportDataByCollection(x[0],x[1],format);}
-function exportVols(){exportDataByCollection('volunteers','متطوعين','excel');}
-function exportVolsPDF(){exportDataByCollection('volunteers','متطوعين','pdf');}
-function exportConsults(){exportDataByCollection('consultations','استشارات','excel');}
-function exportConsultsPDF(){exportDataByCollection('consultations','استشارات','pdf');}
-function exportJobsAdmin(){exportDataByCollection('jobs','وظائف','excel');}
-function exportJobsAdminPDF(){exportDataByCollection('jobs','وظائف','pdf');}
-function exportTendersAdmin(){exportDataByCollection('tenders','مناقصات','excel');}
-function exportTendersAdminPDF(){exportDataByCollection('tenders','مناقصات','pdf');}
-function exportRegistrationRequests(format){exportDataByCollection('registration_requests','طلبات التسجيل',format);}
-function exportPendingJobs(format){exportDataByCollection('pending_jobs','وظائف قيد المراجعة',format);}
-function exportContactMessages(format){exportDataByCollection('contact_messages','رسائل التواصل',format);}
-async function exportToPDF(data,filename){
-  if(!data||!data.length){toast('❌ مفيش بيانات للتصدير');return;}
-  if(typeof html2canvas==='undefined'||!window.jspdf){toast('❌ مكتبات PDF لم يتم تحميلها');return;}
-  var keys=[];data.forEach(function(r){Object.keys(r).forEach(function(k){if(!keys.includes(k)&&k!=='fbId'&&k!=='_id')keys.push(k);});});
-  var rows=data.map(function(r){return '<tr>'+keys.map(function(k){return '<td>'+String(_flatExportValue(r[k])).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</td>';}).join('')+'</tr>';}).join('');
-  var logo=(typeof LOGO_SRC!=='undefined'?LOGO_SRC:'');
-  var wrap=document.createElement('div');wrap.dir='rtl';wrap.style.cssText='position:fixed;left:-100000px;top:0;width:1100px;background:#fff;color:#1f2937;padding:40px;font-family:Cairo,Arial,sans-serif;box-sizing:border-box;';
-  wrap.innerHTML='<div style="position:relative;min-height:80px;text-align:center;border-bottom:2px solid #1463a5;padding-bottom:16px;margin-bottom:18px"><img src="'+logo+'" style="width:72px;height:72px;object-fit:contain;position:absolute;right:0;top:0;opacity:.95"><div style="font-size:25px;font-weight:900;color:#1463a5;padding-top:8px">تنمويين مصر</div><div style="font-size:16px;font-weight:800;margin-top:4px">تقرير '+filename+'</div><div style="font-size:11px;color:#6b7280;margin-top:4px">تاريخ التصدير: '+new Date().toLocaleString('ar-EG')+' | إجمالي السجلات: '+data.length+'</div></div><div style="position:relative"><img src="'+logo+'" style="position:absolute;opacity:.055;width:430px;height:430px;object-fit:contain;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none"><table style="position:relative;width:100%;border-collapse:collapse;font-size:9px;background:rgba(255,255,255,.94)"><thead><tr>'+keys.map(function(k){return '<th style="background:#1463a5;color:#fff;border:1px solid #b9c8d8;padding:7px">'+k+'</th>';}).join('')+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
-  document.body.appendChild(wrap);await new Promise(function(r){setTimeout(r,150);});
-  var canvas=await html2canvas(wrap,{scale:1.5,useCORS:true,backgroundColor:'#fff'});document.body.removeChild(wrap);
-  var pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});var pageW=297,pageH=210,margin=7;var imgW=pageW-margin*2;var imgH=canvas.height*imgW/canvas.width;var pagePx=canvas.width*(pageH-margin*2)/imgH;var y=0;while(y<canvas.height){var h=Math.min(pagePx,canvas.height-y);var pageCanvas=document.createElement('canvas');pageCanvas.width=canvas.width;pageCanvas.height=h;pageCanvas.getContext('2d').drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);var dataUrl=pageCanvas.toDataURL('image/jpeg',0.9);var drawnH=h*imgW/canvas.width;if(y>0)pdf.addPage();pdf.addImage(dataUrl,'JPEG',margin,margin,imgW,drawnH);pdf.setFontSize(7);pdf.setTextColor(120);pdf.text('تنمويين مصر',pageW-margin,pageH-3,{align:'right'});y+=h;}
-  pdf.save('تنمويين_مصر_'+filename+'_'+new Date().toISOString().slice(0,10)+'.pdf');toast('✅ تم إنشاء PDF مع شعار تنمويين مصر وخلفية مائية');
+async function exportAdminData(key,format){
+  var cfg=ADMIN_EXPORTS[key]; if(!cfg)return;
+  try{adminExportStatus('⏳ جاري تجهيز '+cfg.name+'...');var data=await getAdminCollectionData(cfg.col);if(!data.length){adminExportStatus('⚠️ لا توجد بيانات في قسم '+cfg.name,true);toast('❌ لا توجد بيانات');return;}
+    if(format==='xlsx'){exportToExcel(data,cfg.name);} else {await exportDataPDF(data,cfg.name);}
+    adminExportStatus('✅ تم تصدير '+cfg.name+' — '+data.length+' سجل');
+  }catch(e){console.error(e);adminExportStatus('❌ '+cfg.name+': '+(e.message||e),true);toast('❌ '+e.message);}
 }
+function buildExportCenter(){var g=document.getElementById('export-center-grid');if(!g)return;g.innerHTML=Object.keys(ADMIN_EXPORTS).map(function(k){var c=ADMIN_EXPORTS[k];return '<div style="background:white;border:1px solid #e5e7eb;border-radius:13px;padding:11px"><div style="font-size:12px;font-weight:800;margin-bottom:8px">'+c.icon+' '+c.name+'</div><div style="display:flex;gap:5px"><button onclick="exportAdminData(\''+k+'\',\'xlsx\')" style="flex:1;padding:8px;border:0;border-radius:8px;background:#e7faf3;color:#00703a;font-family:Cairo;font-size:10px;font-weight:800;cursor:pointer">Excel</button><button onclick="exportAdminData(\''+k+'\',\'pdf\')" style="flex:1;padding:8px;border:0;border-radius:8px;background:#f3e8ff;color:#7c3aed;font-family:Cairo;font-size:10px;font-weight:800;cursor:pointer">PDF</button></div></div>';}).join('');}
+async function exportAllAdminSectionsExcel(){
+  try{adminExportStatus('⏳ جاري جمع كل الأقسام...');var wb=XLSX.utils.book_new(),total=0;
+    for(var k of Object.keys(ADMIN_EXPORTS)){var c=ADMIN_EXPORTS[k],data=await getAdminCollectionData(c.col);if(!data.length)continue;var p=exportPrepareData(data),ws=XLSX.utils.aoa_to_sheet([p.keys].concat(p.rows));ws['!cols']=p.keys.map(function(x){return {wch:Math.min(40,Math.max(12,x.length+5))};});XLSX.utils.book_append_sheet(wb,ws,c.name.substring(0,31));total+=data.length;}
+    if(!total){adminExportStatus('⚠️ لا توجد بيانات للتصدير',true);return;} XLSX.writeFile(wb,'تنمويين_مصر_كل_الأقسام_'+new Date().toISOString().slice(0,10)+'.xlsx');adminExportStatus('✅ تم تصدير كل الأقسام — '+total+' سجل');toast('✅ تم تصدير كل الأقسام إلى Excel');
+  }catch(e){console.error(e);adminExportStatus('❌ فشل التصدير الشامل: '+e.message,true);toast('❌ '+e.message);}
+}
+function makePdfRows(data){var p=exportPrepareData(data);var html='<table style="width:100%;border-collapse:collapse;direction:rtl;font-family:Arial,sans-serif;font-size:8px"><thead><tr>'+p.keys.map(function(k){return '<th style="background:#1a3a6e;color:#fff;padding:5px;border:1px solid #ddd">'+k+'</th>';}).join('')+'</tr></thead><tbody>'+p.rows.map(function(row){return '<tr>'+row.map(function(v){return '<td style="padding:4px;border:1px solid #ddd;vertical-align:top">'+String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';return html;}
+async function exportDataPDF(data,filename){
+  if(!data||!data.length)throw new Error('لا توجد بيانات');
+  if(!window.jspdf||!window.html2canvas)throw new Error('مكتبات PDF لم يتم تحميلها');
+  var holder=document.createElement('div');holder.dir='rtl';holder.style.cssText='position:fixed;left:-10000px;top:0;width:1100px;background:#fff;padding:35px;font-family:Arial,sans-serif;color:#1a2a3a';
+  holder.innerHTML='<div style="position:relative;min-height:90px;border-bottom:3px solid #00aeef;margin-bottom:18px"><img src="'+LOGO_SRC+'" style="width:72px;height:72px;object-fit:contain;position:absolute;right:0;top:0"><div style="text-align:center;padding:12px 90px"><div style="font-size:25px;font-weight:900;color:#1a3a6e">تنمويين مصر</div><div style="font-size:16px;font-weight:700;margin-top:5px">تقرير '+filename+'</div><div style="font-size:10px;color:#6b7a8d;margin-top:5px">عدد السجلات: '+data.length+' | تاريخ التصدير: '+new Date().toLocaleString('ar-EG')+'</div></div></div><div style="position:relative"><img src="'+LOGO_SRC+'" style="position:absolute;width:420px;height:420px;object-fit:contain;opacity:.055;left:50%;top:260px;transform:translateX(-50%);z-index:0"><div style="position:relative;z-index:1">'+makePdfRows(data)+'</div></div>';
+  document.body.appendChild(holder);var canvas=await html2canvas(holder,{scale:1.5,backgroundColor:'#ffffff',useCORS:true});document.body.removeChild(holder);
+  var jsPDF=window.jspdf.jsPDF,pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});var pw=297,ph=210,margin=7,imgW=pw-margin*2,imgH=canvas.height*imgW/canvas.width,srcY=0,first=true;
+  while(srcY<canvas.height){var pageH=Math.min(canvas.height-srcY,Math.floor(canvas.width*((ph-margin*2)/imgW)));var slice=document.createElement('canvas');slice.width=canvas.width;slice.height=pageH;slice.getContext('2d').drawImage(canvas,0,srcY,canvas.width,pageH,0,0,canvas.width,pageH);if(!first)pdf.addPage();pdf.addImage(slice.toDataURL('image/jpeg',.88),'JPEG',margin,margin,imgW,(pageH/canvas.width)*imgW);srcY+=pageH;first=false;}
+  pdf.save('تنمويين_مصر_'+filename+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+}
+async function exportAllAdminSectionsPDF(){
+  try{adminExportStatus('⏳ جاري جمع الأقسام وإنشاء PDF...');var combined=[];for(var k of Object.keys(ADMIN_EXPORTS)){var c=ADMIN_EXPORTS[k],data=await getAdminCollectionData(c.col);if(data.length)combined.push({name:c.name,data:data});}if(!combined.length){adminExportStatus('⚠️ لا توجد بيانات للتصدير',true);return;}
+    // Build one report with section headings and watermarked logo.
+    var holder=document.createElement('div');holder.dir='rtl';holder.style.cssText='position:fixed;left:-10000px;top:0;width:1100px;background:#fff;padding:35px;font-family:Arial,sans-serif;color:#1a2a3a';holder.innerHTML='<div style="text-align:center;border-bottom:3px solid #00aeef;padding-bottom:15px;margin-bottom:20px"><img src="'+LOGO_SRC+'" style="width:70px;height:70px;object-fit:contain"><div style="font-size:28px;font-weight:900;color:#1a3a6e">تنمويين مصر</div><div style="font-size:16px;font-weight:700">تقرير شامل لكل بيانات المنصة</div><div style="font-size:10px;color:#6b7a8d">'+new Date().toLocaleString('ar-EG')+'</div></div>'+combined.map(function(x){return '<section style="position:relative;margin-bottom:28px;page-break-inside:avoid"><img src="'+LOGO_SRC+'" style="position:absolute;width:300px;height:300px;object-fit:contain;opacity:.045;left:50%;top:80px;transform:translateX(-50%);z-index:0"><div style="position:relative;z-index:1"><h2 style="font-size:18px;color:#1a3a6e;border-right:5px solid #00aeef;padding-right:8px">'+x.name+' ('+x.data.length+')</h2>'+makePdfRows(x.data)+'</div></section>';}).join('');document.body.appendChild(holder);var canvas=await html2canvas(holder,{scale:1.3,backgroundColor:'#fff',useCORS:true});document.body.removeChild(holder);var jsPDF=window.jspdf.jsPDF,pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'}),pw=297,ph=210,margin=7,imgW=pw-margin*2,srcY=0,first=true;while(srcY<canvas.height){var pageH=Math.min(canvas.height-srcY,Math.floor(canvas.width*((ph-margin*2)/imgW)));var slice=document.createElement('canvas');slice.width=canvas.width;slice.height=pageH;slice.getContext('2d').drawImage(canvas,0,srcY,canvas.width,pageH,0,0,canvas.width,pageH);if(!first)pdf.addPage();pdf.addImage(slice.toDataURL('image/jpeg',.86),'JPEG',margin,margin,imgW,(pageH/canvas.width)*imgW);srcY+=pageH;first=false;}pdf.save('تنمويين_مصر_تقرير_شامل_'+new Date().toISOString().slice(0,10)+'.pdf');adminExportStatus('✅ تم إنشاء التقرير الشامل PDF');toast('✅ تم تصدير PDF الشامل');
+  }catch(e){console.error(e);adminExportStatus('❌ فشل PDF الشامل: '+e.message,true);toast('❌ '+e.message);}
+}
+function exportAdminSection(){var map={expert:'expert',sup:'sup',org:'org',jobseeker:'jobseeker'};exportAdminData(map[admTab]||'jobseeker','xlsx');}
+function exportVols(){exportAdminData('volunteers','xlsx');}
+function exportConsults(){exportAdminData('consultations','xlsx');}
+function exportJobsAdmin(){exportAdminData('jobs','xlsx');}
+function exportTendersAdmin(){exportAdminData('tenders','xlsx');}
+
 // تحويل التاريخ لصيغة عربية
 function formatDateAr(dateStr){
   if(!dateStr) return '—';
@@ -7799,6 +7877,9 @@ window.addEventListener('load',()=>{
     <button class="success-btn-wa" onclick="window.open(WA_GROUP_URL,'_blank')" style="background:#128c7e;margin-top:6px">👥 انضم لجروب واتساب تنمويين مصر</button>
   </div>
 </div>
-<script src="./jobs-bulk.js?v=20261006-1"></script>
+<script src="./jobs-bulk.js?v=20261004-3" onerror="console.warn('jobs-bulk.js غير متاح — استخدم رفع JSON/CSV من شاشة الاستيراد')"></script>
+<script>
+window.TANMOYEEN_BULK_JOBS_CURRENT = window.TANMOYEEN_BULK_JOBS || [];
+</script>
 </body>
 </html>

@@ -370,15 +370,26 @@ exports.sendTestPush = onCall(
   {region: "europe-west1", secrets: [ONESIGNAL_REST_API_KEY]},
   async (request) => {
     await assertAdmin(request);
-    const res = await sendOneSignal({
-      title: "🔔 تجربة إشعارات تنمويين مصر",
-      message: "لو الرسالة دي وصلتك، الإشعارات شغالة ✅",
-      url: PUBLIC_APP_URL,
-      topic: "tanmoyeen-test",
-    });
+    let res;
+    try {
+      res = await sendOneSignal({
+        title: "🔔 تجربة إشعارات تنمويين مصر",
+        message: "لو الرسالة دي وصلتك، الإشعارات شغالة ✅",
+        url: PUBLIC_APP_URL,
+        topic: "tanmoyeen-test",
+      });
+    } catch (e) {
+      // نرجّع سبب الخطأ الحقيقي للوحة الأدمن بدل "INTERNAL"
+      throw new HttpsError("failed-precondition", String(e.message || e).slice(0, 400));
+    }
     let parsed = {};
     try { parsed = JSON.parse(res); } catch (e) { /* ignore */ }
-    return {ok: true, id: parsed.id || "", recipients: parsed.recipients};
+    return {
+      ok: true,
+      id: parsed.id || "",
+      recipients: parsed.recipients,
+      errors: parsed.errors || null,
+    };
   }
 );
 

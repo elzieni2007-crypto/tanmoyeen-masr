@@ -7839,7 +7839,7 @@ window.addEventListener('load',()=>{
 </div>
 <script src="./jobs-bulk.js?v=20261004-3"></script>
 <script>
-window.TANMOYEEN_BULK_JOBS_CURRENT = window.TANMOYEEN_BULK_JOBS || [];
+window.TANMOYEEN_BULK_JOBS_CURRENT = window.TANMOYEEN_BULK_JOBS || (typeof TANMOYEEN_BULK_JOBS!=='undefined' ? TANMOYEEN_BULK_JOBS : []);
 </script>
 <script>
 /* ===== أدوات الأدمن: استيراد الوظائف المجمّع + تصدير Excel/PDF بهوية تنمويين مصر ===== */
@@ -8236,16 +8236,16 @@ function openExport(){ buildExportModal(); document.getElementById('tm-exp').cla
 
 /* ---------- الاستيراد المجمّع للوظائف (نسخة مصلحة) ---------- */
 var FIELD_MAP={
-  title:['title','job title','position','المسمى الوظيفي','المسمى','الوظيفة','عنوان الوظيفة','العنوان'],
-  org:['org','organization','organisation','company','الجهة','المؤسسة','الجمعية','الشركة','اسم الجهة'],
+  title:['title','job title','jobtitle','job_title','position','role','المسمى الوظيفي','المسمى','الوظيفة','عنوان الوظيفة','العنوان'],
+  org:['org','organization','organisation','company','employer','orgname','org name','الجهة','المؤسسة','الجمعية','الشركة','اسم الجهة'],
   gov:['gov','governorate','location','city','المحافظة','المكان','الموقع','المدينة'],
   type:['type','job type','نوع الدوام','النوع','نوع الوظيفة'],
   sec:['sec','sector','القطاع','المجال'],
   sal:['sal','salary','الراتب','المرتب'],
-  dl:['dl','deadline','closing date','آخر موعد','الموعد النهائي','اخر موعد','آخر موعد للتقديم'],
+  dl:['dl','deadline','closing date','closingdate','due','end date','آخر موعد','الموعد النهائي','اخر موعد','آخر موعد للتقديم'],
   contact:['contact','email','phone','التواصل','البريد','طريقة التقديم'],
-  desc:['desc','description','details','الوصف','التفاصيل','وصف الوظيفة'],
-  link:['link','url','apply link','الرابط','رابط التقديم','رابط الإعلان'],
+  desc:['desc','description','details','summary','الوصف','التفاصيل','وصف الوظيفة'],
+  link:['link','url','apply link','applylink','apply url','الرابط','رابط التقديم','رابط الإعلان'],
   source:['source','المصدر']
 };
 function normHeader(h){ return String(h||'').toLowerCase().replace(/[_\-:]+/g,' ').replace(/\s+/g,' ').trim(); }
@@ -8354,14 +8354,62 @@ async function runBulkImport(rawJobs, sourceLabel){
   }finally{ _importBusy=false; }
 }
 
-window.bulkImportCurrentJobs=function(){
-  var jobs=Array.isArray(window.TANMOYEEN_BULK_JOBS)?window.TANMOYEEN_BULK_JOBS:(Array.isArray(window.TANMOYEEN_BULK_JOBS_CURRENT)?window.TANMOYEEN_BULK_JOBS_CURRENT:[]);
-  if(!jobs.length){
-    var box=document.getElementById('bulk-import-progress');
-    if(box) box.innerHTML='⚠️ ملف التجميعة <b>jobs-bulk.js</b> مش موجود على الموقع أو فاضي. ارفعه على الريبو، أو استخدم <b>رفع ملف Excel / CSV / JSON</b> تحت.';
+/* قراءة التجميعة من jobs-bulk.js أيًا كانت طريقة تعريفها */
+var BUNDLE_NAMES=['TANMOYEEN_BULK_JOBS','TANMOYEEN_BULK_JOBS_CURRENT','BULK_JOBS','JOBS_BULK','jobsBulk','bulkJobs','JOBS'];
+function pickArray(v){
+  if(Array.isArray(v)) return v;
+  if(v&&typeof v==='object'){ var k=['jobs','data','items','list'].filter(function(x){return Array.isArray(v[x]);})[0]; if(k) return v[k]; }
+  return null;
+}
+function bundleFromGlobals(){
+  for(var i=0;i<BUNDLE_NAMES.length;i++){
+    var n=BUNDLE_NAMES[i], v=null;
+    try{ v=window[n]; }catch(e){}
+    if(v==null){ try{ v=(new Function('return typeof '+n+'!=="undefined"?'+n+':null;'))(); }catch(e){ v=null; } }
+    var a=pickArray(v); if(a&&a.length) return {jobs:a, from:n};
+  }
+  return null;
+}
+function extractArrayLiteral(txt){
+  var t=txt.trim();
+  if(t[0]==='['||t[0]==='{'){ try{ var j=JSON.parse(t); var a=pickArray(j); if(a) return a; }catch(e){} }
+  var m=/=\s*\[/.exec(t); if(!m) return null;
+  var i=m.index+m[0].length-1, depth=0, q=null, esc=false;
+  for(var k=i;k<t.length;k++){
+    var c=t[k];
+    if(q){ if(esc){esc=false;} else if(c==='\\'){esc=true;} else if(c===q){q=null;} continue; }
+    if(c==='"'||c==="'"||c==='`'){q=c;continue;}
+    if(c==='['||c==='{') depth++;
+    else if(c===']'||c==='}'){ depth--; if(depth===0){ var lit=t.slice(i,k+1); try{ return (new Function('"use strict";return ('+lit+');'))(); }catch(e){ return null; } } }
+  }
+  return null;
+}
+async function loadBundle(){
+  var g=bundleFromGlobals(); if(g) return g;
+  try{
+    var r=await fetch('./jobs-bulk.js?nocache='+Date.now(),{cache:'no-store'});
+    if(!r.ok) return {jobs:[], err:'ملف jobs-bulk.js مش موجود على الموقع (HTTP '+r.status+')'};
+    var a=extractArrayLiteral(await r.text());
+    if(a&&a.length) return {jobs:a, from:'jobs-bulk.js'};
+    return {jobs:[], err:'ملف jobs-bulk.js موجود بس مفيش جواه قائمة وظائف مقروءة'};
+  }catch(e){ return {jobs:[], err:'تعذر تحميل jobs-bulk.js: '+(e.message||e)}; }
+}
+window.bulkImportCurrentJobs=async function(){
+  var box=document.getElementById('bulk-import-progress');
+  if(box) box.textContent='⏳ بنقرا ملف التجميعة...';
+  var b=await loadBundle();
+  if(!b.jobs.length){
+    if(box) box.innerHTML='⚠️ '+esc(b.err||'التجميعة فاضية')+'.<br>ارفع الملف على الريبو جنب index.html، أو استخدم <b>رفع ملف Excel / CSV / JSON</b> تحت.';
     return;
   }
-  runBulkImport(jobs,'التجميعة الحالية');
+  var mapped=b.jobs.map(function(r){ return (r&&typeof r==='object')?mapRow(r):{}; });
+  var valid=mapped.filter(function(j){ return String(j.title||'').trim()&&String(j.org||'').trim(); }).length;
+  if(!valid){
+    var keys=b.jobs[0]&&typeof b.jobs[0]==='object'?Object.keys(b.jobs[0]).join('، '):'—';
+    if(box) box.innerHTML='⚠️ لقيت '+b.jobs.length+' عنصر في التجميعة، بس مفيش ولا واحد فيه المسمى والجهة.<br>الحقول الموجودة: <b dir="ltr">'+esc(keys)+'</b>';
+    return;
+  }
+  runBulkImport(mapped,'التجميعة الحالية ('+b.jobs.length+')');
 };
 function readJobsFile(file){
   return new Promise(function(res,rej){
@@ -8416,6 +8464,15 @@ window.exportAdminSection=function(){
 };
 window.tmExport=tmExport; window.tmExportAllExcel=tmExportAllExcel; window.tmOpenExport=openExport;
 
+var LIST_TABS={jobseeker:{col:'jobseekers',name:'باحثي العمل'},expert:{col:'consultants',name:'الاستشاريين'},sup:{col:'suppliers',name:'الموردين'},org:{col:'organizations',name:'المؤسسات'}};
+function curTab(){ var t=''; try{ t=(typeof admTab!=='undefined')?admTab:''; }catch(e){} return LIST_TABS[t]?t:'jobseeker'; }
+function updateListBar(){
+  var bar=document.getElementById('tm-list-export'); if(!bar) return;
+  var t=''; try{ t=(typeof admTab!=='undefined')?admTab:'jobseeker'; }catch(e){ t='jobseeker'; }
+  var info=LIST_TABS[t];
+  bar.style.display=info?'flex':'none';
+  if(info) document.getElementById('tm-list-export-lbl').textContent='تصدير '+info.name;
+}
 /* ---------- إضافة الأزرار للواجهة ---------- */
 function injectUi(){
   buildExportModal();
@@ -8434,6 +8491,22 @@ function injectUi(){
       btn.insertAdjacentElement('afterend',pb);
     }
   });
+  var list=document.getElementById('adm-list');
+  if(list&&!document.getElementById('tm-list-export')){
+    var bar=document.createElement('div'); bar.id='tm-list-export';
+    bar.style.cssText='display:flex;align-items:center;gap:8px;margin:0 16px 10px;padding:10px 12px;background:#f2f7fc;border:1px solid #dfe5ec;border-radius:12px;font-family:Cairo,sans-serif';
+    bar.innerHTML='<span id="tm-list-export-lbl" style="flex:1;font-size:12px;font-weight:800;color:#1a3a6e"></span>'+
+      '<button type="button" data-f="xlsx" style="border:0;border-radius:9px;padding:7px 12px;background:#e7f6ee;color:#0b7a43;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer">📥 Excel</button>'+
+      '<button type="button" data-f="pdf" style="border:0;border-radius:9px;padding:7px 12px;background:#fde8e8;color:#b42318;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer">📄 PDF</button>';
+    bar.addEventListener('click',function(e){ var f=e.target.getAttribute('data-f'); if(f) tmExport(LIST_TABS[curTab()].col,f); });
+    list.parentNode.insertBefore(bar,list);
+    if(typeof window.setAdmTab==='function'&&!window.setAdmTab._tm){
+      var orig=window.setAdmTab;
+      window.setAdmTab=function(){ var r=orig.apply(this,arguments); updateListBar(); return r; };
+      window.setAdmTab._tm=1;
+    }
+    updateListBar();
+  }
   var prog=document.getElementById('bulk-import-progress');
   if(prog&&!document.getElementById('tm-import-file')){
     var div=document.createElement('div');

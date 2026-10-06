@@ -25,6 +25,20 @@
       appId: "8dfa5d04-3fc5-448d-b72d-52d2ed5dc5d9",
       serviceWorkerPath: "/tanmoyeen-masr/OneSignalSDKWorker.js",
       serviceWorkerParam: { scope: "/tanmoyeen-masr/" },
+      promptOptions: {
+        slidedown: {
+          prompts: [{
+            type: "push",
+            autoPrompt: true,
+            text: {
+              actionMessage: "تحب توصلك إشعارات بالوظائف والمناقصات الجديدة أول ما تنزل؟",
+              acceptButton: "أيوه، فعّل",
+              cancelButton: "بعدين"
+            },
+            delay: { pageViews: 1, timeDelay: 15 }
+          }]
+        }
+      }
     });
   });
 </script>
@@ -1984,6 +1998,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="mitem" onclick="go('register')"><div class="mico" style="background:#e8f0fe">📝</div><div class="mtxt"><div class="mtt">تسجيل / تحديث ملفي</div><div class="mst">أضف بياناتك لقاعدة المعلومات</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="go('consultants')"><div class="mico" style="background:#e7faf3">👨‍💼</div><div class="mtxt"><div class="mtt">قاعدة الاستشاريين</div><div class="mst" id="menu-cons-count">استشاريين مسجّلين</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="go('suppliers')"><div class="mico" style="background:#f0e8fe">🏭</div><div class="mtxt"><div class="mtt">قاعدة الموردين</div><div class="mst">87 مورد مسجّل</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div class="mitem" onclick="tmEnablePush()"><div class="mico" style="background:#fff4e0">🔔</div><div class="mtxt"><div class="mtt">إشعارات الوظائف الجديدة</div><div class="mst" id="tm-push-state">اضغط لتفعيل الإشعارات</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="location.href='donor-guide.html'"><div class="mico" style="background:#e5f6fd">📘</div><div class="mtxt"><div class="mtt">دليل اشتراطات الجهات المانحة</div><div class="mst">EU وGIZ والأمم المتحدة والقانون المصري</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
     </div>
     <div class="msec">
@@ -2757,7 +2772,7 @@ async function approveJobFirebase(fbId, jobData){
   try {
     if(typeof auth==='undefined'||!auth.currentUser){toast('⚠️ يجب تسجيل الدخول كمسؤول');return false;}
     if(typeof firebase.functions!=='function'){toast('❌ Firebase Functions غير متاح');return false;}
-    const callable=firebase.functions();
+    const callable=firebase.app().functions('europe-west1');
     const approve=callable.httpsCallable('approveJob');
     const result=await approve({pendingId:fbId});
     if(result.data && result.data.ok){ console.log('✅ Job approved'); return true; }
@@ -5825,7 +5840,7 @@ async function saveImportedJob(){
       toast('❌ Firebase Functions غير متاح في هذه النسخة');
       return;
     }
-    const callable=firebase.functions();
+    const callable=firebase.app().functions('europe-west1');
     const ingest=callable.httpsCallable('ingestJob');
     const result=await ingest({
       job:{
@@ -5898,6 +5913,7 @@ async function publishJob(){
     urg,featured:false,status:'approved'};
   newJob.duplicateKey=makeJobDuplicateKey(newJob);
   newJob.publishedAt=firebase.firestore.FieldValue.serverTimestamp();
+  newJob.timestamp=firebase.firestore.FieldValue.serverTimestamp();
   newJob.updatedAt=firebase.firestore.FieldValue.serverTimestamp();
 
   try{
@@ -8572,6 +8588,86 @@ function injectUi(){
   }
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',injectUi); else injectUi();
+})();
+
+/* ===== الإشعارات: تفعيل للمستخدم + روابط مباشرة للإعلان + زرار تجربة للأدمن ===== */
+(function(){
+'use strict';
+function say(m){ try{ toast(m); }catch(e){ console.log(m); } }
+function withOS(fn){ window.OneSignalDeferred=window.OneSignalDeferred||[]; window.OneSignalDeferred.push(fn); }
+
+function refreshPushState(){
+  var el=document.getElementById('tm-push-state'); if(!el) return;
+  if(!('Notification' in window)){ el.textContent='المتصفح ده مش بيدعم الإشعارات'; return; }
+  if(Notification.permission==='denied'){ el.textContent='الإشعارات مقفولة من إعدادات المتصفح'; return; }
+  withOS(function(OS){
+    try{ el.textContent=OS.User.PushSubscription.optedIn?'✅ مفعّلة — هيوصلك كل جديد':'اضغط لتفعيل الإشعارات'; }catch(e){}
+  });
+}
+window.tmEnablePush=function(){
+  if(!('Notification' in window)){ say('⚠️ الجهاز أو المتصفح ده مش بيدعم الإشعارات'); return; }
+  if(Notification.permission==='denied'){ say('⚠️ الإشعارات مقفولة — فعّلها من إعدادات المتصفح للموقع ده'); return; }
+  withOS(async function(OS){
+    try{
+      if(Notification.permission!=='granted') await OS.Notifications.requestPermission();
+      if(!OS.User.PushSubscription.optedIn) await OS.User.PushSubscription.optIn();
+      say(OS.User.PushSubscription.optedIn?'🔔 تم تفعيل الإشعارات':'⚠️ لم يتم التفعيل');
+    }catch(e){ say('⚠️ '+(e.message||e)); }
+    refreshPushState();
+  });
+};
+withOS(function(OS){ try{ OS.User.PushSubscription.addEventListener('change',refreshPushState); }catch(e){} refreshPushState(); });
+
+/* فتح الإعلان مباشرة من رابط الإشعار: ?job=ID أو ?tender=ID أو ?form=jobs */
+function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+async function openFromLink(kind,id){
+  var listName=kind==='job'?'JOBS':'TENDERS', screen=kind==='job'?'jobs':'tenders', col=kind==='job'?'jobs':'tenders';
+  var getList=function(){ try{ return (new Function('return typeof '+listName+'!=="undefined"?'+listName+':null'))(); }catch(e){ return null; } };
+  var open=function(){ try{ if(typeof go==='function') go(screen); }catch(e){}
+    setTimeout(function(){ try{ (kind==='job'?openJob:openTender)(id); }catch(e){ console.warn(e); } },350); };
+  for(var i=0;i<24;i++){
+    var L=getList(); if(L&&L.some(function(x){return x.id==id;})){ open(); return; }
+    await sleep(500);
+  }
+  try{
+    var d=(typeof db!=='undefined')?db:null; if(!d) return;
+    var snap=await d.collection(col).doc(id).get();
+    if(!snap.exists){ say('ℹ️ الإعلان ده اتشال أو انتهى'); try{ go(screen); }catch(e){} return; }
+    var L2=getList(); if(L2) L2.unshift(Object.assign({},snap.data(),{id:snap.id,fbId:snap.id}));
+    open();
+  }catch(e){ console.warn('deep link',e); }
+}
+function handleDeepLink(){
+  var p=new URLSearchParams(location.search), f=p.get('form');
+  if(p.get('job')) openFromLink('job',p.get('job'));
+  else if(p.get('tender')) openFromLink('tender',p.get('tender'));
+  else if(f==='jobs'||f==='tenders') setTimeout(function(){ try{ go(f); }catch(e){} },800);
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(handleDeepLink,1500); }); else setTimeout(handleDeepLink,1500);
+
+/* زرار إشعار تجريبي في لوحة الأدمن */
+window.tmSendTestPush=async function(){
+  try{
+    var u=(typeof auth!=='undefined')&&auth.currentUser;
+    if(!u){ say('⚠️ ادخل بحساب الأدمن في Firebase الأول'); return; }
+    say('⏳ بنبعت إشعار تجريبي...');
+    var r=await firebase.app().functions('europe-west1').httpsCallable('sendTestPush')({});
+    var n=r&&r.data&&r.data.recipients;
+    say('✅ اتبعت'+(n!=null?' لـ '+n+' مشترك':''));
+  }catch(e){
+    var m=(e&&e.message)||e;
+    if(/not-found|NOT_FOUND|internal/i.test(String(e&&e.code)+m)) m='الـ Cloud Function لسه مش منشورة — اتبع خطوات النشر';
+    say('❌ '+m);
+  }
+};
+function addTestBtn(){
+  var exp=document.querySelector('.tm-exp-open');
+  if(exp&&!document.querySelector('.tm-push-test')){
+    var b=document.createElement('button'); b.className='tm-exp-open tm-push-test'; b.type='button'; b.textContent='🔔 تجربة';
+    b.onclick=window.tmSendTestPush; exp.insertAdjacentElement('afterend',b);
+  }
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',addTestBtn); else addTestBtn();
 })();
 
 </script>

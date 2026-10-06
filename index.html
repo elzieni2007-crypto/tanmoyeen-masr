@@ -7247,7 +7247,7 @@ function exportToExcel(data, filename){
   if(!data||!data.length){toast('❌ مفيش بيانات للتصدير');return;}
   var keys=[];data.forEach(function(r){Object.keys(r).forEach(function(k){if(!keys.includes(k)&&k!=='fbId'&&k!=='_id')keys.push(k);});});
   var wsData=[keys];data.forEach(function(r){wsData.push(keys.map(function(k){return _flatExportValue(r[k]);}));});
-  var ws=XLSX.utils.aoa_to_sheet(wsData);ws['!cols']=keys.map(function(k){return {wch:Math.min(45,Math.max(12,k.length+4));};});
+  var ws=XLSX.utils.aoa_to_sheet(wsData);ws['!cols']=keys.map(function(k){return {wch:Math.min(45,Math.max(12,k.length+4))};});
   var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,filename);
   XLSX.writeFile(wb,'تنمويين_مصر_'+filename+'_'+new Date().toLocaleDateString('ar-EG').replace(/\//g,'-')+'.xlsx');toast('✅ تم تصدير '+data.length+' سجل!');
 }

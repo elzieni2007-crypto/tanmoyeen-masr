@@ -8593,6 +8593,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 /* ===== الإشعارات: تفعيل للمستخدم + روابط مباشرة للإعلان + زرار تجربة للأدمن ===== */
 (function(){
 'use strict';
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 function say(m){ try{ toast(m); }catch(e){ console.log(m); } }
 function withOS(fn){ window.OneSignalDeferred=window.OneSignalDeferred||[]; window.OneSignalDeferred.push(fn); }
 
@@ -8645,19 +8646,87 @@ function handleDeepLink(){
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(handleDeepLink,1500); }); else setTimeout(handleDeepLink,1500);
 
-/* زرار إشعار تجريبي في لوحة الأدمن */
+/* زرار تجربة الإشعارات + فحص كامل للأسباب */
+var ADMIN_EMAIL='elzieni2007@gmail.com';
+function diagBox(){
+  var m=document.getElementById('tm-push-diag');
+  if(!m){
+    m=document.createElement('div'); m.id='tm-push-diag';
+    m.style.cssText='position:fixed;inset:0;z-index:100060;background:rgba(9,22,45,.55);display:flex;align-items:flex-end;justify-content:center;font-family:Cairo,sans-serif;direction:rtl';
+    m.innerHTML='<div style="background:#fff;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px))">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="color:#1a3a6e;font-size:16px">🔔 فحص الإشعارات</b>'+
+      '<button type="button" id="tm-diag-x" style="border:0;background:#eef3f8;border-radius:10px;width:34px;height:34px;font-size:18px">×</button></div>'+
+      '<div id="tm-diag-list" style="font-size:13px;line-height:1.7"></div>'+
+      '<div style="display:flex;gap:8px;margin-top:12px"><button type="button" id="tm-diag-sub" style="flex:1;border:0;border-radius:10px;padding:10px;background:#e8f0fe;color:#1a3a6e;font-family:Cairo,sans-serif;font-weight:800">فعّل الإشعارات على الجهاز ده</button>'+
+      '<button type="button" id="tm-diag-again" style="flex:1;border:0;border-radius:10px;padding:10px;background:#1a3a6e;color:#fff;font-family:Cairo,sans-serif;font-weight:800">ابعت تجربة تاني</button></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click',function(e){
+      if(e.target===m||e.target.id==='tm-diag-x') m.style.display='none';
+      if(e.target.id==='tm-diag-sub') window.tmEnablePush();
+      if(e.target.id==='tm-diag-again') window.tmSendTestPush();
+    });
+  }
+  m.style.display='flex';
+  return document.getElementById('tm-diag-list');
+}
+function row(list,ok,title,detail){
+  var d=document.createElement('div');
+  d.style.cssText='padding:8px 0;border-bottom:1px solid #eef2f6';
+  d.innerHTML='<b>'+(ok===true?'✅':ok===false?'❌':ok==='warn'?'⚠️':'⏳')+' '+title+'</b>'+(detail?'<div style="color:#5d6b7c;font-size:12px">'+detail+'</div>':'');
+  list.appendChild(d); return d;
+}
+function osReady(ms){
+  return new Promise(function(res){
+    var done=false; setTimeout(function(){ if(!done){done=true;res(null);} },ms);
+    withOS(function(OS){ if(!done){done=true;res(OS);} });
+  });
+}
 window.tmSendTestPush=async function(){
+  var list=diagBox(); list.innerHTML='';
+  // 1) الجهاز
+  var supported=('Notification' in window)&&('serviceWorker' in navigator)&&('PushManager' in window);
+  row(list,supported,'الجهاز/المتصفح بيدعم الإشعارات',supported?'':'غالبًا إنت فاتح من جوه تطبيق أندرويد (WebView). جرّب من Chrome. الإشعارات جوه التطبيق محتاجة OneSignal يتضاف للتطبيق نفسه.');
+  var perm=('Notification' in window)?Notification.permission:'—';
+  row(list,perm==='granted'?true:perm==='denied'?false:'warn','إذن الإشعارات: '+({granted:'مسموح',denied:'مرفوض',default:'لسه ماتسألش'}[perm]||perm),
+    perm==='denied'?'افتح إعدادات الموقع في Chrome وخلي الإشعارات Allow.':perm==='default'?'دوس "فعّل الإشعارات على الجهاز ده" تحت.':'');
+  // 2) OneSignal على الجهاز
+  var OS=await osReady(6000);
+  if(!OS||!OS.User){ row(list,false,'OneSignal ماتحمّلش','ممكن مانع إعلانات أو الموقع مش مضاف في إعدادات OneSignal (Site URL).'); }
+  else{
+    var sub=OS.User.PushSubscription;
+    row(list,!!sub.optedIn,'الجهاز ده مشترك في الإشعارات',sub.optedIn?('ID: <span dir="ltr">'+esc(String(sub.id||'').slice(0,13))+'…</span>'):'مش مشترك — يعني حتى لو الإرسال نجح، مش هيوصل للجهاز ده.');
+  }
+  // 3) حساب الأدمن
+  var u=(typeof auth!=='undefined')&&auth.currentUser;
+  var em=u&&String(u.email||'').toLowerCase();
+  row(list,u?(em===ADMIN_EMAIL?true:false):false,'حساب Firebase',u?(esc(u.email||'بدون إيميل')+(em===ADMIN_EMAIL?'':' — لازم تدخل بـ '+ADMIN_EMAIL)):'إنت داخل بالكلمة المحلية مش Firebase. اخرج وادخل بإيميل الأدمن.');
+  if(!u) return;
+  // 4) الإرسال
+  var r4=row(list,null,'بنبعت إشعار تجريبي من السيرفر...','');
   try{
-    var u=(typeof auth!=='undefined')&&auth.currentUser;
-    if(!u){ say('⚠️ ادخل بحساب الأدمن في Firebase الأول'); return; }
-    say('⏳ بنبعت إشعار تجريبي...');
     var r=await firebase.app().functions('europe-west1').httpsCallable('sendTestPush')({});
-    var n=r&&r.data&&r.data.recipients;
-    say('✅ اتبعت'+(n!=null?' لـ '+n+' مشترك':''));
+    var d=(r&&r.data)||{};
+    var errs=d.errors?JSON.stringify(d.errors):'';
+    var n=d.recipients;
+    if(errs||n===0){
+      r4.innerHTML='<b>⚠️ السيرفر بعت، بس OneSignal ماوصّلش لحد</b><div style="color:#5d6b7c;font-size:12px">'+
+        (n===0||/not subscribed|no subscribers|All included players/i.test(errs)?'مفيش ولا مشترك لسه. فعّل الإشعارات على موبايلك من Chrome وجرّب تاني.':'رد OneSignal: <span dir="ltr">'+esc(errs)+'</span>')+'</div>';
+    }else{
+      r4.innerHTML='<b>✅ اتبعت'+(n!=null?' لـ '+n+' مشترك':'')+'</b><div style="color:#5d6b7c;font-size:12px">لو الجهاز ده مشترك، الإشعار هيوصل خلال ثواني.</div>';
+    }
   }catch(e){
-    var m=(e&&e.message)||e;
-    if(/not-found|NOT_FOUND|internal/i.test(String(e&&e.code)+m)) m='الـ Cloud Function لسه مش منشورة — اتبع خطوات النشر';
-    say('❌ '+m);
+    var code=String((e&&e.code)||'').replace('functions/',''), msg=(e&&e.message)||String(e), hint='';
+    if(code==='not-found'||/not.?found/i.test(msg)) hint='الدالة sendTestPush مش منشورة على Firebase. نفّذ firebase deploy --only functions من Cloud Shell.';
+    else if(code==='unauthenticated') hint='Firebase مش شايف تسجيل دخولك. اخرج وادخل تاني بإيميل الأدمن.';
+    else if(code==='permission-denied') hint='الحساب ده مش حساب الأدمن.';
+    else if(code==='failed-precondition'){
+      if(/not configured/i.test(msg)) hint='مفتاح OneSignal مش متسجل. نفّذ: firebase functions:secrets:set ONESIGNAL_REST_API_KEY ثم deploy تاني.';
+      else if(/401|403|unauthori|access denied|api key/i.test(msg)) hint='مفتاح OneSignal غلط أو قديم. خد App API Key جديد من OneSignal → Settings → Keys & IDs وسجّله تاني.';
+      else hint='رد OneSignal فيه مشكلة (التفاصيل فوق).';
+    }
+    else if(code==='internal'&&/INTERNAL/.test(msg)) hint='السيرفر وقع. غالبًا النسخة المنشورة قديمة — اعمل deploy بالملف الجديد عشان يظهر السبب الحقيقي.';
+    else hint='تأكد من الإنترنت، وإن الدوال منشورة على europe-west1.';
+    r4.innerHTML='<b>❌ فشل الإرسال</b><div style="color:#b42318;font-size:12px" dir="auto">'+esc(code?code+': ':'')+esc(msg)+'</div><div style="color:#5d6b7c;font-size:12px">'+hint+'</div>';
   }
 };
 function addTestBtn(){

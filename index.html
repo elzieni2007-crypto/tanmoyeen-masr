@@ -5685,7 +5685,6 @@ function clearJobForm(){
   document.getElementById('nj-urg').checked=false;
 }
 
-async 
 // ============ JOB IMPORTER ============
 function parseImportedDeadline(text){
   const t=String(text||'');
@@ -7854,6 +7853,9 @@ var LIBS = window.TM_LIBS || {
 };
 
 /* ---------- أدوات عامة ---------- */
+/* escapeHtml كانت مستخدمة في شاشة استيراد الإعلان من غير ما تتعرّف — ده سبب التحميل بدون نتيجة */
+if(typeof window.escapeHtml!=='function') window.escapeHtml=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+
 function say(msg){ try{ if(typeof toast==='function') toast(msg); else console.log(msg);}catch(e){console.log(msg);} }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 function getDb(){ try{ return (typeof db!=='undefined')?db:null; }catch(e){ return null; } }
@@ -8303,13 +8305,14 @@ async function runBulkImport(rawJobs, sourceLabel){
   var jobs=[], invalid=0;
   rawJobs.forEach(function(r){ var j=cleanJob(r); if(j.title&&j.org) jobs.push(j); else invalid++; });
   if(!jobs.length){ out('⚠️ مفيش وظائف صالحة. كل وظيفة محتاجة على الأقل المسمى والجهة.'+(invalid?' (تم تجاهل '+invalid+' صف ناقص)':'')); return; }
-  if(!confirm('هيتم إرسال '+jobs.length+' وظيفة من '+sourceLabel+' لقائمة المراجعة، مع منع التكرار. نكمل؟')) { out(''); return; }
+  if(!confirm('هيتم فحص '+jobs.length+' وظيفة من '+sourceLabel+' وإرسال الجديد منها فقط لقائمة المراجعة. نكمل؟')) { out(''); window._tmBundleInfo=''; return; }
   _importBusy=true;
   try{
     out('⏳ بنجهز فحص التكرار (قراءة الوظائف الحالية مرة واحدة)...');
     var existing=[];
     var js=await d.collection('jobs').get(); js.forEach(function(doc){ existing.push(doc.data()||{}); });
-    var ps=await d.collection('pending_jobs').get(); ps.forEach(function(doc){ var x=doc.data()||{}; if(x.status!=='rejected') existing.push(x); });
+    var rejectedKeys={};
+    var ps=await d.collection('pending_jobs').get(); ps.forEach(function(doc){ var x=doc.data()||{}; if(x.status==='rejected') rejectedKeys[x.duplicateKey||dupKey(x)]=1; else existing.push(x); });
     var keySet={}, byTO={};
     function remember(x){
       keySet[x.duplicateKey||dupKey(x)]=1;
@@ -8321,8 +8324,9 @@ async function runBulkImport(rawJobs, sourceLabel){
       return !!(list&&list.some(function(eg){ return !g||!eg||eg===g; }));
     }
     existing.forEach(remember);
-    var FV=firebase.firestore.FieldValue, toAdd=[], dup=0;
+    var FV=firebase.firestore.FieldValue, toAdd=[], dup=0, rej=0;
     jobs.forEach(function(j){
+      if(rejectedKeys[dupKey(j)]){ rej++; return; }
       if(isDup(j)){ dup++; return; }
       remember(j);
       toAdd.push(Object.assign({},j,{duplicateKey:dupKey(j),status:'pending',ownerUid:user.uid,submittedBy:user.uid,submittedByEmail:user.email||'',importMethod:'bulk_admin',timestamp:FV.serverTimestamp(),importedAt:FV.serverTimestamp()}));
@@ -8341,7 +8345,9 @@ async function runBulkImport(rawJobs, sourceLabel){
       }
       out('⏳ '+Math.min(i+400,toAdd.length)+' / '+toAdd.length+' — تمت إضافة: '+added);
     }
-    var html=(fail?'⚠️':'✅')+' انتهى الاستيراد — <b>جديد: '+added+'</b> | موجود مسبقًا: '+dup+(invalid?' | ناقص البيانات: '+invalid:'')+(fail?' | <b style="color:#b42318">فشل: '+fail+'</b>':'');
+    var html=(window._tmBundleInfo?window._tmBundleInfo+'<br>':'')+(fail?'⚠️':'✅')+' انتهى الاستيراد — <b>جديد: '+added+'</b> | موجود مسبقًا: '+dup+(rej?' | مرفوض قبل كده: '+rej:'')+(invalid?' | ناقص البيانات: '+invalid:'')+(fail?' | <b style="color:#b42318">فشل: '+fail+'</b>':'');
+    if(added&&!fail) html+='<div style="margin-top:6px;font-size:11px;line-height:1.7">'+toAdd.slice(0,10).map(function(j){return '• '+esc(j.title)+' — '+esc(j.org);}).join('<br>')+(toAdd.length>10?'<br>… و'+(toAdd.length-10)+' غيرهم':'')+'</div>';
+    window._tmBundleInfo='';
     if(firstErr) html+='<br><span style="color:#b42318">السبب: '+esc(explainError(firstErr))+'</span>';
     if(added) html+='<br>راجع قائمة الوظائف المعلقة ثم انشر المعتمد منها.';
     out(html);
@@ -8384,15 +8390,38 @@ function extractArrayLiteral(txt){
   }
   return null;
 }
-async function loadBundle(){
-  var g=bundleFromGlobals(); if(g) return g;
+var GH_REPO='elzieni2007-crypto/tanmoyeen-masr', GH_FILE='jobs-bulk.js';
+async function fetchText(url,opts,ms){
+  var ctl=new AbortController(), t=setTimeout(function(){ctl.abort();},ms||15000);
+  try{ var r=await fetch(url,Object.assign({cache:'no-store',signal:ctl.signal},opts||{})); if(!r.ok) throw new Error('HTTP '+r.status); return await r.text(); }
+  finally{ clearTimeout(t); }
+}
+async function fileUpdatedAt(){
   try{
-    var r=await fetch('./jobs-bulk.js?nocache='+Date.now(),{cache:'no-store'});
-    if(!r.ok) return {jobs:[], err:'ملف jobs-bulk.js مش موجود على الموقع (HTTP '+r.status+')'};
-    var a=extractArrayLiteral(await r.text());
-    if(a&&a.length) return {jobs:a, from:'jobs-bulk.js'};
-    return {jobs:[], err:'ملف jobs-bulk.js موجود بس مفيش جواه قائمة وظائف مقروءة'};
-  }catch(e){ return {jobs:[], err:'تعذر تحميل jobs-bulk.js: '+(e.message||e)}; }
+    var j=JSON.parse(await fetchText('https://api.github.com/repos/'+GH_REPO+'/commits?path='+GH_FILE+'&per_page=1',{headers:{'Accept':'application/vnd.github+json'}},8000));
+    var d=j&&j[0]&&j[0].commit&&(j[0].commit.committer||j[0].commit.author).date;
+    return d?fmtDate(new Date(d)):'';
+  }catch(e){ return ''; }
+}
+async function loadBundle(){
+  // الأولوية: أحدث نسخة من GitHub مباشرة (مش النسخة المخزنة في المتصفح)
+  var sources=[
+    {name:'GitHub',url:'https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_FILE+'?t='+Date.now(),opts:{headers:{'Accept':'application/vnd.github.raw'}}},
+    {name:'GitHub (raw)',url:'https://raw.githubusercontent.com/'+GH_REPO+'/main/'+GH_FILE+'?t='+Date.now()},
+    {name:'GitHub (raw)',url:'https://raw.githubusercontent.com/'+GH_REPO+'/master/'+GH_FILE+'?t='+Date.now()},
+    {name:'الموقع',url:'./'+GH_FILE+'?nocache='+Date.now()}
+  ];
+  var errs=[];
+  for(var i=0;i<sources.length;i++){
+    try{
+      var a=extractArrayLiteral(await fetchText(sources[i].url,sources[i].opts));
+      if(a&&a.length) return {jobs:a, from:sources[i].name};
+      errs.push(sources[i].name+': الملف مفيهوش قائمة وظائف');
+    }catch(e){ errs.push(sources[i].name+': '+(e.name==='AbortError'?'انتهت المهلة':(e.message||e))); }
+  }
+  var g=bundleFromGlobals();
+  if(g){ g.from='نسخة مخزنة قديمة في المتصفح'; g.stale=true; return g; }
+  return {jobs:[], err:'تعذر قراءة '+GH_FILE+' — '+errs.join(' | ')};
 }
 window.bulkImportCurrentJobs=async function(){
   var box=document.getElementById('bulk-import-progress');
@@ -8409,7 +8438,9 @@ window.bulkImportCurrentJobs=async function(){
     if(box) box.innerHTML='⚠️ لقيت '+b.jobs.length+' عنصر في التجميعة، بس مفيش ولا واحد فيه المسمى والجهة.<br>الحقول الموجودة: <b dir="ltr">'+esc(keys)+'</b>';
     return;
   }
-  runBulkImport(mapped,'التجميعة الحالية ('+b.jobs.length+')');
+  var upd=await fileUpdatedAt();
+  window._tmBundleInfo='📦 المصدر: <b>'+esc(b.from)+'</b>'+(upd?' — آخر تحديث للملف: <bdi dir="ltr">'+esc(upd)+'</bdi>':'')+' — عدد الوظائف في الملف: <b>'+b.jobs.length+'</b>'+(b.stale?'<br><span style="color:#b42318">⚠️ ماقدرناش نوصل لـ GitHub، فاستخدمنا نسخة قديمة.</span>':'');
+  runBulkImport(mapped,'jobs-bulk.js ('+b.jobs.length+' وظيفة)');
 };
 function readJobsFile(file){
   return new Promise(function(res,rej){
@@ -8437,7 +8468,7 @@ window.tmImportJobsFile=async function(input){
   try{
     var jobs=await readJobsFile(f);
     if(box) box.textContent='📄 '+f.name+': '+jobs.length+' صف';
-    await runBulkImport(jobs,'الملف '+f.name);
+    window._tmBundleInfo=''; await runBulkImport(jobs,'الملف '+f.name);
   }catch(e){ if(box) box.innerHTML='❌ '+esc(e.message||e); say('❌ '+(e.message||e)); }
   finally{ input.value=''; }
 };

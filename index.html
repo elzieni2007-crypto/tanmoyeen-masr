@@ -2070,7 +2070,6 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" style="background:#feeaea;color:#c03030;border-color:#e05050" onclick="setAdmTab(this,'email')">📧 إيميل جماعي</div>
       <div class="adm-tab" style="background:#e7faf3;color:#007a50;border-color:#00b894" onclick="setAdmTab(this,'featured')">⭐ مميزون</div>
       <div class="adm-tab" style="background:#e8f0fe;color:#1463a5;border-color:#1463a5" onclick="setAdmTab(this,'import-job')">📥 استيراد إعلان</div>
-      <div class="adm-tab" style="background:#f3e8ff;color:#7c3aed;border-color:#7c3aed" onclick="setAdmTab(this,'exports')">📊 تصدير البيانات</div>
       <div class="adm-tab" style="background:#fff3cd;color:#856404;border-color:#ffc107;position:relative" onclick="setAdmTab(this,'pending')">
         ⏳ انتظار مراجعة
         <span id="pending-count-badge" style="position:absolute;top:-6px;left:-6px;background:#e05050;color:white;border-radius:50%;width:18px;height:18px;font-size:9px;display:none;align-items:center;justify-content:center;font-weight:700"></span>
@@ -2096,6 +2095,9 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       </div>
     </div>
 
+    <!-- تصدير القسم الحالي -->
+    <div id="adm-section-export" style="display:none;margin:6px 16px 10px;padding:10px;background:white;border:1px solid #dbe5ef;border-radius:13px;box-shadow:var(--sh)"></div>
+
     <!-- قائمة السجلات -->
     <div class="adm-list" id="adm-list" style="display:flex;flex-direction:column;gap:8px"></div>
 
@@ -2114,9 +2116,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       </div>
       <div id="export-status" style="display:none;background:#eef8ff;border:1px solid #cfe8ff;border-radius:10px;padding:9px 11px;font-size:10px;color:#1463a5;margin-bottom:10px"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px" id="export-center-grid"></div>
-      <button onclick="exportAllAdminSectionsExcel()" style="width:100%;margin-top:12px;padding:13px;background:#00703a;color:white;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-weight:800;cursor:pointer">📦 تصدير كل الأقسام في ملف Excel واحد</button>
-      <button onclick="exportAllAdminSectionsPDF()" style="width:100%;margin-top:8px;padding:13px;background:#7c3aed;color:white;border:none;border-radius:12px;font-family:Cairo,sans-serif;font-weight:800;cursor:pointer">📄 تصدير كل الأقسام في PDF واحد</button>
-    </div>
+          </div>
 
     <!-- مستورد الإعلانات -->
     <div id="adm-form-import-job" style="display:none;padding:0 16px;padding-bottom:100px">
@@ -5338,114 +5338,71 @@ async function rejectRegistrationRequest(id){try{await db.collection('registrati
 
 function setAdmTab(el, tab){
   admTab = tab;
-  document.querySelectorAll('.adm-tab').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');
+  document.querySelectorAll('.adm-tab').forEach(function(t){t.classList.remove('on');});
+  if(el) el.classList.add('on');
 
-  // إظهار/إخفاء الفورمات
-  const listEl   = document.getElementById('adm-list');
-  const formJob  = document.getElementById('adm-form-job');
-  const formTend = document.getElementById('adm-form-tender');
+  const listEl=document.getElementById('adm-list');
+  const formJob=document.getElementById('adm-form-job');
+  const formTend=document.getElementById('adm-form-tender');
+  const sectionExport=document.getElementById('adm-section-export');
+  const hideIds=['adm-form-registration-requests','adm-form-import-job','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'];
+  hideIds.forEach(function(id){var x=document.getElementById(id);if(x)x.style.display='none';});
+  if(sectionExport){sectionExport.style.display='none';sectionExport.innerHTML='';}
 
-  ['adm-form-registration-requests','adm-form-import-job','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.style.display='none';
-  });
+  var exportMap={
+    jobseeker:'jobseeker', expert:'expert', sup:'sup', org:'org',
+    'jobs-list':'jobs', 'add-job':'jobs', 'tenders-list':'tenders', 'add-tender':'tenders',
+    pending:'pending_jobs', 'registration-requests':'registration_requests',
+    'volunteers-adm':'volunteers', 'consultations-adm':'consultations', contact:'contact_messages'
+  };
+  function showSectionExport(key){
+    if(!sectionExport||!key)return;
+    var c=ADMIN_EXPORTS[key];if(!c)return;
+    sectionExport.style.display='block';
+    sectionExport.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">'+
+      '<div style="font-size:12px;font-weight:900;color:#1a3a6e">'+c.icon+' تصدير بيانات '+c.name+'</div>'+
+      '<div style="display:flex;gap:6px;flex:1;justify-content:flex-end">'+
+      '<button onclick="exportAdminData(\''+key+'\',\'xlsx\')" style="min-width:92px;padding:8px 10px;border:0;border-radius:9px;background:#e7faf3;color:#00703a;font-family:Cairo;font-size:10px;font-weight:900;cursor:pointer">📊 Excel</button>'+
+      '<button onclick="exportAdminData(\''+key+'\',\'pdf\')" style="min-width:92px;padding:8px 10px;border:0;border-radius:9px;background:#f3e8ff;color:#6d28d9;font-family:Cairo;font-size:10px;font-weight:900;cursor:pointer">📄 PDF</button>'+
+      '</div></div><div id="section-export-status" style="font-size:9px;color:#6b7a8d;margin-top:6px"></div>';
+  }
 
-  if(tab === 'registration-requests'){ loadRegistrationRequests(); } else if(tab === 'exports'){ listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none'; var ex=document.getElementById('adm-form-exports'); if(ex){ex.style.display='block'; buildExportCenter();} } else if(tab === 'import-job'){
-    listEl.style.display='none';
-    formJob.style.display='none';
-    formTend.style.display='none';
-    var imp=document.getElementById('adm-form-import-job');
-    if(imp) imp.style.display='block';
-  } else if(tab === 'add-job'){
-    listEl.style.display   = 'none';
-    formJob.style.display  = 'block';
-    formTend.style.display = 'none';
-  } else if(tab === 'jobs-list'){
-    listEl.style.display   = 'none';
-    formJob.style.display  = 'none';
-    formTend.style.display = 'none';
-    var jl = document.getElementById('adm-form-jobs-list');
-    if(jl){ jl.style.display='block'; renderPublishedJobsNew(); }
-  } else if(tab === 'add-tender'){
-    listEl.style.display   = 'none';
-    formJob.style.display  = 'none';
-    formTend.style.display = 'block';
-  } else if(tab === 'tenders-list'){
-    listEl.style.display   = 'none';
-    formJob.style.display  = 'none';
-    formTend.style.display = 'none';
-    var tl = document.getElementById('adm-form-tenders-list');
-    if(tl){ tl.style.display='block'; renderPublishedTendersNew(); }
-  } else if(tab === 'featured'){
-    listEl.style.display='none';formJob.style.display='none';formTend.style.display='none';
-    var fEl=document.getElementById('adm-form-email');if(fEl)fEl.style.display='none';
-    var pEl=document.getElementById('adm-form-pending');if(pEl)pEl.style.display='none';
-    var featEl=document.getElementById('adm-form-featured');if(featEl){featEl.style.display='block';featEl.style.visibility='visible';}
-    renderFeaturedSelector();
-  } else if(tab === 'email'){
-    listEl.style.display   = 'none';
-    formJob.style.display  = 'none';
-    formTend.style.display = 'none';
-    const formEmail = document.getElementById('adm-form-email');
-    if(formEmail) formEmail.style.display = 'block';
-    const formPending = document.getElementById('adm-form-pending');
-    if(formPending) formPending.style.display = 'none';
-    updateEmailList();
-  } else if(tab === 'pending'){
-    listEl.style.display   = 'none';
-    formJob.style.display  = 'none';
-    formTend.style.display = 'none';
-    const formEmail = document.getElementById('adm-form-email');
-    if(formEmail) formEmail.style.display = 'none';
-    const formPending = document.getElementById('adm-form-pending');
-    if(formPending){ formPending.style.display = 'block'; formPending.style.visibility = 'visible'; }
-    renderPendingJobs();
-    updatePendingBadge();
-  } else if(tab === 'athar'){
-    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
-    var aEl=document.getElementById('adm-form-athar');
-    if(aEl){ aEl.style.display='block'; loadAtharTrials(); }
-  } else if(tab === 'contact'){
-    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
-    var cEl=document.getElementById('adm-form-contact');
-    if(cEl){ cEl.style.display='block'; loadContactMsgs(); }
-  } else if(tab === 'broadcast'){
-    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
-    var bEl=document.getElementById('adm-form-broadcast');
-    if(bEl){ bEl.style.display='block'; }
-    // حط الرابط الافتراضي
-    var linkEl = document.getElementById('wa-link-main');
-    if(linkEl && !linkEl.value) linkEl.value = 'https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=consult';
-    loadBroadcastHistory();
-  } else if(tab === 'settings'){
-    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
-    var sEl = document.getElementById('adm-form-settings');
-    if(sEl){ sEl.style.display='block'; loadVisibilitySettings(); }
-  } else if(tab === 'volunteers-adm'){
-    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    var vEl=document.getElementById('adm-form-volunteers-adm');
-    if(vEl){vEl.style.display='block';}
-    loadAdminVols();
-  } else if(tab === 'consultations-adm'){
-    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
-    var cEl=document.getElementById('adm-form-consultations-adm');
-    if(cEl){cEl.style.display='block';}
-    loadAdminConsultations();
-  } else {
-    listEl.style.display   = 'flex';
-    formJob.style.display  = 'none';
-    formTend.style.display = 'none';
-    // Hide all special forms
-    ['adm-form-registration-requests','adm-form-exports','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){
-      var el=document.getElementById(id); if(el) el.style.display='none';
-    });
-    // إظهار القائمة
-    renderAdmList();
+  listEl.style.display='none';formJob.style.display='none';formTend.style.display='none';
+  if(tab==='registration-requests'){
+    var rr=document.getElementById('adm-form-registration-requests');if(rr)rr.style.display='block';
+    showSectionExport('registration_requests');loadRegistrationRequests();
+  }else if(tab==='import-job'){
+    var imp=document.getElementById('adm-form-import-job');if(imp)imp.style.display='block';
+  }else if(tab==='add-job'){
+    formJob.style.display='block';showSectionExport('jobs');
+  }else if(tab==='jobs-list'){
+    var jl=document.getElementById('adm-form-jobs-list');if(jl)jl.style.display='block';showSectionExport('jobs');if(typeof renderPublishedJobsNew==='function')renderPublishedJobsNew();
+  }else if(tab==='add-tender'){
+    formTend.style.display='block';showSectionExport('tenders');
+  }else if(tab==='tenders-list'){
+    var tl=document.getElementById('adm-form-tenders-list');if(tl)tl.style.display='block';showSectionExport('tenders');if(typeof renderPublishedTendersNew==='function')renderPublishedTendersNew();
+  }else if(tab==='featured'){
+    var fe=document.getElementById('adm-form-featured');if(fe)fe.style.display='block';renderFeaturedSelector();
+  }else if(tab==='email'){
+    var em=document.getElementById('adm-form-email');if(em)em.style.display='block';updateEmailList();
+  }else if(tab==='pending'){
+    var pe=document.getElementById('adm-form-pending');if(pe){pe.style.display='block';pe.style.visibility='visible';}showSectionExport('pending_jobs');renderPendingJobs();updatePendingBadge();
+  }else if(tab==='volunteers-adm'){
+    var ve=document.getElementById('adm-form-volunteers-adm');if(ve)ve.style.display='block';showSectionExport('volunteers');loadAdminVols();
+  }else if(tab==='consultations-adm'){
+    var ce=document.getElementById('adm-form-consultations-adm');if(ce)ce.style.display='block';showSectionExport('consultations');loadAdminConsultations();
+  }else if(tab==='contact'){
+    var co=document.getElementById('adm-form-contact');if(co)co.style.display='block';showSectionExport('contact_messages');loadContactMsgs();
+  }else if(tab==='broadcast'){
+    var be=document.getElementById('adm-form-broadcast');if(be)be.style.display='block';var linkEl=document.getElementById('wa-link-main');if(linkEl&&!linkEl.value)linkEl.value='https://elzieni2007-crypto.github.io/tanmoyeen-masr/?form=consult';loadBroadcastHistory();
+  }else if(tab==='athar'){
+    var ae=document.getElementById('adm-form-athar');if(ae)ae.style.display='block';loadAtharTrials();
+  }else if(tab==='settings'){
+    var se=document.getElementById('adm-form-settings');if(se)se.style.display='block';loadVisibilitySettings();
+  }else if(exportMap[tab]){
+    listEl.style.display='flex';showSectionExport(exportMap[tab]);renderAdmList();
+  }else{
+    listEl.style.display='flex';renderAdmList();
   }
 }
 
@@ -5887,7 +5844,7 @@ function parseBulkText(txt){
 }
 function loadBulkJobsText(){try{var jobs=parseBulkText(document.getElementById('bulk-job-json').value);window.TANMOYEEN_BULK_JOBS=jobs;document.getElementById('bulk-import-progress').innerHTML='✅ تم تحميل <b>'+jobs.length+'</b> وظيفة. جاهزة للاستيراد.';toast('✅ تم تحميل التجميعة');}catch(e){toast('❌ '+e.message);}}
 async function loadBulkJobsFile(){var f=document.getElementById('bulk-job-file').files[0];if(!f){toast('⚠️ اختر ملف التجميعة أولا');return;}try{var txt=await f.text();var jobs=parseBulkText(txt);window.TANMOYEEN_BULK_JOBS=jobs;document.getElementById('bulk-import-progress').innerHTML='✅ تم تحميل <b>'+jobs.length+'</b> وظيفة من '+f.name+'. جاهزة للاستيراد.';toast('✅ تم قراءة ملف التجميعة');}catch(e){toast('❌ '+e.message);}}
-function ensureBulkJobsLoaded(){var jobs=Array.isArray(window.TANMOYEEN_BULK_JOBS)?window.TANMOYEEN_BULK_JOBS:[];if(!jobs.length&&Array.isArray(window.TANMOYEEN_BULK_JOBS_CURRENT))jobs=window.TANMOYEEN_BULK_JOBS_CURRENT;return jobs.map(normalizeBulkJob).filter(Boolean);}
+function ensureBulkJobsLoaded(){var jobs=Array.isArray(window.TANMOYEEN_BULK_JOBS)?window.TANMOYEEN_BULK_JOBS:[];if(!jobs.length&&Array.isArray(window.TANMOYEEN_BULK_JOBS_CURRENT))jobs=window.TANMOYEEN_BULK_JOBS_CURRENT;return jobs.map(normalizeBulkJob).filter(function(j){return j&&j.title;});}
 
 async function bulkImportCurrentJobs(){
   const jobs=ensureBulkJobsLoaded();
@@ -7877,7 +7834,495 @@ window.addEventListener('load',()=>{
     <button class="success-btn-wa" onclick="window.open(WA_GROUP_URL,'_blank')" style="background:#128c7e;margin-top:6px">👥 انضم لجروب واتساب تنمويين مصر</button>
   </div>
 </div>
-<script src="./jobs-bulk.js?v=20261004-3" onerror="console.warn('jobs-bulk.js غير متاح — استخدم رفع JSON/CSV من شاشة الاستيراد')"></script>
+<script>
+/* Embedded active jobs bulk data: self-contained so GitHub/hosting cannot break import. */
+// Tanmoyeen Masr - Active Opportunities cumulative file
+// Current through 1 October 2026. Replace this file only; keep filename and variable unchanged.
+window.TANMOYEEN_BULK_JOBS = [
+  {
+    "title": "Senior Program Officer – Refugee and Migrant Rights",
+    "org": "المبادرة المصرية للحقوق الشخصية – EIPR",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "حقوق الإنسان والحماية",
+    "sal": "",
+    "dl": "2026-10-08",
+    "contact": "jobs@eipr.org",
+    "desc": "برنامج حقوق اللاجئين والمهاجرين؛ بحث وسياسات ومناصرة ومساعدة قانونية.",
+    "link": "https://eg.linkedin.com/jobs/view/vacancy-senior-program-officer-on-refugee-and-migrant-rights-at-egyptian-initiative-for-personal-rights-eipr-4470963894",
+    "source": "EIPR"
+  },
+  {
+    "title": "22 معلم/ة – 11 مدرسة مجتمعية",
+    "org": "جمعية الطفولة والتنمية بأسيوط – ACDA",
+    "gov": "مطروح",
+    "type": "دوام كامل",
+    "sec": "التعليم والتنمية",
+    "sal": "",
+    "dl": "2026-10-05",
+    "contact": "jobs@acdaegypt.com",
+    "desc": "22 معلما ومعلمة للعمل في 11 مدرسة مجتمعية ضمن Schools for Egypt 4.",
+    "link": "https://lnkd.in/eVmCbF-H",
+    "source": "ACDA"
+  },
+  {
+    "title": "Administrative & Operations Manager",
+    "org": "جمعية كيان للأشخاص ذوي الإعاقة",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الإدارة والتشغيل",
+    "sal": "",
+    "dl": "2026-10-06",
+    "contact": "",
+    "desc": "إدارة العمليات والشؤون الإدارية والفرق، مع أفضلية لخبرة المجتمع المدني والتنمية.",
+    "link": "https://www.kaianegypt.com/index.php/careers",
+    "source": "Kayan Egypt"
+  },
+  {
+    "title": "Program Administrative Assistant",
+    "org": "جمعية خير وبركة والمرأة الجديدة",
+    "gov": "الأسمرات",
+    "type": "دوام كامل",
+    "sec": "الإدارة والبرامج",
+    "sal": "",
+    "dl": "2026-10-08",
+    "contact": "",
+    "desc": "مساعد إداري للبرامج.",
+    "link": "https://bit.ly/4rDu6Le",
+    "source": "Khayr wa Baraka & New Woman Association"
+  },
+  {
+    "title": "Program Manager – Health & Safety / IPPF",
+    "org": "جمعية خير وبركة والمرأة الجديدة",
+    "gov": "الأسمرات",
+    "type": "دوام كامل",
+    "sec": "إدارة البرامج والصحة",
+    "sal": "",
+    "dl": "2026-10-08",
+    "contact": "",
+    "desc": "مدير برنامج للصحة والسلامة ضمن IPPF.",
+    "link": "https://bit.ly/4yoqmzV",
+    "source": "Khayr wa Baraka & New Woman Association"
+  },
+  {
+    "title": "Business Development Sector",
+    "org": "جمعية خير وبركة والمرأة الجديدة",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "تطوير الأعمال",
+    "sal": "",
+    "dl": "2026-10-04",
+    "contact": "",
+    "desc": "فرصة ضمن قطاع تطوير الأعمال.",
+    "link": "https://bit.ly/4jrNKaT",
+    "source": "Khayr wa Baraka & New Woman Association"
+  },
+  {
+    "title": "Social Media Specialist",
+    "org": "Mersal",
+    "gov": "المعادي – القاهرة",
+    "type": "دوام كامل",
+    "sec": "الإعلام والتواصل",
+    "sal": "",
+    "dl": "",
+    "contact": "",
+    "desc": "Social Media Specialist – Full Time / Hybrid.",
+    "link": "https://wuzzuf.net/jobs/careers/Mersal-Egypt-45113",
+    "source": "Wuzzuf / Mersal"
+  },
+  {
+    "title": "Project Manager",
+    "org": "مكتب التنمية الإيبارشي بالإسماعيلية – IDDO",
+    "gov": "الإسماعيلية",
+    "type": "دوام كامل",
+    "sec": "إدارة المشاريع",
+    "sal": "",
+    "dl": "",
+    "contact": "",
+    "desc": "Project Manager – الإعلان حديث، وموعد الإغلاق غير ظاهر في المصدر المفهرس.",
+    "link": "https://www.jobs-arab.com/eg/job-location/%D8%A7%D9%84%D8%A7%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84%D9%8A%D9%87/",
+    "source": "Jobs-Arab / IDDO"
+  },
+  {
+    "title": "Accountant",
+    "org": "مكتب التنمية الإيبارشي بالإسماعيلية – IDDO",
+    "gov": "الإسماعيلية",
+    "type": "دوام كامل",
+    "sec": "الإدارة المالية",
+    "sal": "",
+    "dl": "",
+    "contact": "",
+    "desc": "Accountant – الإعلان حديث، وموعد الإغلاق غير ظاهر في المصدر المفهرس.",
+    "link": "https://www.jobs-arab.com/eg/job-profession/%D9%85%D8%A7%D9%84-%D9%88%D9%85%D8%AD%D8%A7%D8%B3%D8%A8%D9%87/job-location/%D8%A7%D9%84%D8%A7%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84%D9%8A%D9%87/",
+    "source": "Jobs-Arab / IDDO"
+  },
+  {
+    "title": "Director of Psychosocial Department",
+    "org": "StARS",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الدعم النفسي والاجتماعي",
+    "sal": "",
+    "dl": "2026-10-03",
+    "contact": "applications@stars-egypt.org",
+    "desc": "مدير إدارة الدعم النفسي والاجتماعي.",
+    "link": "https://stars-egypt.org/",
+    "source": "StARS"
+  },
+  {
+    "title": "Senior Public Relations Specialist",
+    "org": "مؤسسة حياة كريمة",
+    "gov": "القاهرة الجديدة",
+    "type": "دوام كامل",
+    "sec": "العلاقات العامة والاتصال",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "علاقات عامة واتصالات خارجية مع زيارات ميدانية محتملة.",
+    "link": "https://lnkd.in/ejSZ8i2k",
+    "source": "Haya Karima Foundation"
+  },
+  {
+    "title": "Senior CSR Specialist",
+    "org": "مؤسسة حياة كريمة",
+    "gov": "القاهرة الجديدة",
+    "type": "دوام كامل",
+    "sec": "المسؤولية المجتمعية والشراكات",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "إدارة مبادرات المسؤولية المجتمعية والشراكات.",
+    "link": "https://lnkd.in/eKmaF2ej",
+    "source": "Haya Karima Foundation"
+  },
+  {
+    "title": "Content & Digital Communications Senior Specialist",
+    "org": "مؤسسة حياة كريمة",
+    "gov": "القاهرة الجديدة",
+    "type": "دوام كامل",
+    "sec": "الإعلام والاتصال الرقمي",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "المحتوى والاتصالات الرقمية وإدارة الحملات والمحتوى.",
+    "link": "https://lnkd.in/eagS3in8",
+    "source": "Haya Karima Foundation"
+  },
+  {
+    "title": "Business Development Specialist",
+    "org": "مؤسسة حياة كريمة",
+    "gov": "القاهرة الجديدة",
+    "type": "دوام كامل",
+    "sec": "تطوير الأعمال والشراكات",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "تطوير فرص وشراكات وتمويلات استراتيجية.",
+    "link": "https://lnkd.in/ePMn7FYg",
+    "source": "Haya Karima Foundation"
+  },
+  {
+    "title": "MEAL Officer",
+    "org": "مؤسسة حياة كريمة",
+    "gov": "القاهرة الجديدة",
+    "type": "دوام كامل",
+    "sec": "المتابعة والتقييم والمساءلة والتعلم",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "دعم أنظمة المتابعة وجودة البيانات وقياس الأداء.",
+    "link": "https://lnkd.in/ey_6AhUJ",
+    "source": "Haya Karima Foundation"
+  },
+  {
+    "title": "Supply Chain Manager",
+    "org": "مؤسسة حياة كريمة",
+    "gov": "القاهرة الجديدة",
+    "type": "دوام كامل",
+    "sec": "المشتريات وسلاسل الإمداد",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "إدارة المشتريات واللوجستيات والمخزون وسلاسل الإمداد.",
+    "link": "https://lnkd.in/eSm9yF5m",
+    "source": "Haya Karima Foundation"
+  },
+  {
+    "title": "Project Officer – Livelihoods Program",
+    "org": "Catholic Relief Services – CRS",
+    "gov": "القاهرة + سفر إلى أسيوط",
+    "type": "دوام كامل",
+    "sec": "سبل العيش والتنمية الاقتصادية",
+    "sal": "",
+    "dl": "2026-10-10",
+    "contact": "",
+    "desc": "وظيفتان، عقد 12 شهرا حسب التمويل، وسفر ميداني إلى أسيوط.",
+    "link": "https://crsegyptjobs.crs.org/job.php?id=992507",
+    "source": "CRS"
+  },
+  {
+    "title": "Volunteers",
+    "org": "Catholic Relief Services – CRS",
+    "gov": "القاهرة",
+    "type": "تطوع",
+    "sec": "التنمية والمجتمع المدني",
+    "sal": "تطوع",
+    "dl": "2026-10-17",
+    "contact": "",
+    "desc": "فرصة تطوع لمدة تصل إلى 5 أشهر حسب المشروع.",
+    "link": "https://crsegyptjobs.crs.org/",
+    "source": "CRS"
+  },
+  {
+    "title": "Country Director – Egypt",
+    "org": "Terre des hommes – Tdh",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الإدارة العليا وإدارة البرامج",
+    "sal": "",
+    "dl": "",
+    "contact": "",
+    "desc": "بداية 15 أكتوبر 2026، مدة 24 شهرا، والتوظيف مستمر حتى شغل الوظيفة.",
+    "link": "https://jobs.tdh.org/en-GB/jobs/8369397-country-director-egypt",
+    "source": "Tdh"
+  },
+  {
+    "title": "Child Protection Technical Advisor",
+    "org": "Save the Children International",
+    "gov": "القاهرة الكبرى + سفر للمحافظات",
+    "type": "دوام كامل",
+    "sec": "حماية الطفل",
+    "sal": "",
+    "dl": "2026-10-15",
+    "contact": "",
+    "desc": "Technical Advisor ضمن Program Development, Quality and Impact.",
+    "link": "https://www.savethechildren.net/careers/apply/details?jid=15996",
+    "source": "Save the Children"
+  },
+  {
+    "title": "Case Worker – UNHCR",
+    "org": "Save the Children International",
+    "gov": "أسوان",
+    "type": "دوام كامل",
+    "sec": "الحماية وإدارة الحالات",
+    "sal": "",
+    "dl": "2026-10-08",
+    "contact": "",
+    "desc": "Case Worker ضمن مشروع UNHCR في أسوان.",
+    "link": "https://joby.ps/",
+    "source": "Save the Children"
+  },
+  {
+    "title": "SGBV Senior Officer",
+    "org": "Save the Children International",
+    "gov": "أسوان / القاهرة",
+    "type": "دوام كامل",
+    "sec": "الحماية والعنف القائم على النوع الاجتماعي",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "وظيفتان؛ أولوية التوظيف لدور أسوان.",
+    "link": "https://www.savethechildren.net/careers/apply/details?jid=16039",
+    "source": "Save the Children"
+  },
+  {
+    "title": "Health Services Coordinator – Aswan",
+    "org": "Save the Children International",
+    "gov": "أسوان",
+    "type": "دوام كامل",
+    "sec": "الصحة",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "تنسيق خدمات العيادات المتنقلة وخدمات الرعاية الصحية الأولية.",
+    "link": "https://www.savethechildren.net/careers/apply/details?jid=16947",
+    "source": "Save the Children"
+  },
+  {
+    "title": "HR Officer, Legal and Policy",
+    "org": "World Health Organization – WHO",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الموارد البشرية",
+    "sal": "",
+    "dl": "2026-10-06",
+    "contact": "",
+    "desc": "P4، عقد سنة مع إمكانية التمديد حسب التمويل والحاجة.",
+    "link": "https://careers.who.int/careersection/ex/jobdetail.ftl?job=2603971",
+    "source": "WHO"
+  },
+  {
+    "title": "Technical Officer – Laboratory",
+    "org": "World Health Organization – WHO",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الصحة والمختبرات",
+    "sal": "",
+    "dl": "2026-10-08",
+    "contact": "",
+    "desc": "P4، دعم أنظمة المختبرات والصحة العامة وبناء القدرات.",
+    "link": "https://www.impactpool.org/jobs/1237561",
+    "source": "WHO"
+  },
+  {
+    "title": "Technical Officer",
+    "org": "World Health Organization – WHO",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الصحة وإدارة البرامج",
+    "sal": "",
+    "dl": "2026-10-19",
+    "contact": "",
+    "desc": "P3، مكتب المدير الإقليمي، عقد سنة خاضع للتمويل والأداء والحاجة.",
+    "link": "https://careers.who.int/careersection/ex/jobdetail.ftl?job=2604217",
+    "source": "WHO"
+  },
+  {
+    "title": "Consultant – Environmental Health (WASH)",
+    "org": "World Health Organization – WHO",
+    "gov": "القاهرة",
+    "type": "استشاري",
+    "sec": "المياه والصرف الصحي والصحة البيئية",
+    "sal": "",
+    "dl": "2026-10-05",
+    "contact": "",
+    "desc": "استشاري لمدة 6 أشهر لدعم WASH والصحة البيئية.",
+    "link": "https://careers.who.int/careersection/ex/jobdetail.ftl?job=2604014",
+    "source": "WHO"
+  },
+  {
+    "title": "Finance Assistant – G5",
+    "org": "UNFPA",
+    "gov": "القاهرة – ASRO",
+    "type": "دوام كامل",
+    "sec": "المالية",
+    "sal": "",
+    "dl": "2026-10-03",
+    "contact": "",
+    "desc": "Finance Assistant، مستوى G5، عقد Fixed Term Appointment.",
+    "link": "https://www.unfpa.org/jobs/finance-assistant-cairo-asro-g5-fta",
+    "source": "UNFPA"
+  },
+  {
+    "title": "Operational Risk and Control Specialist – P3",
+    "org": "UNFPA",
+    "gov": "القاهرة – ASRO",
+    "type": "دوام كامل",
+    "sec": "المخاطر والرقابة",
+    "sal": "",
+    "dl": "2026-10-05",
+    "contact": "",
+    "desc": "متخصص مخاطر وضوابط تشغيلية – P3.",
+    "link": "https://www.impactpool.org/jobs/1237792",
+    "source": "UNFPA"
+  },
+  {
+    "title": "Strategic Advocacy Advisor – P5",
+    "org": "UNFPA",
+    "gov": "القاهرة – المكتب الإقليمي للدول العربية",
+    "type": "دوام كامل",
+    "sec": "المناصرة والاتصال",
+    "sal": "",
+    "dl": "2026-10-07",
+    "contact": "",
+    "desc": "مستشار أول للمناصرة الاستراتيجية – P5.",
+    "link": "https://www.impactpool.org/jobs/1238124",
+    "source": "UNFPA"
+  },
+  {
+    "title": "Strategic Partnerships and Innovative Financing Advisor – P5",
+    "org": "UNFPA",
+    "gov": "القاهرة – المكتب الإقليمي للدول العربية",
+    "type": "دوام كامل",
+    "sec": "الشراكات والتمويل",
+    "sal": "",
+    "dl": "2026-10-07",
+    "contact": "",
+    "desc": "مستشار الشراكات الاستراتيجية والتمويل المبتكر – P5.",
+    "link": "https://www.impactpool.org/jobs/1238125",
+    "source": "UNFPA"
+  },
+  {
+    "title": "Associate RSD Officer – P2",
+    "org": "UNHCR",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الحماية وحقوق اللاجئين",
+    "sal": "",
+    "dl": "2026-10-25",
+    "contact": "",
+    "desc": "دعم تحديد وضع اللاجئين والشؤون القانونية والإجرائية.",
+    "link": "https://www.impactpool.org/jobs/1238801",
+    "source": "UNHCR"
+  },
+  {
+    "title": "Migration Health Nurse",
+    "org": "IOM",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الصحة والهجرة",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "ممرض/ة صحة مهاجرين.",
+    "link": "https://iom.impactpool.org/vacancies/1237160",
+    "source": "IOM"
+  },
+  {
+    "title": "Migration Health Physician",
+    "org": "IOM",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الصحة والهجرة",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "طبيب/ة صحة مهاجرين.",
+    "link": "https://unatlas.org/job/iom/22735",
+    "source": "IOM"
+  },
+  {
+    "title": "Lab Assistant",
+    "org": "IOM",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "المختبرات والصحة",
+    "sal": "",
+    "dl": "2026-10-01",
+    "contact": "",
+    "desc": "مساعد/ة مختبر ضمن برنامج صحة المهاجرين.",
+    "link": "https://unatlas.org/job/iom/22774",
+    "source": "IOM"
+  },
+  {
+    "title": "Information Technology Assistant – G5",
+    "org": "FAO",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "تكنولوجيا المعلومات",
+    "sal": "",
+    "dl": "2026-10-02",
+    "contact": "",
+    "desc": "IT Assistant – G5.",
+    "link": "https://jobs.fao.org/careersection/fao_external/jobdetail.ftl?job=2601966",
+    "source": "FAO"
+  },
+  {
+    "title": "Corporate Services Coordinator",
+    "org": "British Embassy Cairo",
+    "gov": "القاهرة",
+    "type": "دوام كامل",
+    "sec": "الخدمات المؤسسية والإدارة",
+    "sal": "",
+    "dl": "2026-10-04",
+    "contact": "",
+    "desc": "Corporate Services Coordinator – Cairo.",
+    "link": "https://fco.tal.net/candidate/jobboard/vacancy/1/adv/",
+    "source": "British Embassy Cairo"
+  }
+];
+
+</script>
 <script>
 window.TANMOYEEN_BULK_JOBS_CURRENT = window.TANMOYEEN_BULK_JOBS || [];
 </script>

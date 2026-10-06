@@ -235,114 +235,150 @@ exports.approveJob = onCall(
   }
 );
 
-async function sendOneSignal(title, message, url) {
+// ============ إشعارات OneSignal ============
+// السيجمنت الافتراضي في تطبيقات OneSignal الجديدة اسمه "Total Subscriptions"،
+// والقديمة "Subscribed Users" — بنجرب الأول وبعدين التاني.
+const SEGMENTS = ["Total Subscriptions", "Subscribed Users"];
+const PUSH_GAP_MS = 2 * 60 * 1000; // أقل فاصل بين إشعارين فرديين
+const pushStateRef = () => db.collection("settings").doc("push_state");
+
+async function sendOneSignal({title, message, url, topic}) {
   const key = ONESIGNAL_REST_API_KEY.value();
+  if (!key) throw new Error("ONESIGNAL_REST_API_KEY is not configured");
 
-  if (!key) {
-    throw new Error(
-      "ONESIGNAL_REST_API_KEY is not configured"
-    );
-  }
-
-  const response = await fetch(
-    "https://api.onesignal.com/notifications",
-    {
+  let lastError = "";
+  for (const segment of SEGMENTS) {
+    const response = await fetch("https://api.onesignal.com/notifications", {
       method: "POST",
-
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Key " + key,
+        "Authorization": "Key " + key,
       },
-
       body: JSON.stringify({
         app_id: ONESIGNAL_APP_ID,
-
-        included_segments: [
-          "Subscribed Users",
-        ],
-
-        headings: {
-          en: title,
-          ar: title,
-        },
-
-        contents: {
-          en: message,
-          ar: message,
-        },
-
+        target_channel: "push",
+        included_segments: [segment],
+        headings: {en: title, ar: title},
+        contents: {en: message, ar: message},
         url,
+        web_push_topic: topic || "tanmoyeen-new",
+        ttl: 3 * 24 * 60 * 60,
       }),
+    });
+    const body = await response.text();
+    if (response.ok && !/invalid_segments|not found/i.test(body)) {
+      console.log("OneSignal ok", segment, body);
+      return body;
     }
-  );
-
-  const body = await response.text();
-
-  if (!response.ok) {
-    throw new Error(
-      `OneSignal ${response.status}: ${body}`
-    );
+    lastError = `OneSignal ${response.status} (${segment}): ${body}`;
+    console.warn(lastError);
   }
+  throw new Error(lastError);
+}
 
-  return body;
+function clip(s, n) {
+  s = String(s || "").trim();
+  return s.length > n ? s.slice(0, n - 1) + "…" : s;
+}
+
+// بيعلّم المستند إن الإشعار اتبعت (عشان مايتبعتش مرتين)، وبيطبق الفاصل الزمني.
+// يرجّع "send" أو "queued" أو "skip".
+async function claimPush(docRef, kind) {
+  return db.runTransaction(async (tx) => {
+    const [docSnap, stateSnap] = await Promise.all([tx.get(docRef), tx.get(pushStateRef())]);
+    if (!docSnap.exists || docSnap.get("pushSentAt") || docSnap.get("pushQueuedAt")) return "skip";
+    const st = stateSnap.exists ? stateSnap.data() : {};
+    const last = st.lastSentAt && st.lastSentAt.toMillis ? st.lastSentAt.toMillis() : 0;
+    const now = Date.now();
+    if (now - last < PUSH_GAP_MS) {
+      const field = kind === "tender" ? "queuedTenders" : "queuedJobs";
+      tx.set(pushStateRef(), {[field]: FieldValue.increment(1)}, {merge: true});
+      tx.update(docRef, {pushQueuedAt: FieldValue.serverTimestamp()});
+      return "queued";
+    }
+    tx.set(pushStateRef(), {lastSentAt: FieldValue.serverTimestamp()}, {merge: true});
+    tx.update(docRef, {pushSentAt: FieldValue.serverTimestamp()});
+    return "send";
+  });
 }
 
 exports.onNewJob = onDocumentCreated(
-  {
-    document: "jobs/{jobId}",
-    region: "europe-west1",
-    secrets: [ONESIGNAL_REST_API_KEY],
-  },
-
+  {document: "jobs/{jobId}", region: "europe-west1", secrets: [ONESIGNAL_REST_API_KEY]},
   async (event) => {
-    const job = event.data?.data();
-
-    if (!job || job.status !== "approved") {
-      return;
-    }
-
-    await sendOneSignal(
-      `💼 وظيفة جديدة - ${
-        job.org || "تنمويين مصر"
-      }`,
-
-      `${job.title || "وظيفة جديدة"} | ${
-        job.gov || "مصر"
-      }`,
-
-      `${PUBLIC_APP_URL}?form=job`
-    );
+    const job = event.data && event.data.data();
+    if (!job || !["approved", "active"].includes(job.status)) return;
+    const decision = await claimPush(event.data.ref, "job");
+    if (decision !== "send") return;
+    await sendOneSignal({
+      title: "💼 وظيفة جديدة: " + clip(job.title || "وظيفة جديدة", 60),
+      message: clip((job.org || "تنمويين مصر") + (job.gov ? " — " + job.gov : "") +
+        (job.dl ? " | آخر موعد " + job.dl : ""), 120),
+      url: PUBLIC_APP_URL + "?job=" + encodeURIComponent(event.params.jobId),
+      topic: "tanmoyeen-job",
+    });
   }
 );
 
 exports.onNewTender = onDocumentCreated(
-  {
-    document: "tenders/{tenderId}",
-    region: "europe-west1",
-    secrets: [ONESIGNAL_REST_API_KEY],
-  },
-
+  {document: "tenders/{tenderId}", region: "europe-west1", secrets: [ONESIGNAL_REST_API_KEY]},
   async (event) => {
-    const tender = event.data?.data();
+    const tender = event.data && event.data.data();
+    if (!tender || !["approved", "active"].includes(tender.status)) return;
+    const decision = await claimPush(event.data.ref, "tender");
+    if (decision !== "send") return;
+    await sendOneSignal({
+      title: "📋 فرصة جديدة: " + clip(tender.title || "فرصة جديدة", 60),
+      message: clip((tender.org || "تنمويين مصر") + (tender.loc ? " — " + tender.loc : "") +
+        (tender.dl ? " | آخر موعد " + tender.dl : ""), 120),
+      url: PUBLIC_APP_URL + "?tender=" + encodeURIComponent(event.params.tenderId),
+      topic: "tanmoyeen-tender",
+    });
+  }
+);
 
-    if (
-      !tender ||
-      tender.status !== "approved"
-    ) {
-      return;
-    }
+// لو اتنشر كذا إعلان ورا بعض، بدل ما نبعت إشعار لكل واحد،
+// بنبعت إشعار مجمّع واحد كل 10 دقايق بالباقي.
+exports.flushPushDigest = onSchedule(
+  {schedule: "every 10 minutes", timeZone: "Africa/Cairo", region: "europe-west1",
+    secrets: [ONESIGNAL_REST_API_KEY]},
+  async () => {
+    const counts = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(pushStateRef());
+      const st = snap.exists ? snap.data() : {};
+      const jobs = st.queuedJobs || 0, tenders = st.queuedTenders || 0;
+      const last = st.lastSentAt && st.lastSentAt.toMillis ? st.lastSentAt.toMillis() : 0;
+      if (!(jobs + tenders) || Date.now() - last < PUSH_GAP_MS) return null;
+      tx.set(pushStateRef(), {queuedJobs: 0, queuedTenders: 0,
+        lastSentAt: FieldValue.serverTimestamp()}, {merge: true});
+      return {jobs, tenders};
+    });
+    if (!counts) return;
+    const parts = [];
+    if (counts.jobs) parts.push(counts.jobs + (counts.jobs === 1 ? " وظيفة جديدة" : " وظائف جديدة"));
+    if (counts.tenders) parts.push(counts.tenders + (counts.tenders === 1 ? " فرصة/مناقصة جديدة" : " فرص ومناقصات جديدة"));
+    await sendOneSignal({
+      title: "📢 إعلانات جديدة على تنمويين مصر",
+      message: parts.join(" و ") + " — ادخل شوفها قبل ما المواعيد تخلص",
+      url: PUBLIC_APP_URL + (counts.jobs ? "?form=jobs" : "?form=tenders"),
+      topic: "tanmoyeen-digest",
+    });
+  }
+);
 
-    await sendOneSignal(
-      `📋 فرصة جديدة - ${
-        tender.org || "تنمويين مصر"
-      }`,
-
-      `${tender.title || "فرصة جديدة"} | ${
-        tender.loc || "مصر"
-      }`,
-
-      `${PUBLIC_APP_URL}?form=tender`
-    );
+// زرار اختبار من لوحة الأدمن: بيبعت إشعار تجريبي لكل المشتركين
+exports.sendTestPush = onCall(
+  {region: "europe-west1", secrets: [ONESIGNAL_REST_API_KEY]},
+  async (request) => {
+    await assertAdmin(request);
+    const res = await sendOneSignal({
+      title: "🔔 تجربة إشعارات تنمويين مصر",
+      message: "لو الرسالة دي وصلتك، الإشعارات شغالة ✅",
+      url: PUBLIC_APP_URL,
+      topic: "tanmoyeen-test",
+    });
+    let parsed = {};
+    try { parsed = JSON.parse(res); } catch (e) { /* ignore */ }
+    return {ok: true, id: parsed.id || "", recipients: parsed.recipients};
   }
 );
 

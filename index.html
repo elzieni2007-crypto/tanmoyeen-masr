@@ -8628,6 +8628,30 @@ function injectUi(){
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',injectUi); else injectUi();
 })();
 
+/* ===== جسر تطبيق Median (الإشعارات جوه تطبيق أندرويد) ===== */
+(function(){
+  function bridge(){ return (window.median&&window.median.onesignal)?window.median.onesignal:((window.gonative&&window.gonative.onesignal)?window.gonative.onesignal:null); }
+  window.tmInMedianApp=function(){ return !!bridge()||/median|gonative/i.test(navigator.userAgent||''); };
+  function pickId(i){ if(!i) return ''; var sub=i.subscription||{}; return String(sub.id||i.oneSignalSubscriptionId||i.subscriptionId||i.oneSignalUserId||i.userId||''); }
+  function pickOn(i){ if(!i) return false; var sub=i.subscription||{}; return !!(sub.optedIn||i.oneSignalSubscribed||i.subscribed||i.notificationsEnabled||pickId(i)); }
+  window.tmMedianInfo=function(ms){
+    var b=bridge(); if(!b||typeof b.info!=='function') return Promise.resolve(null);
+    return new Promise(function(res){
+      var done=false; setTimeout(function(){ if(!done){done=true;res(null);} },ms||3000);
+      try{ var r=b.info(function(i){ if(!done){done=true;res(i||null);} });
+        if(r&&typeof r.then==='function') r.then(function(i){ if(!done){done=true;res(i||null);} },function(){ if(!done){done=true;res(null);} }); }
+      catch(e){ if(!done){done=true;res(null);} }
+    });
+  };
+  window.tmMedianPushId=async function(ask){
+    var b=bridge(); if(!b) return '';
+    var i=await window.tmMedianInfo();
+    if(ask&&!pickOn(i)){ try{ if(typeof b.register==='function') await b.register(); }catch(e){} i=await window.tmMedianInfo(4000); }
+    return pickOn(i)?pickId(i):'';
+  };
+  window.tmMedianState=async function(){ var i=await window.tmMedianInfo(); return {info:i,id:pickId(i),on:pickOn(i)}; };
+})();
+
 /* ===== الإشعارات: تفعيل للمستخدم + روابط مباشرة للإعلان + زرار تجربة للأدمن ===== */
 (function(){
 'use strict';
@@ -8637,6 +8661,7 @@ function withOS(fn){ window.OneSignalDeferred=window.OneSignalDeferred||[]; wind
 
 function refreshPushState(){
   var el=document.getElementById('tm-push-state'); if(!el) return;
+  if(window.tmInMedianApp&&window.tmInMedianApp()){ window.tmMedianState().then(function(st){ el.textContent=st.on?'✅ مفعّلة — هيوصلك كل جديد':'اضغط لتفعيل الإشعارات'; }); return; }
   if(!('Notification' in window)){ el.textContent='المتصفح ده مش بيدعم الإشعارات'; return; }
   if(Notification.permission==='denied'){ el.textContent='الإشعارات مقفولة من إعدادات المتصفح'; return; }
   withOS(function(OS){
@@ -8644,6 +8669,10 @@ function refreshPushState(){
   });
 }
 window.tmEnablePush=function(){
+  if(window.tmInMedianApp&&window.tmInMedianApp()){
+    window.tmMedianPushId(true).then(function(id){ say(id?'🔔 تم تفعيل الإشعارات':'⚠️ فعّل الإشعارات للتطبيق من إعدادات الموبايل'); refreshPushState(); });
+    return;
+  }
   if(!('Notification' in window)){ say('⚠️ الجهاز أو المتصفح ده مش بيدعم الإشعارات'); return; }
   if(Notification.permission==='denied'){ say('⚠️ الإشعارات مقفولة — فعّلها من إعدادات المتصفح للموقع ده'); return; }
   withOS(async function(OS){
@@ -8721,6 +8750,11 @@ function osReady(ms){
 }
 window.tmSendTestPush=async function(){
   var list=diagBox(); list.innerHTML='';
+  if(window.tmInMedianApp&&window.tmInMedianApp()){
+    var ms=await window.tmMedianState();
+    row(list,ms.info?true:false,'داخل تطبيق تنمويين مصر (Median)',ms.info?'إضافة OneSignal شغالة في التطبيق':'إضافة OneSignal مش مفعّلة في Median، أو التطبيق محتاج نسخة جديدة');
+    if(ms.info) row(list,ms.on,'التطبيق ده مشترك في الإشعارات',ms.on?('ID: <span dir="ltr">'+esc(String(ms.id).slice(0,13))+'…</span>'):'دوس "فعّل الإشعارات على الجهاز ده"');
+  }else{
   // 1) الجهاز
   var supported=('Notification' in window)&&('serviceWorker' in navigator)&&('PushManager' in window);
   row(list,supported,'الجهاز/المتصفح بيدعم الإشعارات',supported?'':'غالبًا إنت فاتح من جوه تطبيق أندرويد (WebView). جرّب من Chrome. الإشعارات جوه التطبيق محتاجة OneSignal يتضاف للتطبيق نفسه.');
@@ -8733,6 +8767,7 @@ window.tmSendTestPush=async function(){
   else{
     var sub=OS.User.PushSubscription;
     row(list,!!sub.optedIn,'الجهاز ده مشترك في الإشعارات',sub.optedIn?('ID: <span dir="ltr">'+esc(String(sub.id||'').slice(0,13))+'…</span>'):'مش مشترك — يعني حتى لو الإرسال نجح، مش هيوصل للجهاز ده.');
+  }
   }
   // 3) حساب الأدمن
   var u=(typeof auth!=='undefined')&&auth.currentUser;
@@ -8855,6 +8890,7 @@ function fill(text,course,reg){
 }
 function withOS(fn){ window.OneSignalDeferred=window.OneSignalDeferred||[]; window.OneSignalDeferred.push(fn); }
 function getPushId(ask){
+  if(window.tmInMedianApp&&window.tmInMedianApp()) return window.tmMedianPushId(ask);
   return new Promise(function(res){
     var done=false; setTimeout(function(){ if(!done){done=true;res('');} }, ask?20000:2500);
     withOS(async function(OS){
@@ -8974,7 +9010,7 @@ window.tmOpenAcademy=async function(courseId){
 
 function renderForm(c){
   var body=shell();
-  var pushOk=('Notification' in window)&&('serviceWorker' in navigator);
+  var pushOk=(('Notification' in window)&&('serviceWorker' in navigator))||(window.tmInMedianApp&&window.tmInMedianApp());
   body.innerHTML=
     '<div class="tma-form-ttl"><b>'+FORM_TITLE+'</b><span>سجّل بياناتك وهيوصلك تأكيد ولينك الحضور</span></div>'+
     '<div class="tma-card"><div class="tma-ttl">🎓 '+esc(c.title)+'</div>'+courseMeta(c)+shareRow(c)+'</div>'+

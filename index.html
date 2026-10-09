@@ -8634,13 +8634,26 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
   window.tmInMedianApp=function(){ return !!bridge()||/median|gonative/i.test(navigator.userAgent||''); };
   function pickId(i){ if(!i) return ''; var sub=i.subscription||{}; return String(sub.id||i.oneSignalSubscriptionId||i.subscriptionId||i.oneSignalUserId||i.userId||''); }
   function pickOn(i){ if(!i) return false; var sub=i.subscription||{}; return !!(sub.optedIn||i.oneSignalSubscribed||i.subscribed||i.notificationsEnabled||pickId(i)); }
+  // Median/GoNative بيبعت البيانات بأكتر من طريقة حسب نسخة التطبيق — بندعمهم كلهم
+  var lastInfo=null;
+  function keep(i){ if(i&&typeof i==='object') lastInfo=i; }
+  var prevM=window.median_onesignal_info, prevG=window.gonative_onesignal_info;
+  window.median_onesignal_info=function(i){ keep(i); if(typeof prevM==='function') try{prevM(i);}catch(e){} };
+  window.gonative_onesignal_info=function(i){ keep(i); if(typeof prevG==='function') try{prevG(i);}catch(e){} };
   window.tmMedianInfo=function(ms){
-    var b=bridge(); if(!b||typeof b.info!=='function') return Promise.resolve(null);
+    var b=bridge();
+    if(!b||typeof b.info!=='function') return Promise.resolve(lastInfo);
     return new Promise(function(res){
-      var done=false; setTimeout(function(){ if(!done){done=true;res(null);} },ms||3000);
-      try{ var r=b.info(function(i){ if(!done){done=true;res(i||null);} });
-        if(r&&typeof r.then==='function') r.then(function(i){ if(!done){done=true;res(i||null);} },function(){ if(!done){done=true;res(null);} }); }
-      catch(e){ if(!done){done=true;res(null);} }
+      var done=false; function fin(i){ if(done) return; done=true; keep(i); res(i||lastInfo||null); }
+      setTimeout(function(){ fin(null); },ms||3500);
+      var cbName='__tmMedianCb'+Date.now();
+      window[cbName]=function(i){ fin(i); try{ delete window[cbName]; }catch(e){} };
+      try{
+        var r=b.info({callback:cbName});
+        if(r&&typeof r.then==='function') r.then(fin,function(){});
+      }catch(e){
+        try{ var r2=b.info(); if(r2&&typeof r2.then==='function') r2.then(fin,function(){}); }catch(e2){}
+      }
     });
   };
   window.tmMedianPushId=async function(ask){

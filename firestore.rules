@@ -113,6 +113,38 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // ===== أكاديمية تنمويين مصر =====
+    // التدريبات: الكل يشوفها، والأدمن بس يضيف ويعدل
+    match /courses/{courseId} {
+      allow read: if true;
+      allow write: if isAdmin();
+      match /messages/{msgId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // تسجيلات التدريب: أي حد يسجل (لو التدريب مفتوح)، والأدمن بس يقرا ويعدل.
+    // رقم المستند = رقم التدريب + "_" + الموبايل، فنفس الرقم مايقدرش يسجل مرتين.
+    match /course_registrations/{regId} {
+      allow create: if request.resource.data.keys().hasOnly(['courseId','courseTitle','name','phone','email','gov','org','jobTitle','prevTraining','heardFrom','notes','consent','pushId','status','createdAt','source'])
+        && request.resource.data.courseId is string
+        && regId == request.resource.data.courseId + '_' + request.resource.data.phone
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 120
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 8 && request.resource.data.phone.size() <= 20
+        && request.resource.data.status == 'new'
+        && request.resource.data.consent == true
+        && get(/databases/$(database)/documents/courses/$(request.resource.data.courseId)).data.status == 'open';
+      // المستخدم يقدر بس يضيف رقم الإشعارات بتاعه بعد التسجيل
+      allow update: if isAdmin()
+        || (resource.data.get('pushId', '') == ''
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pushId'])
+            && request.resource.data.pushId is string
+            && request.resource.data.pushId.size() < 80);
+      allow read, delete: if isAdmin();
+    }
+
     // Deny everything else by default.
     match /{document=**} {
       allow read, write: if false;

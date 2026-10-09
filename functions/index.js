@@ -409,13 +409,18 @@ const COURSE_STATUSES = ["new", "confirmed", "waitlist", "cancelled", "attended"
 function certLink(id) { return PUBLIC_APP_URL + "certificate.html?id=" + encodeURIComponent(id); }
 
 function fillCourseText(text, course, name, certId) {
-  return String(text || "")
-    .replace(/\{الاسم\}/g, name || "")
-    .replace(/\{الكورس\}|\{التدريب\}/g, course.title || "")
-    .replace(/\{المدرب\}/g, course.trainer || "")
-    .replace(/\{الموعد\}/g, [course.startDate, course.timeText].filter(Boolean).join(" — "))
-    .replace(/\{الرابط\}/g, course.link || "")
-    .replace(/\{الشهادة\}/g, certId ? certLink(certId) : "")
+  const vals = {
+    "الاسم": name || "", "الكورس": course.title || "", "التدريب": course.title || "", "المدرب": course.trainer || "",
+    "الموعد": [course.startDate, course.timeText].filter(Boolean).join(" — "), "الرابط": course.link || "",
+    "الجروب": course.waGroup || "", "الشهادة": certId ? certLink(certId) : "",
+  };
+  return String(text || "").split("\n")
+    .filter((line) => {
+      const m = line.match(/\{(الرابط|الجروب|الشهادة)\}/g);
+      return !m || m.every((t) => vals[t.slice(1, -1)]);
+    })
+    .join("\n")
+    .replace(/\{(الاسم|الكورس|التدريب|المدرب|الموعد|الرابط|الجروب|الشهادة)\}/g, (_, k) => vals[k])
     .replace(/[ \t]+\n/g, "\n").replace(/[ \t]{2,}/g, " ").replace(/[ \t]+([،,.!؟])/g, "$1").trim();
 }
 
@@ -464,7 +469,10 @@ exports.sendCourseMessage = onCall(
     if (!cSnap.exists) throw new HttpsError("not-found", "course not found");
     const course = cSnap.data();
     const regs = await db.collection("course_registrations").where("courseId", "==", courseId).get();
-    const targets = regs.docs.map((d) => d.data()).filter((r) => statuses.includes(r.status || "new"));
+    const only = Array.isArray(request.data && request.data.regIds) ? new Set(request.data.regIds) : null;
+    const targets = regs.docs.map((d) => Object.assign({id: d.id}, d.data()))
+      .filter((r) => statuses.includes(r.status || "new") && (!only || only.has(r.id)));
+    const sentRegIds = [];
     const ids = [...new Set(targets.map((r) => r.pushId).filter(Boolean))];
     const personal = /\{الاسم\}|\{الشهادة\}/.test(String(message) + String(title || ""));
     const text = fillCourseText(message, course, "");
@@ -485,6 +493,7 @@ exports.sendCourseMessage = onCall(
             topic: "academy-" + courseId, subscriptionIds: [r.pushId],
           });
           sent++;
+          sentRegIds.push(r.id);
         }
       } else {
         for (let i = 0; i < ids.length; i += 2000) {
@@ -493,6 +502,7 @@ exports.sendCourseMessage = onCall(
             url: course.link || (PUBLIC_APP_URL + "?form=academy"), topic: "academy-" + courseId, subscriptionIds: chunk});
           sent += chunk.length;
         }
+        targets.filter((r) => r.pushId).forEach((r) => sentRegIds.push(r.id));
       }
     } catch (e) {
       throw new HttpsError("failed-precondition", String(e.message || e).slice(0, 400));
@@ -501,7 +511,7 @@ exports.sendCourseMessage = onCall(
       channel: "push", title: head, text, statuses, recipients: targets.length, withPush: ids.length, sent,
       at: FieldValue.serverTimestamp(), by: request.auth.token.email || "",
     });
-    return {total: targets.length, withPush: ids.length, sent};
+    return {total: targets.length, withPush: ids.length, sent, sentRegIds};
   }
 );
 

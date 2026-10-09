@@ -242,36 +242,46 @@ const SEGMENTS = ["Total Subscriptions", "Subscribed Users"];
 const PUSH_GAP_MS = 2 * 60 * 1000; // أقل فاصل بين إشعارين فرديين
 const pushStateRef = () => db.collection("settings").doc("push_state");
 
-async function sendOneSignal({title, message, url, topic}) {
-  const key = ONESIGNAL_REST_API_KEY.value();
+async function sendOneSignal({title, message, url, topic, subscriptionIds}) {
+  // تنظيف المفتاح من أي مسافات أو سطر جديد اتلصق معاه
+  const key = String(ONESIGNAL_REST_API_KEY.value() || "").trim().replace(/^(Key|Basic)\s+/i, "");
   if (!key) throw new Error("ONESIGNAL_REST_API_KEY is not configured");
 
+  // المفاتيح الجديدة (os_v2_...) بتستخدم "Key"، والقديمة (Legacy REST API Key) بتستخدم "Basic"
+  const schemes = /^os_v2_/i.test(key) ? ["Key", "Basic"] : ["Basic", "Key"];
   let lastError = "";
-  for (const segment of SEGMENTS) {
-    const response = await fetch("https://api.onesignal.com/notifications", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Key " + key,
-      },
-      body: JSON.stringify({
-        app_id: ONESIGNAL_APP_ID,
-        target_channel: "push",
-        included_segments: [segment],
-        headings: {en: title, ar: title},
-        contents: {en: message, ar: message},
-        url,
-        web_push_topic: topic || "tanmoyeen-new",
-        ttl: 3 * 24 * 60 * 60,
-      }),
-    });
-    const body = await response.text();
-    if (response.ok && !/invalid_segments|not found/i.test(body)) {
-      console.log("OneSignal ok", segment, body);
-      return body;
+  for (const scheme of schemes) {
+    const targets = subscriptionIds ? [null] : SEGMENTS;
+    for (const segment of targets) {
+      const response = await fetch("https://api.onesignal.com/notifications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": scheme + " " + key,
+        },
+        body: JSON.stringify({
+          app_id: ONESIGNAL_APP_ID,
+          target_channel: "push",
+          ...(subscriptionIds ? {include_subscription_ids: subscriptionIds} : {included_segments: [segment]}),
+          headings: {en: title, ar: title},
+          contents: {en: message, ar: message},
+          // web_url للمتصفح، و data للتطبيق: أغلب أدوات تغليف التطبيقات بتفتح الرابط ده جوه التطبيق
+          web_url: url,
+          data: {url: url, targetUrl: url},
+          android_group: "tanmoyeen",
+          web_push_topic: topic || "tanmoyeen-new",
+          ttl: 3 * 24 * 60 * 60,
+        }),
+      });
+      const body = await response.text();
+      if (response.ok && !/invalid_segments|not found/i.test(body)) {
+        console.log("OneSignal ok", scheme, segment, body);
+        return body;
+      }
+      lastError = `OneSignal ${response.status} (${segment}, ${scheme}, key ${key.slice(0, 10)}… len ${key.length}): ${body}`;
+      console.warn(lastError);
+      if (response.status === 401 || response.status === 403) break; // المفتاح نفسه مرفوض — جرّب الصيغة التانية
     }
-    lastError = `OneSignal ${response.status} (${segment}): ${body}`;
-    console.warn(lastError);
   }
   throw new Error(lastError);
 }
@@ -390,6 +400,87 @@ exports.sendTestPush = onCall(
       recipients: parsed.recipients,
       errors: parsed.errors || null,
     };
+  }
+);
+
+// ============ أكاديمية تنمويين مصر ============
+const COURSE_STATUSES = ["new", "confirmed", "waitlist", "cancelled", "attended"];
+
+function fillCourseText(text, course, name) {
+  return String(text || "")
+    .replace(/\{الاسم\}/g, name || "")
+    .replace(/\{الكورس\}|\{التدريب\}/g, course.title || "")
+    .replace(/\{المدرب\}/g, course.trainer || "")
+    .replace(/\{الموعد\}/g, [course.startDate, course.timeText].filter(Boolean).join(" — "))
+    .replace(/\{الرابط\}/g, course.link || "")
+    .replace(/[ \t]+\n/g, "\n").replace(/[ \t]{2,}/g, " ").replace(/[ \t]+([،,.!؟])/g, "$1").trim();
+}
+
+// تأكيد التسجيل: بيحدد مؤكد أو قائمة انتظار حسب عدد المقاعد، ويحدّث عدّاد التدريب
+exports.onCourseRegistration = onDocumentCreated(
+  {document: "course_registrations/{regId}", region: "europe-west1", secrets: [ONESIGNAL_REST_API_KEY]},
+  async (event) => {
+    const reg = event.data && event.data.data();
+    if (!reg || !reg.courseId) return;
+    const courseRef = db.collection("courses").doc(reg.courseId);
+    const result = await db.runTransaction(async (tx) => {
+      const c = await tx.get(courseRef);
+      if (!c.exists) return null;
+      const course = c.data();
+      const count = (course.registeredCount || 0) + 1;
+      const seats = Number(course.seats || 0);
+      const status = seats && count > seats ? "waitlist" : "confirmed";
+      tx.update(courseRef, {registeredCount: count, updatedAt: FieldValue.serverTimestamp()});
+      tx.update(event.data.ref, {status, confirmedAt: FieldValue.serverTimestamp()});
+      return {course, status};
+    });
+    if (!result || !reg.pushId) return;
+    try {
+      await sendOneSignal({
+        title: result.status === "waitlist" ? "🕒 إنت في قائمة الانتظار" : "✅ تم تسجيلك في التدريب",
+        message: clip(result.course.title, 90) + (result.status === "waitlist" ?
+          " — المقاعد اكتملت، وهنبلغك لو اتفتح مكان" : " — هيوصلك لينك الحضور قبل الموعد"),
+        url: PUBLIC_APP_URL + "?form=academy",
+        topic: "academy-" + reg.courseId,
+        subscriptionIds: [reg.pushId],
+      });
+    } catch (e) { console.warn("confirmation push failed", e.message); }
+  }
+);
+
+// رسالة جماعية لكل المسجلين في تدريب (إشعار على التطبيق)
+exports.sendCourseMessage = onCall(
+  {region: "europe-west1", secrets: [ONESIGNAL_REST_API_KEY]},
+  async (request) => {
+    await assertAdmin(request);
+    const {courseId, title, message} = request.data || {};
+    const statuses = (request.data && request.data.statuses || ["new", "confirmed", "waitlist", "attended"])
+      .filter((s) => COURSE_STATUSES.includes(s));
+    if (!courseId || !message) throw new HttpsError("invalid-argument", "courseId and message are required");
+    const cSnap = await db.collection("courses").doc(courseId).get();
+    if (!cSnap.exists) throw new HttpsError("not-found", "course not found");
+    const course = cSnap.data();
+    const regs = await db.collection("course_registrations").where("courseId", "==", courseId).get();
+    const targets = regs.docs.map((d) => d.data()).filter((r) => statuses.includes(r.status || "new"));
+    const ids = [...new Set(targets.map((r) => r.pushId).filter(Boolean))];
+    const text = fillCourseText(message, course, "");
+    const head = fillCourseText(title || ("🎓 " + course.title), course, "");
+    let sent = 0;
+    for (let i = 0; i < ids.length; i += 2000) {
+      const chunk = ids.slice(i, i + 2000);
+      try {
+        await sendOneSignal({title: clip(head, 80), message: clip(text, 220),
+          url: course.link || (PUBLIC_APP_URL + "?form=academy"), topic: "academy-" + courseId, subscriptionIds: chunk});
+        sent += chunk.length;
+      } catch (e) {
+        throw new HttpsError("failed-precondition", String(e.message || e).slice(0, 400));
+      }
+    }
+    await db.collection("courses").doc(courseId).collection("messages").add({
+      channel: "push", title: head, text, statuses, recipients: targets.length, withPush: ids.length, sent,
+      at: FieldValue.serverTimestamp(), by: request.auth.token.email || "",
+    });
+    return {total: targets.length, withPush: ids.length, sent};
   }
 );
 

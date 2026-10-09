@@ -406,13 +406,16 @@ exports.sendTestPush = onCall(
 // ============ أكاديمية تنمويين مصر ============
 const COURSE_STATUSES = ["new", "confirmed", "waitlist", "cancelled", "attended"];
 
-function fillCourseText(text, course, name) {
+function certLink(id) { return PUBLIC_APP_URL + "certificate.html?id=" + encodeURIComponent(id); }
+
+function fillCourseText(text, course, name, certId) {
   return String(text || "")
     .replace(/\{الاسم\}/g, name || "")
     .replace(/\{الكورس\}|\{التدريب\}/g, course.title || "")
     .replace(/\{المدرب\}/g, course.trainer || "")
     .replace(/\{الموعد\}/g, [course.startDate, course.timeText].filter(Boolean).join(" — "))
     .replace(/\{الرابط\}/g, course.link || "")
+    .replace(/\{الشهادة\}/g, certId ? certLink(certId) : "")
     .replace(/[ \t]+\n/g, "\n").replace(/[ \t]{2,}/g, " ").replace(/[ \t]+([،,.!؟])/g, "$1").trim();
 }
 
@@ -463,18 +466,36 @@ exports.sendCourseMessage = onCall(
     const regs = await db.collection("course_registrations").where("courseId", "==", courseId).get();
     const targets = regs.docs.map((d) => d.data()).filter((r) => statuses.includes(r.status || "new"));
     const ids = [...new Set(targets.map((r) => r.pushId).filter(Boolean))];
+    const personal = /\{الاسم\}|\{الشهادة\}/.test(String(message) + String(title || ""));
     const text = fillCourseText(message, course, "");
     const head = fillCourseText(title || ("🎓 " + course.title), course, "");
     let sent = 0;
-    for (let i = 0; i < ids.length; i += 2000) {
-      const chunk = ids.slice(i, i + 2000);
-      try {
-        await sendOneSignal({title: clip(head, 80), message: clip(text, 220),
-          url: course.link || (PUBLIC_APP_URL + "?form=academy"), topic: "academy-" + courseId, subscriptionIds: chunk});
-        sent += chunk.length;
-      } catch (e) {
-        throw new HttpsError("failed-precondition", String(e.message || e).slice(0, 400));
+    try {
+      if (personal) {
+        // رسالة مخصصة لكل شخص (اسمه ولينك شهادته)
+        const seen = new Set();
+        for (const r of targets) {
+          if (!r.pushId || seen.has(r.pushId)) continue;
+          seen.add(r.pushId);
+          const first = String(r.name || "").split(/\s+/)[0];
+          await sendOneSignal({
+            title: clip(fillCourseText(title || ("🎓 " + course.title), course, first, r.certId), 80),
+            message: clip(fillCourseText(message, course, first, r.certId), 220),
+            url: r.certId && /\{الشهادة\}/.test(message) ? certLink(r.certId) : (course.link || (PUBLIC_APP_URL + "?form=academy")),
+            topic: "academy-" + courseId, subscriptionIds: [r.pushId],
+          });
+          sent++;
+        }
+      } else {
+        for (let i = 0; i < ids.length; i += 2000) {
+          const chunk = ids.slice(i, i + 2000);
+          await sendOneSignal({title: clip(head, 80), message: clip(text, 220),
+            url: course.link || (PUBLIC_APP_URL + "?form=academy"), topic: "academy-" + courseId, subscriptionIds: chunk});
+          sent += chunk.length;
+        }
       }
+    } catch (e) {
+      throw new HttpsError("failed-precondition", String(e.message || e).slice(0, 400));
     }
     await db.collection("courses").doc(courseId).collection("messages").add({
       channel: "push", title: head, text, statuses, recipients: targets.length, withPush: ids.length, sent,

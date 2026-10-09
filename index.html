@@ -45,6 +45,17 @@
 <!-- CSP removed to allow Firebase connections -->
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>تنمويين مصر</title>
+<meta name="description" content="تنمويين مصر — المنصة الشاملة للعمل التنموي في مصر: وظائف ومناقصات واستشاريين وموردين وتدريبات أكاديمية تنمويين مصر.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="تنمويين مصر">
+<meta property="og:locale" content="ar_EG">
+<meta property="og:title" content="تنمويين مصر — لكل تنموي في مصر">
+<meta property="og:description" content="وظائف ومناقصات واستشاريين وموردين وتدريبات للعاملين في القطاع التنموي في مكان واحد.">
+<meta property="og:image" content="https://elzieni2007-crypto.github.io/tanmoyeen-masr/site-og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://elzieni2007-crypto.github.io/tanmoyeen-masr/site-og.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -8779,7 +8790,7 @@ var DEFAULT_TPL=[
   {name:'✅ تأكيد التسجيل',title:'✅ تم تأكيد تسجيلك',text:'أهلاً {الاسم} 👋\nتم تأكيد تسجيلك في تدريب "{الكورس}" مع {المدرب}.\n🗓️ الموعد: {الموعد}\nهنبعتلك لينك الحضور قبل التدريب.\nأكاديمية تنمويين مصر للتعلم عن بعد'},
   {name:'🔗 لينك الحضور',title:'🔗 لينك حضور التدريب',text:'أهلاً {الاسم}\nده لينك حضور تدريب "{الكورس}":\n{الرابط}\n🗓️ {الموعد}\nياريت تدخل قبل الموعد بـ 5 دقايق. مستنيينك 🌱'},
   {name:'⏰ تذكير قبل الموعد',title:'⏰ تذكير: التدريب قرّب',text:'تذكير يا {الاسم} ⏰\nتدريب "{الكورس}" {الموعد}.\nلينك الدخول: {الرابط}'},
-  {name:'🙏 شكر بعد التدريب',title:'🙏 شكرًا لحضورك',text:'شكرًا يا {الاسم} على حضورك تدريب "{الكورس}" 🙏\nهنبعتلك الشهادة قريب، وتابع أكاديمية تنمويين مصر عشان التدريبات الجاية.'}
+  {name:'🙏 شكر بعد التدريب',title:'🙏 شكرًا لحضورك',text:'شكرًا يا {الاسم} على حضورك تدريب "{الكورس}" 🙏\nتابع أكاديمية تنمويين مصر عشان التدريبات الجاية 🌱'}
 ];
 
 function $(id){ return document.getElementById(id); }
@@ -8794,6 +8805,38 @@ function normPhone(p){
   else if(/^20\d{10}$/.test(d)) d='0'+d.slice(2);
   else if(/^1\d{9}$/.test(d)) d='0'+d;
   return d;
+}
+function courseLink(c){ return APP_URL+'academy.html?course='+encodeURIComponent(c.id); }
+function shareText(c){
+  return '🎓 أكاديمية تنمويين مصر للتعلم عن بعد\n📌 '+(c.title||'')+(c.trainer?'\n👤 مع '+c.trainer:'')+
+    ((c.startDate||c.timeText)?'\n🗓️ '+[c.startDate,c.timeText].filter(Boolean).join(' — '):'')+'\n💻 أونلاين ومجاني\n\n📝 سجّل من هنا:\n'+courseLink(c);
+}
+function openUrl(u){ var w=window.open(u,'_blank'); if(!w) location.href=u; }
+window.tmShareCourse=function(c,how){
+  var link=courseLink(c), text=shareText(c);
+  if(how==='wa') return openUrl('https://wa.me/?text='+encodeURIComponent(text));
+  if(how==='fb') return openUrl('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(link));
+  if(how==='copy') return copyText(text,'✅ اتنسخ الإعلان باللينك — الصقه في أي مكان');
+  if(navigator.share){ navigator.share({title:c.title,text:text}).catch(function(){}); }
+  else copyText(text,'✅ اتنسخ الإعلان باللينك — الصقه في أي مكان');
+};
+function shareRow(c){
+  return '<div class="tma-share" data-sc="'+esc(c.id)+'">'+
+    '<button type="button" data-h="native">📤 مشاركة</button>'+
+    '<button type="button" data-h="wa" style="background:#dcfce7;color:#00703a">💬 واتساب</button>'+
+    '<button type="button" data-h="fb" style="background:#e7eefc;color:#1877f2">📘 فيسبوك</button>'+
+    '<button type="button" data-h="copy">🔗 نسخ</button></div>';
+}
+function bindShare(root,list){
+  root.querySelectorAll('.tma-share').forEach(function(row){
+    var c=list.filter(function(x){return x.id===row.getAttribute('data-sc');})[0]; if(!c) return;
+    row.querySelectorAll('button[data-h]').forEach(function(b){ b.onclick=function(e){ e.stopPropagation(); window.tmShareCourse(c,b.getAttribute('data-h')); }; });
+  });
+}
+function copyText(t,msg){
+  function done(){ say(msg); }
+  function fb(){ var a=document.createElement('textarea'); a.value=t; document.body.appendChild(a); a.select(); try{document.execCommand('copy');}catch(e){} a.remove(); done(); }
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done,fb); else fb();
 }
 function waNumber(p){ var d=normPhone(p); return /^01\d{9}$/.test(d)?'2'+d:d.replace(/^0+/,''); }
 function fmtDate(v){
@@ -8843,6 +8886,7 @@ function css(){
   '.tma-f input:focus,.tma-f select:focus,.tma-f textarea:focus{outline:none;border-color:#00aeef}'+
   '.tma-chk{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:#334155;margin:8px 0;line-height:1.7}.tma-chk input{margin-top:5px;width:18px;height:18px;flex:none}'+
   '.tma-err{color:#b42318;font-size:12.5px;font-weight:700;min-height:18px}'+
+  '.tma-share{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.tma-share button{flex:1;min-width:70px;border:0;border-radius:10px;padding:8px 6px;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer;background:#eef3f9;color:#1a3a6e}'+
   '.tma-empty{text-align:center;color:#64748b;padding:40px 10px;font-size:13px;line-height:1.9}'+
   '.tma-form-ttl{background:linear-gradient(135deg,#1a3a6e,#1463a5);color:#fff;border-radius:16px;padding:16px;margin-bottom:12px;text-align:center}'+
   '.tma-form-ttl b{display:block;font-size:15px;line-height:1.7}.tma-form-ttl span{font-size:12px;opacity:.85}'+
@@ -8916,8 +8960,9 @@ window.tmOpenAcademy=async function(courseId){
         return '<div class="tma-card"><span class="tma-pill">'+esc(c.platform||'أونلاين')+'</span><span class="tma-pill" style="background:#e7f6ee;color:#0b7a43">مجاني</span>'+
           '<div class="tma-ttl" style="margin-top:8px">'+esc(c.title)+'</div>'+courseMeta(c)+
           (c.desc?'<div class="tma-desc">'+esc(c.desc)+'</div>':'')+
-          '<button class="tma-btn" type="button" data-c="'+esc(c.id)+'">📝 سجّل الآن</button></div>';
+          '<button class="tma-btn" type="button" data-c="'+esc(c.id)+'">📝 سجّل الآن</button>'+shareRow(c)+'</div>';
       }).join('');
+    bindShare(body,list);
     body.querySelectorAll('button[data-c]').forEach(function(b){
       b.onclick=function(){ renderForm(list.filter(function(x){return x.id===b.getAttribute('data-c');})[0]); };
     });
@@ -8929,9 +8974,9 @@ function renderForm(c){
   var pushOk=('Notification' in window)&&('serviceWorker' in navigator);
   body.innerHTML=
     '<div class="tma-form-ttl"><b>'+FORM_TITLE+'</b><span>سجّل بياناتك وهيوصلك تأكيد ولينك الحضور</span></div>'+
-    '<div class="tma-card"><div class="tma-ttl">🎓 '+esc(c.title)+'</div>'+courseMeta(c)+'</div>'+
+    '<div class="tma-card"><div class="tma-ttl">🎓 '+esc(c.title)+'</div>'+courseMeta(c)+shareRow(c)+'</div>'+
     '<div class="tma-card">'+
-      f('tma-name','الاسم بالكامل (زي ما هيتكتب في الشهادة)',true,'text','مثال: أحمد محمد علي')+
+      f('tma-name','الاسم بالكامل',true,'text','مثال: أحمد محمد علي')+
       f('tma-phone','رقم الموبايل (واتساب)',true,'tel','01xxxxxxxxx')+
       f('tma-email','البريد الإلكتروني',true,'email','name@example.com')+
       '<div class="tma-f"><label>المحافظة <i>*</i></label><select id="tma-gov"><option value="">اختار المحافظة</option>'+GOVS.map(function(g){return '<option>'+g+'</option>';}).join('')+'</select></div>'+
@@ -8946,6 +8991,7 @@ function renderForm(c){
       '<button class="tma-btn" type="button" id="tma-submit">✅ تأكيد التسجيل</button>'+
       '<button class="tma-btn alt" type="button" id="tma-back">← رجوع للتدريبات</button>'+
     '</div>';
+  bindShare(body,[c]);
   $('tma-back').onclick=function(){ window.tmOpenAcademy(); };
   $('tma-submit').onclick=function(){ submit(c); };
 }
@@ -8987,7 +9033,9 @@ function success(c,name,hasPush){
     '<div style="font-size:52px">🎉</div><div class="tma-ttl" style="font-size:18px">تم تسجيلك يا '+esc(name.split(' ')[0])+'!</div>'+
     '<div class="tma-meta" style="font-size:13px">في تدريب <b>'+esc(c.title)+'</b>'+(left===0?'<br>🕒 المقاعد اكتملت، فإنت في <b>قائمة الانتظار</b> وهنبلغك لو اتفتح مكان.':'<br>هيوصلك تأكيد ولينك الحضور قبل الموعد.')+'</div>'+
     (hasPush?'<div class="tma-meta" style="margin-top:10px;color:#0b7a43">🔔 الإشعارات مفعّلة — هيوصلك كل جديد عن التدريب.</div>':'<div class="tma-meta" style="margin-top:10px">💡 ممكن توصلك رسايل التدريب على واتساب أو الإيميل اللي سجلته.</div>')+
+    '<div class="tma-meta" style="margin-top:14px;font-weight:800;color:#1a3a6e">💚 شارك التدريب مع زمايلك</div>'+shareRow(c)+
     '<button class="tma-btn alt" type="button" id="tma-more">🎓 تدريبات تانية</button></div>';
+  bindShare(body,[c]);
   $('tma-more').onclick=function(){ window.tmOpenAcademy(); };
 }
 
@@ -9081,10 +9129,11 @@ async function admHome(){
       var rs=regsOf(c.id), cnt={}; rs.forEach(function(r){ cnt[r.status||'new']=(cnt[r.status||'new']||0)+1; });
       return '<div class="aca-card" data-c="'+esc(c.id)+'" style="cursor:pointer"><div class="aca-row"><div class="t">🎓 '+esc(c.title)+'</div><div class="aca-n">'+rs.length+'</div></div>'+
         '<div class="aca-small">'+esc(CST[c.status]||c.status||'')+(c.startDate?' • 🗓️ '+esc(c.startDate):'')+(c.trainer?' • 👤 '+esc(c.trainer):'')+(c.seats?' • 🪑 '+esc(c.seats)+' مقعد':'')+'</div>'+
-        '<div class="aca-small">'+Object.keys(ST).filter(function(k){return cnt[k];}).map(function(k){return ST[k].t+' '+cnt[k];}).join(' • ')+'</div></div>';
+        '<div class="aca-small">'+Object.keys(ST).filter(function(k){return cnt[k];}).map(function(k){return ST[k].t+' '+cnt[k];}).join(' • ')+'</div>'+shareRow(c)+'</div>';
     }).join(''):'<div class="aca-card aca-small" style="text-align:center;padding:24px">لسه مفيش تدريبات. دوس "➕ تدريب جديد" وابدأ.</div>');
   $('aca-new').onclick=function(){ courseForm(null); };
   $('aca-xl-all').onclick=function(){ window.tmExportRows('تسجيلات الأكاديمية',A.regs.map(cleanReg),'xlsx'); };
+  bindShare(box,A.courses);
   box.querySelectorAll('.aca-card[data-c]').forEach(function(el){ el.onclick=function(){ courseView(el.getAttribute('data-c')); }; });
 }
 function cleanReg(r){ return {name:r.name,courseTitle:r.courseTitle,phone:r.phone,email:r.email,gov:r.gov,org:r.org,jobTitle:r.jobTitle,prevTraining:r.prevTraining,heardFrom:r.heardFrom,notes:r.notes,status:r.status||'new',pushId:r.pushId?'نعم':'لا',createdAt:r.createdAt}; }
@@ -9134,16 +9183,17 @@ async function courseView(id){
   A.filter='all'; A.q='';
   await loadTpls();
   var c=A.course, box=$('adm-form-academy');
-  var link=APP_URL+'?course='+encodeURIComponent(c.id);
+  var link=courseLink(c);
   box.innerHTML='<div class="aca-bar"><button class="aca-b" id="aca-back">← كل التدريبات</button><button class="aca-b" id="aca-edit">✏️ تعديل</button>'+
       '<button class="aca-b" id="aca-share">🔗 نسخ لينك التسجيل</button></div>'+
     '<div class="aca-card"><div class="tma-ttl">🎓 '+esc(c.title)+'</div><div class="aca-small">'+esc(CST[c.status]||'')+(c.trainer?' • 👤 '+esc(c.trainer):'')+((c.startDate||c.timeText)?' • 🗓️ '+esc([c.startDate,c.timeText].filter(Boolean).join(' — ')):'')+(c.seats?' • 🪑 '+c.seats+' مقعد':'')+'</div>'+
-      (c.link?'<div class="aca-small" dir="ltr" style="text-align:right;word-break:break-all">'+esc(c.link)+'</div>':'<div class="aca-small" style="color:#b42318">⚠️ لسه مفيش لينك حضور — ضيفه من "تعديل" عشان يتبعت في الرسائل</div>')+'</div>'+
+      (c.link?'<div class="aca-small" dir="ltr" style="text-align:right;word-break:break-all">'+esc(c.link)+'</div>':'<div class="aca-small" style="color:#b42318">⚠️ لسه مفيش لينك حضور — ضيفه من "تعديل" عشان يتبعت في الرسائل</div>')+shareRow(c)+'</div>'+
     msgPanel()+
     '<div class="aca-card"><div class="aca-row"><div class="t">👥 المسجلين</div><button class="aca-b g" id="aca-xl">📥 Excel</button><button class="aca-b r" id="aca-pdf">📄 PDF</button></div>'+
       '<input id="aca-q" placeholder="🔍 بحث بالاسم أو الرقم أو الجهة" style="width:100%;box-sizing:border-box;border:1.5px solid #d6dee8;border-radius:10px;padding:9px;font-family:Cairo,sans-serif;font-size:14px;margin-top:8px">'+
       '<div class="aca-chips" id="aca-chips"></div><div id="aca-regs"></div></div>'+
     '<div class="aca-card"><div class="t" style="font-weight:800;color:#1a2a3a;font-size:13px">📜 سجل الرسائل</div><div id="aca-log" class="aca-small">⏳</div></div>';
+  bindShare(box,[c]);
   $('aca-back').onclick=admHome;
   $('aca-edit').onclick=function(){ courseForm(c); };
   $('aca-share').onclick=function(){ copy(link,'✅ اتنسخ لينك التسجيل — انشره على فيسبوك وواتساب'); };

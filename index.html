@@ -8790,6 +8790,7 @@ var DEFAULT_TPL=[
   {name:'✅ تأكيد التسجيل',title:'✅ تم تأكيد تسجيلك',text:'أهلاً {الاسم} 👋\nتم تأكيد تسجيلك في تدريب "{الكورس}" مع {المدرب}.\n🗓️ الموعد: {الموعد}\nهنبعتلك لينك الحضور قبل التدريب.\nأكاديمية تنمويين مصر للتعلم عن بعد'},
   {name:'🔗 لينك الحضور',title:'🔗 لينك حضور التدريب',text:'أهلاً {الاسم}\nده لينك حضور تدريب "{الكورس}":\n{الرابط}\n🗓️ {الموعد}\nياريت تدخل قبل الموعد بـ 5 دقايق. مستنيينك 🌱'},
   {name:'⏰ تذكير قبل الموعد',title:'⏰ تذكير: التدريب قرّب',text:'تذكير يا {الاسم} ⏰\nتدريب "{الكورس}" {الموعد}.\nلينك الدخول: {الرابط}'},
+  {name:'🎓 الشهادة جاهزة',title:'🎓 شهادتك جاهزة',text:'مبروك يا {الاسم} 🎉\nشهادة حضورك لتدريب "{الكورس}" جاهزة:\n{الشهادة}\nتقدر تنزّلها PDF وتضيفها على LinkedIn من نفس الصفحة.\nأكاديمية تنمويين مصر للتعلم عن بعد 🌱'},
   {name:'🙏 شكر بعد التدريب',title:'🙏 شكرًا لحضورك',text:'شكرًا يا {الاسم} على حضورك تدريب "{الكورس}" 🙏\nتابع أكاديمية تنمويين مصر عشان التدريبات الجاية 🌱'}
 ];
 
@@ -8806,6 +8807,7 @@ function normPhone(p){
   else if(/^1\d{9}$/.test(d)) d='0'+d;
   return d;
 }
+function certUrl(id){ return APP_URL+'certificate.html?id='+encodeURIComponent(id); }
 function courseLink(c){ return APP_URL+'academy.html?course='+encodeURIComponent(c.id); }
 function shareText(c){
   return '🎓 أكاديمية تنمويين مصر للتعلم عن بعد\n📌 '+(c.title||'')+(c.trainer?'\n👤 مع '+c.trainer:'')+
@@ -8848,6 +8850,7 @@ function fill(text,course,reg){
   var name=reg&&reg.name?String(reg.name).split(/\s+/)[0]:'';
   return String(text||'').replace(/\{الاسم\}/g,name).replace(/\{الكورس\}|\{التدريب\}/g,course.title||'').replace(/\{المدرب\}/g,course.trainer||'')
     .replace(/\{الموعد\}/g,[course.startDate,course.timeText].filter(Boolean).join(' — ')).replace(/\{الرابط\}/g,course.link||'')
+    .replace(/\{الشهادة\}/g,reg&&reg.certId?certUrl(reg.certId):'')
     .replace(/[ \t]{2,}/g,' ').replace(/[ \t]+([،,.!؟])/g,'$1');
 }
 function withOS(fn){ window.OneSignalDeferred=window.OneSignalDeferred||[]; window.OneSignalDeferred.push(fn); }
@@ -9147,6 +9150,7 @@ function courseForm(c){
     inp('ac-date','تاريخ البدء',c.startDate,'date')+
     inp('ac-time','الموعد (اليوم والساعة)',c.timeText,'text','مثال: الثلاثاء 7 مساءً')+
     inp('ac-dur','المدة',c.duration,'text','مثال: 3 جلسات × ساعتين')+
+    inp('ac-hours','عدد الساعات التدريبية (بيتكتب في الشهادة)',c.hours,'number','مثال: 6')+
     '<div class="tma-f"><label>المنصة</label><select id="ac-plat">'+['Zoom','Google Meet','Microsoft Teams','فيسبوك لايف','أخرى'].map(function(p){return '<option'+(c.platform===p?' selected':'')+'>'+p+'</option>';}).join('')+'</select></div>'+
     inp('ac-link','لينك الحضور (مش بيظهر للناس — بيتبعت في الرسائل بس)',c.link,'url','https://...')+
     inp('ac-seats','عدد المقاعد (سيبه فاضي لو مفتوح)',c.seats,'number')+
@@ -9157,7 +9161,7 @@ function courseForm(c){
   $('ac-save').onclick=async function(){
     var title=$('ac-title').value.trim(); if(!title){ say('⚠️ اكتب اسم التدريب'); return; }
     var data={title:title,trainer:$('ac-trainer').value.trim(),startDate:$('ac-date').value,timeText:$('ac-time').value.trim(),duration:$('ac-dur').value.trim(),
-      platform:$('ac-plat').value,link:$('ac-link').value.trim(),seats:Number($('ac-seats').value)||0,status:$('ac-status').value,desc:$('ac-desc').value.trim(),updatedAt:FV().serverTimestamp()};
+      hours:Number($('ac-hours').value)||0,platform:$('ac-plat').value,link:$('ac-link').value.trim(),seats:Number($('ac-seats').value)||0,status:$('ac-status').value,desc:$('ac-desc').value.trim(),updatedAt:FV().serverTimestamp()};
     try{
       if(c.id){ await getDb().collection('courses').doc(c.id).update(data); say('✅ اتحفظ'); await loadAll(); courseView(c.id); }
       else{ data.createdAt=FV().serverTimestamp(); data.registeredCount=0; var ref=await getDb().collection('courses').add(data); say('✅ اتضاف التدريب'); await loadAll(); courseView(ref.id); }
@@ -9185,7 +9189,7 @@ async function courseView(id){
   var c=A.course, box=$('adm-form-academy');
   var link=courseLink(c);
   box.innerHTML='<div class="aca-bar"><button class="aca-b" id="aca-back">← كل التدريبات</button><button class="aca-b" id="aca-edit">✏️ تعديل</button>'+
-      '<button class="aca-b" id="aca-share">🔗 نسخ لينك التسجيل</button></div>'+
+      '<button class="aca-b" id="aca-share">🔗 نسخ لينك التسجيل</button><button class="aca-b y" id="aca-cert">🎓 إصدار الشهادات</button></div>'+
     '<div class="aca-card"><div class="tma-ttl">🎓 '+esc(c.title)+'</div><div class="aca-small">'+esc(CST[c.status]||'')+(c.trainer?' • 👤 '+esc(c.trainer):'')+((c.startDate||c.timeText)?' • 🗓️ '+esc([c.startDate,c.timeText].filter(Boolean).join(' — ')):'')+(c.seats?' • 🪑 '+c.seats+' مقعد':'')+'</div>'+
       (c.link?'<div class="aca-small" dir="ltr" style="text-align:right;word-break:break-all">'+esc(c.link)+'</div>':'<div class="aca-small" style="color:#b42318">⚠️ لسه مفيش لينك حضور — ضيفه من "تعديل" عشان يتبعت في الرسائل</div>')+shareRow(c)+'</div>'+
     msgPanel()+
@@ -9197,6 +9201,9 @@ async function courseView(id){
   $('aca-back').onclick=admHome;
   $('aca-edit').onclick=function(){ courseForm(c); };
   $('aca-share').onclick=function(){ copy(link,'✅ اتنسخ لينك التسجيل — انشره على فيسبوك وواتساب'); };
+  $('aca-cert').onclick=issueCerts;
+  (function(){ var att=regsOf(c.id).filter(function(r){return r.status==='attended';}), done=att.filter(function(r){return r.certId;}).length;
+    $('aca-cert').textContent='🎓 إصدار الشهادات'+(att.length?' ('+done+'/'+att.length+')':''); })();
   $('aca-xl').onclick=function(){ window.tmExportRows('تسجيلات '+c.title,filtered().map(cleanReg),'xlsx'); };
   $('aca-pdf').onclick=function(){ window.tmExportRows('تسجيلات '+c.title,filtered().map(cleanReg),'pdf'); };
   $('aca-q').oninput=function(){ A.q=this.value.trim(); renderRegs(); };
@@ -9214,6 +9221,7 @@ function renderRegs(){
     return '<div style="border-top:1px solid #eef2f6;padding:10px 0"><div class="aca-row"><div class="t">'+esc(r.name)+'</div><span style="font-size:10px;font-weight:800;color:'+s.c+'">'+s.t+'</span></div>'+
       '<div class="aca-small">📱 <a href="https://wa.me/'+waNumber(r.phone)+'" target="_blank" dir="ltr">'+esc(r.phone)+'</a> • ✉️ <span dir="ltr">'+esc(r.email||'')+'</span>'+(r.pushId?' • 🔔':'')+'</div>'+
       '<div class="aca-small">'+[r.gov,r.org,r.jobTitle].filter(Boolean).map(esc).join(' • ')+(r.notes?'<br>💬 '+esc(r.notes):'')+'</div>'+
+      (r.certId?'<div class="aca-small">🎓 <a href="'+certUrl(r.certId)+'" target="_blank" dir="ltr">'+esc(r.certId)+'</a></div>':'')+
       '<div class="aca-row" style="margin-top:6px"><select data-r="'+esc(r.id)+'" style="flex:1;border:1.5px solid #d6dee8;border-radius:9px;padding:6px;font-family:Cairo,sans-serif;font-size:12px">'+
         Object.keys(ST).map(function(k){return '<option value="'+k+'"'+((r.status||'new')===k?' selected':'')+'>'+ST[k].t+'</option>';}).join('')+'</select>'+
       '<button class="aca-b r" data-del="'+esc(r.id)+'">🗑️</button></div></div>';
@@ -9273,6 +9281,7 @@ function bindMsg(){
   $('aca-mail').onclick=function(){
     var text=$('aca-mtext').value.trim(); if(!text){ say('⚠️ اكتب الرسالة الأول'); return; }
     var l=recipients().map(function(r){return r.email;}).filter(Boolean); if(!l.length){ say('⚠️ مفيش إيميلات'); return; }
+    if(/\{الشهادة\}/.test(text)){ say('⚠️ لينك الشهادة مختلف لكل شخص — ابعته بواتساب أو إشعار التطبيق'); return; }
     var body=fill(text,A.course,{name:''}).replace(/^أهلاً\s*\n/,'أهلاً بحضرتك\n');
     var url='mailto:?bcc='+encodeURIComponent(l.join(','))+'&subject='+encodeURIComponent(fill($('aca-mtitle').value||A.course.title,A.course,{}))+'&body='+encodeURIComponent(body);
     if(url.length>1900){ copy(l.join(', '),'📋 الإيميلات كتير على رابط واحد — اتنسخوا، الصقهم في BCC'); url='mailto:?subject='+encodeURIComponent(fill($('aca-mtitle').value||A.course.title,A.course,{}))+'&body='+encodeURIComponent(body); }
@@ -9297,6 +9306,34 @@ function bindMsg(){
   };
 }
 async function courseViewKeep(){ var id=A.course.id, t=$('aca-mtitle').value, x=$('aca-mtext').value; await courseView(id); $('aca-mtitle').value=t; $('aca-mtext').value=x; }
+async function issueCerts(){
+  var c=A.course, att=regsOf(c.id).filter(function(r){return r.status==='attended';});
+  if(!att.length){ say('⚠️ علّم الأول على اللي حضروا "🎓 حضر" من قائمة المسجلين'); return; }
+  var todo=att.filter(function(r){return !r.certId;});
+  if(!todo.length){ say('✅ كل الحاضرين ('+att.length+') ليهم شهادات بالفعل'); return; }
+  if(!c.hours&&!confirm('عدد الساعات مش متسجل في التدريب، وسطر الساعات مش هيظهر في الشهادة. نكمل؟')) return;
+  if(!confirm('هيتم إصدار '+todo.length+' شهادة حضور لتدريب "'+c.title+'". نكمل؟')) return;
+  var d=getDb(), year=new Date().getFullYear(), counterRef=d.collection('settings').doc('cert_counter');
+  try{
+    var start=await d.runTransaction(async function(tx){
+      var s=await tx.get(counterRef), cur=(s.exists&&s.data()['y'+year])||0;
+      var upd={}; upd['y'+year]=cur+todo.length; tx.set(counterRef,upd,{merge:true}); return cur;
+    });
+    var batch=d.batch();
+    todo.forEach(function(r,i){
+      var id='TMA-'+year+'-'+String(start+i+1).padStart(4,'0');
+      batch.set(d.collection('certificates').doc(id),{name:r.name,courseTitle:c.title,courseId:c.id,trainer:c.trainer||'',courseDate:c.startDate||'',hours:c.hours||0,regId:r.id,issuedAt:FV().serverTimestamp()});
+      batch.update(d.collection('course_registrations').doc(r.id),{certId:id,updatedAt:FV().serverTimestamp()});
+      r.certId=id;
+    });
+    await batch.commit();
+    say('🎓 اتصدر '+todo.length+' شهادة');
+    await courseView(c.id);
+    var tpl=DEFAULT_TPL.filter(function(t){return /الشهادة/.test(t.name);})[0];
+    $('aca-mtitle').value=tpl.title; $('aca-mtext').value=tpl.text; $('aca-to').value='attended'; updateCount();
+    $('aca-mtext').scrollIntoView({block:'center'});
+  }catch(e){ say('❌ '+(e.code==='permission-denied'?'محتاج تنشر قواعد Firestore الجديدة (certificates)':(e.message||e))); }
+}
 function waWizard(list,text){
   var m=$('aca-wa'); if(!m){ m=document.createElement('div'); m.id='aca-wa'; document.body.appendChild(m); }
   var i=0;

@@ -8301,11 +8301,11 @@ var FIELD_MAP={
   source:['source','المصدر']
 };
 function normHeader(h){ return String(h||'').toLowerCase().replace(/[_\-:]+/g,' ').replace(/\s+/g,' ').trim(); }
-function mapRow(r){
-  var out={}, lookup={};
+function mapRow(r,map){
+  map=map||FIELD_MAP; var out={}, lookup={};
   Object.keys(r).forEach(function(k){ lookup[normHeader(k)]=r[k]; });
-  Object.keys(FIELD_MAP).forEach(function(f){
-    for(var i=0;i<FIELD_MAP[f].length;i++){ var v=lookup[normHeader(FIELD_MAP[f][i])]; if(v!=null&&String(v).trim()!==''){ out[f]=v; break; } }
+  Object.keys(map).forEach(function(f){
+    for(var i=0;i<map[f].length;i++){ var v=lookup[normHeader(map[f][i])]; if(v!=null&&String(v).trim()!==''){ out[f]=v; break; } }
   });
   return out;
 }
@@ -8414,25 +8414,26 @@ async function runBulkImport(rawJobs, sourceLabel){
 var BUNDLE_NAMES=['TANMOYEEN_BULK_JOBS_CURRENT','TANMOYEEN_BULK_JOBS','BULK_JOBS','JOBS_BULK','jobsBulk','bulkJobs','JOBS'];
 function pickArray(v){
   if(Array.isArray(v)) return v;
-  if(v&&typeof v==='object'){ var k=['jobs','data','items','list'].filter(function(x){return Array.isArray(v[x]);})[0]; if(k) return v[k]; }
+  if(v&&typeof v==='object'){ var k=['jobs','tenders','data','items','list'].filter(function(x){return Array.isArray(v[x]);})[0]; if(k) return v[k]; }
   return null;
 }
-function bundleFromGlobals(){
-  for(var i=0;i<BUNDLE_NAMES.length;i++){
-    var n=BUNDLE_NAMES[i], v=null;
+function bundleFromGlobals(names){
+  names=names||BUNDLE_NAMES;
+  for(var i=0;i<names.length;i++){
+    var n=names[i], v=null;
     try{ v=window[n]; }catch(e){}
     if(v==null){ try{ v=(new Function('return typeof '+n+'!=="undefined"?'+n+':null;'))(); }catch(e){ v=null; } }
     var a=pickArray(v); if(a&&a.length) return {jobs:a, from:n};
   }
   return null;
 }
-function runInSandbox(code){
-  var fake={};
-  var names=BUNDLE_NAMES.map(function(n){return '"'+n+'":(typeof '+n+'!=="undefined"?'+n+':undefined)';}).join(',');
+function runInSandbox(code,list){
+  list=list||BUNDLE_NAMES; var fake={};
+  var names=list.map(function(n){return '"'+n+'":(typeof '+n+'!=="undefined"?'+n+':undefined)';}).join(',');
   var fn=new Function('window','self','globalThis', code+'\n;return {'+names+'};');
   var res=fn(fake,fake,fake);
-  for(var i=0;i<BUNDLE_NAMES.length;i++){
-    var a=pickArray(res[BUNDLE_NAMES[i]])||pickArray(fake[BUNDLE_NAMES[i]]);
+  for(var i=0;i<list.length;i++){
+    var a=pickArray(res[list[i]])||pickArray(fake[list[i]]);
     if(a&&a.length) return a;
   }
   return null;
@@ -8459,10 +8460,10 @@ function salvageObjects(t){
   var cut=start>-1?t.slice(0,start).split('\n').length:t.split('\n').length;
   return {jobs:out,cutLine:cut,truncated:true};
 }
-function parseBundle(txt){
+function parseBundle(txt,names){
   var t=String(txt||'').trim();
   if(t[0]==='['||t[0]==='{'){ try{ var j=pickArray(JSON.parse(t)); if(j) return {jobs:j}; }catch(e){} }
-  try{ var a=runInSandbox(t); if(a&&a.length) return {jobs:a}; }catch(e){}
+  try{ var a=runInSandbox(t,names); if(a&&a.length) return {jobs:a}; }catch(e){}
   var sv=salvageObjects(t);
   return {jobs:sv.jobs, truncated:!!sv.truncated, cutLine:sv.cutLine};
 }
@@ -8472,32 +8473,33 @@ async function fetchText(url,opts,ms){
   try{ var r=await fetch(url,Object.assign({cache:'no-store',signal:ctl.signal},opts||{})); if(!r.ok) throw new Error('HTTP '+r.status); return await r.text(); }
   finally{ clearTimeout(t); }
 }
-async function fileUpdatedAt(){
+async function fileUpdatedAt(file){
   try{
-    var j=JSON.parse(await fetchText('https://api.github.com/repos/'+GH_REPO+'/commits?path='+GH_FILE+'&per_page=1',{headers:{'Accept':'application/vnd.github+json'}},8000));
+    var j=JSON.parse(await fetchText('https://api.github.com/repos/'+GH_REPO+'/commits?path='+(file||GH_FILE)+'&per_page=1',{headers:{'Accept':'application/vnd.github+json'}},8000));
     var d=j&&j[0]&&j[0].commit&&(j[0].commit.committer||j[0].commit.author).date;
     return d?fmtDate(new Date(d)):'';
   }catch(e){ return ''; }
 }
-async function loadBundle(){
+async function loadBundle(file,names){
+  file=file||GH_FILE; names=names||BUNDLE_NAMES;
   // الأولوية: أحدث نسخة من GitHub مباشرة (مش النسخة المخزنة في المتصفح)
   var sources=[
-    {name:'GitHub',url:'https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_FILE+'?t='+Date.now(),opts:{headers:{'Accept':'application/vnd.github.raw'}}},
-    {name:'GitHub (raw)',url:'https://raw.githubusercontent.com/'+GH_REPO+'/main/'+GH_FILE+'?t='+Date.now()},
-    {name:'GitHub (raw)',url:'https://raw.githubusercontent.com/'+GH_REPO+'/master/'+GH_FILE+'?t='+Date.now()},
-    {name:'الموقع',url:'./'+GH_FILE+'?nocache='+Date.now()}
+    {name:'GitHub',url:'https://api.github.com/repos/'+GH_REPO+'/contents/'+file+'?t='+Date.now(),opts:{headers:{'Accept':'application/vnd.github.raw'}}},
+    {name:'GitHub (raw)',url:'https://raw.githubusercontent.com/'+GH_REPO+'/main/'+file+'?t='+Date.now()},
+    {name:'GitHub (raw)',url:'https://raw.githubusercontent.com/'+GH_REPO+'/master/'+file+'?t='+Date.now()},
+    {name:'الموقع',url:'./'+file+'?nocache='+Date.now()}
   ];
   var errs=[];
   for(var i=0;i<sources.length;i++){
     try{
-      var pb=parseBundle(await fetchText(sources[i].url,sources[i].opts));
+      var pb=parseBundle(await fetchText(sources[i].url,sources[i].opts),names);
       if(pb.jobs&&pb.jobs.length) return {jobs:pb.jobs, from:sources[i].name, truncated:pb.truncated, cutLine:pb.cutLine};
       errs.push(sources[i].name+': '+(pb.truncated?'الملف مقطوع ومفيهوش ولا وظيفة كاملة':'الملف مفيهوش قائمة وظائف'));
     }catch(e){ errs.push(sources[i].name+': '+(e.name==='AbortError'?'انتهت المهلة':(e.message||e))); }
   }
-  var g=bundleFromGlobals();
+  var g=bundleFromGlobals(names);
   if(g){ g.from='نسخة مخزنة قديمة في المتصفح'; g.stale=true; g.errs=errs; return g; }
-  return {jobs:[], err:'تعذر قراءة '+GH_FILE+' — '+errs.join(' | ')};
+  return {jobs:[], err:'تعذر قراءة '+file+' — '+errs.join(' | ')};
 }
 window.bulkImportCurrentJobs=async function(){
   var box=document.getElementById('bulk-import-progress');
@@ -8518,12 +8520,12 @@ window.bulkImportCurrentJobs=async function(){
   window._tmBundleInfo='📦 المصدر: <b>'+esc(b.from)+'</b>'+(upd?' — آخر تحديث للملف: <bdi dir="ltr">'+esc(upd)+'</bdi>':'')+' — عدد الوظائف في الملف: <b>'+b.jobs.length+'</b>'+(b.truncated?'<br><span style="color:#b42318">⚠️ ملف '+GH_FILE+' على GitHub <b>مقطوع</b> عند سطر '+b.cutLine+' — اتقرت الوظائف الكاملة بس. ارفع الملف كامل تاني.</span>':'')+(b.stale?'<br><span style="color:#b42318">⚠️ ماقدرناش نقرا الملف من GitHub ('+esc((b.errs||[]).join(' | '))+')، فاستخدمنا نسخة قديمة.</span>':'');
   runBulkImport(mapped,'jobs-bulk.js ('+b.jobs.length+' وظيفة)');
 };
-function readJobsFile(file){
+function readJobsFile(file,map){
   return new Promise(function(res,rej){
     var name=(file.name||'').toLowerCase(), rd=new FileReader();
     rd.onerror=function(){ rej(new Error('تعذر قراءة الملف')); };
     if(/\.json$/.test(name)){
-      rd.onload=function(){ try{ var j=JSON.parse(rd.result); j=Array.isArray(j)?j:(j.jobs||j.data||[]); res(j.map(mapRow)); }catch(e){ rej(new Error('ملف JSON غير صالح')); } };
+      rd.onload=function(){ try{ var j=JSON.parse(rd.result); j=Array.isArray(j)?j:(j.jobs||j.data||[]); res(j.map(function(r){return mapRow(r,map);})); }catch(e){ rej(new Error('ملف JSON غير صالح')); } };
       rd.readAsText(file,'utf-8'); return;
     }
     if(typeof XLSX==='undefined'){ rej(new Error('مكتبة Excel غير محمّلة')); return; }
@@ -8532,7 +8534,7 @@ function readJobsFile(file){
         var wb=XLSX.read(new Uint8Array(rd.result),{type:'array',cellDates:true,codepage:65001});
         var ws=wb.Sheets[wb.SheetNames[0]];
         var rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
-        res(rows.map(mapRow));
+        res(rows.map(function(r){return mapRow(r,map);}));
       }catch(e){ rej(new Error('تعذر قراءة الملف: '+(e.message||e))); }
     };
     rd.readAsArrayBuffer(file);
@@ -8554,6 +8556,133 @@ window.tmDownloadImportTemplate=function(){
     ['مسؤول مالي','جمعية مثال','القاهرة','دوام كامل','تنمية','','2026-12-31','hr@example.org','وصف مختصر','https://example.org/job','']]);
   ws['!cols']=[{wch:22},{wch:20},{wch:12},{wch:12},{wch:12},{wch:10},{wch:12},{wch:20},{wch:30},{wch:28},{wch:14}];
   var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'وظائف'); XLSX.writeFile(wb,'نموذج_استيراد_وظائف_تنمويين_مصر.xlsx');
+};
+
+/* ---------- استيراد المناقصات (نفس طريقة الوظائف) ---------- */
+var T_FILE='tenders-bulk.js';
+var T_NAMES=['TANMOYEEN_BULK_TENDERS_CURRENT','TANMOYEEN_BULK_TENDERS','BULK_TENDERS','TENDERS_BULK','tendersBulk','bulkTenders','TENDERS'];
+var T_TYPES=['استشارة فردية','استشارة مؤسسية','توريد','خدمات','مقاولات'];
+var T_COLORS={'استشارة فردية':'#00aeef','استشارة مؤسسية':'#e07a2f','توريد':'#00b894','خدمات':'#6c5ce7','مقاولات':'#e050a0'};
+var T_MAP={
+  title:['title','tender','tender title','عنوان المناقصة','اسم المناقصة','المناقصة','العنوان','الموضوع'],
+  org:['org','organization','organisation','company','client','buyer','donor','orgname','org name','الجهة','الجهة الطالبة','الجهة المانحة','المؤسسة','الجمعية','الشركة','اسم الجهة'],
+  type:['type','category','cat','نوع المناقصة','النوع','التصنيف','الفئة'],
+  budget:['budget','value','amount','الميزانية','الميزانية التقديرية','القيمة'],
+  loc:['loc','location','gov','city','country','المكان','الموقع','المحافظة','المدينة','مكان التنفيذ'],
+  dl:['dl','deadline','closing date','closingdate','due','end date','آخر موعد','الموعد النهائي','اخر موعد','آخر موعد للتقديم'],
+  desc:['desc','description','details','scope','summary','الوصف','التفاصيل','المهام','نطاق العمل'],
+  req:['req','requirements','eligibility','criteria','الشروط','المتطلبات','شروط التقدم'],
+  contact:['contact','email','phone','التواصل','البريد','طريقة التقديم'],
+  link:['link','url','apply link','tor','الرابط','رابط المناقصة','رابط الإعلان','رابط التقديم'],
+  source:['source','المصدر']
+};
+function tenderType(v,all){
+  v=String(v||'').trim(); if(T_TYPES.indexOf(v)>-1) return v;
+  var t=(v+' '+all).toLowerCase();
+  if(/مقاول|إنشاء|انشاء|ترميم|construction|works/.test(t)) return 'مقاولات';
+  if(/توريد|شراء|supply|procurement of goods|goods|equipment|أجهزة|اجهزة/.test(t)) return 'توريد';
+  if(/استشار|تقييم|دراسة|consult|evaluation|assessment|study|expert|خبير/.test(t)) return /مؤسس|شركة|firm|company|بيت خبرة/.test(t)?'استشارة مؤسسية':'استشارة فردية';
+  return 'خدمات';
+}
+function cleanTender(j){
+  var o={};
+  ['title','org','type','budget','loc','dl','desc','req','contact','link','source'].forEach(function(k){
+    var v=j[k]; if(v instanceof Date) v=v.getFullYear()+'-'+pad(v.getMonth()+1)+'-'+pad(v.getDate());
+    o[k]=(v==null)?'':String(v).trim();
+  });
+  o.type=tenderType(o.type,o.title+' '+o.desc);
+  if(!o.budget) o.budget='يُحدد لاحقاً';
+  if(!o.loc) o.loc='—';
+  if(!o.req) o.req='يُحدد لاحقاً';
+  if(!o.desc) o.desc=o.title;
+  if(!o.source) o.source='استيراد تنمويين مصر';
+  if(o.link&&typeof canonicalizeJobUrl==='function') o.link=canonicalizeJobUrl(o.link);
+  return o;
+}
+function tKey(t){ return 'tender:'+[normT(t.org),normT(t.title)].join('|'); }
+
+var _tBusy=false;
+async function runTenderImport(raw,label,info){
+  var box=document.getElementById('tender-import-progress');
+  function out(h){ if(box) box.innerHTML=h; }
+  if(_tBusy){ say('⏳ فيه استيراد شغال'); return; }
+  var d=getDb(); if(!d){ out('❌ Firebase غير متصل.'); return; }
+  out('⏳ بنتأكد من تسجيل الدخول...');
+  var user=await waitForUser(4000);
+  if(!user){ out('<b style="color:#b42318">❌ إنت مش داخل بحساب Firebase.</b><br>اخرج وادخل بإيميل الأدمن المسجل في Firebase.'); return; }
+  var list=[], invalid=0;
+  raw.forEach(function(r){ var t=cleanTender(r); if(t.title&&t.org) list.push(t); else invalid++; });
+  if(!list.length){ out('⚠️ مفيش مناقصات صالحة. كل مناقصة محتاجة على الأقل العنوان والجهة.'); return; }
+  if(!confirm('هيتم فحص '+list.length+' مناقصة من '+label+' وإرسال الجديد منها فقط لقائمة المراجعة. نكمل؟')){ out(''); return; }
+  _tBusy=true;
+  try{
+    out('⏳ بنجهز فحص التكرار...');
+    var keys={}, rejected={};
+    var ts=await d.collection('tenders').get(); ts.forEach(function(x){ var v=x.data()||{}; keys[v.duplicateKey||tKey(v)]=1; });
+    var ps=await d.collection('pending_jobs').get();
+    ps.forEach(function(x){ var v=x.data()||{}; if(v._ptype!=='tender'&&!v.budget) return; var k=v.duplicateKey||tKey(v); if(v.status==='rejected') rejected[k]=1; else keys[k]=1; });
+    var FV=firebase.firestore.FieldValue, toAdd=[], dup=0, rej=0;
+    list.forEach(function(t){
+      var k=tKey(t);
+      if(rejected[k]){ rej++; return; }
+      if(keys[k]){ dup++; return; }
+      keys[k]=1;
+      toAdd.push(Object.assign({},t,{cat:t.type,color:T_COLORS[t.type]||'#00aeef',_ptype:'tender',duplicateKey:k,status:'pending',
+        ownerUid:user.uid,submittedBy:user.uid,submittedByEmail:user.email||'',importMethod:'bulk_admin_tender',timestamp:FV.serverTimestamp(),importedAt:FV.serverTimestamp()}));
+    });
+    var added=0, fail=0, firstErr=null;
+    for(var i=0;i<toAdd.length;i+=400){
+      var chunk=toAdd.slice(i,i+400), batch=d.batch();
+      chunk.forEach(function(p){ batch.set(d.collection('pending_jobs').doc(),p); });
+      try{ await batch.commit(); added+=chunk.length; }
+      catch(e){ firstErr=firstErr||e; fail+=chunk.length; if(e&&(e.code==='permission-denied'||e.code==='unauthenticated')){ fail+=toAdd.length-i-chunk.length; break; } }
+      out('⏳ '+Math.min(i+400,toAdd.length)+' / '+toAdd.length+' — تمت إضافة: '+added);
+    }
+    var html=(info?info+'<br>':'')+(fail?'⚠️':'✅')+' انتهى استيراد المناقصات — <b>جديد: '+added+'</b> | موجود مسبقًا: '+dup+(rej?' | مرفوض قبل كده: '+rej:'')+(invalid?' | ناقص البيانات: '+invalid:'')+(fail?' | <b style="color:#b42318">فشل: '+fail+'</b>':'');
+    if(firstErr) html+='<br><span style="color:#b42318">السبب: '+esc(explainError(firstErr))+'</span>';
+    if(added&&!fail) html+='<div style="margin-top:6px;font-size:11px;line-height:1.7">'+toAdd.slice(0,10).map(function(t){return '• '+esc(t.title)+' — '+esc(t.org)+' <span style="color:#6b7280">('+esc(t.type)+')</span>';}).join('<br>')+(toAdd.length>10?'<br>… و'+(toAdd.length-10)+' غيرهم':'')+'</div><div style="margin-top:4px">راجعها من "⏳ انتظار مراجعة" وانشر المعتمد منها.</div>';
+    out(html);
+    say(fail?'⚠️ الاستيراد اكتمل مع أخطاء':'✅ المناقصات اتضافت لقائمة المراجعة');
+    if(added){ try{ if(typeof updatePendingBadge==='function') updatePendingBadge(); }catch(e){} }
+  }catch(e){ out('<b style="color:#b42318">❌ فشل الاستيراد:</b> '+esc(explainError(e))); }
+  finally{ _tBusy=false; }
+}
+window.tmImportTendersBundle=async function(){
+  var box=document.getElementById('tender-import-progress');
+  if(box) box.textContent='⏳ بنقرا '+T_FILE+' من GitHub...';
+  var b=await loadBundle(T_FILE,T_NAMES);
+  if(!b.jobs.length){ if(box) box.innerHTML='⚠️ '+esc(b.err||'التجميعة فاضية')+'.<br>ارفع ملف <b>'+T_FILE+'</b> على الريبو جنب index.html، أو ارفع ملف Excel / CSV / JSON تحت.'; return; }
+  var mapped=b.jobs.map(function(r){ return (r&&typeof r==='object')?mapRow(r,T_MAP):{}; });
+  if(!mapped.some(function(t){ return String(t.title||'').trim()&&String(t.org||'').trim(); })){
+    if(box) box.innerHTML='⚠️ لقيت '+b.jobs.length+' عنصر بس مفيش ولا واحد فيه العنوان والجهة.<br>الحقول الموجودة: <b dir="ltr">'+esc(Object.keys(b.jobs[0]||{}).join('، '))+'</b>'; return;
+  }
+  var upd=await fileUpdatedAt(T_FILE);
+  var info='📦 المصدر: <b>'+esc(b.from)+'</b>'+(upd?' — آخر تحديث للملف: <bdi dir="ltr">'+esc(upd)+'</bdi>':'')+' — عدد المناقصات في الملف: <b>'+b.jobs.length+'</b>'+
+    (b.truncated?'<br><span style="color:#b42318">⚠️ الملف مقطوع عند سطر '+b.cutLine+' — اتقرت المناقصات الكاملة بس.</span>':'');
+  runTenderImport(mapped,T_FILE+' ('+b.jobs.length+' مناقصة)',info);
+};
+window.tmImportTendersFile=async function(input){
+  var f=input&&input.files&&input.files[0]; if(!f) return;
+  var box=document.getElementById('tender-import-progress');
+  try{ var rows=await readJobsFile(f,T_MAP); if(box) box.textContent='📄 '+f.name+': '+rows.length+' صف'; await runTenderImport(rows,'الملف '+f.name,''); }
+  catch(e){ if(box) box.innerHTML='❌ '+esc(e.message||e); }
+  finally{ input.value=''; }
+};
+window.tmImportTendersPaste=function(){
+  var ta=document.getElementById('tender-paste'), txt=(ta&&ta.value||'').trim(); if(!txt){ say('⚠️ الصق JSON أو صفوف من Excel الأول'); return; }
+  var rows=[];
+  var pb=parseBundle(txt,T_NAMES);
+  if(pb.jobs&&pb.jobs.length) rows=pb.jobs;
+  else if(typeof XLSX!=='undefined'&&/\t/.test(txt)){ var wb=XLSX.read(txt,{type:'string'}); rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}); }
+  if(!rows.length){ say('⚠️ ماقدرتش أقرا البيانات — الصق JSON أو انسخ الصفوف من Excel مع صف العناوين'); return; }
+  runTenderImport(rows.map(function(r){return mapRow(r,T_MAP);}),'البيانات الملصوقة','');
+};
+window.tmDownloadTenderTemplate=function(){
+  if(typeof XLSX==='undefined'){ say('❌ مكتبة Excel غير محمّلة'); return; }
+  var ws=XLSX.utils.aoa_to_sheet([['عنوان المناقصة','الجهة','نوع المناقصة','الميزانية','المكان','آخر موعد','الوصف','الشروط','التواصل','الرابط','المصدر'],
+    ['تقييم نهائي لمشروع التمكين الاقتصادي','جمعية مثال','استشارة فردية','يُحدد لاحقاً','القاهرة + ميداني','2026-12-31','تقييم نهائي للمشروع وفق الشروط المرجعية','خبرة 5 سنوات في التقييم','procurement@example.org','https://example.org/tender','']]);
+  ws['!cols']=[{wch:32},{wch:20},{wch:14},{wch:14},{wch:14},{wch:12},{wch:34},{wch:24},{wch:22},{wch:28},{wch:12}];
+  var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'مناقصات'); XLSX.writeFile(wb,'نموذج_استيراد_مناقصات_تنمويين_مصر.xlsx');
 };
 
 /* ---------- ربط الدوال القديمة بالتصدير الجديد ---------- */
@@ -8614,6 +8743,23 @@ function injectUi(){
       window.setAdmTab._tm=1;
     }
     updateListBar();
+  }
+  var jprog=document.getElementById('bulk-import-progress');
+  if(jprog&&!document.getElementById('tender-import-card')){
+    var jcard=jprog.parentNode;
+    var card=document.createElement('div'); card.id='tender-import-card';
+    card.style.cssText='margin:14px 0;padding:16px;background:#f3f0ff;border:1.5px solid #c4b5fd;border-radius:16px;font-family:Cairo,sans-serif';
+    card.innerHTML='<div style="font-weight:900;font-size:15px;color:#4c1d95;margin-bottom:4px">📋 استيراد المناقصات</div>'+
+      '<div style="font-size:12px;color:#5b4a8a;line-height:1.7;margin-bottom:10px">بنفس طريقة الوظائف: المناقصات بتروح لقائمة المراجعة، والمكرر والمرفوض قبل كده بيتخطى تلقائي.</div>'+
+      '<button type="button" onclick="tmImportTendersBundle()" style="width:100%;border:0;border-radius:12px;padding:13px;background:linear-gradient(135deg,#6c5ce7,#8b7cf6);color:#fff;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer">📥 استيراد تجميعة المناقصات (tenders-bulk.js)</button>'+
+      '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #c4b5fd"><div style="font-weight:800;font-size:12px;margin-bottom:6px;color:#4c1d95">📄 أو ارفع ملف مناقصات (Excel / CSV / JSON)</div>'+
+      '<input type="file" accept=".xlsx,.xls,.csv,.json" onchange="tmImportTendersFile(this)" style="font-family:Cairo,sans-serif;font-size:11px;width:100%">'+
+      '<button type="button" onclick="tmDownloadTenderTemplate()" style="margin-top:8px;background:none;border:0;color:#6c5ce7;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer;padding:0">⬇️ تحميل نموذج ملف المناقصات</button></div>'+
+      '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #c4b5fd"><div style="font-weight:800;font-size:12px;margin-bottom:6px;color:#4c1d95">📋 أو الصق البيانات (JSON أو صفوف منسوخة من Excel)</div>'+
+      '<textarea id="tender-paste" rows="3" style="width:100%;box-sizing:border-box;border:1.5px solid #c4b5fd;border-radius:10px;padding:8px;font-family:Cairo,sans-serif;font-size:12px" placeholder="الصق هنا..."></textarea>'+
+      '<button type="button" onclick="tmImportTendersPaste()" style="margin-top:6px;border:0;border-radius:10px;padding:8px 14px;background:#ede9fe;color:#4c1d95;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer">استيراد البيانات الملصوقة</button></div>'+
+      '<div id="tender-import-progress" style="margin-top:10px;font-size:12px;line-height:1.8;color:#3b2a6b"></div>';
+    jcard.parentNode.insertBefore(card,jcard.nextSibling);
   }
   var prog=document.getElementById('bulk-import-progress');
   if(prog&&!document.getElementById('tm-import-file')){

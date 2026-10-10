@@ -9794,6 +9794,106 @@ function addBtn(){
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',addBtn); else addBtn();
 })();
 
+/* ===== شاشة "اعرف التطبيق" للمستخدم الجديد ===== */
+(function(){
+'use strict';
+var KEY='tm_onboard_v1';
+var CARDS=[
+  {i:'📲',t:'أهلاً بيك في تنمويين مصر',d:'كل اللي يحتاجه التنموي في مكان واحد، ومجانًا. خد دقيقة تعرف التطبيق بيعمل إيه 👇'},
+  {i:'💼',t:'الوظائف',d:'فرص جديدة كل يوم في الجمعيات والمنظمات الدولية، بكل التفاصيل ولينك التقديم وآخر موعد.'},
+  {i:'📋',t:'المناقصات والاستشارات',d:'مهام استشارية للأفراد والشركات، ومناقصات توريد وخدمات ومقاولات.'},
+  {i:'👨‍💼',t:'الاستشاريين والموردين',d:'ابحث بالتخصص والمحافظة وتواصل على طول، وسجّل نفسك مجانًا عشان الجهات توصلك.'},
+  {i:'🎓',t:'أكاديمية تنمويين مصر',d:'تدريبات أونلاين مجانية، وشهادة حضور موثّقة تضيفها على LinkedIn.'},
+  {i:'📘',t:'دليل الاشتراطات وبرنامج أثر',d:'اشتراطات الجهات المانحة مختصرة ومنظمة، ونظام أثر للإدارة المالية للجمعيات.'},
+  {i:'🔔',t:'خليك أول واحد يعرف',d:'فعّل الإشعارات واختار مجالك ومحافظتك، ويوصلك اللي يهمك بس أول ما ينزل.',last:true}
+];
+function $(id){ return document.getElementById(id); }
+function css(){
+  if($('tmo-css')) return;
+  var st=document.createElement('style'); st.id='tmo-css';
+  st.textContent='#tmo{position:fixed;inset:0;z-index:100060;background:rgba(9,22,45,.72);display:none;align-items:center;justify-content:center;font-family:Cairo,sans-serif;direction:rtl;padding:16px}'+
+  '#tmo.on{display:flex}#tmo .bx{background:linear-gradient(160deg,#1a3a6e,#122a52);color:#fff;width:100%;max-width:420px;border-radius:24px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.4);position:relative}'+
+  '#tmo .skip{position:absolute;top:12px;left:12px;z-index:2;background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:20px;padding:6px 14px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer}'+
+  '#tmo .track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}#tmo .track::-webkit-scrollbar{display:none}'+
+  '#tmo .card{flex:0 0 100%;scroll-snap-align:center;padding:56px 26px 20px;text-align:center;min-height:360px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center}'+
+  '#tmo .ic{width:96px;height:96px;border-radius:26px;background:rgba(0,174,239,.2);display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:18px}'+
+  '#tmo .t{font-size:22px;font-weight:900;margin-bottom:10px;line-height:1.4}#tmo .d{font-size:14.5px;color:#cfe3f7;line-height:1.9}'+
+  '#tmo .cta{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:18px}#tmo .cta button{border:0;border-radius:12px;padding:12px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer}'+
+  '#tmo .cta .a{background:#00aeef;color:#0b2347}#tmo .cta .b{background:rgba(255,255,255,.12);color:#fff}'+
+  '#tmo .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 18px;border-top:4px solid #00aeef;background:rgba(0,0,0,.12)}'+
+  '#tmo .dots{display:flex;gap:6px}#tmo .dot{width:8px;height:8px;border-radius:4px;background:rgba(255,255,255,.3);transition:all .2s}#tmo .dot.on{width:22px;background:#ffc94a}'+
+  '#tmo .next{background:#fff;color:#1a3a6e;border:0;border-radius:12px;padding:9px 20px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer}';
+  document.head.appendChild(st);
+}
+function done(){ try{ localStorage.setItem(KEY,'1'); }catch(e){} var m=$('tmo'); if(m) m.classList.remove('on'); }
+window.tmOpenOnboarding=function(){
+  css();
+  var m=$('tmo');
+  if(!m){
+    m=document.createElement('div'); m.id='tmo';
+    m.innerHTML='<div class="bx"><button class="skip" type="button">تخطي</button><div class="track" id="tmo-track">'+
+      CARDS.map(function(c){ return '<div class="card"><div class="ic">'+c.i+'</div><div class="t">'+c.t+'</div><div class="d">'+c.d+'</div>'+
+        (c.last?'<div class="cta"><button class="a" type="button" data-a="push">🔔 فعّل الإشعارات</button><button class="b" type="button" data-a="prefs">🎯 اختار مجالك ومحافظتك</button><button class="b" type="button" data-a="go">يلا نبدأ</button></div>':'')+'</div>'; }).join('')+
+      '</div><div class="nav"><div class="dots" id="tmo-dots">'+CARDS.map(function(){return '<span class="dot"></span>';}).join('')+'</div><button class="next" type="button" id="tmo-next">التالي ←</button></div></div>';
+    document.body.appendChild(m);
+    var track=$('tmo-track');
+    function idx(){ return Math.round(Math.abs(track.scrollLeft)/track.clientWidth); }
+    function upd(){ var i=idx(); $('tmo-dots').querySelectorAll('.dot').forEach(function(d,k){ d.classList.toggle('on',k===i); }); $('tmo-next').textContent=i>=CARDS.length-1?'يلا نبدأ ✓':'التالي ←'; }
+    track.addEventListener('scroll',function(){ clearTimeout(track._t); track._t=setTimeout(upd,60); });
+    $('tmo-next').onclick=function(){ var i=idx(); if(i>=CARDS.length-1){ done(); return; } var card=track.children[i+1]; if(card) card.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); };
+    m.querySelector('.skip').onclick=done;
+    m.addEventListener('click',function(e){
+      var a=e.target.getAttribute&&e.target.getAttribute('data-a'); if(!a) return;
+      done();
+      if(a==='push'&&window.tmEnablePush) window.tmEnablePush();
+      if(a==='prefs'&&window.tmOpenPushPrefs) window.tmOpenPushPrefs();
+    });
+    upd();
+  }
+  var tr=$('tmo-track'); if(tr) tr.scrollLeft=0;
+  m.classList.add('on');
+};
+function menuItem(){
+  var ref=document.querySelector('.mitem[data-tma]')||document.querySelector('.mitem[onclick="tmEnablePush()"]');
+  if(!ref||document.querySelector('.mitem[data-onb]')) return;
+  var d=document.createElement('div'); d.className='mitem'; d.setAttribute('data-onb','1'); d.onclick=window.tmOpenOnboarding;
+  d.innerHTML='<div class="mico" style="background:#fff4e0">💡</div><div class="mtxt"><div class="mtt">اعرف التطبيق</div><div class="mst">جولة سريعة في مميزات تنمويين مصر</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>';
+  ref.parentNode.insertBefore(d,ref);
+}
+function autoShow(){
+  try{ if(localStorage.getItem(KEY)) return; }catch(e){ return; }
+  if(location.search&&/[?&](job|tender|course|form)=/.test(location.search)) return; // جاي من لينك مباشر
+  var tries=0;
+  (function wait(){
+    tries++;
+    function vis(el){ if(!el) return false; var cs=getComputedStyle(el); return cs.display!=='none'&&cs.visibility!=='hidden'&&el.getClientRects().length>0; }
+    var app=$('app'), sp=$('splash');
+    var splashOn=vis(sp)||(app&&getComputedStyle(app).display==='none');
+    var adminOn=vis($('admin'));
+    var otherModal=document.querySelector('#tma.on,#tmp.on,#tmd.on,#tm-exp.on');
+    if(!splashOn&&!adminOn&&!otherModal){ setTimeout(window.tmOpenOnboarding,1200); return; }
+    if(tries<90) setTimeout(wait,1000);
+  })();
+}
+function init(){ menuItem(); autoShow(); }
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+
+/* ===== زرار "حسابي" في الهيدر (شاشة حسابي ماكانش ليها مدخل) ===== */
+(function(){
+  function add(){
+    var bell=document.getElementById('notif-bell-btn');
+    if(!bell||document.getElementById('tm-profile-btn')) return;
+    var b=document.createElement('button');
+    b.id='tm-profile-btn'; b.className=bell.className||'ib'; b.type='button'; b.setAttribute('aria-label','حسابي');
+    b.style.cssText='position:relative;display:flex;align-items:center;justify-content:center';
+    b.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    b.onclick=function(){ try{ go('profile'); }catch(e){} };
+    bell.parentNode.insertBefore(b,bell);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',add); else add();
+})();
+
 </script>
 </body>
 </html>

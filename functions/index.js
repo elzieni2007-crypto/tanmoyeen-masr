@@ -242,7 +242,7 @@ const SEGMENTS = ["Total Subscriptions", "Subscribed Users"];
 const PUSH_GAP_MS = 2 * 60 * 1000; // أقل فاصل بين إشعارين فرديين
 const pushStateRef = () => db.collection("settings").doc("push_state");
 
-async function sendOneSignal({title, message, url, topic, subscriptionIds}) {
+async function sendOneSignal({title, message, url, topic, subscriptionIds, filters}) {
   // تنظيف المفتاح من أي مسافات أو سطر جديد اتلصق معاه
   const key = String(ONESIGNAL_REST_API_KEY.value() || "").trim().replace(/^(Key|Basic)\s+/i, "");
   if (!key) throw new Error("ONESIGNAL_REST_API_KEY is not configured");
@@ -251,7 +251,7 @@ async function sendOneSignal({title, message, url, topic, subscriptionIds}) {
   const schemes = /^os_v2_/i.test(key) ? ["Key", "Basic"] : ["Basic", "Key"];
   let lastError = "";
   for (const scheme of schemes) {
-    const targets = subscriptionIds ? [null] : SEGMENTS;
+    const targets = (subscriptionIds || filters) ? [null] : SEGMENTS;
     for (const segment of targets) {
       const response = await fetch("https://api.onesignal.com/notifications", {
         method: "POST",
@@ -262,7 +262,8 @@ async function sendOneSignal({title, message, url, topic, subscriptionIds}) {
         body: JSON.stringify({
           app_id: ONESIGNAL_APP_ID,
           target_channel: "push",
-          ...(subscriptionIds ? {include_subscription_ids: subscriptionIds} : {included_segments: [segment]}),
+          ...(subscriptionIds ? {include_subscription_ids: subscriptionIds} :
+            filters ? {filters} : {included_segments: [segment]}),
           headings: {en: title, ar: title},
           contents: {en: message, ar: message},
           // web_url للمتصفح، و data للتطبيق: أغلب أدوات تغليف التطبيقات بتفتح الرابط ده جوه التطبيق
@@ -312,6 +313,55 @@ async function claimPush(docRef, kind) {
   });
 }
 
+// ============ الإشعارات المخصصة (المجال + المحافظة) ============
+// اللي ماخصصوش (مفيش عندهم تاج prefs) بيوصلهم كل حاجة زي الأول.
+// واللي خصصوا، تفضيلاتهم في push_prefs/{subscriptionId} وبيوصلهم اللي يناسبهم بس.
+function normAr(s) {
+  return String(s || "").toLowerCase()
+    .replace(/[\u064B-\u065F\u0670]/g, "").replace(/[أإآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه")
+    .replace(/\s+/g, " ").trim();
+}
+function isRemote(place) { return /بعد|اونلاين|online|remote/.test(normAr(place)); }
+function placeMatches(place, govs) {
+  if (!govs || !govs.length) return true;
+  if (!place || isRemote(place)) return true;
+  const p = normAr(place);
+  return govs.some((g) => p.includes(normAr(g)));
+}
+function sectorMatches(sec, secs) {
+  if (!secs || !secs.length) return true;
+  if (!sec) return true;
+  const s = normAr(sec);
+  return secs.some((x) => { const n = normAr(x); return s.includes(n) || n.includes(s); });
+}
+async function matchedSubscriptions(kind, item) {
+  const snap = await db.collection("push_prefs").where(kind === "tender" ? "tenders" : "jobs", "==", true).get();
+  const ids = [];
+  snap.forEach((d) => {
+    const p = d.data() || {};
+    const place = kind === "tender" ? item.loc : item.gov;
+    const okSec = kind === "tender" ? true : sectorMatches(item.sec, p.secs);
+    if (okSec && placeMatches(place, p.govs)) ids.push(p.subId || d.id);
+  });
+  return [...new Set(ids)];
+}
+// بيبعت للجمهور العام (اللي ماخصصوش) + اللي تفضيلاتهم مطابقة
+async function sendToAudience(payload, matchedIds) {
+  let ok = false;
+  let lastErr = null;
+  try {
+    await sendOneSignal(Object.assign({}, payload, {filters: [{field: "tag", key: "prefs", relation: "not_exists"}]}));
+    ok = true;
+  } catch (e) { lastErr = e; console.warn("general push failed", e.message); }
+  for (let i = 0; i < matchedIds.length; i += 2000) {
+    try {
+      await sendOneSignal(Object.assign({}, payload, {subscriptionIds: matchedIds.slice(i, i + 2000)}));
+      ok = true;
+    } catch (e) { lastErr = e; console.warn("matched push failed", e.message); }
+  }
+  if (!ok && lastErr) throw lastErr;
+}
+
 exports.onNewJob = onDocumentCreated(
   {document: "jobs/{jobId}", region: "europe-west1", secrets: [ONESIGNAL_REST_API_KEY]},
   async (event) => {
@@ -319,13 +369,14 @@ exports.onNewJob = onDocumentCreated(
     if (!job || !["approved", "active"].includes(job.status)) return;
     const decision = await claimPush(event.data.ref, "job");
     if (decision !== "send") return;
-    await sendOneSignal({
+    const matchedJ = await matchedSubscriptions("job", job);
+    await sendToAudience({
       title: "💼 وظيفة جديدة: " + clip(job.title || "وظيفة جديدة", 60),
       message: clip((job.org || "تنمويين مصر") + (job.gov ? " — " + job.gov : "") +
         (job.dl ? " | آخر موعد " + job.dl : ""), 120),
       url: PUBLIC_APP_URL + "?job=" + encodeURIComponent(event.params.jobId),
       topic: "tanmoyeen-job",
-    });
+    }, matchedJ);
   }
 );
 
@@ -336,13 +387,14 @@ exports.onNewTender = onDocumentCreated(
     if (!tender || !["approved", "active"].includes(tender.status)) return;
     const decision = await claimPush(event.data.ref, "tender");
     if (decision !== "send") return;
-    await sendOneSignal({
+    const matchedT = await matchedSubscriptions("tender", tender);
+    await sendToAudience({
       title: "📋 فرصة جديدة: " + clip(tender.title || "فرصة جديدة", 60),
       message: clip((tender.org || "تنمويين مصر") + (tender.loc ? " — " + tender.loc : "") +
         (tender.dl ? " | آخر موعد " + tender.dl : ""), 120),
       url: PUBLIC_APP_URL + "?tender=" + encodeURIComponent(event.params.tenderId),
       topic: "tanmoyeen-tender",
-    });
+    }, matchedT);
   }
 );
 
@@ -366,12 +418,18 @@ exports.flushPushDigest = onSchedule(
     const parts = [];
     if (counts.jobs) parts.push(counts.jobs + (counts.jobs === 1 ? " وظيفة جديدة" : " وظائف جديدة"));
     if (counts.tenders) parts.push(counts.tenders + (counts.tenders === 1 ? " فرصة/مناقصة جديدة" : " فرص ومناقصات جديدة"));
-    await sendOneSignal({
+    const prefSnap = await db.collection("push_prefs").get();
+    const digestIds = [];
+    prefSnap.forEach((d) => {
+      const p = d.data() || {};
+      if ((counts.jobs && p.jobs !== false) || (counts.tenders && p.tenders !== false)) digestIds.push(p.subId || d.id);
+    });
+    await sendToAudience({
       title: "📢 إعلانات جديدة على تنمويين مصر",
       message: parts.join(" و ") + " — ادخل شوفها قبل ما المواعيد تخلص",
       url: PUBLIC_APP_URL + (counts.jobs ? "?form=jobs" : "?form=tenders"),
       topic: "tanmoyeen-digest",
-    });
+    }, [...new Set(digestIds)]);
   }
 );
 

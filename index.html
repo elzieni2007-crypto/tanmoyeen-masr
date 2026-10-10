@@ -8699,6 +8699,7 @@ window.exportAdminSection=function(){
   tmExport(t==='expert'?'consultants':t==='sup'?'suppliers':t==='org'?'organizations':'jobseekers','xlsx');
 };
 window.tmExport=tmExport;
+window.tmLogoAssets=loadLogoAssets;
 window.tmExportRows=function(title,rows,fmt){ if(!rows||!rows.length){ say('⚠️ مفيش بيانات للتصدير'); return Promise.resolve(); } return (fmt==='pdf'?pdfFromRows(title,rows,{pdf:['name','phone','email','gov','org','jobTitle','status']}):excelFromRows(title,rows)).then(function(){ say('✅ تم تصدير '+rows.length+' سجل'); }).catch(function(e){ say('❌ '+(e.message||e)); }); }; window.tmExportAllExcel=tmExportAllExcel; window.tmOpenExport=openExport;
 
 var LIST_TABS={jobseeker:{col:'jobseekers',name:'باحثي العمل'},expert:{col:'consultants',name:'الاستشاريين'},sup:{col:'suppliers',name:'الموردين'},org:{col:'organizations',name:'المؤسسات'}};
@@ -8717,7 +8718,7 @@ function injectUi(){
   if(out&&!document.querySelector('.tm-exp-open')){
     var b=document.createElement('button'); b.className='tm-exp-open'; b.type='button'; b.textContent='📤 تصدير';
     b.onclick=openExport;
-    var wrap=document.createElement('div'); wrap.style.cssText='display:flex;align-items:center';
+    var wrap=document.createElement('div'); wrap.style.cssText='display:flex;align-items:center;flex-wrap:wrap;gap:4px;justify-content:flex-end';
     out.parentNode.insertBefore(wrap,out); wrap.appendChild(b); wrap.appendChild(out);
   }
   [['exportJobsAdmin','jobs'],['exportTendersAdmin','tenders'],['exportVols','volunteers'],['exportConsults','consultations']].forEach(function(p){
@@ -9617,6 +9618,273 @@ function copy(t,msg){
 
 function init(){ css(); admTabBtn(); menuItem(); setTimeout(homeBanner,2500); setTimeout(deepLink,1600); }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+
+/* ===== تخصيص الإشعارات (المجال + المحافظة) ===== */
+(function(){
+'use strict';
+var SECS=['الرصد والتقييم M&E','إدارة المشاريع','التدريب وبناء القدرات','الصحة المجتمعية','التعليم والتنمية','حماية الطفل','تمكين المرأة','التمكين الاقتصادي','النوع الاجتماعي','الموارد البشرية','الإدارة المالية','المشتريات والتوريدات','الزراعة والتنمية الريفية','التواصل والإعلام','الصحة النفسية','تكنولوجيا المعلومات'];
+var GOVS=['القاهرة','الإسكندرية','الجيزة','القليوبية','الشرقية','الدقهلية','البحيرة','الغربية','المنوفية','كفر الشيخ','دمياط','بورسعيد','الإسماعيلية','السويس','شمال سيناء','جنوب سيناء','الفيوم','بني سويف','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','الوادي الجديد','مطروح'];
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function say(m){ try{ toast(m); }catch(e){ console.log(m); } }
+function getDb(){ try{ return (typeof db!=='undefined')?db:null; }catch(e){ return null; } }
+function withOS(fn){ window.OneSignalDeferred=window.OneSignalDeferred||[]; window.OneSignalDeferred.push(fn); }
+function inApp(){ return !!(window.tmInMedianApp&&window.tmInMedianApp()); }
+
+function getSubId(){
+  if(inApp()) return window.tmMedianPushId(true);
+  return new Promise(function(res){
+    var done=false; setTimeout(function(){ if(!done){done=true;res('');} },20000);
+    withOS(async function(OS){
+      try{
+        if(('Notification' in window)&&Notification.permission==='default') await OS.Notifications.requestPermission();
+        if(!OS.User.PushSubscription.optedIn&&('Notification' in window)&&Notification.permission==='granted') await OS.User.PushSubscription.optIn();
+        var id=OS.User.PushSubscription.optedIn?(OS.User.PushSubscription.id||''):'';
+        if(!done){done=true;res(id);}
+      }catch(e){ if(!done){done=true;res('');} }
+    });
+  });
+}
+function setPrefsTag(){
+  // تاج واحد بس "prefs" — السيرفر بيستخدمه عشان مايبعتش الإشعار العام للي خصصوا
+  if(inApp()){
+    try{
+      var t=(window.median&&window.median.onesignal&&window.median.onesignal.tags)||(window.gonative&&window.gonative.onesignal&&window.gonative.onesignal.tags);
+      if(t&&typeof t.setTags==='function'){ var r=t.setTags({tags:{prefs:'1'}}); return Promise.resolve(r).then(function(){return true;},function(){return false;}); }
+    }catch(e){}
+    return Promise.resolve(false);
+  }
+  return new Promise(function(res){
+    var done=false; setTimeout(function(){ if(!done){done=true;res(false);} },6000);
+    withOS(async function(OS){ try{ await OS.User.addTag('prefs','1'); if(!done){done=true;res(true);} }catch(e){ if(!done){done=true;res(false);} } });
+  });
+}
+
+function css(){
+  if($('tmp-css')) return;
+  var st=document.createElement('style'); st.id='tmp-css';
+  st.textContent='#tmp{position:fixed;inset:0;z-index:100045;background:rgba(9,22,45,.55);display:none;align-items:flex-end;justify-content:center;font-family:Cairo,sans-serif;direction:rtl}'+
+  '#tmp.on{display:flex}#tmp .bx{background:#fff;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px))}'+
+  '#tmp h3{margin:0;color:#1a3a6e;font-size:16px;flex:1}#tmp .hd{display:flex;align-items:center;margin-bottom:6px}'+
+  '#tmp .x{border:0;background:#eef3f8;border-radius:10px;width:34px;height:34px;font-size:18px;cursor:pointer}'+
+  '#tmp .sec{font-weight:900;color:#1a3a6e;font-size:13px;margin:14px 0 6px}#tmp .hint{font-size:11.5px;color:#64748b;line-height:1.7}'+
+  '#tmp .chips{display:flex;flex-wrap:wrap;gap:6px}#tmp .chip{border:1.5px solid #cbd5e1;background:#fff;color:#334155;border-radius:20px;padding:6px 11px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer}'+
+  '#tmp .chip.on{background:#1a3a6e;color:#fff;border-color:#1a3a6e}#tmp .chip.all.on{background:#00aeef;border-color:#00aeef}'+
+  '#tmp .tg{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:12px;margin-bottom:8px;font-weight:800;color:#1d2733;font-size:13px}'+
+  '#tmp .tg input{width:20px;height:20px}#tmp .save{width:100%;border:0;border-radius:12px;padding:13px;margin-top:14px;background:linear-gradient(135deg,#1a3a6e,#1463a5);color:#fff;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer}'+
+  '#tmp .save[disabled]{opacity:.6}#tmp .reset{width:100%;border:0;background:none;color:#64748b;font-family:Cairo,sans-serif;font-size:12px;margin-top:8px;cursor:pointer}';
+  document.head.appendChild(st);
+}
+var P={jobs:true,tenders:true,secs:[],govs:[]}, SUB='';
+function chips(list,key){
+  var all='<button type="button" class="chip all'+(P[key].length?'':' on')+'" data-k="'+key+'" data-v="">'+(key==='secs'?'كل المجالات':'كل المحافظات')+'</button>';
+  return all+list.map(function(v){ return '<button type="button" class="chip'+(P[key].indexOf(v)>-1?' on':'')+'" data-k="'+key+'" data-v="'+esc(v)+'">'+esc(v)+'</button>'; }).join('');
+}
+function draw(){
+  var b=$('tmp-body');
+  b.innerHTML='<div class="hint">اختار المجالات والمحافظات اللي تهمك، وهيوصلك إشعار بالوظائف والمناقصات اللي تناسبك بس. الوظائف "عن بُعد" بتوصلك أيًا كانت محافظتك.</div>'+
+    '<div class="sec">نوع الإشعارات</div>'+
+    '<label class="tg"><input type="checkbox" id="tmp-jobs"'+(P.jobs?' checked':'')+'> 💼 الوظائف الجديدة</label>'+
+    '<label class="tg"><input type="checkbox" id="tmp-tenders"'+(P.tenders?' checked':'')+'> 📋 المناقصات والاستشارات</label>'+
+    '<div class="sec">🎯 المجالات</div><div class="chips" id="tmp-secs">'+chips(SECS,'secs')+'</div>'+
+    '<div class="sec">📍 المحافظات</div><div class="chips" id="tmp-govs">'+chips(GOVS,'govs')+'</div>'+
+    '<button type="button" class="save" id="tmp-save">💾 حفظ التفضيلات</button>'+
+    '<button type="button" class="reset" id="tmp-reset">رجوع لاستقبال كل الإشعارات</button>';
+  b.querySelectorAll('.chip').forEach(function(c){ c.onclick=function(){
+    var k=c.getAttribute('data-k'), v=c.getAttribute('data-v');
+    if(!v) P[k]=[]; else { var i=P[k].indexOf(v); if(i>-1) P[k].splice(i,1); else P[k].push(v); }
+    P.jobs=$('tmp-jobs').checked; P.tenders=$('tmp-tenders').checked; draw();
+  }; });
+  $('tmp-save').onclick=save;
+  $('tmp-reset').onclick=function(){ P={jobs:true,tenders:true,secs:[],govs:[]}; save(); };
+}
+async function save(){
+  var btn=$('tmp-save'); P.jobs=$('tmp-jobs').checked; P.tenders=$('tmp-tenders').checked;
+  btn.disabled=true; btn.textContent='⏳ جاري الحفظ...';
+  try{
+    if(!SUB) SUB=await getSubId();
+    if(!SUB){ say('⚠️ فعّل الإشعارات الأول عشان نقدر نحفظ تفضيلاتك'); return; }
+    await getDb().collection('push_prefs').doc(SUB).set({subId:SUB,jobs:!!P.jobs,tenders:!!P.tenders,secs:P.secs.slice(0,20),govs:P.govs.slice(0,30),platform:inApp()?'app':'web',updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    var tagged=await setPrefsTag();
+    if(!tagged) console.warn('prefs tag not set — user may receive general pushes too');
+    say('✅ اتحفظت تفضيلات الإشعارات'); $('tmp').classList.remove('on'); refreshLabel();
+  }catch(e){ say('❌ '+(e.code==='permission-denied'?'محتاج تحديث قواعد Firestore (push_prefs)':(e.message||e))); }
+  finally{ if(btn){ btn.disabled=false; btn.textContent='💾 حفظ التفضيلات'; } }
+}
+window.tmOpenPushPrefs=async function(){
+  css();
+  var m=$('tmp');
+  if(!m){ m=document.createElement('div'); m.id='tmp'; m.innerHTML='<div class="bx"><div class="hd"><h3>🎯 تخصيص الإشعارات</h3><button class="x" type="button">×</button></div><div id="tmp-body"></div></div>'; document.body.appendChild(m);
+    m.addEventListener('click',function(e){ if(e.target===m||e.target.classList.contains('x')) m.classList.remove('on'); }); }
+  m.classList.add('on'); $('tmp-body').innerHTML='<div class="hint" style="text-align:center;padding:20px">⏳ ...</div>';
+  try{
+    SUB=SUB||await getSubId();
+    if(SUB){ var s=await getDb().collection('push_prefs').doc(SUB).get(); if(s.exists){ var d=s.data(); P={jobs:d.jobs!==false,tenders:d.tenders!==false,secs:d.secs||[],govs:d.govs||[]}; } }
+  }catch(e){}
+  draw();
+};
+function refreshLabel(){
+  var el=$('tm-prefs-state'); if(!el) return;
+  var parts=[]; if(!P.jobs&&!P.tenders) parts.push('الإشعارات مقفولة');
+  else{ parts.push(P.secs.length?P.secs.length+' مجال':'كل المجالات'); parts.push(P.govs.length?P.govs.length+' محافظة':'كل المحافظات'); }
+  el.textContent=parts.join(' • ');
+}
+function menuItem(){
+  var ref=document.querySelector('.mitem[onclick="tmEnablePush()"]');
+  if(!ref||document.querySelector('.mitem[data-prefs]')) return;
+  var d=document.createElement('div'); d.className='mitem'; d.setAttribute('data-prefs','1'); d.onclick=window.tmOpenPushPrefs;
+  d.innerHTML='<div class="mico" style="background:#e8f0fe">🎯</div><div class="mtxt"><div class="mtt">تخصيص الإشعارات</div><div class="mst" id="tm-prefs-state">اختار مجالك ومحافظتك</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>';
+  ref.parentNode.insertBefore(d,ref.nextSibling);
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',menuItem); else menuItem();
+})();
+
+/* ===== ملخص الأسبوع: بوست فيسبوك + صورة جاهزة ===== */
+(function(){
+'use strict';
+var APP='https://elzieni2007-crypto.github.io/tanmoyeen-masr/';
+var PLAY='https://play.google.com/store/apps/details?id=co.median.android.xlpkzqd';
+var MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function say(m){ try{ toast(m); }catch(e){ console.log(m); } }
+function getDb(){ try{ return (typeof db!=='undefined')?db:null; }catch(e){ return null; } }
+function tsOf(x){ var t=x.timestamp||x.publishedAt||x.approvedAt; if(!t) return 0; if(t.toDate) return t.toDate().getTime(); if(t.seconds) return t.seconds*1000; var d=new Date(t); return isNaN(d)?0:d.getTime(); }
+function dlDate(v){ try{ if(typeof jobDeadlineDate==='function') return jobDeadlineDate(v); }catch(e){} var m=String(v||'').match(/(\d{4})-(\d{2})-(\d{2})/); return m?new Date(+m[1],+m[2]-1,+m[3],23,59):null; }
+function arDay(d){ return d.getDate()+' '+MONTHS[d.getMonth()]; }
+function short(s,n){ s=String(s||'').trim(); return s.length>n?s.slice(0,n-1)+'…':s; }
+function plural(n,one,many){ return n===1?one:(n===2?(one+'ين').replace('ةين','تين'):many); }
+
+var D={jobs:[],tenders:[],days:7,text:''};
+async function load(days){
+  var d=getDb(), since=Date.now()-days*864e5, now=new Date();
+  var ok=function(x){ var s=String(x.status||'approved'); if(s!=='approved'&&s!=='active') return false; if(!x.title) return false; if(tsOf(x)<since) return false; var dd=dlDate(x.dl); return !(dd&&dd<now); };
+  var js=await d.collection('jobs').get(), ts=await d.collection('tenders').get();
+  D.jobs=[]; js.forEach(function(x){ var v=Object.assign({},x.data(),{id:x.id}); if(ok(v)) D.jobs.push(v); });
+  D.tenders=[]; ts.forEach(function(x){ var v=Object.assign({},x.data(),{id:x.id}); if(ok(v)) D.tenders.push(v); });
+  var byDl=function(a,b){ var da=dlDate(a.dl), db_=dlDate(b.dl); return (da?da.getTime():9e15)-(db_?db_.getTime():9e15); };
+  D.jobs.sort(byDl); D.tenders.sort(byDl); D.days=days;
+}
+function buildText(maxJ,maxT){
+  var to=new Date(), from=new Date(Date.now()-D.days*864e5), L=[];
+  L.push('📰 ملخص '+(D.days===7?'الأسبوع':D.days+' يوم')+' على تنمويين مصر');
+  L.push('من '+arDay(from)+' لـ '+arDay(to)+' '+to.getFullYear());
+  L.push('');
+  if(D.jobs.length){
+    L.push('💼 وظائف جديدة ('+D.jobs.length+')');
+    D.jobs.slice(0,maxJ).forEach(function(j){
+      var dd=dlDate(j.dl);
+      L.push('▫️ '+short(j.title,70)+' — '+short(j.org,40)+(j.gov?' ('+j.gov+')':'')+(dd?' | آخر موعد '+arDay(dd):''));
+    });
+    if(D.jobs.length>maxJ) L.push('➕ و'+(D.jobs.length-maxJ)+' '+(D.jobs.length-maxJ===1?'وظيفة تانية':'وظائف تانية')+' على التطبيق');
+    L.push('👉 '+APP+'?form=jobs');
+    L.push('');
+  }
+  if(D.tenders.length){
+    L.push('📋 مناقصات وفرص استشارية ('+D.tenders.length+')');
+    D.tenders.slice(0,maxT).forEach(function(t){
+      var dd=dlDate(t.dl);
+      L.push('▫️ '+short(t.title,70)+' — '+short(t.org,40)+(t.cat||t.type?' ['+(t.cat||t.type)+']':'')+(dd?' | آخر موعد '+arDay(dd):''));
+    });
+    if(D.tenders.length>maxT) L.push('➕ و'+(D.tenders.length-maxT)+' '+(D.tenders.length-maxT===1?'فرصة تانية':'فرص تانية')+' على التطبيق');
+    L.push('👉 '+APP+'?form=tenders');
+    L.push('');
+  }
+  if(!D.jobs.length&&!D.tenders.length) L.push('مفيش إعلانات جديدة مفتوحة في الفترة دي.','');
+  L.push('🔔 فعّل الإشعارات وخصّصها لمجالك ومحافظتك من قائمة "حسابي" في التطبيق، عشان يوصلك اللي يهمك أول بأول.');
+  L.push('📲 حمّل تطبيق تنمويين مصر:');
+  L.push(PLAY);
+  L.push('');
+  L.push('شارك البوست مع زمايلك 🙏');
+  L.push('#تنمويين_مصر #وظائف_تنموية #مناقصات #المجتمع_المدني');
+  return L.join('\n');
+}
+function roundRect(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+function fitText(c,t,max){ t=String(t||''); if(c.measureText(t).width<=max) return t; while(t.length>4&&c.measureText(t+'…').width>max) t=t.slice(0,-1); return t+'…'; }
+async function drawImage(){
+  var cv=$('tmd-canvas'), c=cv.getContext('2d'), W=1080, H=1080;
+  try{ if(document.fonts&&document.fonts.load){ await document.fonts.load('900 60px Cairo'); await document.fonts.load('700 30px Cairo'); } }catch(e){}
+  c.clearRect(0,0,W,H); c.direction='rtl'; c.textAlign='right'; c.textBaseline='alphabetic';
+  var g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#1a3a6e'); g.addColorStop(1,'#122a52'); c.fillStyle=g; c.fillRect(0,0,W,H);
+  c.strokeStyle='rgba(255,255,255,.07)'; c.lineWidth=3; c.beginPath(); c.arc(80,120,300,0,Math.PI*2); c.stroke();
+  // logo
+  var src=null; try{ var la=window.tmLogoAssets?await window.tmLogoAssets():null; src=la?la.logo:((typeof LOGO_SRC!=='undefined')?LOGO_SRC:null); }catch(e){}
+  if(src){ await new Promise(function(r){ var im=new Image(); im.onload=function(){ c.fillStyle='#fff'; roundRect(c,W-330,56,260,120,24); c.fill(); var h=100, w=h*im.width/im.height; if(w>240){ w=240; h=w*im.height/im.width; } c.drawImage(im,W-200-w/2,116-h/2,w,h); r(); }; im.onerror=r; im.src=src; }); }
+  c.fillStyle='#ffc94a'; c.font='800 30px Cairo, sans-serif'; c.fillText('📰 ملخص '+(D.days===7?'الأسبوع':D.days+' يوم'),W-70,250);
+  c.fillStyle='#fff'; c.font='900 74px Cairo, sans-serif'; c.fillText('فرص جديدة للتنمويين',W-70,345);
+  var to=new Date(), from=new Date(Date.now()-D.days*864e5);
+  c.fillStyle='#cfe3f7'; c.font='600 30px Cairo, sans-serif'; c.fillText('من '+arDay(from)+' لـ '+arDay(to)+' '+to.getFullYear(),W-70,400);
+  // counters
+  function box(x,num,label,color){ c.fillStyle='rgba(255,255,255,.08)'; roundRect(c,x,450,440,190,24); c.fill(); c.fillStyle=color; c.font='900 96px Cairo, sans-serif'; c.textAlign='center'; c.fillText(String(num),x+220,570); c.fillStyle='#fff'; c.font='700 32px Cairo, sans-serif'; c.fillText(label,x+220,620); c.textAlign='right'; }
+  box(W-70-440,D.jobs.length,'💼 وظيفة جديدة','#00aeef'); box(70,D.tenders.length,'📋 مناقصة وفرصة','#ffc94a');
+  // top items
+  c.font='700 30px Cairo, sans-serif'; var y=710;
+  D.jobs.concat(D.tenders).slice(0,4).forEach(function(x){ c.fillStyle='#00aeef'; c.fillText('◂',W-70,y); c.fillStyle='#fff'; c.fillText(fitText(c,x.title+' — '+(x.org||''),W-180),W-110,y); y+=52; });
+  // footer
+  c.fillStyle='#00aeef'; c.fillRect(0,H-130,W,130); c.fillStyle='#ffc94a'; c.fillRect(0,H-138,W,8);
+  c.fillStyle='#0b2347'; c.font='900 42px Cairo, sans-serif'; c.fillText('📲 التفاصيل والتقديم على تطبيق تنمويين مصر',W-70,H-52);
+}
+function css(){
+  if($('tmd-css')) return;
+  var st=document.createElement('style'); st.id='tmd-css';
+  st.textContent='#tmd{position:fixed;inset:0;z-index:100046;background:rgba(9,22,45,.55);display:none;align-items:flex-end;justify-content:center;font-family:Cairo,sans-serif;direction:rtl}'+
+  '#tmd.on{display:flex}#tmd .bx{background:#fff;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px))}'+
+  '#tmd .hd{display:flex;align-items:center;margin-bottom:8px}#tmd h3{flex:1;margin:0;color:#1a3a6e;font-size:16px}'+
+  '#tmd .x{border:0;background:#eef3f8;border-radius:10px;width:34px;height:34px;font-size:18px;cursor:pointer}'+
+  '#tmd .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;font-size:12px;font-weight:800;color:#1a3a6e}'+
+  '#tmd select,#tmd input[type=number]{border:1.5px solid #d6dee8;border-radius:9px;padding:6px 8px;font-family:Cairo,sans-serif;font-size:13px}'+
+  '#tmd textarea{width:100%;box-sizing:border-box;border:1.5px solid #d6dee8;border-radius:12px;padding:10px;font-family:Cairo,sans-serif;font-size:13px;line-height:1.8;min-height:220px}'+
+  '#tmd canvas{width:100%;height:auto;border-radius:12px;margin-top:10px;box-shadow:0 4px 16px rgba(0,0,0,.15)}'+
+  '#tmd .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#tmd .btns button{flex:1;min-width:120px;border:0;border-radius:11px;padding:11px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;background:#1a3a6e;color:#fff}'+
+  '#tmd .btns .alt{background:#e8f0fe;color:#1a3a6e}#tmd .note{font-size:11.5px;color:#64748b;margin-top:6px}';
+  document.head.appendChild(st);
+}
+async function generate(){
+  var days=+$('tmd-days').value, mj=Math.max(1,+$('tmd-mj').value||10), mt=Math.max(1,+$('tmd-mt').value||8);
+  $('tmd-text').value='⏳ بنجمع إعلانات الفترة...';
+  try{ await load(days); D.text=buildText(mj,mt); $('tmd-text').value=D.text;
+    $('tmd-note').textContent=D.jobs.length+' وظيفة و'+D.tenders.length+' مناقصة منشورين في الفترة ولسه مفتوحين. تقدر تعدّل النص قبل النسخ.';
+    await drawImage();
+  }catch(e){ $('tmd-text').value='❌ '+(e.message||e); }
+}
+function copyText(t){ if(navigator.clipboard&&navigator.clipboard.writeText) return navigator.clipboard.writeText(t); var a=document.createElement('textarea'); a.value=t; document.body.appendChild(a); a.select(); try{document.execCommand('copy');}catch(e){} a.remove(); return Promise.resolve(); }
+window.tmOpenDigest=function(){
+  css();
+  var m=$('tmd');
+  if(!m){
+    m=document.createElement('div'); m.id='tmd';
+    m.innerHTML='<div class="bx"><div class="hd"><h3>📰 ملخص الأسبوع للنشر</h3><button class="x" type="button">×</button></div>'+
+      '<div class="row">الفترة: <select id="tmd-days"><option value="7">آخر 7 أيام</option><option value="14">آخر 14 يوم</option><option value="30">آخر 30 يوم</option></select>'+
+      'وظائف: <input type="number" id="tmd-mj" value="10" min="1" max="40" style="width:58px"> مناقصات: <input type="number" id="tmd-mt" value="8" min="1" max="40" style="width:58px"></div>'+
+      '<textarea id="tmd-text"></textarea><div class="note" id="tmd-note"></div>'+
+      '<canvas id="tmd-canvas" width="1080" height="1080"></canvas>'+
+      '<div class="btns"><button type="button" id="tmd-copy">📋 نسخ النص</button><button type="button" id="tmd-img" class="alt">🖼️ تحميل الصورة</button><button type="button" id="tmd-share" class="alt">📤 مشاركة</button><button type="button" id="tmd-regen" class="alt">🔄 تحديث</button></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click',function(e){ if(e.target===m||e.target.classList.contains('x')) m.classList.remove('on'); });
+    ['tmd-days','tmd-mj','tmd-mt'].forEach(function(id){ $(id).onchange=generate; });
+    $('tmd-regen').onclick=generate;
+    $('tmd-copy').onclick=function(){ copyText($('tmd-text').value).then(function(){ say('✅ اتنسخ — الصقه في بوست فيسبوك'); }); };
+    $('tmd-img').onclick=function(){ var a=document.createElement('a'); a.href=$('tmd-canvas').toDataURL('image/png'); a.download='ملخص_تنمويين_مصر_'+new Date().toISOString().slice(0,10)+'.png'; document.body.appendChild(a); a.click(); a.remove(); };
+    $('tmd-share').onclick=function(){
+      var text=$('tmd-text').value;
+      $('tmd-canvas').toBlob(function(blob){
+        var file=blob&&window.File?new File([blob],'tanmoyeen-digest.png',{type:'image/png'}):null;
+        if(file&&navigator.canShare&&navigator.canShare({files:[file]})) navigator.share({files:[file],text:text}).catch(function(){});
+        else copyText(text).then(function(){ say('📋 اتنسخ النص — نزّل الصورة وارفعهم مع بعض'); });
+      },'image/png');
+    };
+  }
+  m.classList.add('on'); generate();
+};
+function addBtn(){
+  var exp=document.querySelector('.tm-exp-open');
+  if(exp&&!document.querySelector('.tm-digest-btn')){
+    var b=document.createElement('button'); b.className='tm-exp-open tm-digest-btn'; b.type='button'; b.textContent='📰 الملخص';
+    b.onclick=window.tmOpenDigest; exp.insertAdjacentElement('afterend',b);
+  }
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',addBtn); else addBtn();
 })();
 
 </script>

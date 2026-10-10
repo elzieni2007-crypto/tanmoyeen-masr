@@ -123,6 +123,26 @@ service cloud.firestore {
       }
     }
 
+    // تفضيلات الإشعارات: رقم المستند = رقم اشتراك الإشعارات نفسه (مش متوقع)
+    match /push_prefs/{subId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update: if request.resource.data.keys().hasOnly(['subId','jobs','tenders','secs','govs','platform','updatedAt'])
+        && request.resource.data.subId == subId
+        && subId.size() >= 8 && subId.size() <= 80
+        && request.resource.data.jobs is bool
+        && request.resource.data.tenders is bool
+        && request.resource.data.secs is list && request.resource.data.secs.size() <= 20
+        && request.resource.data.govs is list && request.resource.data.govs.size() <= 30;
+      allow delete: if isAdmin();
+    }
+
+    // شهادات الأكاديمية: أي حد يقدر يتحقق منها، والأدمن بس يصدرها
+    match /certificates/{certId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // تسجيلات التدريب: أي حد يسجل (لو التدريب مفتوح)، والأدمن بس يقرا ويعدل.
     // رقم المستند = رقم التدريب + "_" + الموبايل، فنفس الرقم مايقدرش يسجل مرتين.
     match /course_registrations/{regId} {

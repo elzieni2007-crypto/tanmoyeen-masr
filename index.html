@@ -5268,7 +5268,16 @@ function setAdmTab(el, tab){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
-  if(tab === 'registration-requests'){ loadRegistrationRequests(); } else if(tab === 'import-job'){
+  if(tab === 'registration-requests'){
+    // كان بيحمّل الطلبات من غير ما يُظهر مكانها، فكانت قائمة الباحثين عن عمل هي اللي فاضلة ظاهرة
+    listEl.style.display='none';
+    formJob.style.display='none';
+    formTend.style.display='none';
+    var rr=document.getElementById('adm-form-registration-requests');
+    if(rr) rr.style.display='block';
+    var lb=document.getElementById('tm-list-export'); if(lb) lb.style.display='none';
+    loadRegistrationRequests();
+  } else if(tab === 'import-job'){
     listEl.style.display='none';
     formJob.style.display='none';
     formTend.style.display='none';

@@ -581,6 +581,47 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+/* ===== حماية من حقن HTML/JavaScript (XSS) =====
+   كل بيانات Firestore بتتنضف أول ما تتقري: الرموز اللي ممكن تتحول لكود (< > " ' `) بتتبدل
+   برموز شبهها شكلًا ومش بتشتغل كود، واللينكات من نوع javascript: أو data: بتتشال. */
+(function(){
+  var BAD=/^\s*(javascript|vbscript|data)\s*:/i, IMG=/^data:image\/(png|jpe?g|gif|webp);base64,/i;
+  function cleanStr(k,v){
+    if(BAD.test(v)){ return (/photo|image|img|logo|avatar|pic|signature/i.test(k)&&IMG.test(v))?v:''; }
+    if(!/[<>"'`]/.test(v)) return v;
+    return v.replace(/</g,'\u2039').replace(/>/g,'\u203A').replace(/"/g,'\u05F4').replace(/'/g,'\u2019').replace(/`/g,'\u02BB');
+  }
+  function clean(o,k,depth){
+    depth=depth||0; if(depth>8) return o;
+    if(typeof o==='string') return cleanStr(k||'',o);
+    if(Array.isArray(o)) return o.map(function(x){ return clean(x,k,depth+1); });
+    if(o&&typeof o==='object'&&Object.getPrototypeOf(o)===Object.prototype){
+      var r={}; for(var key in o){ if(Object.prototype.hasOwnProperty.call(o,key)) r[key]=clean(o[key],key,depth+1); } return r;
+    }
+    return o; // Timestamp وغيرها بتفضل زي ما هي
+  }
+  window.tmSafeData=clean;
+  function patch(C){
+    if(!C||!C.prototype||Object.prototype.hasOwnProperty.call(C.prototype,'__tmSafe')) return;
+    var d=C.prototype.data, g=C.prototype.get;
+    if(typeof d==='function') C.prototype.data=function(){ var v=d.apply(this,arguments); return v==null?v:clean(v); };
+    if(typeof g==='function') C.prototype.get=function(f){ var v=g.apply(this,arguments); return clean(v,typeof f==='string'?f:''); };
+    C.prototype.__tmSafe=1;
+  }
+  try{ patch(firebase.firestore.DocumentSnapshot); patch(firebase.firestore.QueryDocumentSnapshot); }catch(e){ console.warn('safe-data patch',e); }
+  // البيانات المخزنة على الجهاز من نسخ قديمة (cache_...)
+  try{
+    var gi=Storage.prototype.getItem;
+    Storage.prototype.getItem=function(k){
+      var v=gi.apply(this,arguments);
+      if(v&&typeof k==='string'&&/^cache_/.test(k)){ try{ return JSON.stringify(clean(JSON.parse(v))); }catch(e){} }
+      return v;
+    };
+  }catch(e){}
+})();
+
+</script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -2077,8 +2118,8 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
 
     <!-- زر فتح Sheets -->
-    <a id="adm-sheet-link" href="#" target="_blank" class="adm-sheet-btn">
-      📊 فتح Google Sheets لرؤية كل البيانات ←
+    <a id="adm-sheet-link" href="javascript:void(0)" onclick="if(window.tmOpenExport)tmOpenExport();return false;" class="adm-sheet-btn">
+      📊 تصدير كل البيانات (Excel / PDF) ←
     </a>
 
     <!-- تبويبات -->
@@ -2798,143 +2839,13 @@ async function rejectJobFirebase(fbId){
   } catch(e) { console.log('Reject failed:', e); }
 }
 
-// ============ LIVE CSV LOADER ============
-async function loadConsFromSheet(){
-  try {
-    var url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnv-TMZ2XXxDcStCOZqIHWnLdlyrgynC-lVxiAbQ6Zb4guphDnKjBa2H5iYgMsIUScdLJQmzPovMdm/pub?gid=856889725&single=true&output=csv';
-    var resp = await fetch(url);
-    var text = await resp.text();
-    var rows = text.split('\n').map(function(r){ return r.split(','); });
-    
-    // Skip first 3 rows (headers)
-    var data = rows.slice(3).filter(function(r){ return r[2] && r[2].trim(); });
-    
-    var avatars = {
-      'تمكين':'💼','اقتصاد':'📊','تدريب':'🎓','صحة':'🏥',
-      'تعليم':'📚','بيئة':'🌿','مرأة':'👩','طفل':'👶',
-      'مسرح':'🎭','زراعة':'🌾','مشاريع':'📋','مالي':'💰',
-      'إعلام':'📡','تكنولوجيا':'💻','نفسي':'🧠','اجتماعي':'🤝'
-    };
-    var bgs = ['#e8f0fe','#e7faf3','#fff3cd','#fde8f0','#e8fef3','#f0e8fe'];
-    var femaleNames = ['داليا','ماير','إيمان','سمر','نهى','هناء','دينا','رانيا','مريم','نور','هبة','شيماء','رشا','حنان','سارة','منى'];
-
-    var newCons = data.map(function(r, i){
-      var name = (r[2]||'').trim();
-      var gov  = (r[3]||'').trim();
-      var bio  = (r[4]||'').trim();
-      var email= (r[5]||'').trim();
-      var phone= (r[6]||'').trim().replace(/[^\d]/g,'');
-      var spec = (r[7]||'').trim();
-      
-      if(phone.startsWith('20')) phone = '0' + phone.substring(2);
-      
-      var av = '👨‍💼';
-      for(var k in avatars){ if(spec.includes(k)||bio.includes(k)){ av=avatars[k]; break; } }
-      for(var j=0; j<femaleNames.length; j++){ if(name.includes(femaleNames[j])){ av='👩‍💼'; break; } }
-      
-      return { id:i+1, name:name, spec:spec||'استشاري', spec2:'', gov:gov, bio:bio,
-               email:email, phone:phone, orgs:'', av:av, bg:bgs[i%bgs.length] };
-    });
-
-    if(newCons.length > 10){
-      window.CONS = newCons;
-      var el = document.getElementById('dash-cons-n');
-      if(el) el.textContent = newCons.length;
-      var dg = document.getElementById('cons-dg-count');
-      if(dg) dg.textContent = newCons.length + ' مسجّل';
-      console.log('✅ Loaded ' + newCons.length + ' consultants from sheet');
-      setTimeout(updateAllCounts, 100);
-      renderDash();
-    }
-  } catch(e) {
-    console.log('Sheet load failed, using local data:', e);
-  }
-}
-
-async function loadSupsFromSheet(){
-  try {
-    var resp = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQnv-TMZ2XXxDcStCOZqIHWnLdlyrgynC-lVxiAbQ6Zb4guphDnKjBa2H5iYgMsIUScdLJQmzPovMdm/pub?gid=43853626&single=true&output=csv');
-    var text = await resp.text();
-    var rows = text.split('\n').map(function(r){ return r.split(','); });
-    var data = rows.slice(3).filter(function(r){ return r[2] && r[2].trim(); });
-    var logos = {'مقاولات':'🏗️','توريد':'📦','أجهزة':'💻','طباعة':'🖨️','تدريب':'🎓','صحة':'🏥','أغذية':'🍱','زراعة':'🌾','نقل':'🚚','نظافة':'🧹','استشار':'💼','خدمات':'🏢'};
-    var newSups = data.map(function(r,i){
-      var name = (r[2]||'').trim();
-      var cat  = (r[3]||'').trim();
-      var gov  = (r[4]||'').trim();
-      var addr = (r[5]||'').trim();
-      var phone= (r[6]||'').trim().replace(/[^\d]/g,'');
-      var email= (r[7]||'').trim();
-      if(phone.startsWith('20')) phone='0'+phone.substring(2);
-      var logo='🏭';
-      for(var k in logos){ if(cat.includes(k)||name.includes(k)){logo=logos[k];break;} }
-      return {id:i+1,name:name,cat:cat||'توريدات',gov:gov,address:addr,phone:phone,email:email,delivery:'',clients:'',logo:logo,cert:''};
-    });
-    if(newSups.length > 5){
-      window.SUPS = newSups;
-      var el=document.getElementById('dash-sups-n'); if(el) el.textContent=newSups.length;
-      var dg=document.getElementById('sups-dg-count'); if(dg) dg.textContent=newSups.length+' مورد';
-      console.log('✅ Loaded '+newSups.length+' suppliers');
-      setTimeout(updateAllCounts, 100);
-      renderDash();
-    }
-  } catch(e){ console.log('Sups sheet failed:',e); }
-}
-
-async function loadVolsFromSheet(){
-  try {
-    var resp = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQnv-TMZ2XXxDcStCOZqIHWnLdlyrgynC-lVxiAbQ6Zb4guphDnKjBa2H5iYgMsIUScdLJQmzPovMdm/pub?gid=518168763&single=true&output=csv');
-    var text = await resp.text();
-    var rows = text.split('\n').map(function(r){ return r.split(','); });
-    var data = rows.slice(3).filter(function(r){ return r[2] && r[2].trim(); });
-    var newVols = data.map(function(r,i){
-      var name    = (r[2]||'').trim();
-      var gov     = (r[3]||'').trim();
-      var interests= (r[4]||'').trim().split('/').map(function(x){return x.trim();}).filter(Boolean);
-      var phone   = (r[5]||'').trim().replace(/[^\d]/g,'');
-      var email   = (r[6]||'').trim();
-      var skills  = (r[7]||'').trim();
-      var hours   = (r[8]||'').trim();
-      var worktype= (r[9]||'').trim();
-      var days    = (r[10]||'').trim();
-      var travel  = (r[11]||'').trim();
-      var langs   = (r[12]||'').trim();
-      var badges  = (r[13]||'').trim().split('/').map(function(x){return x.trim();}).filter(Boolean);
-      if(phone.startsWith('20')) phone='0'+phone.substring(2);
-      return {id:i+1,name:name,gov:gov,interests:interests,phone:phone,email:email,skills:skills,hours:hours,worktype:worktype,days:days,travel:travel,langs:langs,badges:badges,photo:''};
-    });
-    if(newVols.length > 0){
-      window.VOLUNTEERS_PRELOAD = newVols;
-      console.log('✅ Loaded '+newVols.length+' volunteers');
-    }
-  } catch(e){ console.log('Vols sheet failed:',e); }
-}
-
-async function loadOrgsFromSheet(){
-  try {
-    var resp = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQnv-TMZ2XXxDcStCOZqIHWnLdlyrgynC-lVxiAbQ6Zb4guphDnKjBa2H5iYgMsIUScdLJQmzPovMdm/pub?gid=960598300&single=true&output=csv');
-    var text = await resp.text();
-    var rows = text.split('\n').map(function(r){ return r.split(','); });
-    var data = rows.slice(3).filter(function(r){ return r[2] && r[2].trim(); });
-    var logos = {'دولية':'🌍','أمم':'🌐','حكومية':'🏛️','أهلية':'🤝','جمعية':'🏠','مؤسسة':'🏢','شركة':'🏭','هيئة':'⚖️'};
-    var newOrgs = data.map(function(r,i){
-      var name  = (r[2]||'').trim();
-      var type  = (r[3]||'').trim();
-      var gov   = (r[4]||'').trim();
-      var field = (r[5]||'').trim();
-      var phone = (r[6]||'').trim().replace(/[^\d]/g,'');
-      var email = (r[7]||'').trim();
-      if(phone.startsWith('20')) phone='0'+phone.substring(2);
-      var logo='🏢';
-      for(var k in logos){ if(type.includes(k)||name.includes(k)){logo=logos[k];break;} }
-      return {id:i+1,name:name,type:type,gov:gov,field:field,phone:phone,email:email,notes:'',logo:logo};
-    });
-    if(newOrgs.length > 5){
-      window.ORGS = newOrgs;
-      console.log('✅ Loaded '+newOrgs.length+' orgs');
-    }
-  } catch(e){ console.log('Orgs sheet failed:',e); }
-}
+// ============ (قديم) تحميل من Google Sheets — اتلغى ============
+// البيانات اتنقلت كلها لـ Firebase. الدوال دي بقت فاضية عشان أي مكان بيناديها مايكسرش،
+// ومابقتش بتحمّل الشيتات المنشورة (ولا لينكاتها موجودة في الكود).
+async function loadConsFromSheet(){ return; }
+async function loadSupsFromSheet(){ return; }
+async function loadVolsFromSheet(){ return; }
+async function loadOrgsFromSheet(){ return; }
 
 function enterApp(){
   var splash = document.getElementById('splash');
@@ -7018,12 +6929,8 @@ function closeTerms(e){
 function manualRefresh(){
   var btn = document.getElementById('refresh-btn');
   if(btn){ btn.style.animation='spin 1s linear'; btn.textContent='⏳'; }
-  Promise.all([
-    loadConsFromSheet(),
-    loadSupsFromSheet(),
-    loadVolsFromSheet(),
-    loadOrgsFromSheet()
-  ]).then(function(){
+  // التحديث بقى من Firebase (كان بيرجّع بيانات الشيتات القديمة فوق بيانات Firebase)
+  Promise.resolve(loadFromFirebase()).then(function(){ return new Promise(function(r){ setTimeout(r,1500); }); }).then(function(){
     renderDash();
     loadVolunteers();
     updateAllCounts();

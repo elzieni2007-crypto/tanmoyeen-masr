@@ -8901,6 +8901,7 @@ var DEFAULT_TPL=[
   {name:'✅ تأكيد التسجيل',title:'✅ تم تأكيد تسجيلك',text:'أهلاً {الاسم} 👋\nتم تأكيد تسجيلك في تدريب "{الكورس}" مع {المدرب}.\n🗓️ الموعد: {الموعد}\nهنبعتلك لينك الحضور قبل التدريب.\n👥 انضم لجروب التدريب على واتساب: {الجروب}\nأكاديمية تنمويين مصر للتعلم عن بعد'},
   {name:'🔗 لينك الحضور',title:'🔗 لينك حضور التدريب',text:'أهلاً {الاسم}\nده لينك حضور تدريب "{الكورس}":\n{الرابط}\n🗓️ {الموعد}\nياريت تدخل قبل الموعد بـ 5 دقايق. مستنيينك 🌱'},
   {name:'⏰ تذكير قبل الموعد',title:'⏰ تذكير: التدريب قرّب',text:'تذكير يا {الاسم} ⏰\nتدريب "{الكورس}" {الموعد}.\nلينك الدخول: {الرابط}'},
+  {name:'🎓 الشهادات جاهزة (رسالة واحدة للكل)',title:'🎓 شهادات الحضور جاهزة',text:'مبروك لكل اللي حضروا تدريب "{الكورس}" 🎉\nشهادات الحضور جاهزة. افتح اللينك واكتب رقم الموبايل والإيميل اللي سجلت بيهم:\n{الشهادات}\nوتقدر تنزّلها PDF وتشاركها على فيسبوك ولينكدإن 💚'},
   {name:'🎓 الشهادة جاهزة',title:'🎓 شهادتك جاهزة',text:'مبروك يا {الاسم} 🎉\nشهادة حضورك لتدريب "{الكورس}" جاهزة:\n{الشهادة}\nتقدر تنزّلها PDF وتضيفها على LinkedIn من نفس الصفحة.\nأكاديمية تنمويين مصر للتعلم عن بعد 🌱'},
   {name:'🙏 شكر بعد التدريب',title:'🙏 شكرًا لحضورك',text:'شكرًا يا {الاسم} على حضورك تدريب "{الكورس}" 🙏\nتابع أكاديمية تنمويين مصر عشان التدريبات الجاية 🌱'}
 ];
@@ -8961,11 +8962,11 @@ function fill(text,course,reg){
   var name=reg&&reg.name?String(reg.name).split(/\s+/)[0]:'';
   var vals={'الاسم':name,'الكورس':course.title||'','التدريب':course.title||'','المدرب':course.trainer||'',
     'الموعد':[course.startDate,course.timeText].filter(Boolean).join(' — '),'الرابط':course.link||'',
-    'الجروب':course.waGroup||'','الشهادة':reg&&reg.certId?certUrl(reg.certId):''};
+    'الجروب':course.waGroup||'','الشهادة':reg&&reg.certId?certUrl(reg.certId):'','الشهادات':APP_URL+'certificate.html'};
   return String(text||'').split('\n').filter(function(line){
     // لو السطر فيه لينك أو جروب أو شهادة مش موجودين، بيتشال السطر كله بدل ما يفضل ناقص
     var m=line.match(/\{(الرابط|الجروب|الشهادة)\}/g); return !m||m.every(function(t){ return vals[t.slice(1,-1)]; });
-  }).join('\n').replace(/\{(الاسم|الكورس|التدريب|المدرب|الموعد|الرابط|الجروب|الشهادة)\}/g,function(_,k){ return vals[k]; })
+  }).join('\n').replace(/\{(الاسم|الكورس|التدريب|المدرب|الموعد|الرابط|الجروب|الشهادة|الشهادات)\}/g,function(_,k){ return vals[k]; })
     .replace(/[ \t]{2,}/g,' ').replace(/[ \t]+([،,.!؟])/g,'$1');
 }
 function withOS(fn){ window.OneSignalDeferred=window.OneSignalDeferred||[]; window.OneSignalDeferred.push(fn); }
@@ -9095,9 +9096,13 @@ function renderForm(c){
     '<div class="tma-form-ttl"><b>'+FORM_TITLE+'</b><span>سجّل بياناتك وهيوصلك تأكيد ولينك الحضور</span></div>'+
     '<div class="tma-card"><div class="tma-ttl">🎓 '+esc(c.title)+'</div>'+courseMeta(c)+shareRow(c)+'</div>'+
     '<div class="tma-card">'+
-      f('tma-name','الاسم بالكامل',true,'text','مثال: أحمد محمد علي')+
+      f('tma-name','الاسم بالكامل',true,'text','مثال: أحمد محمد علي حسن')+
+      '<div class="tma-meta" style="margin:-6px 0 8px">اكتب اسمك ثلاثي أو رباعي بالعربي، زي ما هو في البطاقة.</div>'+
+      '<div id="tma-cert-prev" style="display:none;background:#fff8e6;border:1.5px dashed #c9932e;border-radius:12px;padding:10px 12px;margin-bottom:8px;text-align:center"><div style="font-size:12px;color:#8a6a1f;font-weight:800">🎓 الاسم اللي هيتكتب في شهادة الحضور:</div><div id="tma-cert-name" style="font-size:22px;font-weight:900;color:#122a52;margin-top:4px"></div></div>'+
+      '<label class="tma-chk" id="tma-name-ok-wrap" style="display:none"><input type="checkbox" id="tma-name-ok"> <span>اتأكدت إن اسمي مكتوب صح زي ما عايزه يظهر في الشهادة <b style="color:#e05050">*</b></span></label>'+
       f('tma-phone','رقم الموبايل (واتساب)',true,'tel','01xxxxxxxxx')+
       f('tma-email','البريد الإلكتروني',true,'email','name@example.com')+
+      '<div style="background:#eef6ff;border:1.5px solid #9cc3ff;border-radius:12px;padding:10px 12px;margin:-4px 0 12px;font-size:12.5px;color:#1a3a6e;line-height:1.8">📌 <b>مهم:</b> اتأكد إن رقم الموبايل والإيميل مكتوبين صح، لأنك <b>هتحتاجهم الاتنين عشان تستلم شهادة الحضور</b> بعد التدريب. ولينك الحضور والتذكير هيوصلوك عليهم كمان.</div>'+
       '<div class="tma-f"><label>المحافظة <i>*</i></label><select id="tma-gov"><option value="">اختار المحافظة</option>'+GOVS.map(function(g){return '<option>'+g+'</option>';}).join('')+'</select></div>'+
       f('tma-org','جهة العمل / الجمعية',false,'text','اسم الجمعية أو المؤسسة')+
       f('tma-job','المسمى الوظيفي',false,'text','مثال: محاسب، منسق مشروع')+
@@ -9113,6 +9118,11 @@ function renderForm(c){
   bindShare(body,[c]);
   $('tma-back').onclick=function(){ window.tmOpenAcademy(); };
   $('tma-submit').onclick=function(){ submit(c); };
+  $('tma-name').addEventListener('input',function(){
+    var v=this.value.trim().replace(/\s+/g,' ');
+    $('tma-cert-prev').style.display=v?'block':'none'; $('tma-name-ok-wrap').style.display=v?'flex':'none';
+    $('tma-cert-name').textContent=v; $('tma-name-ok').checked=false;
+  });
 }
 function f(id,lbl,req,type,ph){ return '<div class="tma-f"><label for="'+id+'">'+lbl+(req?' <i>*</i>':'')+'</label><input id="'+id+'" type="'+type+'" placeholder="'+esc(ph||'')+'"'+(type==='tel'?' inputmode="tel" dir="ltr" style="text-align:right"':'')+(type==='email'?' dir="ltr" style="text-align:right" autocomplete="email"':'')+'></div>'; }
 
@@ -9128,7 +9138,9 @@ async function submit(c){
   if(name.length<5||name.split(' ').length<2){ err.textContent='⚠️ اكتب الاسم بالكامل (اسمين على الأقل)'; $('tma-name').focus(); return; }
   if(!/^01[0125]\d{8}$/.test(phone)&&!/^\d{8,15}$/.test(phone)){ err.textContent='⚠️ رقم الموبايل مش صحيح'; $('tma-phone').focus(); return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){ err.textContent='⚠️ البريد الإلكتروني مش صحيح'; $('tma-email').focus(); return; }
+  if(!confirm('📌 اتأكد من بياناتك قبل التسجيل:\n\nالاسم في الشهادة: '+name+'\nالموبايل: '+phone+'\nالإيميل: '+email+'\n\nهتحتاج الموبايل والإيميل دول عشان تستلم شهادة الحضور.\nالبيانات صح؟')) return;
   if(!gov){ err.textContent='⚠️ اختار المحافظة'; $('tma-gov').focus(); return; }
+  if(!$('tma-name-ok')||!$('tma-name-ok').checked){ err.textContent='⚠️ اتأكد من اسمك اللي هيتكتب في الشهادة وعلّم على المربع'; $('tma-name').scrollIntoView({block:'center'}); return; }
   if(!$('tma-consent').checked){ err.textContent='⚠️ لازم توافق على التواصل بخصوص التدريب'; return; }
   _submitting=true; btn.disabled=true; btn.textContent='⏳ جاري التسجيل...';
   try{
@@ -9138,20 +9150,21 @@ async function submit(c){
       org:($('tma-org').value||'').trim(),jobTitle:($('tma-job').value||'').trim(),prevTraining:$('tma-prev').value,heardFrom:$('tma-heard').value,
       notes:($('tma-notes').value||'').trim().slice(0,1000),consent:true,pushId:pushId||'',status:'new',source:'app',createdAt:FV().serverTimestamp()};
     await getDb().collection('course_registrations').doc(c.id+'_'+phone).set(data);
-    success(c,name,!!pushId);
+    success(c,name,!!pushId,phone,email);
   }catch(e){
     console.warn('register',e);
     err.innerHTML=(e&&e.code==='permission-denied')?'⚠️ الرقم ده متسجل في التدريب ده قبل كده، أو التسجيل اتقفل.<br>لو محتاج تعدّل بياناتك كلمنا على صفحة تنمويين مصر.':'❌ حصلت مشكلة في الاتصال، جرّب تاني.';
     btn.disabled=false; btn.textContent='✅ تأكيد التسجيل';
   }finally{ _submitting=false; }
 }
-function success(c,name,hasPush){
+function success(c,name,hasPush,phone,email){
   var body=shell();
   var left=seatsLeft(c);
   body.innerHTML='<div class="tma-card" style="text-align:center;padding:28px 18px">'+
     '<div style="font-size:52px">🎉</div><div class="tma-ttl" style="font-size:18px">تم تسجيلك يا '+esc(name.split(' ')[0])+'!</div>'+
     '<div class="tma-meta" style="font-size:13px">في تدريب <b>'+esc(c.title)+'</b>'+(left===0?'<br>🕒 المقاعد اكتملت، فإنت في <b>قائمة الانتظار</b> وهنبلغك لو اتفتح مكان.':'<br>هيوصلك تأكيد ولينك الحضور قبل الموعد.')+'</div>'+
     (hasPush?'<div class="tma-meta" style="margin-top:10px;color:#0b7a43">🔔 الإشعارات مفعّلة — هيوصلك كل جديد عن التدريب.</div>':'<div class="tma-meta" style="margin-top:10px">💡 ممكن توصلك رسايل التدريب على واتساب أو الإيميل اللي سجلته.</div>')+
+    (phone?'<div style="background:#fff8e6;border:1.5px dashed #c9932e;border-radius:12px;padding:10px 12px;margin-top:14px;font-size:12.5px;color:#5b4a1f;line-height:1.9;text-align:right">🎓 <b>احتفظ بالبيانات دي لاستلام شهادة الحضور:</b><br>📱 <span dir="ltr">'+esc(phone)+'</span><br>✉️ <span dir="ltr">'+esc(email||'')+'</span><br><span style="font-size:11.5px">تقدر تاخد لقطة شاشة للصفحة دي.</span></div>':'')+
     (c.waGroup?'<a class="tma-btn" href="'+esc(c.waGroup)+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;background:linear-gradient(135deg,#00703a,#00b894)">👥 انضم لجروب التدريب على واتساب</a><div class="tma-meta" style="margin-top:6px">كل التحديثات ولينك الحضور هتنزل في الجروب</div>':'')+
     '<div class="tma-meta" style="margin-top:14px;font-weight:800;color:#1a3a6e">💚 شارك التدريب مع زمايلك</div>'+shareRow(c)+
     '<button class="tma-btn alt" type="button" id="tma-more">🎓 تدريبات تانية</button></div>';
@@ -9367,7 +9380,7 @@ function msgPanel(){
     '<select id="aca-tpl"><option value="">📋 اختار رسالة محفوظة...</option>'+tpls.map(function(t,i){return '<option value="'+i+'">'+esc(t.name)+'</option>';}).join('')+'</select>'+
     '<input id="aca-mtitle" placeholder="عنوان الرسالة (للإشعار والإيميل)">'+
     '<textarea id="aca-mtext" rows="6" placeholder="اكتب الرسالة..."></textarea>'+
-    '<div class="aca-small" style="margin-bottom:6px">بيتغيروا تلقائيًا: <b>{الاسم}</b> <b>{الكورس}</b> <b>{المدرب}</b> <b>{الموعد}</b> <b>{الرابط}</b></div>'+
+    '<div class="aca-small" style="margin-bottom:6px">بيتغيروا تلقائيًا: <b>{الاسم}</b> <b>{الكورس}</b> <b>{المدرب}</b> <b>{الموعد}</b> <b>{الرابط}</b> <b>{الجروب}</b> <b>{الشهادة}</b> (لكل شخص) <b>{الشهادات}</b> (لينك واحد للكل)</div>'+
     '<select id="aca-to"><option value="active">👥 كل المسجلين (ماعدا الملغي)</option><option value="confirmed">✅ المؤكدين بس</option><option value="waitlist">🕒 قائمة الانتظار بس</option><option value="attended">🎓 اللي حضروا بس</option></select>'+
     '<label class="aca-small" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;font-weight:800;color:#1a3a6e"><input type="checkbox" id="aca-skip" checked style="width:16px;height:16px"> تخطي اللي وصلتهم نفس الرسالة قبل كده (بأي طريقة)</label>'+
     '<div class="aca-small" id="aca-cnt" style="margin-bottom:8px"></div>'+
@@ -9438,7 +9451,7 @@ function bindMsg(){
   $('aca-mail').onclick=function(){
     var text=$('aca-mtext').value.trim(); if(!text){ say('⚠️ اكتب الرسالة الأول'); return; }
     var l=recipients().map(function(r){return r.email;}).filter(Boolean); if(!l.length){ say(skipOn()?'✅ كل اللي ليهم إيميل وصلتهم الرسالة دي قبل كده':'⚠️ مفيش إيميلات'); return; }
-    if(/\{الشهادة\}/.test(text)){ say('⚠️ لينك الشهادة مختلف لكل شخص — ابعته بواتساب أو إشعار التطبيق'); return; }
+    if(/\{الشهادة\}/.test(text)){ say('⚠️ لينك {الشهادة} مختلف لكل شخص — استخدم رسالة "الشهادات جاهزة (رسالة واحدة للكل)" للإيميل'); return; }
     var body=fill(text,A.course,{name:''}).replace(/^أهلاً\s*\n/,'أهلاً بحضرتك\n');
     var url='mailto:?bcc='+encodeURIComponent(l.join(','))+'&subject='+encodeURIComponent(fill($('aca-mtitle').value||A.course.title,A.course,{}))+'&body='+encodeURIComponent(body);
     if(url.length>1900){ copy(l.join(', '),'📋 الإيميلات كتير على رابط واحد — اتنسخوا، الصقهم في BCC'); url='mailto:?subject='+encodeURIComponent(fill($('aca-mtitle').value||A.course.title,A.course,{}))+'&body='+encodeURIComponent(body); }
@@ -9466,10 +9479,20 @@ function bindMsg(){
   };
 }
 async function courseViewKeep(){ var id=A.course.id, t=$('aca-mtitle').value, x=$('aca-mtext').value; await courseView(id); $('aca-mtitle').value=t; $('aca-mtext').value=x; }
+function tmSha256Hex(str){var b=unescape(encodeURIComponent(str)),K=[],H=[],i,j,p=2;function f(n){for(var d=2;d*d<=n;d++)if(n%d==0)return 0;return 1}for(var c=0;c<64;p++)if(f(p)){if(c<8)H[c]=Math.pow(p,1/2)*4294967296|0;K[c++]=Math.pow(p,1/3)*4294967296|0}var w=[],l=b.length*8;b+='\x80';while(b.length%64-56)b+='\x00';for(i=0;i<b.length;i++){j=b.charCodeAt(i);w[i>>2]|=j<<((3-i)%4)*8}w[w.length]=(l/4294967296)|0;w[w.length]=l;var h=H.slice(0);for(j=0;j<w.length;){var W=w.slice(j,j+=16),o=h.slice(0);for(i=0;i<64;i++){var a=h[0],e=h[4],x;if(i>=16){var s0=W[i-15],s1=W[i-2];W[i]=W[i-16]+(((s0>>>7)|(s0<<25))^((s0>>>18)|(s0<<14))^(s0>>>3))+W[i-7]+(((s1>>>17)|(s1<<15))^((s1>>>19)|(s1<<13))^(s1>>>10))|0}x=h[7]+(((e>>>6)|(e<<26))^((e>>>11)|(e<<21))^((e>>>25)|(e<<7)))+((e&h[5])^(~e&h[6]))+K[i]+W[i];var t2=(((a>>>2)|(a<<30))^((a>>>13)|(a<<19))^((a>>>22)|(a<<10)))+((a&h[1])^(a&h[2])^(h[1]&h[2]));h=[(x+t2)|0].concat(h);h[4]=(h[4]+x)|0;h.length=8}for(i=0;i<8;i++)h[i]=(h[i]+o[i])|0}var r='';for(i=0;i<8;i++)for(j=3;j+1;j--){var v=(h[i]>>(j*8))&255;r+=(v<16?'0':'')+v.toString(16)}return r}
+async function phHash(phone,email){
+  // بصمة من الموبايل + الإيميل مع بعض: محدش يقدر يوصل لشهادة حد بالرقم لوحده
+  var t='tm:'+normPhone(phone)+'|'+String(email||'').trim().toLowerCase();
+  try{ if(window.crypto&&crypto.subtle){ var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)); return Array.from(new Uint8Array(b)).map(function(x){return ('0'+x.toString(16)).slice(-2);}).join(''); } }catch(e){}
+  return tmSha256Hex(t);
+}
 async function issueCerts(){
   var c=A.course, att=regsOf(c.id).filter(function(r){return r.status==='attended';});
   if(!att.length){ say('⚠️ علّم الأول على اللي حضروا "🎓 حضر" من قائمة المسجلين'); return; }
   var todo=att.filter(function(r){return !r.certId;});
+  // الشهادات اللي اتصدرت قبل كده: نضيفلها بصمة الموبايل عشان صفحة "استلم شهادتك" تلاقيها
+  var old=att.filter(function(r){return r.certId;});
+  if(old.length){ try{ var bb=getDb().batch(); for(var k=0;k<old.length;k++){ var hh=await phHash(old[k].phone,old[k].email); if(hh) bb.set(getDb().collection('certificates').doc(old[k].certId),{ph:hh},{merge:true}); } await bb.commit(); }catch(e){ console.warn('backfill ph',e); } }
   if(!todo.length){ say('✅ كل الحاضرين ('+att.length+') ليهم شهادات بالفعل'); return; }
   if(!c.hours&&!confirm('عدد الساعات مش متسجل في التدريب، وسطر الساعات مش هيظهر في الشهادة. نكمل؟')) return;
   if(!confirm('هيتم إصدار '+todo.length+' شهادة حضور لتدريب "'+c.title+'". نكمل؟')) return;
@@ -9479,10 +9502,11 @@ async function issueCerts(){
       var s=await tx.get(counterRef), cur=(s.exists&&s.data()['y'+year])||0;
       var upd={}; upd['y'+year]=cur+todo.length; tx.set(counterRef,upd,{merge:true}); return cur;
     });
-    var batch=d.batch();
+    var batch=d.batch(), hashes=[];
+    for(var hi=0;hi<todo.length;hi++) hashes.push(await phHash(todo[hi].phone,todo[hi].email));
     todo.forEach(function(r,i){
       var id='TMA-'+year+'-'+String(start+i+1).padStart(4,'0');
-      batch.set(d.collection('certificates').doc(id),{name:r.name,courseTitle:c.title,courseId:c.id,trainer:c.trainer||'',courseDate:c.startDate||'',hours:c.hours||0,regId:r.id,issuedAt:FV().serverTimestamp()});
+      batch.set(d.collection('certificates').doc(id),{name:r.name,courseTitle:c.title,courseId:c.id,trainer:c.trainer||'',courseDate:c.startDate||'',hours:c.hours||0,regId:r.id,ph:hashes[i]||'',issuedAt:FV().serverTimestamp()});
       batch.update(d.collection('course_registrations').doc(r.id),{certId:id,updatedAt:FV().serverTimestamp()});
       r.certId=id;
     });

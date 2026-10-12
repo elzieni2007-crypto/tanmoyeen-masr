@@ -2968,7 +2968,7 @@ function loadFromFirebase(){
   // Firebase real-time listener - only when admin logged in
   if(typeof db !== 'undefined' && typeof auth !== 'undefined'){
     auth.onAuthStateChanged(function(user){
-      if(user){
+      if(user && tmIsAdminUser(user)){
         isLoggedIn = true;
         console.log('✅ Admin auto-logged in:', user.email);
         var loginScreen = document.getElementById('admin-login-screen');
@@ -5126,6 +5126,10 @@ const ADMIN_USERS = {
   // تم نقل الصلاحيات لـ Firebase Authentication
   // لا توجد كلمات مرور محفوظة في الكود
 };
+// لوحة الأدمن للإيميل ده بس (نفس الإيميل اللي في قواعد Firestore).
+// أي حساب تاني (زي حسابات المؤسسات) مايقدرش يفتح لوحة الأدمن.
+const TM_ADMIN_EMAIL = 'elzieni2007@gmail.com';
+function tmIsAdminUser(u){ return !!(u && String(u.email||'').toLowerCase() === TM_ADMIN_EMAIL); }
 const SHEETS_LINK = 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit';
 let admTab = 'jobseeker';
 let isLoggedIn = false;
@@ -5159,6 +5163,13 @@ function doLogin(){
     if(btn) btn.textContent = '⏳ جاري الدخول...';
     auth.signInWithEmailAndPassword(email, pass)
       .then(function(cred){
+        if(!tmIsAdminUser(cred.user)){
+          isLoggedIn = false;
+          if(btn) btn.textContent = 'دخول';
+          err.classList.add('on');
+          toast('⛔ الحساب ده مش حساب أدمن');
+          return;
+        }
         isLoggedIn = true;
         err.classList.remove('on');
         if(btn) btn.textContent = 'دخول';
@@ -5169,7 +5180,7 @@ function doLogin(){
       })
       .catch(function(e){
         // Fallback to local users
-        if(ADMIN_USERS[email] && ADMIN_USERS[email] === pass){
+        if(false){ /* مفيش دخول بكلمة سر محلية */
           isLoggedIn = true;
           err.classList.remove('on');
           document.getElementById('admin-login-screen').style.display = 'none';
@@ -5183,7 +5194,7 @@ function doLogin(){
       });
   } else {
     // Fallback to local
-    if(ADMIN_USERS[email] && ADMIN_USERS[email] === pass){
+    if(false){ /* مفيش دخول بكلمة سر محلية */
       isLoggedIn = true;
       err.classList.remove('on');
       document.getElementById('admin-login-screen').style.display = 'none';
@@ -6840,7 +6851,7 @@ function goAdmin(){
   a.style.zIndex='99999'; a.style.overflowY='auto';
   a.style.background='#f0f4f9'; a.style.width='100%'; a.style.minHeight='100vh';
   window.scrollTo(0,0);
-  if(typeof auth!=='undefined'&&auth.currentUser) isLoggedIn=true;
+  isLoggedIn = (typeof auth!=='undefined' && tmIsAdminUser(auth.currentUser));
   if(!isLoggedIn){
     document.getElementById('admin-login-screen').style.display='block';
     document.getElementById('admin-dashboard').style.display='none';

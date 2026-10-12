@@ -470,7 +470,7 @@ function fillCourseText(text, course, name, certId) {
   const vals = {
     "الاسم": name || "", "الكورس": course.title || "", "التدريب": course.title || "", "المدرب": course.trainer || "",
     "الموعد": [course.startDate, course.timeText].filter(Boolean).join(" — "), "الرابط": course.link || "",
-    "الجروب": course.waGroup || "", "الشهادة": certId ? certLink(certId) : "",
+    "الجروب": course.waGroup || "", "الشهادة": certId ? certLink(certId) : "", "الشهادات": PUBLIC_APP_URL + "certificate.html",
   };
   return String(text || "").split("\n")
     .filter((line) => {
@@ -478,7 +478,7 @@ function fillCourseText(text, course, name, certId) {
       return !m || m.every((t) => vals[t.slice(1, -1)]);
     })
     .join("\n")
-    .replace(/\{(الاسم|الكورس|التدريب|المدرب|الموعد|الرابط|الجروب|الشهادة)\}/g, (_, k) => vals[k])
+    .replace(/\{(الاسم|الكورس|التدريب|المدرب|الموعد|الرابط|الجروب|الشهادة|الشهادات)\}/g, (_, k) => vals[k])
     .replace(/[ \t]+\n/g, "\n").replace(/[ \t]{2,}/g, " ").replace(/[ \t]+([،,.!؟])/g, "$1").trim();
 }
 

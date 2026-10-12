@@ -9336,6 +9336,12 @@ async function courseView(id){
       (c.link?'<div class="aca-small" dir="ltr" style="text-align:right;word-break:break-all">'+esc(c.link)+'</div>':'<div class="aca-small" style="color:#b42318">⚠️ لسه مفيش لينك حضور — ضيفه من "تعديل" عشان يتبعت في الرسائل</div>')+shareRow(c)+'</div>'+
     msgPanel()+
     '<div class="aca-card"><div class="aca-row"><div class="t">👥 المسجلين</div><button class="aca-b g" id="aca-xl">📥 Excel</button><button class="aca-b r" id="aca-pdf">📄 PDF</button></div>'+
+      '<button class="aca-b p" id="aca-att" style="width:100%;margin-top:8px;padding:11px">📥 رفع ملف الحضور (Zoom / Meet / Teams / Excel) وتعليم الحاضرين تلقائي</button>'+
+      '<div id="aca-bulk" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;background:#f6f9fc;border-radius:10px;padding:8px">'+
+        '<label class="aca-small" style="display:flex;align-items:center;gap:4px;font-weight:800;color:#1a3a6e"><input type="checkbox" id="aca-selall" style="width:16px;height:16px"> تحديد الكل</label>'+
+        '<span class="aca-small" id="aca-selcnt">0 محدد</span>'+
+        '<select id="aca-bulkst" style="border:1.5px solid #d6dee8;border-radius:9px;padding:5px;font-family:Cairo,sans-serif;font-size:12px">'+Object.keys(ST).map(function(k){return '<option value="'+k+'"'+(k==='attended'?' selected':'')+'>'+ST[k].t+'</option>';}).join('')+'</select>'+
+        '<button class="aca-b g" id="aca-bulkgo">تطبيق على المحددين</button></div>'+
       '<input id="aca-q" placeholder="🔍 بحث بالاسم أو الرقم أو الجهة" style="width:100%;box-sizing:border-box;border:1.5px solid #d6dee8;border-radius:10px;padding:9px;font-family:Cairo,sans-serif;font-size:14px;margin-top:8px">'+
       '<div class="aca-chips" id="aca-chips"></div><div id="aca-regs"></div></div>'+
     '<div class="aca-card"><div class="t" style="font-weight:800;color:#1a2a3a;font-size:13px">📜 سجل الرسائل</div><div id="aca-log" class="aca-small">⏳</div></div>';
@@ -9349,6 +9355,10 @@ async function courseView(id){
   $('aca-xl').onclick=function(){ window.tmExportRows('تسجيلات '+c.title,filtered().map(cleanReg),'xlsx'); };
   $('aca-pdf').onclick=function(){ window.tmExportRows('تسجيلات '+c.title,filtered().map(cleanReg),'pdf'); };
   $('aca-q').oninput=function(){ A.q=this.value.trim(); renderRegs(); };
+  A.sel={};
+  $('aca-selall').onchange=function(){ var on=this.checked; filtered().forEach(function(r){ if(on) A.sel[r.id]=1; else delete A.sel[r.id]; }); renderRegs(); };
+  $('aca-bulkgo').onclick=function(){ var ids=Object.keys(A.sel); if(!ids.length){ say('⚠️ حدد مسجلين الأول'); return; } setStatusBulk(ids,$('aca-bulkst').value); };
+  $('aca-att').onclick=openAttendanceImport;
   bindMsg(); renderRegs(); loadLog();
 }
 function renderRegs(){
@@ -9360,7 +9370,7 @@ function renderRegs(){
   var rs=filtered();
   $('aca-regs').innerHTML=rs.length?rs.map(function(r){
     var s=ST[r.status||'new']||ST.new;
-    return '<div style="border-top:1px solid #eef2f6;padding:10px 0"><div class="aca-row"><div class="t">'+esc(r.name)+'</div><span style="font-size:10px;font-weight:800;color:'+s.c+'">'+s.t+'</span></div>'+
+    return '<div style="border-top:1px solid #eef2f6;padding:10px 0"><div class="aca-row"><input type="checkbox" data-sel="'+esc(r.id)+'"'+(A.sel&&A.sel[r.id]?' checked':'')+' style="width:18px;height:18px;flex:none"><div class="t">'+esc(r.name)+'</div><span style="font-size:10px;font-weight:800;color:'+s.c+'">'+s.t+'</span></div>'+
       '<div class="aca-small">📱 <a href="https://wa.me/'+waNumber(r.phone)+'" target="_blank" dir="ltr">'+esc(r.phone)+'</a> • ✉️ <span dir="ltr">'+esc(r.email||'')+'</span>'+(r.pushId?' • 🔔':'')+(r.sent&&Object.keys(r.sent).length?' • ✉️ '+Object.keys(r.sent).length+' رسالة':'')+'</div>'+
       '<div class="aca-small">'+[r.gov,r.org,r.jobTitle].filter(Boolean).map(esc).join(' • ')+(r.notes?'<br>💬 '+esc(r.notes):'')+'</div>'+
       (r.certId?'<div class="aca-small">🎓 <a href="'+certUrl(r.certId)+'" target="_blank" dir="ltr">'+esc(r.certId)+'</a></div>':'')+
@@ -9368,6 +9378,8 @@ function renderRegs(){
         Object.keys(ST).map(function(k){return '<option value="'+k+'"'+((r.status||'new')===k?' selected':'')+'>'+ST[k].t+'</option>';}).join('')+'</select>'+
       '<button class="aca-b r" data-del="'+esc(r.id)+'">🗑️</button></div></div>';
   }).join(''):'<div class="aca-small" style="text-align:center;padding:16px">مفيش مسجلين هنا</div>';
+  $('aca-regs').querySelectorAll('input[data-sel]').forEach(function(cb){ cb.onchange=function(){ var id=cb.getAttribute('data-sel'); if(cb.checked) A.sel[id]=1; else delete A.sel[id]; updSel(); }; });
+  updSel();
   $('aca-regs').querySelectorAll('select[data-r]').forEach(function(sel){
     sel.onchange=async function(){
       var id=sel.getAttribute('data-r');
@@ -9384,6 +9396,123 @@ function renderRegs(){
       catch(e){ say('❌ '+(e.message||e)); }
     };
   });
+}
+function updSel(){ var n=Object.keys(A.sel||{}).length; if($('aca-selcnt')) $('aca-selcnt').textContent=n+' محدد'; var fl=filtered(); if($('aca-selall')) $('aca-selall').checked=fl.length>0&&fl.every(function(r){return A.sel[r.id];}); }
+async function setStatusBulk(ids,status){
+  if(!confirm('هيتغير حالة '+ids.length+' مسجل لـ "'+ST[status].t+'". نكمل؟')) return;
+  var d=getDb();
+  try{
+    for(var i=0;i<ids.length;i+=400){
+      var b=d.batch();
+      ids.slice(i,i+400).forEach(function(id){ b.update(d.collection('course_registrations').doc(id),{status:status,updatedAt:FV().serverTimestamp()}); });
+      await b.commit();
+    }
+    A.regs.forEach(function(r){ if(ids.indexOf(r.id)>-1) r.status=status; });
+    A.sel={}; say('✅ اتغيرت حالة '+ids.length+' مسجل'); renderRegs(); updateCount();
+    var att=regsOf(A.course.id).filter(function(r){return r.status==='attended';}), done=att.filter(function(r){return r.certId;}).length;
+    if($('aca-cert')) $('aca-cert').textContent='🎓 إصدار الشهادات'+(att.length?' ('+done+'/'+att.length+')':'');
+  }catch(e){ say('❌ '+(e.message||e)); }
+}
+/* ---------- استيراد ملف الحضور ---------- */
+function normName(s){
+  return String(s||'').replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي')
+    .replace(/\(.*?\)/g,' ').replace(/عبد\s+/g,'عبد').replace(/[^\u0600-\u06FFa-zA-Z0-9 ]/g,' ').toLowerCase().replace(/\s+/g,' ').trim();
+}
+function parseMinutes(v){
+  if(v==null||v==='') return 0; if(typeof v==='number') return v;
+  var t=String(v).trim(), h=t.match(/(\d+)\s*h/i), m=t.match(/(\d+)\s*m(?!s)/i), sec=t.match(/(\d+)\s*s/i);
+  if(h||m||sec) return (h?+h[1]*60:0)+(m?+m[1]:0)+(sec?+sec[1]/60:0);
+  var hms=t.match(/^(\d+):(\d{1,2})(?::(\d{1,2}))?$/); if(hms) return hms[3]!=null?(+hms[1]*60+ +hms[2]+ +hms[3]/60):(+hms[1]+ +hms[2]/60);
+  var n=parseFloat(toLatin(t)); return isNaN(n)?0:n;
+}
+function loadXLSX(){
+  if(window.XLSX) return Promise.resolve();
+  return new Promise(function(res,rej){ var s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload=res; s.onerror=function(){rej(new Error('تعذر تحميل مكتبة Excel'));}; document.head.appendChild(s); });
+}
+async function readAttendance(file){
+  await loadXLSX();
+  var buf=await file.arrayBuffer(), wb;
+  if(/\.csv$/i.test(file.name)){
+    var txt=new TextDecoder('utf-8').decode(buf); if(txt.indexOf('\ufffd')>-1){ try{ txt=new TextDecoder('utf-16le').decode(buf); }catch(e){} }
+    wb=XLSX.read(txt,{type:'string'});
+  } else wb=XLSX.read(buf,{type:'array'});
+  var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:'',raw:true});
+  // ملفات Zoom بيبقى فوقها بيانات الاجتماع، فبندوّر على صف العناوين الحقيقي
+  var hi=-1, cols={};
+  for(var i=0;i<Math.min(rows.length,40);i++){
+    var r=rows[i].map(function(x){return String(x||'').toLowerCase().trim();}), c={};
+    r.forEach(function(h,j){
+      if(c.email==null&&/e-?mail|بريد|إيميل|ايميل/.test(h)) c.email=j;
+      else if(c.phone==null&&/phone|mobile|موبايل|تليفون|هاتف|رقم/.test(h)) c.phone=j;
+      else if(c.dur==null&&/duration|المدة|مدة|minutes|دقائق|دقيقة|time in/.test(h)) c.dur=j;
+      else if(c.first==null&&/first name|الاسم الأول/.test(h)) c.first=j;
+      else if(c.last==null&&/last name|surname|اسم العائلة/.test(h)) c.last=j;
+      else if(c.name==null&&/name|الاسم|اسم|participant|attendee/.test(h)) c.name=j;
+    });
+    if(c.email!=null||c.name!=null||c.first!=null||c.phone!=null){ hi=i; cols=c; break; }
+  }
+  if(hi<0) throw new Error('ماقدرتش ألاقي أعمدة الاسم أو الإيميل في الملف');
+  var people={};
+  rows.slice(hi+1).forEach(function(r){
+    var name=cols.name!=null?r[cols.name]:[cols.first!=null?r[cols.first]:'',cols.last!=null?r[cols.last]:''].join(' ');
+    var email=cols.email!=null?String(r[cols.email]||'').trim().toLowerCase():'';
+    var phone=cols.phone!=null?normPhone(r[cols.phone]):'';
+    name=String(name||'').trim(); if(!name&&!email&&!phone) return;
+    var key=email||phone||normName(name);
+    var p=people[key]||(people[key]={name:name,email:email,phone:phone,min:0,rows:0});
+    p.min+=cols.dur!=null?parseMinutes(r[cols.dur]):0; p.rows++;
+  });
+  return {people:Object.keys(people).map(function(k){return people[k];}),hasDur:cols.dur!=null};
+}
+function matchAttendance(list,regs){
+  var byEmail={}, byPhone={}, byName={};
+  regs.forEach(function(r){ if(r.email) byEmail[String(r.email).toLowerCase()]=r; if(r.phone) byPhone[normPhone(r.phone)]=r; byName[normName(r.name)]=r; });
+  var matched={}, unmatched=[];
+  list.forEach(function(p){
+    var r=null, how='';
+    if(p.email&&byEmail[p.email]){ r=byEmail[p.email]; how='الإيميل'; }
+    else if(p.phone&&byPhone[p.phone]){ r=byPhone[p.phone]; how='الموبايل'; }
+    else{
+      var n=normName(p.name);
+      if(n&&byName[n]){ r=byName[n]; how='الاسم'; }
+      else if(n){ var w=n.split(' '); if(w.length>=2){ var cands=regs.filter(function(x){ var xn=normName(x.name); return xn.indexOf(w[0]+' '+w[1])===0; }); if(cands.length===1){ r=cands[0]; how='أول اسمين'; } } }
+    }
+    if(r){ var m=matched[r.id]||(matched[r.id]={reg:r,min:0,how:how,names:[]}); m.min+=p.min; m.names.push(p.name||p.email); }
+    else unmatched.push(p);
+  });
+  return {matched:Object.keys(matched).map(function(k){return matched[k];}),unmatched:unmatched};
+}
+function openAttendanceImport(){
+  var m=$('aca-attm'); if(!m){ m=document.createElement('div'); m.id='aca-attm'; m.style.cssText='position:fixed;inset:0;z-index:100070;background:rgba(9,22,45,.6);display:flex;align-items:flex-end;justify-content:center;font-family:Cairo,sans-serif;direction:rtl'; document.body.appendChild(m); }
+  m.style.display='flex';
+  m.innerHTML='<div style="background:#fff;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px))">'+
+    '<div class="aca-row"><div class="t" style="font-weight:900;color:#1a3a6e;font-size:15px">📥 رفع ملف الحضور</div><button class="aca-b" id="att-x">×</button></div>'+
+    '<div class="aca-small" style="line-height:1.9;margin:8px 0">ارفع تقرير الحضور من <b>Zoom</b> (Reports ← Usage ← Participants) أو <b>Google Meet</b> أو <b>Teams</b>، أو أي ملف Excel فيه الإيميل أو الموبايل أو الاسم. المطابقة بالإيميل الأول، وبعدين الموبايل، وبعدين الاسم.</div>'+
+    '<input type="file" id="att-file" accept=".csv,.xlsx,.xls" style="width:100%;font-family:Cairo,sans-serif;font-size:12px">'+
+    '<div class="aca-row" style="margin-top:10px"><span class="aca-small" style="font-weight:800">أقل مدة حضور (بالدقايق):</span><input id="att-min" type="number" value="0" min="0" style="width:80px;border:1.5px solid #d6dee8;border-radius:8px;padding:6px;font-family:Cairo,sans-serif"></div>'+
+    '<div id="att-out" style="margin-top:12px"></div></div>';
+  $('att-x').onclick=function(){ m.style.display='none'; };
+  var data=null;
+  function show(){
+    if(!data) return;
+    var minM=+$('att-min').value||0, regs=regsOf(A.course.id), res=matchAttendance(data.people,regs);
+    var ok=res.matched.filter(function(x){ return !data.hasDur||x.min>=minM; }), shortL=res.matched.filter(function(x){ return data.hasDur&&x.min<minM; });
+    var already=ok.filter(function(x){return x.reg.status==='attended';}).length, toMark=ok.filter(function(x){return x.reg.status!=='attended';});
+    $('att-out').innerHTML='<div style="background:#e7f6ee;border-radius:12px;padding:10px;font-size:13px;line-height:1.9">'+
+      '✅ اتطابق: <b>'+res.matched.length+'</b> من '+data.people.length+' في الملف'+(data.hasDur?' — منهم <b>'+ok.length+'</b> حضروا '+minM+' دقيقة أو أكتر':'')+
+      '<br>🎓 هيتعلّم "حضر": <b>'+toMark.length+'</b>'+(already?' (و'+already+' متعلّمين قبل كده)':'')+'</div>'+
+      (toMark.length?'<button class="tma-btn" id="att-go">✅ علّم '+toMark.length+' حضر</button>':'')+
+      (shortL.length?'<div class="aca-small" style="margin-top:10px"><b>⏱️ حضروا أقل من '+minM+' دقيقة ('+shortL.length+'):</b><br>'+shortL.map(function(x){return esc(x.reg.name)+' — '+Math.round(x.min)+' د';}).join('<br>')+'</div>':'')+
+      (res.unmatched.length?'<div class="aca-small" style="margin-top:10px;color:#9a5b00"><b>⚠️ في الملف بس مش لاقيهم في المسجلين ('+res.unmatched.length+'):</b><br>'+res.unmatched.slice(0,40).map(function(p){return esc(p.name||p.email||p.phone)+(data.hasDur?' — '+Math.round(p.min)+' د':'');}).join('<br>')+(res.unmatched.length>40?'<br>…':'')+'<br>علّم دول بإيدك لو هما مسجلين بإيميل أو اسم مختلف.</div>':'')+
+      '<details style="margin-top:10px"><summary class="aca-small" style="cursor:pointer;font-weight:800">📋 تفاصيل المطابقة</summary><div class="aca-small" style="line-height:1.9">'+res.matched.map(function(x){return esc(x.reg.name)+' ← '+esc(x.names[0])+' (بـ'+x.how+(data.hasDur?'، '+Math.round(x.min)+' د':'')+')';}).join('<br>')+'</div></details>';
+    if($('att-go')) $('att-go').onclick=function(){ m.style.display='none'; setStatusBulk(toMark.map(function(x){return x.reg.id;}),'attended'); };
+  }
+  $('att-min').oninput=show;
+  $('att-file').onchange=async function(){
+    var f=this.files&&this.files[0]; if(!f) return;
+    $('att-out').innerHTML='<div class="aca-small">⏳ بنقرا الملف...</div>';
+    try{ data=await readAttendance(f); show(); }catch(e){ data=null; $('att-out').innerHTML='<div style="color:#b42318;font-size:13px">❌ '+esc(e.message||e)+'</div>'; }
+  };
 }
 function msgPanel(){
   var tpls=DEFAULT_TPL.concat(A.tpls);

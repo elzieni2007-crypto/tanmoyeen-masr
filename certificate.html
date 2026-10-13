@@ -146,6 +146,7 @@ body{background:#eef3f8;font-family:Cairo,Tahoma,sans-serif;color:#1d2733;min-he
       try{
         var h=await sha('tm:'+ph+'|'+em), q=await firebase.firestore().collection('certificates').where('ph','==',h).limit(5).get();
         if(q.empty){ out.innerHTML='<span style="color:#b42318">مفيش شهادة بالبيانات دي.</span><br><span style="color:#5b6675">اتأكد إنهم نفس الرقم والإيميل اللي سجلت بيهم، أو إن الشهادة اتصدرت.</span>'; return; }
+        q.docs.forEach(function(d){ try{ sessionStorage.setItem('tm_own_'+d.id,'1'); }catch(e){} });
         if(q.size===1){ location.href='?id='+encodeURIComponent(q.docs[0].id); return; }
         out.innerHTML=q.docs.map(function(d){ var c=d.data(); return '<a href="?id='+encodeURIComponent(d.id)+'" style="display:block;background:#eef4ff;border-radius:10px;padding:10px;margin-bottom:8px;color:#1a3a6e;font-weight:800;text-decoration:none">🎓 '+esc(c.courseTitle)+'</a>'; }).join('');
       }catch(e){ out.innerHTML='<span style="color:#b42318">تعذر البحث، جرّب تاني.</span>'; }
@@ -154,6 +155,31 @@ body{background:#eef3f8;font-family:Cairo,Tahoma,sans-serif;color:#1d2733;min-he
   firebase.firestore().collection('certificates').doc(id).get().then(function(doc){
     if(!doc.exists){ fail('الشهادة دي مش موجودة في سجلات الأكاديمية'); return; }
     var c=doc.data();
+    /* متابعة فتح الشهادة: بنسجل إن الشهادة اتفتحت/اتنزلت/اتشاركت (أعداد وتواريخ بس، من غير أي بيانات شخصية) */
+    var noTrack=new URLSearchParams(location.search).get('a')==='1';
+    try{ if(localStorage.getItem('tm_cert_notrack')==='1') noTrack=true; }catch(e){}
+    function track(kind){
+      if(noTrack) return;
+      var FVx=firebase.firestore.FieldValue, k='tm_cv_'+kind+'_'+id, last=0, upd={};
+      try{ last=+localStorage.getItem(k)||0; }catch(e){}
+      if(kind==='view'){
+        var own=false; try{ own=sessionStorage.getItem('tm_own_'+id)==='1'; }catch(e){}
+        var needOwn=own&&!c.ownerViewedAt;
+        if(!needOwn&&last&&Date.now()-last<6*3600*1000) return; // نفس الجهاز فتحها من قريب
+        if(!last) upd.views=FVx.increment(1);
+        if(!c.firstViewedAt) upd.firstViewedAt=FVx.serverTimestamp();
+        if(needOwn) upd.ownerViewedAt=FVx.serverTimestamp();
+        upd.lastViewedAt=FVx.serverTimestamp();
+      } else { if(last) return; upd[kind]=FVx.increment(1); }
+      var ref=firebase.firestore().collection('certificates').doc(id);
+      function ok(){ try{ localStorage.setItem(k,String(Date.now())); }catch(e){} if(upd.ownerViewedAt) c.ownerViewedAt=true; if(upd.firstViewedAt) c.firstViewedAt=true; }
+      ref.update(upd).then(ok).catch(function(){
+        // لو جهاز تاني سجّل أول فتح في نفس اللحظة، نعيد من غير التواريخ الأولى
+        if(!upd.firstViewedAt&&!upd.ownerViewedAt) return;
+        delete upd.firstViewedAt; delete upd.ownerViewedAt; ref.update(upd).then(ok).catch(function(e){ console.warn('track',e); });
+      });
+    }
+    track('view');
     var url=location.origin+location.pathname+'?id='+encodeURIComponent(id);
     var node=document.getElementById('tpl').content.firstElementChild.cloneNode(true);
     function set(k,v){ var el=node.querySelector('[data-f="'+k+'"]'); if(el) el.textContent=v; }
@@ -180,11 +206,12 @@ body{background:#eef3f8;font-family:Cairo,Tahoma,sans-serif;color:#1d2733;min-he
     wrap.innerHTML='<div class="ok">✅ <div><b>شهادة صحيحة وموثّقة</b><br>صادرة من أكاديمية تنمويين مصر للتعلم عن بعد باسم <b>'+esc(c.name)+'</b> — رقم <span dir="ltr">'+esc(id)+'</span></div></div>'+
       '<div class="stage" id="stage"><div class="scaler" id="scaler"></div></div>'+
       '<div class="actions"><button type="button" id="b-pdf">📄 تحميل PDF</button><button type="button" id="b-png" class="alt">🖼️ تحميل صورة</button>'+
-      '<a class="li" href="'+li+'" target="_blank" rel="noopener">in أضفها على LinkedIn</a>'+
+      '<a class="li" id="b-li" href="'+li+'" target="_blank" rel="noopener">in أضفها على LinkedIn</a>'+
       '<button type="button" id="b-fb" style="background:#1877f2">📘 شاركها على فيسبوك</button>'+
       '<button type="button" id="b-wa" style="background:#00a35a">💬 واتساب</button>'+
       '<button type="button" id="b-share" class="alt">📤 شارك صورة الشهادة</button></div>'+
       '<div id="b-note" style="font-size:12.5px;color:#5b6675;margin-top:8px;text-align:center"></div>';
+    document.getElementById('b-li').addEventListener('click',function(){ track('shares'); });
     var scaler=document.getElementById('scaler'), stage=document.getElementById('stage');
     scaler.appendChild(node);
     function fit(){ var s=stage.clientWidth/1123; scaler.style.transform='scale('+s+')'; stage.style.height=(794*s)+'px'; }
@@ -207,13 +234,13 @@ body{background:#eef3f8;font-family:Cairo,Tahoma,sans-serif;color:#1d2733;min-he
       var b=this; b.disabled=true; b.textContent='⏳ جاري التجهيز...';
       try{ var cv=await render(); var pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'pt',format:'a4'});
         pdf.addImage(cv.toDataURL('image/jpeg',0.95),'JPEG',0,0,pdf.internal.pageSize.getWidth(),pdf.internal.pageSize.getHeight());
-        pdf.setProperties({title:'شهادة حضور - '+c.name}); pdf.save(fname+'.pdf'); }
+        pdf.setProperties({title:'شهادة حضور - '+c.name}); pdf.save(fname+'.pdf'); track('downloads'); }
       catch(e){ alert('تعذر تجهيز الملف، جرّب تاني'); }
       b.disabled=false; b.textContent='📄 تحميل PDF';
     };
     document.getElementById('b-png').onclick=async function(){
       var b=this; b.disabled=true; b.textContent='⏳ جاري التجهيز...';
-      try{ var cv=await render(); var a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download=fname+'.png'; document.body.appendChild(a); a.click(); a.remove(); }
+      try{ var cv=await render(); var a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download=fname+'.png'; document.body.appendChild(a); a.click(); a.remove(); track('downloads'); }
       catch(e){ alert('تعذر تجهيز الصورة، جرّب تاني'); }
       b.disabled=false; b.textContent='🖼️ تحميل صورة';
     };
@@ -222,16 +249,17 @@ body{background:#eef3f8;font-family:Cairo,Tahoma,sans-serif;color:#1d2733;min-he
     function openUrl(u){ var w=window.open(u,'_blank'); if(!w) location.href=u; }
     document.getElementById('b-fb').onclick=function(){
       // فيسبوك مابيسمحش يتكتب نص جاهز، فبننسخه عشان الشخص يلصقه
+      track('shares');
       copy(shareText+'\n'+url).then(function(){ document.getElementById('b-note').textContent='✅ اتنسخ كلام جاهز — الصقه في البوست على فيسبوك'; });
       openUrl('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url));
     };
-    document.getElementById('b-wa').onclick=function(){ openUrl('https://wa.me/?text='+encodeURIComponent(shareText+'\n'+url)); };
+    document.getElementById('b-wa').onclick=function(){ track('shares'); openUrl('https://wa.me/?text='+encodeURIComponent(shareText+'\n'+url)); };
     document.getElementById('b-share').onclick=async function(){
       var b=this; b.disabled=true; b.textContent='⏳ جاري التجهيز...';
       try{
         var cv=await render();
         var blob=await new Promise(function(r){ cv.toBlob(r,'image/png'); });
-        var file=new File([blob],'شهادة_'+id+'.png',{type:'image/png'});
+        var file=new File([blob],'شهادة_'+id+'.png',{type:'image/png'}); track('shares');
         if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],text:shareText+'\n'+url}); }
         else{ var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=file.name; document.body.appendChild(a); a.click(); a.remove();
           copy(shareText+'\n'+url); document.getElementById('b-note').textContent='✅ نزلت صورة الشهادة واتنسخ الكلام — ارفعهم على فيسبوك أو لينكدإن'; }

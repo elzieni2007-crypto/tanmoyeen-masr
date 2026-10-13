@@ -8914,6 +8914,7 @@ var DEFAULT_TPL=[
   {name:'⏰ تذكير قبل الموعد',title:'⏰ تذكير: التدريب قرّب',text:'تذكير يا {الاسم} ⏰\nتدريب "{الكورس}" {الموعد}.\nلينك الدخول: {الرابط}'},
   {name:'🎓 الشهادات جاهزة (رسالة واحدة للكل)',title:'🎓 شهادات الحضور جاهزة',text:'🎓 شهادات الحضور جاهزة!\n\nمبروك لكل اللي حضروا تدريب "{الكورس}" مع {المدرب} 🎉\n\n📥 تستلم شهادتك إزاي؟\n1️⃣ افتح اللينك ده:\n{الشهادات}\n2️⃣ اكتب رقم الموبايل اللي سجلت بيه في التدريب\n3️⃣ اكتب الإيميل اللي سجلت بيه\n4️⃣ دوس "🔎 اعرض شهادتي" وهتظهرلك شهادتك\n5️⃣ من نفس الصفحة تقدر تحمّلها PDF أو صورة، وتضيفها على LinkedIn، وتشاركها على فيسبوك وواتساب\n\n⚠️ لازم نفس الموبايل والإيميل اللي سجلت بيهم بالظبط، عشان شهادتك محمية ومحدش غيرك يفتحها.\n\n💚 ولو شاركتها على فيسبوك أو لينكدإن، منشن تنمويين مصر ونفرح بيك!\n#تنمويين_مصر #أكاديمية_تنمويين_مصر'},
   {name:'🎓 الشهادة جاهزة',title:'🎓 شهادتك جاهزة',text:'مبروك يا {الاسم} 🎉\nشهادة حضورك لتدريب "{الكورس}" جاهزة:\n{الشهادة}\nتقدر تنزّلها PDF وتضيفها على LinkedIn من نفس الصفحة.\nأكاديمية تنمويين مصر للتعلم عن بعد 🌱'},
+  {name:'🔔 تذكير باستلام الشهادة (للي لسه ماشافوهاش)',to:'nocert',title:'🎓 شهادتك مستنياك',text:'أهلاً {الاسم} 👋\nشهادة حضورك لتدريب "{الكورس}" جاهزة ولسه ماستلمتهاش 🎓\n\n📥 استلمها من هنا:\n{الشهادات}\nاكتب رقم الموبايل والإيميل اللي سجلت بيهم، وهتظهرلك تحملها PDF أو صورة وتضيفها على LinkedIn.\n\nأكاديمية تنمويين مصر للتعلم عن بعد 🌱'},
   {name:'🙏 شكر بعد التدريب',title:'🙏 شكرًا لحضورك',text:'شكرًا يا {الاسم} على حضورك تدريب "{الكورس}" 🙏\nتابع أكاديمية تنمويين مصر عشان التدريبات الجاية 🌱'}
 ];
 
@@ -9319,9 +9320,36 @@ function courseForm(c){
 }
 function filtered(){
   var rs=regsOf(A.course.id);
-  if(A.filter!=='all') rs=rs.filter(function(r){ return (r.status||'new')===A.filter; });
+  if(A.filter==='nocert') rs=rs.filter(function(r){ return r.certId&&!certSeen(r).seen; });
+  else if(A.filter!=='all') rs=rs.filter(function(r){ return (r.status||'new')===A.filter; });
   if(A.q){ var q=A.q.toLowerCase(); rs=rs.filter(function(r){ return [r.name,r.phone,r.email,r.org,r.gov].join(' ').toLowerCase().indexOf(q)>-1; }); }
   return rs;
+}
+/* ---------- متابعة فتح الشهادات ---------- */
+async function loadCertStats(cid){
+  A.cst={};
+  // متصفح الأدمن مايتحسبش في المشاهدات
+  try{ localStorage.setItem('tm_cert_notrack','1'); }catch(e){}
+  try{ var q=await getDb().collection('certificates').where('courseId','==',cid).get(); q.forEach(function(d){ A.cst[d.id]=d.data(); }); }catch(e){ console.warn('certStats',e); }
+}
+function certSeen(r){
+  var s=(r.certId&&A.cst&&A.cst[r.certId])||{};
+  var own=!!s.ownerViewedAt, views=+s.views||0;
+  return {own:own,views:views,dl:+s.downloads||0,sh:+s.shares||0,seen:own||views>0,last:s.lastViewedAt};
+}
+function certBadge(r){
+  if(!r.certId) return '';
+  var x=certSeen(r), last=x.last&&x.last.toDate?x.last.toDate():null;
+  var when=last?' — آخر فتح '+last.toLocaleDateString('ar-EG',{day:'numeric',month:'short'}):'';
+  var b=x.own?'<span style="color:#00703a;font-weight:800">✅ استلمها بنفسه</span>'
+    :x.views?'<span style="color:#1463a5;font-weight:800">👁️ اتفتحت</span>'
+    :'<span style="color:#b42318;font-weight:800">🙈 لسه ماتفتحتش</span>';
+  var extra=[]; if(x.views) extra.push(x.views+' جهاز'); if(x.dl) extra.push('📥 نزّلها'); if(x.sh) extra.push('📤 شاركها');
+  return b+(extra.length?' <span style="color:#5b6675">('+extra.join(' • ')+')</span>':'')+'<span style="color:#5b6675">'+when+'</span>';
+}
+function certBtnText(){
+  var att=regsOf(A.course.id).filter(function(r){return r.status==='attended';}), withC=att.filter(function(r){return r.certId;}), seen=withC.filter(function(r){return certSeen(r).seen;}).length;
+  return '🎓 إصدار الشهادات'+(att.length?' ('+withC.length+'/'+att.length+')':'')+(withC.length?' • 👁️ '+seen+'/'+withC.length+' فتحوها':'');
 }
 async function loadTpls(){
   try{ var s=await getDb().collection('settings').doc('academy_templates').get(); A.tpls=(s.exists&&s.data().list)||[]; }catch(e){ A.tpls=[]; }
@@ -9329,7 +9357,7 @@ async function loadTpls(){
 async function courseView(id){
   A.course=A.courses.filter(function(c){return c.id===id;})[0]; if(!A.course){ admHome(); return; }
   A.filter='all'; A.q='';
-  await loadTpls();
+  await loadTpls(); await loadCertStats(id);
   var c=A.course, box=$('adm-form-academy');
   var link=courseLink(c);
   box.innerHTML='<div class="aca-bar"><button class="aca-b" id="aca-back">← كل التدريبات</button><button class="aca-b" id="aca-edit">✏️ تعديل</button>'+
@@ -9352,8 +9380,7 @@ async function courseView(id){
   $('aca-edit').onclick=function(){ courseForm(c); };
   $('aca-share').onclick=function(){ copy(link,'✅ اتنسخ لينك التسجيل — انشره على فيسبوك وواتساب'); };
   $('aca-cert').onclick=issueCerts;
-  (function(){ var att=regsOf(c.id).filter(function(r){return r.status==='attended';}), done=att.filter(function(r){return r.certId;}).length;
-    $('aca-cert').textContent='🎓 إصدار الشهادات'+(att.length?' ('+done+'/'+att.length+')':''); })();
+  $('aca-cert').textContent=certBtnText();
   $('aca-xl').onclick=function(){ window.tmExportRows('تسجيلات '+c.title,filtered().map(cleanReg),'xlsx'); };
   $('aca-pdf').onclick=function(){ window.tmExportRows('تسجيلات '+c.title,filtered().map(cleanReg),'pdf'); };
   $('aca-q').oninput=function(){ A.q=this.value.trim(); renderRegs(); };
@@ -9367,7 +9394,8 @@ function renderRegs(){
   var all=regsOf(A.course.id), cnt={all:all.length};
   all.forEach(function(r){ var s=r.status||'new'; cnt[s]=(cnt[s]||0)+1; });
   $('aca-chips').innerHTML=[['all','الكل']].concat(Object.keys(ST).map(function(k){return [k,ST[k].t];})).filter(function(x){return x[0]==='all'||cnt[x[0]];})
-    .map(function(x){ return '<button class="aca-chip'+(A.filter===x[0]?' on':'')+'" data-f="'+x[0]+'">'+x[1]+' ('+(cnt[x[0]]||0)+')</button>'; }).join('');
+    .map(function(x){ return '<button class="aca-chip'+(A.filter===x[0]?' on':'')+'" data-f="'+x[0]+'">'+x[1]+' ('+(cnt[x[0]]||0)+')</button>'; }).join('')+
+    (function(){ var n=all.filter(function(r){return r.certId&&!certSeen(r).seen;}).length; return n?'<button class="aca-chip'+(A.filter==='nocert'?' on':'')+'" data-f="nocert">🙈 ماشافوش الشهادة ('+n+')</button>':''; })();
   $('aca-chips').querySelectorAll('[data-f]').forEach(function(b){ b.onclick=function(){ A.filter=b.getAttribute('data-f'); renderRegs(); }; });
   var rs=filtered();
   $('aca-regs').innerHTML=rs.length?rs.map(function(r){
@@ -9375,7 +9403,7 @@ function renderRegs(){
     return '<div style="border-top:1px solid #eef2f6;padding:10px 0"><div class="aca-row"><input type="checkbox" data-sel="'+esc(r.id)+'"'+(A.sel&&A.sel[r.id]?' checked':'')+' style="width:18px;height:18px;flex:none"><div class="t">'+esc(r.name)+'</div><span style="font-size:10px;font-weight:800;color:'+s.c+'">'+s.t+'</span></div>'+
       '<div class="aca-small">📱 <a href="https://wa.me/'+waNumber(r.phone)+'" target="_blank" dir="ltr">'+esc(r.phone)+'</a> • ✉️ <span dir="ltr">'+esc(r.email||'')+'</span>'+(r.pushId?' • 🔔':'')+(r.sent&&Object.keys(r.sent).length?' • ✉️ '+Object.keys(r.sent).length+' رسالة':'')+'</div>'+
       '<div class="aca-small">'+[r.gov,r.org,r.jobTitle].filter(Boolean).map(esc).join(' • ')+(r.notes?'<br>💬 '+esc(r.notes):'')+'</div>'+
-      (r.certId?'<div class="aca-small">🎓 <a href="'+certUrl(r.certId)+'" target="_blank" dir="ltr">'+esc(r.certId)+'</a></div>':'')+
+      (r.certId?'<div class="aca-small">🎓 <a href="'+certUrl(r.certId)+'&a=1" target="_blank" dir="ltr">'+esc(r.certId)+'</a> • '+certBadge(r)+'</div>':'')+
       '<div class="aca-row" style="margin-top:6px"><select data-r="'+esc(r.id)+'" style="flex:1;border:1.5px solid #d6dee8;border-radius:9px;padding:6px;font-family:Cairo,sans-serif;font-size:12px">'+
         Object.keys(ST).map(function(k){return '<option value="'+k+'"'+((r.status||'new')===k?' selected':'')+'>'+ST[k].t+'</option>';}).join('')+'</select>'+
       '<button class="aca-b r" data-del="'+esc(r.id)+'">🗑️</button></div></div>';
@@ -9411,8 +9439,7 @@ async function setStatusBulk(ids,status){
     }
     A.regs.forEach(function(r){ if(ids.indexOf(r.id)>-1) r.status=status; });
     A.sel={}; say('✅ اتغيرت حالة '+ids.length+' مسجل'); renderRegs(); updateCount();
-    var att=regsOf(A.course.id).filter(function(r){return r.status==='attended';}), done=att.filter(function(r){return r.certId;}).length;
-    if($('aca-cert')) $('aca-cert').textContent='🎓 إصدار الشهادات'+(att.length?' ('+done+'/'+att.length+')':'');
+    if($('aca-cert')) $('aca-cert').textContent=certBtnText();
   }catch(e){ say('❌ '+(e.message||e)); }
 }
 /* ---------- استيراد ملف الحضور ---------- */
@@ -9523,7 +9550,7 @@ function msgPanel(){
     '<input id="aca-mtitle" placeholder="عنوان الرسالة (للإشعار والإيميل)">'+
     '<textarea id="aca-mtext" rows="6" placeholder="اكتب الرسالة..."></textarea>'+
     '<div class="aca-small" style="margin-bottom:6px">بيتغيروا تلقائيًا: <b>{الاسم}</b> <b>{الكورس}</b> <b>{المدرب}</b> <b>{الموعد}</b> <b>{الرابط}</b> <b>{الجروب}</b> <b>{الشهادة}</b> (لكل شخص) <b>{الشهادات}</b> (لينك واحد للكل)</div>'+
-    '<select id="aca-to"><option value="active">👥 كل المسجلين (ماعدا الملغي)</option><option value="confirmed">✅ المؤكدين بس</option><option value="waitlist">🕒 قائمة الانتظار بس</option><option value="attended">🎓 اللي حضروا بس</option></select>'+
+    '<select id="aca-to"><option value="active">👥 كل المسجلين (ماعدا الملغي)</option><option value="confirmed">✅ المؤكدين بس</option><option value="waitlist">🕒 قائمة الانتظار بس</option><option value="attended">🎓 اللي حضروا بس</option><option value="nocert">🙈 اللي لسه ماشافوش شهادتهم</option></select>'+
     '<label class="aca-small" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;font-weight:800;color:#1a3a6e"><input type="checkbox" id="aca-skip" checked style="width:16px;height:16px"> تخطي اللي وصلتهم نفس الرسالة قبل كده (بأي طريقة)</label>'+
     '<div class="aca-small" id="aca-cnt" style="margin-bottom:8px"></div>'+
     '<div class="aca-bar" style="margin:0"><button class="aca-b p" id="aca-push">🔔 إشعار على التطبيق</button><button class="aca-b w" id="aca-wa-btn">💬 واتساب</button><button class="aca-b y" id="aca-mail">📧 إيميل</button></div>'+
@@ -9552,13 +9579,14 @@ async function markSent(list,channel,key){
 }
 function allRecipients(){
   var to=$('aca-to').value, rs=regsOf(A.course.id);
+  if(to==='nocert') return rs.filter(function(r){ return r.certId&&!certSeen(r).seen; });
   return rs.filter(function(r){ var s=r.status||'new'; return to==='active'?s!=='cancelled':s===to; });
 }
 function recipients(){
   var all=allRecipients(); if(!skipOn()) return all;
   var key=msgKey(); return all.filter(function(r){ return !gotIt(r,key); });
 }
-function statusesFor(to){ return to==='active'?['new','confirmed','waitlist','attended']:[to]; }
+function statusesFor(to){ return to==='active'?['new','confirmed','waitlist','attended']:to==='nocert'?['attended']:[to]; }
 function updateCount(){
   if(!$('aca-cnt')) return;
   var all=allRecipients(), rs=recipients(), push=rs.filter(function(r){return r.pushId;}).length, em=rs.filter(function(r){return r.email;}).length;
@@ -9568,7 +9596,7 @@ function updateCount(){
 }
 function bindMsg(){
   var tpls=DEFAULT_TPL.concat(A.tpls);
-  $('aca-tpl').onchange=function(){ var t=tpls[this.value]; if(!t) return; $('aca-mtitle').value=t.title||''; $('aca-mtext').value=t.text||''; updateCount(); };
+  $('aca-tpl').onchange=function(){ var t=tpls[this.value]; if(!t) return; $('aca-mtitle').value=t.title||''; $('aca-mtext').value=t.text||''; if(t.to) $('aca-to').value=t.to; updateCount(); };
   $('aca-to').onchange=updateCount; updateCount();
   $('aca-skip').onchange=updateCount;
   var _t; ['aca-mtext','aca-mtitle'].forEach(function(id){ $(id).addEventListener('input',function(){ clearTimeout(_t); _t=setTimeout(updateCount,300); }); });

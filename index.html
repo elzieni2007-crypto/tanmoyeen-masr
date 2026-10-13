@@ -8912,7 +8912,7 @@ var DEFAULT_TPL=[
   {name:'✅ تأكيد التسجيل',title:'✅ تم تأكيد تسجيلك',text:'أهلاً {الاسم} 👋\nتم تأكيد تسجيلك في تدريب "{الكورس}" مع {المدرب}.\n🗓️ الموعد: {الموعد}\nهنبعتلك لينك الحضور قبل التدريب.\n👥 انضم لجروب التدريب على واتساب: {الجروب}\nأكاديمية تنمويين مصر للتعلم عن بعد'},
   {name:'🔗 لينك الحضور',title:'🔗 لينك حضور التدريب',text:'أهلاً {الاسم}\nده لينك حضور تدريب "{الكورس}":\n{الرابط}\n🗓️ {الموعد}\nياريت تدخل قبل الموعد بـ 5 دقايق. مستنيينك 🌱'},
   {name:'⏰ تذكير قبل الموعد',title:'⏰ تذكير: التدريب قرّب',text:'تذكير يا {الاسم} ⏰\nتدريب "{الكورس}" {الموعد}.\nلينك الدخول: {الرابط}'},
-  {name:'🎓 الشهادات جاهزة (رسالة واحدة للكل)',title:'🎓 شهادات الحضور جاهزة',text:'مبروك لكل اللي حضروا تدريب "{الكورس}" 🎉\nشهادات الحضور جاهزة. افتح اللينك واكتب رقم الموبايل والإيميل اللي سجلت بيهم:\n{الشهادات}\nوتقدر تنزّلها PDF وتشاركها على فيسبوك ولينكدإن 💚'},
+  {name:'🎓 الشهادات جاهزة (رسالة واحدة للكل)',title:'🎓 شهادات الحضور جاهزة',text:'🎓 شهادات الحضور جاهزة!\n\nمبروك لكل اللي حضروا تدريب "{الكورس}" مع {المدرب} 🎉\n\n📥 تستلم شهادتك إزاي؟\n1️⃣ افتح اللينك ده:\n{الشهادات}\n2️⃣ اكتب رقم الموبايل اللي سجلت بيه في التدريب\n3️⃣ اكتب الإيميل اللي سجلت بيه\n4️⃣ دوس "🔎 اعرض شهادتي" وهتظهرلك شهادتك\n5️⃣ من نفس الصفحة تقدر تحمّلها PDF أو صورة، وتضيفها على LinkedIn، وتشاركها على فيسبوك وواتساب\n\n⚠️ لازم نفس الموبايل والإيميل اللي سجلت بيهم بالظبط، عشان شهادتك محمية ومحدش غيرك يفتحها.\n\n💚 ولو شاركتها على فيسبوك أو لينكدإن، منشن تنمويين مصر ونفرح بيك!\n#تنمويين_مصر #أكاديمية_تنمويين_مصر'},
   {name:'🎓 الشهادة جاهزة',title:'🎓 شهادتك جاهزة',text:'مبروك يا {الاسم} 🎉\nشهادة حضورك لتدريب "{الكورس}" جاهزة:\n{الشهادة}\nتقدر تنزّلها PDF وتضيفها على LinkedIn من نفس الصفحة.\nأكاديمية تنمويين مصر للتعلم عن بعد 🌱'},
   {name:'🙏 شكر بعد التدريب',title:'🙏 شكرًا لحضورك',text:'شكرًا يا {الاسم} على حضورك تدريب "{الكورس}" 🙏\nتابع أكاديمية تنمويين مصر عشان التدريبات الجاية 🌱'}
 ];
@@ -9527,6 +9527,7 @@ function msgPanel(){
     '<label class="aca-small" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;font-weight:800;color:#1a3a6e"><input type="checkbox" id="aca-skip" checked style="width:16px;height:16px"> تخطي اللي وصلتهم نفس الرسالة قبل كده (بأي طريقة)</label>'+
     '<div class="aca-small" id="aca-cnt" style="margin-bottom:8px"></div>'+
     '<div class="aca-bar" style="margin:0"><button class="aca-b p" id="aca-push">🔔 إشعار على التطبيق</button><button class="aca-b w" id="aca-wa-btn">💬 واتساب</button><button class="aca-b y" id="aca-mail">📧 إيميل</button></div>'+
+    '<button class="aca-b" id="aca-sharemsg" style="width:100%;margin-top:6px;padding:10px;background:#e7eefc;color:#1a3a6e">📤 مشاركة الرسالة (جروب واتساب / فيسبوك / أي تطبيق) أو نسخها</button>'+
     '<div class="aca-bar" style="margin:6px 0 0"><button class="aca-b" id="aca-save-tpl">💾 حفظ كرسالة محفوظة</button><button class="aca-b" id="aca-copy-ph">📋 نسخ الأرقام</button><button class="aca-b" id="aca-copy-em">📋 نسخ الإيميلات</button><button class="aca-b" id="aca-vcf">📇 تحميل جهات الاتصال</button></div></div>';
 }
 function msgKey(){
@@ -9587,6 +9588,14 @@ function bindMsg(){
     A.tpls=A.tpls.filter(function(t){return t.name!==name;}).concat([{name:name,title:$('aca-mtitle').value.trim(),text:text}]);
     try{ await getDb().collection('settings').doc('academy_templates').set({list:A.tpls,updatedAt:FV().serverTimestamp()}); say('💾 اتحفظت'); courseViewKeep(); }
     catch(e){ say('❌ '+(e.message||e)); }
+  };
+  $('aca-sharemsg').onclick=function(){
+    var text=$('aca-mtext').value.trim(); if(!text){ say('⚠️ اختار رسالة محفوظة أو اكتب رسالة الأول'); return; }
+    if(/\{الشهادة\}/.test(text)){ say('⚠️ {الشهادة} لينك مختلف لكل شخص — للمشاركة العامة استخدم رسالة "الشهادات جاهزة (رسالة واحدة للكل)"'); return; }
+    var msg=fill(text,A.course,{name:''}).replace(/^أهلاً\s*\n/,'أهلاً بيكم\n');
+    function copied(){ say('✅ اتنسخت الرسالة — الصقها في الجروب أو البوست'); }
+    if(navigator.share){ navigator.share({text:msg}).then(function(){ logMsg('share',0,text); }).catch(function(){}); }
+    else{ copy(msg,'✅ اتنسخت الرسالة — الصقها في الجروب أو البوست'); logMsg('share',0,text); }
   };
   $('aca-copy-ph').onclick=function(){ var l=recipients().map(function(r){return r.phone;}).filter(Boolean); copy(l.join('\n'),'✅ اتنسخ '+l.length+' رقم'); };
   $('aca-copy-em').onclick=function(){ var l=recipients().map(function(r){return r.email;}).filter(Boolean); copy(l.join(', '),'✅ اتنسخ '+l.length+' إيميل — الصقهم في خانة BCC'); };

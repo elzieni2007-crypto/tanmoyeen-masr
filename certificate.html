@@ -15,7 +15,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Aref+Ruqaa:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Amiri:wght@700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
@@ -55,7 +55,7 @@ body{background:#eef3f8;font-family:Cairo,Tahoma,sans-serif;color:#1d2733;min-he
 .title{font-size:58px;font-weight:900;color:#1a3a6e;margin-top:14px;line-height:1.2}
 .sub{font-size:20px;color:#c9932e;font-weight:800;margin-top:2px}
 .lead{font-size:20px;color:#475569;margin-top:22px}
-.name{font-family:'Aref Ruqaa',serif;font-size:66px;font-weight:700;color:#122a52;margin-top:4px;line-height:1.35;white-space:nowrap}
+.name{font-family:'Amiri','Cairo',serif;font-size:64px;font-weight:700;color:#122a52;margin-top:4px;line-height:1.45;white-space:nowrap}
 .line{width:420px;height:2px;margin:2px auto 0;background:linear-gradient(90deg,transparent,#c9932e,transparent)}
 .course-l{font-size:19px;color:#475569;margin-top:14px}
 .course{font-size:30px;font-weight:900;color:#1a3a6e;margin-top:2px;line-height:1.4}
@@ -158,7 +158,13 @@ body{background:#eef3f8;font-family:Cairo,Tahoma,sans-serif;color:#1d2733;min-he
     var node=document.getElementById('tpl').content.firstElementChild.cloneNode(true);
     function set(k,v){ var el=node.querySelector('[data-f="'+k+'"]'); if(el) el.textContent=v; }
     set('name',c.name); set('course',c.courseTitle); set('trainer',c.trainer||'—'); set('id',id);
-    var meta=[]; if(c.courseDate) meta.push('المنعقد يوم '+arDate(c.courseDate)); if(c.hours) meta.push('بإجمالي '+c.hours+' ساعات تدريبية');
+    var meta=[];
+    if(c.courseDate&&c.courseEndDate&&c.courseEndDate!==c.courseDate){
+      var d1=toDate(c.courseDate), d2=toDate(c.courseEndDate);
+      meta.push(d1&&d2&&d1.getMonth()===d2.getMonth()&&d1.getFullYear()===d2.getFullYear()
+        ? 'المنعقد في الفترة من '+d1.getDate()+' إلى '+d2.getDate()+' '+MONTHS[d2.getMonth()]+' '+d2.getFullYear()
+        : 'المنعقد في الفترة من '+arDate(c.courseDate)+' إلى '+arDate(c.courseEndDate));
+    } else if(c.courseDate) meta.push('المنعقد يوم '+arDate(c.courseDate)); if(c.hours) meta.push('بإجمالي '+c.hours+' ساعات تدريبية');
     set('meta',meta.join('  •  ')); set('issued','تاريخ الإصدار: '+arDate(c.issuedAt));
     var qr=qrcode(0,'M'); qr.addData(url); qr.make();
     node.querySelector('[data-f="qr"]').src=qr.createDataURL(6,1);
@@ -184,7 +190,7 @@ body{background:#eef3f8;font-family:Cairo,Tahoma,sans-serif;color:#1d2733;min-he
     function fit(){ var s=stage.clientWidth/1123; scaler.style.transform='scale('+s+')'; stage.style.height=(794*s)+'px'; }
     fit(); window.addEventListener('resize',fit);
     (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(function(){
-      var max=700; if(nameEl.scrollWidth>max){ nameEl.style.fontSize=Math.max(36,Math.floor(66*max/nameEl.scrollWidth))+'px'; }
+      var max=700; if(nameEl.scrollWidth>max){ nameEl.style.fontSize=Math.max(34,Math.floor(64*max/nameEl.scrollWidth))+'px'; }
     });
 
     function loadScript(src){ return new Promise(function(res,rej){ var s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }

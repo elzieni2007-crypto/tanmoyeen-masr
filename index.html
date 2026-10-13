@@ -8972,7 +8972,7 @@ function fmtDate(v){
 function fill(text,course,reg){
   var name=reg&&reg.name?String(reg.name).split(/\s+/)[0]:'';
   var vals={'الاسم':name,'الكورس':course.title||'','التدريب':course.title||'','المدرب':course.trainer||'',
-    'الموعد':[course.startDate,course.timeText].filter(Boolean).join(' — '),'الرابط':course.link||'',
+    'الموعد':[dateRange(course),course.timeText].filter(Boolean).join(' — '),'الرابط':course.link||'',
     'الجروب':course.waGroup||'','الشهادة':reg&&reg.certId?certUrl(reg.certId):'','الشهادات':APP_URL+'certificate.html'};
   return String(text||'').split('\n').filter(function(line){
     // لو السطر فيه لينك أو جروب أو شهادة مش موجودين، بيتشال السطر كله بدل ما يفضل ناقص
@@ -9061,11 +9061,12 @@ async function fetchOpenCourses(){
   return list;
 }
 function seatsLeft(c){ var s=Number(c.seats||0); if(!s) return null; return Math.max(0,s-Number(c.registeredCount||0)); }
+function dateRange(c){ return c.endDate&&c.endDate!==c.startDate?('من '+c.startDate+' إلى '+c.endDate):(c.startDate||''); }
 function courseMeta(c){
   var left=seatsLeft(c);
   return '<div class="tma-meta">'+
     (c.trainer?'👤 المدرب: <b>'+esc(c.trainer)+'</b><br>':'')+
-    ((c.startDate||c.timeText)?'🗓️ '+esc([c.startDate,c.timeText].filter(Boolean).join(' — '))+'<br>':'')+
+    ((c.startDate||c.timeText)?'🗓️ '+esc([dateRange(c),c.timeText].filter(Boolean).join(' — '))+'<br>':'')+
     (c.duration?'⏱️ '+esc(c.duration)+'<br>':'')+
     (c.platform?'💻 '+esc(c.platform)+' (أونلاين)<br>':'')+
     (left!==null?(left>0?'🪑 المقاعد المتاحة: <b>'+left+'</b>':'🕒 المقاعد اكتملت — التسجيل هيكون في قائمة الانتظار'):'')+
@@ -9289,6 +9290,7 @@ function courseForm(c){
     inp('ac-title','اسم التدريب *',c.title,'text','مثال: ريادة الأعمال داخل الجمعيات الأهلية')+
     inp('ac-trainer','المدرب',c.trainer,'text','مثال: د. أماني السباعي')+
     inp('ac-date','تاريخ البدء',c.startDate,'date')+
+    inp('ac-end','تاريخ الانتهاء (لو التدريب أكتر من يوم)',c.endDate,'date')+
     inp('ac-time','الموعد (اليوم والساعة)',c.timeText,'text','مثال: الثلاثاء 7 مساءً')+
     inp('ac-dur','المدة',c.duration,'text','مثال: 3 جلسات × ساعتين')+
     inp('ac-hours','عدد الساعات التدريبية (بيتكتب في الشهادة)',c.hours,'number','مثال: 6')+
@@ -9302,7 +9304,7 @@ function courseForm(c){
   $('aca-back').onclick=function(){ c.id?courseView(c.id):admHome(); };
   $('ac-save').onclick=async function(){
     var title=$('ac-title').value.trim(); if(!title){ say('⚠️ اكتب اسم التدريب'); return; }
-    var data={title:title,trainer:$('ac-trainer').value.trim(),startDate:$('ac-date').value,timeText:$('ac-time').value.trim(),duration:$('ac-dur').value.trim(),
+    var data={title:title,trainer:$('ac-trainer').value.trim(),startDate:$('ac-date').value,endDate:($('ac-end').value&&$('ac-end').value>$('ac-date').value)?$('ac-end').value:'',timeText:$('ac-time').value.trim(),duration:$('ac-dur').value.trim(),
       hours:Number($('ac-hours').value)||0,platform:$('ac-plat').value,link:$('ac-link').value.trim(),waGroup:$('ac-group').value.trim(),seats:Number($('ac-seats').value)||0,status:$('ac-status').value,desc:$('ac-desc').value.trim(),updatedAt:FV().serverTimestamp()};
     try{
       if(c.id){ await getDb().collection('courses').doc(c.id).update(data); say('✅ اتحفظ'); await loadAll(); courseView(c.id); }
@@ -9632,8 +9634,8 @@ async function issueCerts(){
   var todo=att.filter(function(r){return !r.certId;});
   // الشهادات اللي اتصدرت قبل كده: نضيفلها بصمة الموبايل عشان صفحة "استلم شهادتك" تلاقيها
   var old=att.filter(function(r){return r.certId;});
-  if(old.length){ try{ var bb=getDb().batch(); for(var k=0;k<old.length;k++){ var hh=await phHash(old[k].phone,old[k].email); if(hh) bb.set(getDb().collection('certificates').doc(old[k].certId),{ph:hh},{merge:true}); } await bb.commit(); }catch(e){ console.warn('backfill ph',e); } }
-  if(!todo.length){ say('✅ كل الحاضرين ('+att.length+') ليهم شهادات بالفعل'); return; }
+  if(old.length){ try{ var bb=getDb().batch(); for(var k=0;k<old.length;k++){ var hh=await phHash(old[k].phone,old[k].email); bb.set(getDb().collection('certificates').doc(old[k].certId),{ph:hh||'',courseTitle:c.title,trainer:c.trainer||'',courseDate:c.startDate||'',courseEndDate:c.endDate||'',hours:c.hours||0},{merge:true}); } await bb.commit(); }catch(e){ console.warn('backfill ph',e); } }
+  if(!todo.length){ say('✅ كل الحاضرين ('+att.length+') ليهم شهادات بالفعل'+(old.length?' — واتحدّثت بياناتها (التواريخ والساعات)':'')); return; }
   if(!c.hours&&!confirm('عدد الساعات مش متسجل في التدريب، وسطر الساعات مش هيظهر في الشهادة. نكمل؟')) return;
   if(!confirm('هيتم إصدار '+todo.length+' شهادة حضور لتدريب "'+c.title+'". نكمل؟')) return;
   var d=getDb(), year=new Date().getFullYear(), counterRef=d.collection('settings').doc('cert_counter');
@@ -9646,7 +9648,7 @@ async function issueCerts(){
     for(var hi=0;hi<todo.length;hi++) hashes.push(await phHash(todo[hi].phone,todo[hi].email));
     todo.forEach(function(r,i){
       var id='TMA-'+year+'-'+String(start+i+1).padStart(4,'0');
-      batch.set(d.collection('certificates').doc(id),{name:r.name,courseTitle:c.title,courseId:c.id,trainer:c.trainer||'',courseDate:c.startDate||'',hours:c.hours||0,regId:r.id,ph:hashes[i]||'',issuedAt:FV().serverTimestamp()});
+      batch.set(d.collection('certificates').doc(id),{name:r.name,courseTitle:c.title,courseId:c.id,trainer:c.trainer||'',courseDate:c.startDate||'',courseEndDate:c.endDate||'',hours:c.hours||0,regId:r.id,ph:hashes[i]||'',issuedAt:FV().serverTimestamp()});
       batch.update(d.collection('course_registrations').doc(r.id),{certId:id,updatedAt:FV().serverTimestamp()});
       r.certId=id;
     });

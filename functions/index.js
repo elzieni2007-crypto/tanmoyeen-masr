@@ -647,3 +647,58 @@ exports.expireJobs = onSchedule(
     };
   }
 );
+
+/* ===== قراءة صفحة إعلان من السيرفر (للأدمن بس) =====
+   المتصفح مايقدرش يقرا صفحات المواقع التانية مباشرة (CORS)،
+   فالسيرفر بيجيب الـ HTML ويرجعه للوحة الأدمن عشان تحلله. */
+exports.fetchJobPage = onCall(
+  {region: "europe-west1", timeoutSeconds: 30, memory: "256MiB"},
+  async (request) => {
+    await assertAdmin(request);
+    const raw = String((request.data && request.data.url) || "").trim();
+    let u;
+    try {
+      u = new URL(raw);
+    } catch (e) {
+      throw new HttpsError("invalid-argument", "رابط غير صحيح");
+    }
+    if (!/^https?:$/.test(u.protocol)) {
+      throw new HttpsError("invalid-argument", "لازم الرابط يبدأ بـ http أو https");
+    }
+    // منع الوصول لعناوين داخلية
+    const h = u.hostname.toLowerCase();
+    if (h === "localhost" || h.endsWith(".internal") || h.endsWith(".local") ||
+        /^(127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|0\.)/.test(h) ||
+        h.includes(":") || h === "metadata.google.internal") {
+      throw new HttpsError("invalid-argument", "الرابط ده مش مسموح");
+    }
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 20000);
+    try {
+      const res = await fetch(u.toString(), {
+        redirect: "follow",
+        signal: ctl.signal,
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9,ar;q=0.8",
+        },
+      });
+      const type = res.headers.get("content-type") || "";
+      if (!res.ok) {
+        throw new HttpsError("unavailable", "الموقع رجّع HTTP " + res.status);
+      }
+      if (!/html|xml|text/i.test(type)) {
+        throw new HttpsError("failed-precondition", "الرابط مش صفحة ويب (" + type + ")");
+      }
+      const html = (await res.text()).slice(0, 800000);
+      return {html, finalUrl: res.url, status: res.status};
+    } catch (e) {
+      if (e instanceof HttpsError) throw e;
+      throw new HttpsError("unavailable", "تعذر فتح الصفحة: " + (e.name === "AbortError" ? "انتهت المهلة" : (e.message || e)));
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+);

@@ -296,7 +296,7 @@ textarea.fi{resize:none}
 .ms-d{font-size:12px;color:var(--muted);line-height:1.8}
 .abtn{width:100%;padding:15px;background:linear-gradient(135deg,var(--p),var(--p2));color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;margin-top:18px;box-shadow:0 8px 24px rgba(26,58,110,.28);transition:.2s}
 .abtn:hover{transform:translateY(-2px)}
-.toast{position:fixed;bottom:calc(var(--bot)+14px);left:50%;transform:translateX(-50%) translateY(12px);background:#1a2a3a;color:white;padding:11px 18px;border-radius:12px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:.28s;pointer-events:none;white-space:nowrap}
+.toast{position:fixed;bottom:calc(var(--bot)+14px);left:50%;transform:translateX(-50%) translateY(12px);background:#1a2a3a;color:white;padding:11px 18px;border-radius:12px;font-size:12px;font-weight:600;z-index:100100;opacity:0;transition:.28s;pointer-events:none;white-space:nowrap}
 .toast.sh{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:600px){.dh-stats{grid-template-columns:repeat(3,1fr)}}
 
@@ -2716,6 +2716,17 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div class="msheet"><div class="mhandle"></div><div class="mcon" id="mbody"></div><div id="mcall"></div></div>
 </div>
 <div class="toast" id="toast"></div>
+<script>
+/* نافذة التعديل (modal) كانت بتفتح ورا لوحة الأدمن لأن اللوحة طبقتها أعلى.
+   لما الأدمن مفتوح، بنرفع النافذة فوقه. */
+(function(){
+  var m=document.getElementById('modal'); if(!m||!window.MutationObserver) return;
+  function adminOpen(){ var a=document.getElementById('admin'); return !!a && getComputedStyle(a).display!=='none'; }
+  new MutationObserver(function(){
+    if(m.classList.contains('op')) m.style.zIndex=adminOpen()?'100010':'';
+  }).observe(m,{attributes:true,attributeFilter:['class']});
+})();
+</script>
 
 <script>
 // Logo
@@ -4289,10 +4300,10 @@ function _renderPendingList(list){
       ${item.contact ? '<div style="font-size:11px;margin-bottom:6px">📞 تواصل: '+item.contact+'</div>' : ''}
       ${item.link ? '<div style="font-size:10px;margin-bottom:10px;word-break:break-all;color:var(--a)">🔗 '+item.link+'</div>' : ''}
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button onclick="if(confirm('هتنشر الإعلان ده للمستخدمين — متأكد؟')) approvePending(${idx})" style="flex:2;padding:13px;background:linear-gradient(135deg,#00b894,#00703a);color:white;border:none;border-radius:12px;font-size:13px;font-weight:800;font-family:Cairo,sans-serif;cursor:pointer;box-shadow:0 4px 12px rgba(0,184,148,.3)">
+        <button onclick="if(confirm('هتنشر الإعلان ده للمستخدمين — متأكد؟')) approvePending('${item.fbId}')" style="flex:2;padding:13px;background:linear-gradient(135deg,#00b894,#00703a);color:white;border:none;border-radius:12px;font-size:13px;font-weight:800;font-family:Cairo,sans-serif;cursor:pointer;box-shadow:0 4px 12px rgba(0,184,148,.3)">
           ✅ نشر الآن
         </button>
-        <button onclick="if(confirm('هترفض الإعلان ده — متأكد؟')) rejectPending(${idx})" style="flex:1;padding:13px;background:#feeaea;color:#c03030;border:2px solid #f5c6c6;border-radius:12px;font-size:13px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
+        <button onclick="if(confirm('هترفض الإعلان ده — متأكد؟')) rejectPending('${item.fbId}')" style="flex:1;padding:13px;background:#feeaea;color:#c03030;border:2px solid #f5c6c6;border-radius:12px;font-size:13px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer">
           ❌ رفض
         </button>
       </div>
@@ -4310,8 +4321,9 @@ function approvePending(idx){
       var data = d.data();
       if(data.status === 'pending') allPending.push(Object.assign({},data,{fbId:d.id}));
     });
-    var item = allPending[idx];
-    if(!item){ toast('❌ السجل غير موجود'); return; }
+    // بنحدد الإعلان برقمه في Firebase مش بترتيبه، عشان لو وصل إعلان جديد مايتنشرش إعلان غلط
+    var item = (typeof idx==='string') ? allPending.filter(function(x){return x.fbId===idx;})[0] : allPending[idx];
+    if(!item){ toast('❌ السجل غير موجود — ممكن يكون اتراجع قبل كده'); renderPendingJobs(); return; }
 
     var col = (item._ptype==='tender') ? 'tenders' : 'jobs';
     // لو مفيش _ptype — نحدده من البيانات
@@ -4370,8 +4382,9 @@ function rejectPending(idx){
   if(typeof db === 'undefined'){ toast('❌ Firebase غير متصل'); return; }
   db.collection('pending_jobs').orderBy('timestamp','desc').get().then(function(snap){
     var pendingDocs = snap.docs.filter(function(d){ return d.data().status === 'pending'; });
-    if(!pendingDocs[idx]){ toast('❌ السجل غير موجود'); return; }
-    pendingDocs[idx].ref.update({status:'rejected'}).then(function(){
+    var doc = (typeof idx==='string') ? pendingDocs.filter(function(d){return d.id===idx;})[0] : pendingDocs[idx];
+    if(!doc){ toast('❌ السجل غير موجود — ممكن يكون اتراجع قبل كده'); renderPendingJobs(); return; }
+    db.collection('pending_jobs').doc(doc.id).update({status:'rejected'}).then(function(){
       toast('🗑️ تم الرفض');
       renderPendingJobs();
       updatePendingBadge();

@@ -577,6 +577,10 @@ body.dark-mode .modal-sheet { background: #16213e; }
 body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e0; border-color: #2d3748; }
 
 @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.fd-f{background:#fff;border-radius:12px;padding:11px 10px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center;border-top:3px solid #00aeef}
+.fd-f div{font-size:21px;margin-bottom:3px}.fd-f b{display:block;font-size:11.5px;color:#1a2a3a;font-weight:900}.fd-f span{display:block;font-size:9.5px;color:#6b7a8d;line-height:1.6;margin-top:2px}
+.fd-box{background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px}
+.fd-h{font-size:13px;font-weight:900;color:#1a3a6e;margin-bottom:14px;border-bottom:2px solid #f0f0f0;padding-bottom:8px}
 </style>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -806,19 +810,15 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
   </div>
 
-  <!-- بانر أثر -->
+  <!-- بانر منصة فرص التمويل والمنح (مكان بانر أثر) -->
   <div style="padding:0 12px 6px">
-    <div onclick="go('athar-screen')" style="background:linear-gradient(135deg,#004d29,#00703a);border-radius:16px;padding:12px 16px;cursor:pointer;box-shadow:0 4px 16px rgba(0,112,58,.3);display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.1)">
-      <div style="width:38px;height:38px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.15)">
-        <img src="https://raw.githubusercontent.com/elzieni2007-crypto/athar-ngo/56a9d7998da26638b257fab6900fc5a994c3aedd/file_000000002df07246ada08d5bf6048297.png"
-          style="width:28px;height:28px;object-fit:contain"
-          onerror="this.style.display='none';this.parentElement.innerHTML='<span style=font-size:16px;font-weight:900;color:#00703a>أثر</span>'">
-      </div>
+    <div onclick="go('funding-screen')" style="background:linear-gradient(135deg,#0d2347,#1a3a6e 60%,#0b6a93);border-radius:16px;padding:12px 16px;cursor:pointer;box-shadow:0 4px 16px rgba(26,58,110,.35);display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.12)">
+      <div style="width:38px;height:38px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">💰</div>
       <div style="flex:1">
-        <div style="color:white;font-size:12px;font-weight:900;margin-bottom:2px">🌿 برنامج أثر — نسخة تجريبية مجانية</div>
-        <div style="color:rgba(255,255,255,.75);font-size:10px">الحلول المالية للجمعيات الأهلية | سجّل الآن</div>
+        <div style="color:white;font-size:12px;font-weight:900;margin-bottom:2px">منصة فرص التمويل والمنح <span style="background:#00aeef;border-radius:6px;padding:0 6px;font-size:9px">قريبًا</span></div>
+        <div style="color:rgba(255,255,255,.78);font-size:10px">فرص مناسبة لجمعيتك ومسودة مقترح من خبراتها</div>
       </div>
-      <div style="background:rgba(255,255,255,.15);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;flex-shrink:0">←</div>
+      <div style="background:#fff;color:#1a3a6e;border-radius:10px;padding:5px 10px;font-size:11px;font-weight:900;flex-shrink:0;white-space:nowrap">احجز الآن</div>
     </div>
   </div>
 
@@ -844,10 +844,15 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div class="dg-card" onclick="go('consult-screen')" style="border:2px solid #c06010;background:linear-gradient(135deg,#fef3e8,#fff8f0)"><div class="dg-icon" style="background:#c06010">📋</div><div class="dg-t" style="color:#c06010;font-weight:900">استشارة</div><div class="dg-c" style="color:#c06010;font-weight:700">ضريبية / تأمينية</div></div>
     <div class="dg-card" onclick="go('athar-screen')" style="border:2px solid #00703a;background:linear-gradient(135deg,#e7faf3,#f0fdf8)">
       <div class="dg-icon" style="background:#00703a;display:flex;align-items:center;justify-content:center">
-        <img src="https://raw.githubusercontent.com/elzieni2007-crypto/athar-ngo/56a9d7998da26638b257fab6900fc5a994c3aedd/file_000000002df07246ada08d5bf6048297.png" style="width:22px;height:22px;object-fit:contain;filter:brightness(10)" onerror="this.style.display='none';this.parentElement.innerHTML+='💰'">
+        <img src="https://raw.githubusercontent.com/elzieni2007-crypto/athar-ngo/56a9d7998da26638b257fab6900fc5a994c3aedd/file_000000002df07246ada08d5bf6048297.png" style="width:22px;height:22px;object-fit:contain;filter:brightness(10)" onerror="this.onerror=null;this.replaceWith('💰')">
       </div>
       <div class="dg-t" style="color:#00703a;font-weight:900">أثر</div>
       <div class="dg-c" style="color:#00703a;font-weight:700">حلول مالية 🆓</div>
+    </div>
+    <div class="dg-card" onclick="go('funding-screen')" style="border:2px solid #1a3a6e;background:linear-gradient(135deg,#e8f0fe,#f2f8ff)">
+      <div class="dg-icon" style="background:#1a3a6e;color:#fff">💰</div>
+      <div class="dg-t" style="color:#1a3a6e;font-weight:900">فرص التمويل والمنح</div>
+      <div class="dg-c" style="color:#0094cc;font-weight:800">احجز الآن 📌</div>
     </div>
     <div class="dg-card" onclick="go('nexus-screen')" style="border:2px solid #0d1b2a;background:linear-gradient(135deg,#0d1b2a,#1a2f4a)">
       <img src="https://i.ibb.co/Lz1cNZZQ/file-00000000c47c720aa2b32868309a3136.png" style="width:38px;height:38px;object-fit:contain;border-radius:8px" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
@@ -1279,6 +1284,64 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   </div>
 </div>
 </div>
+</div>
+
+<div id="funding-screen" class="scr">
+  <div style="background:linear-gradient(135deg,#0d2347,#1a3a6e 55%,#0b6a93);padding:24px 16px 22px;color:white;text-align:center;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-50px;left:-50px;width:170px;height:170px;border-radius:50%;background:rgba(0,174,239,.18)"></div>
+    <button onclick="history.back()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;padding:6px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;cursor:pointer;z-index:2">← رجوع</button>
+    <div style="position:relative;z-index:1;padding-top:18px">
+      <div style="display:inline-block;background:#00aeef;border-radius:20px;padding:3px 14px;font-size:11px;font-weight:900;margin-bottom:10px">🚀 قريبًا — الحجز مفتوح</div>
+      <h1 style="font-size:20px;font-weight:900;line-height:1.5;margin-bottom:6px">منصة تنمويين مصر<br>لفرص التمويل والمنح</h1>
+      <p style="font-size:12.5px;opacity:.9;line-height:1.8">أداة في إيد جمعيتك.. مش شركة استشارية<br><b>جمعيتك هي اللي بتقود</b></p>
+    </div>
+  </div>
+
+  <div style="padding:16px">
+    <div style="font-size:13px;font-weight:900;color:#1a3a6e;margin-bottom:10px">المنصة هتعمل إيه لجمعيتك؟</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div class="fd-f"><div>🔎</div><b>فرص جديدة كل يوم</b><span>المنصة بتدوّر على فرص المنح الجديدة يوميًا</span></div>
+      <div class="fd-f"><div>🎯</div><b>المناسب لجمعيتك بس</b><span>فلترة حسب حجم جمعيتك ونطاقها ومجالها</span></div>
+      <div class="fd-f"><div>📇</div><b>دليل الممولين</b><span>سفارات ووكالات دولية ومؤسسات مصرية</span></div>
+      <div class="fd-f"><div>✅</div><b>قرار Go / No-Go</b><span>تقييم الفرصة بمعايير واضحة قبل ما تبدأ</span></div>
+      <div class="fd-f"><div>📝</div><b>مسودة أولى للمقترح</b><span>من خبرات جمعيتك الحقيقية وبروفايلها</span></div>
+      <div class="fd-f"><div>🌐</div><b>نسخة إنجليزي</b><span>بضغطة واحدة، وإيميل التقديم جاهز</span></div>
+    </div>
+    <div style="background:#e8f0fe;border-radius:12px;padding:12px 14px;margin-bottom:14px;border-right:3px solid #1a3a6e;font-size:11.5px;color:#1a3a6e;line-height:1.8">
+      ⏳ <b>المنصة لسه في مرحلة الإطلاق.</b> احجز مكان جمعيتك دلوقتي، وهنتواصل معاك أول ما نفتح الدفعة الأولى.<br>
+      <span style="color:#5b6675">المنصة بتساعدك تلاقي الفرص وتجهّز، لكن قرار التقديم والمراجعة النهائية دايمًا عند جمعيتك.</span>
+    </div>
+
+    <div id="fd-form-wrap">
+      <div class="fd-box">
+        <div class="fd-h">🏢 بيانات الجمعية</div>
+        <div class="fg"><label class="fl">اسم الجمعية <span style="color:#e05050">*</span></label><input class="fi" id="fd-name" type="text" maxlength="150" placeholder="الاسم الرسمي للجمعية"></div>
+        <div class="fg"><label class="fl">رقم الإشهار أو الرقم الموحد <span style="color:#e05050">*</span></label><input class="fi" id="fd-reg" type="text" maxlength="60" placeholder="رقم الإشهار / الرقم الموحد"></div>
+        <div class="fg"><label class="fl">المحافظة <span style="color:#e05050">*</span></label><select class="fi" id="fd-gov"></select></div>
+        <div class="fg"><label class="fl">رقم التليفون <span style="color:#e05050">*</span></label><input class="fi" id="fd-phone" type="tel" maxlength="20" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right"></div>
+        <div class="fg"><label class="fl">البريد الإلكتروني للجمعية</label><input class="fi" id="fd-org-email" type="email" maxlength="120" placeholder="info@org.com" style="direction:ltr"></div>
+      </div>
+      <div class="fd-box">
+        <div class="fd-h">👤 بيانات مسؤول التواصل</div>
+        <div class="fg"><label class="fl">اسم مسؤول التواصل <span style="color:#e05050">*</span></label><input class="fi" id="fd-contact-name" type="text" maxlength="120" placeholder="الاسم الكامل"></div>
+        <div class="fg"><label class="fl">البريد الإلكتروني الشخصي <span style="color:#e05050">*</span></label><input class="fi" id="fd-contact-email" type="email" maxlength="120" placeholder="example@gmail.com" style="direction:ltr"></div>
+      </div>
+      <div class="fd-box">
+        <div class="fd-h">📝 توصيات وملاحظات</div>
+        <div class="fg"><label class="fl">توصيات أو طلبات خاصة</label><textarea class="fi" id="fd-requests" rows="3" maxlength="1500" placeholder="مثلًا: مجالات عمل الجمعية، نوع المنح اللي بتدوروا عليها..."></textarea></div>
+        <div class="fg"><label class="fl">ملاحظات إضافية</label><textarea class="fi" id="fd-notes" rows="2" maxlength="1500" placeholder="أي ملاحظات أخرى..."></textarea></div>
+      </div>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:#5b6675;line-height:1.7;margin:0 2px 12px"><input type="checkbox" id="fd-consent" style="width:18px;height:18px;flex:none;margin-top:2px"> أوافق إن تنمويين مصر تتواصل معايا بخصوص المنصة، والبيانات دي مش هتتنشر أو تتشارك مع أي جهة.</label>
+      <div id="fd-error" style="color:#e05050;font-size:12px;text-align:center;margin-bottom:10px;display:none"></div>
+      <button onclick="submitFunding()" id="fd-btn" style="width:100%;padding:14px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:white;border:none;border-radius:13px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 6px 20px rgba(26,58,110,.3);margin-bottom:100px">📌 احجز مكان جمعيتك</button>
+    </div>
+
+    <div id="fd-success" style="display:none;text-align:center;padding:30px 0 100px">
+      <div style="font-size:56px;margin-bottom:14px">✅</div>
+      <div style="font-size:18px;font-weight:900;color:#1a3a6e;margin-bottom:8px">تم حجز مكان جمعيتك!</div>
+      <div style="font-size:12.5px;color:#6b7a8d;line-height:1.9">شكرًا لاهتمامك بمنصة تنمويين مصر لفرص التمويل والمنح<br>هنتواصل معاك أول ما نفتح الدفعة الأولى 🎯</div>
+    </div>
+  </div>
 </div>
 
 <div id="nexus-screen" class="scr">
@@ -2144,6 +2207,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" style="background:#fef3e8;color:#c06010;border-color:#c06010" onclick="setAdmTab(this,'consultations-adm')">📋 استشارات</div>
       <div class="adm-tab" style="background:#dcfce7;color:#00703a;border-color:#00703a" onclick="setAdmTab(this,'broadcast')">💬 واتساب</div>
       <div class="adm-tab" onclick="setAdmTab(this,'contact')">📧 رسايل</div>
+      <div class="adm-tab" onclick="setAdmTab(this,'funding')">💰 حجز منصة المنح</div>
       <div class="adm-tab" onclick="setAdmTab(this,'athar')">🌿 أثر</div>
       <div class="adm-tab" style="background:#f3e8ff;color:#7c3aed;border-color:#7c3aed" onclick="setAdmTab(this,'settings')">⚙️ إعدادات</div>
     </div>
@@ -2406,6 +2470,16 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   </div>
 
   <div id="adm-consult-list"></div>
+</div>
+
+<div id="adm-form-funding" style="display:none;padding:0 16px;padding-bottom:100px">
+  <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px">
+    <div style="flex:1;font-size:13px;font-weight:800;color:#1a3a6e">💰 حجوزات منصة فرص التمويل والمنح</div>
+    <button onclick="exportFundingXlsx()" style="padding:6px 10px;background:#e7faf3;color:#00703a;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer">📥 Excel</button>
+  </div>
+  <div id="funding-stats" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+  <input id="funding-q" oninput="renderFundingList()" placeholder="🔍 بحث باسم الجمعية أو المحافظة أو المسؤول" style="width:100%;box-sizing:border-box;border:1.5px solid #d6dee8;border-radius:10px;padding:9px;font-family:Cairo,sans-serif;font-size:13px;margin-bottom:8px">
+  <div id="funding-list"><div style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل...</div></div>
 </div>
 
 <div id="adm-form-athar" style="display:none;padding:0 16px;padding-bottom:100px">
@@ -3006,6 +3080,7 @@ function handleUrlParams(){
   else if(fp==='tender'){setTimeout(()=>{go('tenders');setTimeout(openSubmitTender,400);},300);}
   else if(fp==='consult'){setTimeout(()=>{go('consult-screen');},300);}
   else if(fp==='athar'){setTimeout(()=>{go('athar-screen');},300);}
+  else if(fp==='funding'||fp==='grants'){setTimeout(()=>{go('funding-screen');},300);}
   else if(fp==='guide'){location.href='donor-guide.html';}
   else if(fp==='expert'||fp==='sup'||fp==='org'||fp==='jobseeker'||fp==='volunteer'){
     setTimeout(()=>{go('register');setTimeout(function(){ selectRegType(fp); },400);},300);
@@ -3034,7 +3109,7 @@ let jFilt='all', tFilt='all', cFilt='all', sFilt='all';
 let logoTaps=0, logoTimer=null;
 
 // ============ NAVIGATION ============
-const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus','contact-screen':'n-home','athar-screen':'n-home'};
+const navMap={home:'n-home',jobs:'n-tenders',consultants:'n-consultants',suppliers:'n-suppliers',tenders:'n-tenders',register:'n-register',volunteers:'n-volunteers','orgs-screen':'n-register','consult-screen':'n-consult','nexus-screen':'n-nexus','contact-screen':'n-home','athar-screen':'n-home','funding-screen':'n-home'};
 function go(id){
   // تأكد إن الـ splash مش ظاهرة
   var splash = document.getElementById('splash');
@@ -5288,7 +5363,7 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  ['adm-form-registration-requests','adm-form-import-job','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){
+  ['adm-form-registration-requests','adm-form-import-job','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
@@ -5352,19 +5427,24 @@ function setAdmTab(el, tab){
     if(formPending){ formPending.style.display = 'block'; formPending.style.visibility = 'visible'; }
     renderPendingJobs();
     updatePendingBadge();
+  } else if(tab === 'funding'){
+    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    var lbF=document.getElementById('tm-list-export'); if(lbF) lbF.style.display='none';
+    var fEl=document.getElementById('adm-form-funding');
+    if(fEl){ fEl.style.display='block'; loadFundingWaitlist(); }
   } else if(tab === 'athar'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var aEl=document.getElementById('adm-form-athar');
     if(aEl){ aEl.style.display='block'; loadAtharTrials(); }
   } else if(tab === 'contact'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar','adm-form-funding'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-contact');
     if(cEl){ cEl.style.display='block'; loadContactMsgs(); }
   } else if(tab === 'broadcast'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var bEl=document.getElementById('adm-form-broadcast');
     if(bEl){ bEl.style.display='block'; }
     // حط الرابط الافتراضي
@@ -5373,7 +5453,7 @@ function setAdmTab(el, tab){
     loadBroadcastHistory();
   } else if(tab === 'settings'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var sEl = document.getElementById('adm-form-settings');
     if(sEl){ sEl.style.display='block'; loadVisibilitySettings(); }
   } else if(tab === 'volunteers-adm'){
@@ -5383,7 +5463,7 @@ function setAdmTab(el, tab){
     loadAdminVols();
   } else if(tab === 'consultations-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-consultations-adm');
     if(cEl){cEl.style.display='block';}
     loadAdminConsultations();
@@ -5392,7 +5472,7 @@ function setAdmTab(el, tab){
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
     // Hide all special forms
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar'].forEach(function(id){
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
     // إظهار القائمة
@@ -7139,6 +7219,105 @@ async function submitAthar(){
   }
 }
 
+
+// ============ منصة فرص التمويل والمنح: حجز مكان ============
+(function(){ var sel=document.getElementById('fd-gov'); if(!sel) return;
+  var src=document.getElementById('at-gov'); sel.innerHTML=src?src.innerHTML:'<option value="">اختر المحافظة</option>'; })();
+async function submitFunding(){
+  function v(id){ return String((document.getElementById(id)||{}).value||'').trim(); }
+  var name=v('fd-name'), reg=v('fd-reg'), gov=v('fd-gov'), phone=v('fd-phone').replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d);}),
+      orgEmail=v('fd-org-email').toLowerCase(), contactName=v('fd-contact-name'), contactEmail=v('fd-contact-email').toLowerCase(),
+      requests=v('fd-requests'), notes=v('fd-notes'), consent=!!(document.getElementById('fd-consent')||{}).checked;
+  var err=document.getElementById('fd-error'); err.style.display='none';
+  function bad(m){ err.textContent='⚠️ '+m; err.style.display='block'; }
+  var em=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if(name.length<3) return bad('أدخل اسم الجمعية');
+  if(!reg) return bad('أدخل رقم الإشهار أو الرقم الموحد');
+  if(!gov) return bad('اختر المحافظة');
+  if(phone.replace(/\D/g,'').length<8) return bad('أدخل رقم تليفون صحيح');
+  if(orgEmail && !em.test(orgEmail)) return bad('إيميل الجمعية مش صحيح');
+  if(contactName.length<3) return bad('أدخل اسم مسؤول التواصل');
+  if(!em.test(contactEmail)) return bad('أدخل البريد الإلكتروني الشخصي صح');
+  if(!consent) return bad('لازم توافق على التواصل معاك بخصوص المنصة');
+  var btn=document.getElementById('fd-btn'); btn.textContent='⏳ جاري الحجز...'; btn.disabled=true;
+  try{
+    await db.collection('funding_waitlist').add({
+      orgName:name, regNumber:reg, gov:gov, phone:phone, orgEmail:orgEmail,
+      contactName:contactName, contactEmail:contactEmail, requests:requests, notes:notes,
+      consent:true, status:'pending', source:'tanmoyeen_app',
+      timestamp:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('fd-form-wrap').style.display='none';
+    document.getElementById('fd-success').style.display='block';
+    try{ sendEmailNotif('💰 حجز جديد لمنصة المنح - '+name, 'الجمعية: '+name+'\nرقم الإشهار: '+reg+'\nالمحافظة: '+gov+'\nالتليفون: '+phone+'\nمسؤول التواصل: '+contactName+'\nإيميل: '+contactEmail); }catch(e){}
+  }catch(e){
+    console.warn('funding',e);
+    bad(e&&e.code==='permission-denied'?'تعذر الإرسال، اتأكد من البيانات وحاول تاني':'حدث خطأ، حاول مرة أخرى');
+    btn.textContent='📌 احجز مكان جمعيتك'; btn.disabled=false;
+  }
+}
+var _fundingRows=[];
+var FUND_ST={pending:{t:'⏳ جديد',c:'#d49a00'},contacted:{t:'📞 تم التواصل',c:'#1463a5'},active:{t:'✅ مفعّل',c:'#00a37a'},rejected:{t:'❌ مستبعد',c:'#e05050'}};
+async function loadFundingWaitlist(){
+  var list=document.getElementById('funding-list'); if(!list) return;
+  if(typeof auth==='undefined'||!auth.currentUser){ list.innerHTML='<div style="text-align:center;padding:20px;color:#e05050">❌ يجب تسجيل دخول الأدمن أولاً</div>'; return; }
+  list.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل...</div>';
+  try{
+    var snap=await db.collection('funding_waitlist').get();
+    _fundingRows=snap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }).sort(function(a,b){
+      return (b.timestamp&&b.timestamp.toMillis?b.timestamp.toMillis():0)-(a.timestamp&&a.timestamp.toMillis?a.timestamp.toMillis():0); });
+    renderFundingList();
+  }catch(e){
+    list.innerHTML='<div style="color:#e05050;padding:12px;text-align:center">❌ '+(e.code==='permission-denied'?'محتاج تنشر قواعد Firestore الجديدة (funding_waitlist)':escapeHtml(e.message||String(e)))+'</div>';
+  }
+}
+function renderFundingList(){
+  var list=document.getElementById('funding-list'); if(!list) return;
+  var cnt={all:_fundingRows.length}; _fundingRows.forEach(function(r){ var k=r.status||'pending'; cnt[k]=(cnt[k]||0)+1; });
+  var st=document.getElementById('funding-stats');
+  if(st) st.innerHTML='<span style="background:#1a3a6e;color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800">الكل: '+cnt.all+'</span>'+Object.keys(FUND_ST).filter(function(k){return cnt[k];}).map(function(k){return '<span style="background:'+FUND_ST[k].c+'22;color:'+FUND_ST[k].c+';border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800">'+FUND_ST[k].t+': '+cnt[k]+'</span>';}).join('');
+  var q=String((document.getElementById('funding-q')||{}).value||'').trim().toLowerCase();
+  var rows=_fundingRows.filter(function(r){ return !q||[r.orgName,r.gov,r.contactName,r.phone,r.regNumber].join(' ').toLowerCase().indexOf(q)>-1; });
+  if(!rows.length){ list.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">📭 لا توجد حجوزات</div>'; return; }
+  var E=escapeHtml;
+  list.innerHTML=rows.map(function(r){
+    var s=FUND_ST[r.status||'pending']||FUND_ST.pending;
+    var date=r.timestamp&&r.timestamp.toMillis?new Date(r.timestamp.toMillis()).toLocaleDateString('ar-EG'):'—';
+    var row=function(l,v,ltr){ return v?'<tr><td style="color:#6b7a8d;padding:2px 4px;width:35%">'+l+'</td><td style="padding:2px 4px;font-weight:600'+(ltr?';direction:ltr;text-align:right;font-size:10.5px':'')+'">'+E(v)+'</td></tr>':''; };
+    return '<div style="background:white;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-right:4px solid #1a3a6e">'+
+      '<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px"><div style="font-size:13px;font-weight:900;color:#1a2a3a">'+E(r.orgName||'—')+'</div>'+
+      '<span style="font-size:9px;font-weight:800;background:'+s.c+'22;color:'+s.c+';padding:2px 8px;border-radius:8px;white-space:nowrap">'+s.t+'</span></div>'+
+      '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:8px">'+
+        row('📋 رقم الإشهار',r.regNumber)+row('📍 المحافظة',r.gov)+row('📞 التليفون',r.phone,1)+row('✉️ إيميل الجمعية',r.orgEmail,1)+
+        row('👤 مسؤول التواصل',r.contactName)+row('📧 إيميل شخصي',r.contactEmail,1)+row('📝 طلبات',r.requests)+row('💬 ملاحظات',r.notes)+row('📅 التاريخ',date)+
+      '</table>'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+        (r.phone?'<a href="'+waNum(r.phone)+'?text='+encodeURIComponent('السلام عليكم '+(r.contactName||'')+'، بخصوص حجز جمعية '+(r.orgName||'')+' في منصة تنمويين مصر لفرص التمويل والمنح')+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>':'')+
+        (r.contactEmail?'<a href="mailto:'+encodeURIComponent(r.contactEmail)+'?subject='+encodeURIComponent('منصة تنمويين مصر لفرص التمويل والمنح - '+(r.orgName||''))+'" style="flex:1;padding:7px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ إيميل</a>':'')+
+        '<select onchange="updateFundingStatus(\''+r.id+'\',this.value)" style="flex:1.3;border:1.5px solid #d6dee8;border-radius:8px;padding:5px;font-family:Cairo,sans-serif;font-size:11px">'+
+          Object.keys(FUND_ST).map(function(k){ return '<option value="'+k+'"'+((r.status||'pending')===k?' selected':'')+'>'+FUND_ST[k].t+'</option>'; }).join('')+'</select>'+
+        '<button onclick="deleteFunding(\''+r.id+'\')" style="padding:7px 10px;background:#feeaea;color:#e05050;border:none;border-radius:8px;font-size:12px;cursor:pointer">🗑️</button>'+
+      '</div></div>';
+  }).join('');
+}
+function updateFundingStatus(id,status){
+  db.collection('funding_waitlist').doc(id).update({status:status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){
+    _fundingRows.forEach(function(r){ if(r.id===id) r.status=status; }); toast('✅ اتغيرت الحالة'); renderFundingList();
+  }).catch(function(e){ toast('❌ '+e.message); });
+}
+function deleteFunding(id){
+  if(!confirm('تحذف الحجز ده نهائيًا؟')) return;
+  db.collection('funding_waitlist').doc(id).delete().then(function(){
+    _fundingRows=_fundingRows.filter(function(r){return r.id!==id;}); toast('🗑️ اتحذف'); renderFundingList();
+  }).catch(function(e){ toast('❌ '+e.message); });
+}
+function exportFundingXlsx(){
+  if(!_fundingRows.length){ toast('⚠️ مفيش حجوزات'); return; }
+  var rows=_fundingRows.map(function(r){ return {'اسم الجمعية':r.orgName||'','رقم الإشهار':r.regNumber||'','المحافظة':r.gov||'','التليفون':r.phone||'','إيميل الجمعية':r.orgEmail||'','مسؤول التواصل':r.contactName||'','الإيميل الشخصي':r.contactEmail||'','طلبات':r.requests||'','ملاحظات':r.notes||'','الحالة':(FUND_ST[r.status||'pending']||{}).t||'','التاريخ':r.timestamp&&r.timestamp.toMillis?new Date(r.timestamp.toMillis()).toLocaleDateString('ar-EG'):''}; });
+  if(typeof window.tmExportRows==='function') window.tmExportRows('حجوزات منصة المنح',rows,'xlsx');
+  else if(window.XLSX){ var ws=XLSX.utils.json_to_sheet(rows), wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Bookings'); XLSX.writeFile(wb,'funding_waitlist.xlsx'); }
+}
+
 // ============ CONTACT ADMIN ============
 async function loadAtharTrials(){
   var list = document.getElementById('athar-trials-list');
@@ -8008,6 +8187,7 @@ var SECTIONS=[
   {col:'consultations',name:'الاستشارات',icon:'💬',pdf:['name','type','subject','phone','email','status']},
   {col:'registration_requests',name:'طلبات التسجيل',icon:'📝',pdf:['name','orgName','type','email','phone','status']},
   {col:'contact_messages',name:'رسائل التواصل',icon:'✉️',pdf:['name','email','phone','subject','message']},
+  {col:'funding_waitlist',name:'حجوزات منصة المنح',icon:'💰',pdf:['orgName','regNumber','gov','phone','contactName','contactEmail','status']},
   {col:'athar_trials',name:'طلبات تجربة أثر',icon:'🌿',pdf:['name','org','orgName','email','phone','status']},
   {col:'courses',name:'تدريبات الأكاديمية',icon:'🎓',pdf:['title','trainer','startDate','timeText','platform','seats','registeredCount','status']},
   {col:'course_registrations',name:'تسجيلات الأكاديمية',icon:'📝',pdf:['name','courseTitle','phone','email','gov','org','status']}

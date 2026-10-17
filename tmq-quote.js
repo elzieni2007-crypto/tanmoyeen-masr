@@ -263,9 +263,25 @@ function previewHTML(d){const dots='<span class="tmq-dots">..................</s
   <h3 style="margin-top:20px">شروط وملاحظات</h3><ul>${['المنصة أداة مساعدة وفريق الجمعية مسؤول عن مراجعة المسودات واعتمادها قبل التقديم.','المنصة لا تضمن الحصول على تمويل. القرار للجهة المانحة وحدها.','بيانات الجمعية وملفاتها ملكها ومحدش يطلع عليها غير فريقها المصرح له.','دقة التحليل مرتبطة بدقة بيانات البروفايل.','أي تمويل أجنبي يحتاج موافقة وزارة التضامن الاجتماعي وفق القانون 149 لسنة 2019.',`حد الـ${d.cap} مقترح في السنة للاستخدام المعتاد للجمعية.`,`العرض صالح لمدة ${d.valid} يوم أو لحد اكتمال أماكن المرحلة الأولى أيهما أقرب.`].concat(d.notes?d.notes.split(/\n+/).filter(Boolean):[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
   <h3 style="margin-top:20px">الموافقة على العرض</h3><div class="tmq-acc"><div><b>1. التوقيع والختم</b><br>اسم الجمعية: ${d.assoc?esc(d.assoc):dots}<br>اسم الممثل القانوني: ${dots}<br>التوقيع والختم: ${dots}<br>التاريخ: ${dots}</div><div class="gold"><b>2. إيميل تأكيد</b><br>ابعت إيميل بالموافقة على العرض رقم ${esc(d.no)} ومعاه صورة تحويل جدية التعاقد (${f(d.deposit)} جنيه) على: <b dir="ltr">${d.senderEmail?esc(d.senderEmail):dots}</b><br>وهنرد عليكم بتأكيد الحجز وميعاد تسليم المنصة.</div></div></div>`;
   return clean(h)}
-function mailBody(d){return clean(`السادة ${d.assoc||'الجمعية'}${d.contact?`\nعناية الأستاذ/ة ${d.contact}`:''}\n\nتحية طيبة\n\nشكرا لحجزكم مكان في المرحلة الأولى من منصة الفرص والمنح من تنمويين مصر. مرفق لحضراتكم عرض السعر رقم ${d.no} وده ملخصه:\n\n• رسوم التأسيس: ${f(d.setup)} جنيه تدفع مرة واحدة (تدريب الفريق وتشغيل الحساب وتجهيز بيانات الجمعية)\n• الاشتراك الشهري: ${f(d.monthly)} جنيه (الاستضافة واشتراكات الذكاء الاصطناعي) والسداد ربع سنوي مقدما\n• ولو دفعتم السنة مقدم: ${f(d.monthly*d.annualMonths)} جنيه بدل ${f(d.monthly*12)} جنيه\n\nلو العرض مناسب سارع بتحويل جدية التعاقد ${f(d.deposit)} جنيه لتأكيد مكان جمعيتكم والباقي ${f(d.setup-d.deposit)} جنيه بعد تسليم المنصة. ${d.acceptUrl?'وللموافقة على العرض اضغط على الرابط ده:\n'+d.acceptUrl+'\nأو ابعتولنا إيميل تأكيد ومعاه صورة التحويل.':'وللموافقة ابعتولنا إيميل تأكيد ومعاه صورة التحويل.'}\n\nالعرض صالح لمدة ${d.valid} يوم أو لحد اكتمال أماكن أول 100 جمعية.\n\nمع خالص التحية\n${d.senderName}${d.senderEmail?'\n'+d.senderEmail:''}`)}
+function mailBody(d){return clean(`السادة ${d.assoc||'الجمعية'}${d.contact?`\nعناية الأستاذ/ة ${d.contact}`:''}\n\nتحية طيبة\n\nشكرا لحجزكم مكان في المرحلة الأولى من منصة الفرص والمنح من تنمويين مصر. مرفق لحضراتكم عرض السعر رقم ${d.no}\n\nلو العرض مناسب سارع بتحويل جدية التعاقد.\n${d.acceptUrl?'وللموافقة على العرض اضغط على الرابط ده:\n'+d.acceptUrl+'\nأو ابعتولنا إيميل تأكيد ومعاه صورة التحويل.':'وللموافقة ابعتولنا إيميل تأكيد ومعاه صورة التحويل.'}\n\nالعرض صالح لمدة ${d.valid} يوم أو لحد اكتمال أماكن أول 100 جمعية.\n\nمع خالص التحية\n${d.senderName}${d.senderEmail?'\n'+d.senderEmail:''}`)}
 function waText(d){return clean(`السلام عليكم ${d.contact||''}\nشكرا لحجز ${d.assoc||'جمعيتكم'} في منصة الفرص والمنح من تنمويين مصر 🌱\nعرض السعر رقم ${d.no}:\n• تأسيس ${f(d.setup)} جنيه تدفع مرة واحدة\n• اشتراك ${f(d.monthly)} جنيه شهريا والسداد ربع سنوي مقدما\n• أو سنة مقدم بـ${f(d.monthly*d.annualMonths)} جنيه بدل ${f(d.monthly*12)}\n• لو العرض مناسب سارع بتحويل جدية التعاقد ${f(d.deposit)} جنيه والباقي بعد التسليم\n${d.acceptUrl?'• للموافقة على العرض: '+d.acceptUrl+'\n':''}هبعتلكم ملف العرض كامل هنا 👇`)}
 const waPhone=p=>{let x=String(p||'').replace(/[^\d]/g,'');if(x.startsWith('00'))x=x.slice(2);if(x.startsWith('0'))x='20'+x.slice(1);return x};
+
+// ملف PDF من نفس صفحات العرض (صفحة A4 لكل صفحة في المعاينة)
+let _pdfLibs=null;const loadPdfLibs=()=>_pdfLibs||(_pdfLibs=Promise.all(['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js','https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'].map(src=>new Promise((res,rej)=>{if((src.includes('html2canvas')&&window.html2canvas)||(src.includes('jspdf')&&window.jspdf)){res();return}const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>{_pdfLibs=null;rej(new Error('lib'))};document.head.appendChild(sc)}))));
+async function buildPdf(d){
+  await loadPdfLibs();if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+  d.dateTxt=dateAr(new Date((d.date||new Date().toISOString().slice(0,10))+'T12:00:00'));
+  const host=document.createElement('div');host.style.cssText='position:fixed;left:-30000px;top:0;width:794px;direction:rtl;background:#fff';
+  host.innerHTML='<div class="tmq-prev" style="padding:0;background:#fff">'+previewHTML(d)+'</div>';document.body.appendChild(host);
+  try{const pages=[...host.querySelectorAll('.tmq-pg')];const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'pt',format:'a4',compress:true});
+    const W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight();
+    for(let i=0;i<pages.length;i++){const pg=pages[i];pg.style.boxShadow='none';pg.style.margin='0';pg.style.width='794px';pg.style.minHeight='1123px';
+      const cv=await window.html2canvas(pg,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
+      let w=W,h=cv.height*W/cv.width;if(h>H){h=H;w=cv.width*H/cv.height}
+      if(i)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',0.9),'JPEG',(W-w)/2,0,w,h)}
+    pdf.setProperties({title:'عرض سعر '+(d.no||'')+(d.assoc?' - '+d.assoc:'')});
+    return pdf.output('blob')}finally{host.remove()}}
 function open(booking={},opts={}){
   if(!document.getElementById('tmq-css')){const s=document.createElement('style');s.id='tmq-css';s.textContent=CSS;document.head.appendChild(s)}
   const saved=booking.quote||null;const seq=saved?null:nextNo();
@@ -280,7 +296,7 @@ function open(booking={},opts={}){
     <h4>نصوص إضافية</h4><div class="tmq-f"><label class="full">مقدمة مخصصة (اختياري)<textarea data-k="intro" placeholder="لو فاضية هتظهر المقدمة الافتراضية"></textarea></label><label class="full">ملاحظات تتضاف للشروط (سطر لكل ملاحظة)<textarea data-k="notes"></textarea></label></div>
     <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:#5e7282;margin-top:12px"><input type="checkbox" id="tmqDef"> احفظ الأسعار وبيانات التحويل كافتراضي للعروض الجاية</label>
    </div><div class="tmq-prev" id="tmqPrev"></div></div>
-   <div class="tmq-acts"><button class="tmq-b s" data-a="save">حفظ المسودة</button><button class="tmq-b" data-a="docx">تحميل Word</button><button class="tmq-b s" data-a="print">طباعة / PDF</button><button class="tmq-b g" data-a="mail">إرسال بالإيميل</button><button class="tmq-b g" data-a="wa">إرسال واتساب</button><span class="tmq-msg" id="tmqMsg">راجع العرض وعدّل، وبعدين ابعته.</span></div></div>`;
+   <div class="tmq-acts"><button class="tmq-b s" data-a="save">حفظ المسودة</button><button class="tmq-b" data-a="pdf">تحميل PDF</button><button class="tmq-b s" data-a="docx">تحميل Word</button><button class="tmq-b g" data-a="mail">إرسال بالإيميل</button><button class="tmq-b g" data-a="wa">إرسال واتساب</button><span class="tmq-msg" id="tmqMsg">راجع العرض وعدّل، وبعدين ابعته.</span></div></div>`;
   document.body.appendChild(ov);document.body.style.overflow='hidden';
   const $=s=>ov.querySelector(s);const msg=t=>{$('#tmqMsg').textContent=t};
   const num=['setup','monthly','deposit','cap','valid','annualMonths'];
@@ -291,22 +307,37 @@ function open(booking={},opts={}){
   const snapshot=status=>{const q=Object.assign({},d,{status:status||(saved?.status==='sent'?'sent':'draft'),updatedAt:new Date().toISOString()});delete q.dateTxt;return q};
   const persist=status=>{if(seq){seq.commit()}if($('#tmqDef').checked){const k=['setup','monthly','deposit','cap','valid','annualMonths','bankName','bankAcc','instapay','senderName','senderEmail','senderPhone'];const o={};k.forEach(x=>o[x]=d[x]);ls.set(LSK,o)}
     const q=snapshot(status);booking.quote=q;try{opts.onSave&&opts.onSave(q,booking)}catch(e){}$('#tmqSt').textContent=q.status==='sent'?'اتبعت':'مسودة محفوظة';return q};
-  const fileName=()=>`عرض سعر ${d.no}${d.assoc?' - '+d.assoc.replace(/[\\/:*?"<>|]/g,' ').slice(0,60):''}.docx`;
+  const baseName=()=>`عرض سعر ${d.no}${d.assoc?' - '+d.assoc.replace(/[\\/:*?"<>|]/g,' ').slice(0,60):''}`;
+  const fileName=()=>baseName()+'.docx';
+  const pdfName=()=>baseName()+'.pdf';
+  const saveBlob=(b,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)};
+  const getPdf=async()=>{msg('بيجهّز ملف PDF…');return buildPdf(d)};
+  const downloadPdf=async()=>{try{const b=await getPdf();saveBlob(b,pdfName());msg('اتحمّل ملف PDF: '+pdfName());return b}catch(e){console.warn(e);msg('معرفناش نجهّز ملف PDF. اتأكد من الإنترنت وجرّب تاني.');return null}};
+  // مشاركة الملف نفسه (أندرويد/آيفون): بتفتح قايمة المشاركة وتختار Gmail أو واتساب فيتبعت الـ PDF مرفق
+  const shareFile=async(blob,title,text)=>{try{const file=new File([blob],pdfName(),{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:title,text:text});return 'shared'}}catch(e){if(e&&e.name==='AbortError')return 'cancel'}return 'nope'};
   const getDocx=async()=>{await loadDocx();d.dateTxt=dateAr(new Date(d.date+'T12:00:00'));return window.docx.Packer.toBlob(buildQuoteDoc(window.docx,d,Uint8Array.from(atob(window.__TMQ_logo),c=>c.charCodeAt(0))))};
   const download=async()=>{msg('بيجهّز ملف Word…');try{const b=await getDocx();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fileName();document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);msg('اتحمّل ملف Word.');return true}catch(e){msg('معرفناش نجهّز ملف Word. اتأكد من الإنترنت وجرّب تاني.');return false}};
   ov.addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
     if(a==='save'){persist();msg('اتحفظت المسودة.')}
     if(a==='docx'){persist();await download()}
-    if(a==='print'){persist();window.print()}
+    if(a==='pdf'){persist();await downloadPdf()}
     if(a==='mail'){if(!d.email){msg('اكتب إيميل الجمعية الأول.');$('[data-k="email"]').focus();return}
-      const ok=await download();persist('sent');try{opts.onSent&&opts.onSent(booking.quote,'email',booking)}catch(e){}
-      location.href=`mailto:${encodeURIComponent(d.email)}?subject=${encodeURIComponent('عرض سعر منصة الفرص والمنح – '+d.no)}&body=${encodeURIComponent(mailBody(d))}`;
-      msg(ok?'اتفتح الإيميل، وملف Word اتحمّل: ارفقه وابعت.':'اتفتح الإيميل. حمّل ملف Word وارفقه.')}
+      const subject='عرض سعر منصة الفرص والمنح – '+d.no,body=mailBody(d);
+      let blob=null;try{blob=await getPdf()}catch(e){console.warn(e)}
+      persist('sent');try{opts.onSent&&opts.onSent(booking.quote,'email',booking)}catch(e){}
+      if(blob){try{navigator.clipboard&&navigator.clipboard.writeText(d.email)}catch(e){}
+        const r=await shareFile(blob,subject,body);
+        if(r==='shared'){msg('✅ اختار Gmail من قايمة المشاركة: الـ PDF مرفق والرسالة جاهزة. إيميل الجمعية اتنسخ، الصقه في خانة "إلى".');return}
+        if(r==='cancel'){msg('اتلغت المشاركة. دوس "إرسال بالإيميل" تاني لما تكون جاهز.');return}
+        saveBlob(blob,pdfName())}
+      location.href=`mailto:${encodeURIComponent(d.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      msg(blob?'اتفتح الإيميل، وملف PDF اتحمّل باسم «'+pdfName()+'»: ارفقه من التحميلات وابعت. (المتصفح ده مش بيسمح يرفق الملف لوحده)':'اتفتح الإيميل. حمّل PDF وارفقه.')}
     if(a==='wa'){const p=waPhone(d.phone);if(!p){msg('اكتب رقم موبايل الجمعية الأول.');$('[data-k="phone"]').focus();return}
-      const ok=await download();persist('sent');try{opts.onSent&&opts.onSent(booking.quote,'whatsapp',booking)}catch(e){}
-      window.open(`https://wa.me/${p}?text=${encodeURIComponent(waText(d))}`,'_blank','noopener');msg(ok?'اتفتح واتساب، وملف Word اتحمّل: ابعته في نفس المحادثة.':'اتفتح واتساب. حمّل ملف Word وابعته.')}});
+      let blob=null;try{blob=await getPdf()}catch(e){}
+      if(blob)saveBlob(blob,pdfName());persist('sent');try{opts.onSent&&opts.onSent(booking.quote,'whatsapp',booking)}catch(e){}
+      window.open(`https://wa.me/${p}?text=${encodeURIComponent(waText(d))}`,'_blank','noopener');msg(blob?'اتفتح واتساب، وملف PDF اتحمّل: ابعته في نفس المحادثة.':'اتفتح واتساب. حمّل PDF وابعته.')}});
   setTimeout(()=>$('[data-k="assoc"]').focus(),50);
   return {close,data:d};
 }
-window.TMQuote={open,previewHTML,mailBody,defaults:DEF,docx:async d=>{await loadDocx();const x=Object.assign({},DEF,d,{dateTxt:dateAr(new Date((d.date||new Date().toISOString().slice(0,10))+'T12:00:00'))});return window.docx.Packer.toBlob(buildQuoteDoc(window.docx,x,Uint8Array.from(atob(window.__TMQ_logo),c=>c.charCodeAt(0))))}};
+window.TMQuote={open,previewHTML,mailBody,pdf:d=>buildPdf(Object.assign({},DEF,d)),defaults:DEF,docx:async d=>{await loadDocx();const x=Object.assign({},DEF,d,{dateTxt:dateAr(new Date((d.date||new Date().toISOString().slice(0,10))+'T12:00:00'))});return window.docx.Packer.toBlob(buildQuoteDoc(window.docx,x,Uint8Array.from(atob(window.__TMQ_logo),c=>c.charCodeAt(0))))}};
 })();

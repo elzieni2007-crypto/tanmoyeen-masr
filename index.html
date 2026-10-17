@@ -7290,7 +7290,7 @@ function renderFundingList(){
       '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:8px">'+
         row('📋 رقم الإشهار',r.regNumber)+row('📍 المحافظة',r.gov)+row('📞 التليفون',r.phone,1)+row('✉️ إيميل الجمعية',r.orgEmail,1)+
         row('👤 مسؤول التواصل',r.contactName)+row('📧 إيميل شخصي',r.contactEmail,1)+row('📝 طلبات',r.requests)+row('💬 ملاحظات',r.notes)+row('📅 التاريخ',date)+
-      '</table>'+
+      '</table>'+(window.fqCardExtra?fqCardExtra(r):'')+
       '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
         (r.phone?'<a href="'+waNum(r.phone)+'?text='+encodeURIComponent('السلام عليكم '+(r.contactName||'')+'، بخصوص حجز جمعية '+(r.orgName||'')+' في منصة تنمويين مصر لفرص التمويل والمنح')+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>':'')+
         (r.contactEmail?'<a href="mailto:'+encodeURIComponent(r.contactEmail)+'?subject='+encodeURIComponent('منصة تنمويين مصر لفرص التمويل والمنح - '+(r.orgName||''))+'" style="flex:1;padding:7px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ إيميل</a>':'')+
@@ -10412,5 +10412,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 })();
 
 </script>
+<script src="tmq-quote.js"></script>
+<script src="funding-quotes.js"></script>
 </body>
 </html>

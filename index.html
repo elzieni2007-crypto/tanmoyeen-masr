@@ -811,14 +811,15 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   </div>
 
   <!-- بانر منصة فرص التمويل والمنح (مكان بانر أثر) -->
+  <style>@keyframes fpGlow{0%,100%{box-shadow:0 6px 18px rgba(242,153,0,.35)}50%{box-shadow:0 6px 26px rgba(242,153,0,.6)}}@media (prefers-reduced-motion:reduce){.fp-banner{animation:none!important}}</style>
   <div style="padding:0 12px 6px">
-    <div onclick="go('funding-screen')" style="background:linear-gradient(135deg,#0d2347,#1a3a6e 60%,#0b6a93);border-radius:16px;padding:12px 16px;cursor:pointer;box-shadow:0 4px 16px rgba(26,58,110,.35);display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.12)">
-      <div style="width:38px;height:38px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">💰</div>
+    <div class="fp-banner" onclick="go('funding-screen')" style="background:linear-gradient(135deg,#ffd166,#f6a609 70%,#f08c00);border-radius:16px;padding:12px 16px;cursor:pointer;animation:fpGlow 2.6s ease-in-out infinite;display:flex;align-items:center;gap:12px;border:1.5px solid #ffe3a3">
+      <div style="width:40px;height:40px;background:#0d2347;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">💰</div>
       <div style="flex:1">
-        <div style="color:white;font-size:12px;font-weight:900;margin-bottom:2px">منصة فرص التمويل والمنح <span style="background:#00aeef;border-radius:6px;padding:0 6px;font-size:9px">قريبًا</span></div>
-        <div style="color:rgba(255,255,255,.78);font-size:10px">فرص مناسبة لجمعيتك ومسودة مقترح من خبراتها</div>
+        <div style="color:#0d2347;font-size:13px;font-weight:900;margin-bottom:2px">منصة فرص التمويل والمنح <span style="background:#0d2347;color:#ffd166;border-radius:6px;padding:0 6px;font-size:9px">قريبًا</span></div>
+        <div style="color:#3a2a00;font-size:10.5px;font-weight:700">فرص مناسبة لجمعيتك ومسودة مقترح من خبراتها</div>
       </div>
-      <div style="background:#fff;color:#1a3a6e;border-radius:10px;padding:5px 10px;font-size:11px;font-weight:900;flex-shrink:0;white-space:nowrap">احجز الآن</div>
+      <div style="background:#0d2347;color:#fff;border-radius:10px;padding:6px 11px;font-size:11px;font-weight:900;flex-shrink:0;white-space:nowrap">احجز الآن</div>
     </div>
   </div>
 
@@ -7286,7 +7287,7 @@ function renderFundingList(){
       '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:8px">'+
         row('📋 رقم الإشهار',r.regNumber)+row('📍 المحافظة',r.gov)+row('📞 التليفون',r.phone,1)+row('✉️ إيميل الجمعية',r.orgEmail,1)+
         row('👤 مسؤول التواصل',r.contactName)+row('📧 إيميل شخصي',r.contactEmail,1)+row('📝 طلبات',r.requests)+row('💬 ملاحظات',r.notes)+row('📅 التاريخ',date)+
-      '</table>'+
+      '</table>'+(window.fqCardExtra?fqCardExtra(r):'')+
       '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
         (r.phone?'<a href="'+'https://wa.me/'+cleanPhone(r.phone)+'?text='+encodeURIComponent('السلام عليكم '+(r.contactName||'')+'، بخصوص حجز جمعية '+(r.orgName||'')+' في منصة تنمويين مصر لفرص التمويل والمنح')+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>':'')+
         (r.contactEmail?'<a href="mailto:'+encodeURIComponent(r.contactEmail)+'?subject='+encodeURIComponent('منصة تنمويين مصر لفرص التمويل والمنح - '+(r.orgName||''))+'" style="flex:1;padding:7px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ إيميل</a>':'')+
@@ -10539,6 +10540,7 @@ window.tmUpdateJsStats=async function(force){
   try{
     var list=await seekers(force!==false), by={};
     list.forEach(function(r){ var k=specCat(r.spec)||'أي مجال تنموي'; by[k]=(by[k]||0)+1; });
+    ['adm-n-js','dash-js-n'].forEach(function(id){ var e=$(id); if(e) e.textContent=list.length; });
     await getDbX().collection('settings').doc('js_stats').set({total:list.length,bySpec:by,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
   }catch(e){ console.warn('js_stats',e); }
 };
@@ -10636,5 +10638,8 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 })();
 </script>
 
+<script src="tmq-quote.js"></script>
+<script src="funding-quotes.js"></script>
+<script src="outreach.js"></script>
 </body>
 </html>

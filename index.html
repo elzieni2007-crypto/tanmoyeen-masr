@@ -7008,14 +7008,17 @@ function resendWA(encodedMsg){
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 
-function sendBulkEmail(){
+async function sendBulkEmail(){
   const subject = document.getElementById('email-subject').value.trim();
   const body    = document.getElementById('email-body').value.trim();
   const type    = document.getElementById('email-to-type').value;
 
   if(!subject || !body){ toast('⚠️ اكتب الموضوع والرسالة'); return; }
 
-  const list = getEmailList(type);
+  // كانت بتنادي getEmailList ودي مش موجودة، فالزرار ماكانش بيعمل حاجة
+  toast('⏳ بنجمع الإيميلات...');
+  const all  = await loadEmailsFromFirebase();
+  const list = type === 'all' ? all : all.filter(function(r){ return r.type === type; });
 
   if(list.length === 0){
     // لو مفيش إيميلات مسجّلة، افتح إيميل فاضي للأدمن
@@ -7025,13 +7028,10 @@ function sendBulkEmail(){
     return;
   }
 
-  // بناء mailto مع كل الإيميلات
+  // كل المستلمين في BCC على دفعات (قبل كده كانوا في "إلى" وكل واحد كان بيشوف إيميلات الباقيين)
+  if(window.tmBccEmail){ window.tmBccEmail(list.map(r => r.email), subject, body); return; }
   const emails = list.map(r => r.email).join(',');
-  const mailtoLink = `mailto:${emails}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-  // افتح تطبيق الإيميل
-  window.location.href = mailtoLink;
-
+  window.location.href = `mailto:?bcc=${encodeURIComponent(emails)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   toast(`📧 جاري فتح الإيميل لـ ${list.length} مشترك...`);
 }
 
@@ -10564,15 +10564,45 @@ window.tmJobCandidates=async function(jobId){
     var link=APP+'?job='+encodeURIComponent(jobId);
     var msg=function(r){ return 'أهلًا '+(r.name||'')+' 👋\nفيه فرصة جديدة مناسبة لمجالك على تنمويين مصر:\n💼 '+(js.title||'')+'\n🏢 '+(js.org||'')+'\n📍 '+(js.gov||'')+(js.dl?'\n⏰ آخر موعد: '+js.dl:'')+'\n\nالتفاصيل ولينك التقديم:\n'+link; };
     mb.innerHTML='<div style="padding:4px 2px 16px;font-family:Cairo,sans-serif"><div style="font-size:15px;font-weight:900;color:#1a3a6e">👥 مرشحين مطابقين ('+list.length+')</div>'+
-      '<div style="font-size:11.5px;color:#5b6675;margin:2px 0 10px">'+esc(js.title||'')+' — '+esc(js.org||'')+'<br>ابعتلهم الفرصة على واتساب، وهتتعلّم ✓ عشان ماتتبعتش مرتين.</div>'+
+      '<div style="font-size:11.5px;color:#5b6675;margin:2px 0 10px">'+esc(js.title||'')+' — '+esc(js.org||'')+'<br>ابعتلهم الفرصة إيميل للكل مرة واحدة، أو واتساب لكل واحد. اللي اتبعتله بيتعلّم ✓.</div>'+
+      (list.length?'<button type="button" id="jc-email" style="width:100%;border:0;border-radius:11px;padding:11px;background:#1a3a6e;color:#fff;font-family:Cairo,sans-serif;font-weight:900;font-size:13px;cursor:pointer;margin-bottom:10px">✉️ إيميل للكل ('+list.filter(function(r){return r.email;}).length+') — مخفي BCC</button>':'')+
       (list.length?list.map(function(r){ var sent=r.notified&&r.notified[jobId];
         return seekerRow(r,{right:'<a href="'+wa(r.phone,msg(r))+'" target="_blank" data-n="'+esc(r.fbId)+'" style="flex:none;padding:6px 10px;border-radius:9px;text-decoration:none;font-size:11px;font-weight:800;'+(sent?'background:#eef2f6;color:#6b7280">✓ اتبعت':'background:#25d366;color:#fff">💬 ابعت')+'</a>'}); }).join('')
        :'<div style="text-align:center;padding:16px;color:#6b7280">مفيش باحثين مطابقين لمجال الوظيفة ومحافظتها لسه.</div>')+'</div>';
+    if($('jc-email')) $('jc-email').onclick=function(){
+      var subj='فرصة عمل مناسبة لمجالك: '+(js.title||'')+(js.org?' - '+js.org:'');
+      var body='أهلًا 👋\n\nفيه فرصة جديدة على تنمويين مصر مناسبة لمجالك ومحافظتك:\n\n💼 '+(js.title||'')+'\n🏢 '+(js.org||'')+'\n📍 '+(js.gov||'')+(js.dl?'\n⏰ آخر موعد: '+js.dl:'')+'\n\nالتفاصيل ولينك التقديم (التقديم بيكون مباشرة للجهة):\n'+link+'\n\nبالتوفيق 🌱\nتنمويين مصر\n\nلو مش حابب توصلك فرص تانية رد على الإيميل ده بكلمة «لا».';
+      var byMail={}; list.forEach(function(r){ if(r.email) byMail[String(r.email).trim().toLowerCase()]=r; });
+      window.tmBccEmail(Object.keys(byMail),subj,body,function(batch){
+        batch.forEach(function(e){ var r=byMail[e]; if(!r) return; var upd={}; upd['notified.'+jobId]=firebase.firestore.FieldValue.serverTimestamp();
+          getDbX().collection('jobseekers').doc(r.fbId).update(upd).catch(function(){}); r.notified=r.notified||{}; r.notified[jobId]=true; });
+      });
+    };
     mb.querySelectorAll('a[data-n]').forEach(function(a){ a.addEventListener('click',function(){ var id=a.getAttribute('data-n'); a.textContent='✓ اتبعت'; a.style.background='#eef2f6'; a.style.color='#6b7280';
       var upd={}; upd['notified.'+jobId]=firebase.firestore.FieldValue.serverTimestamp();
       getDbX().collection('jobseekers').doc(id).update(upd).catch(function(e){console.warn(e);});
       list.forEach(function(r){ if(r.fbId===id){ r.notified=r.notified||{}; r.notified[jobId]=true; } }); }); });
   }catch(e){ mb.innerHTML='<div style="padding:16px;color:#e05050">❌ '+esc(e.message||e)+'</div>'; }
+};
+
+/* ---------- إيميل جماعي آمن: كل المستلمين في BCC (محدش يشوف إيميل التاني)، على دفعات ---------- */
+window.tmBccEmail=function(emails,subject,body,onSent){
+  emails=emails.map(function(e){return String(e||'').trim().toLowerCase();}).filter(function(e,i,a){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)&&a.indexOf(e)===i; });
+  if(!emails.length){ say('⚠️ مفيش إيميلات صالحة'); return; }
+  var N=40, batches=[]; for(var i=0;i<emails.length;i+=N) batches.push(emails.slice(i,i+N));
+  var mb=$('mbody'); if(!mb) return;
+  mb.innerHTML='<div style="padding:4px 2px 16px;font-family:Cairo,sans-serif"><div style="font-size:15px;font-weight:900;color:#1a3a6e">✉️ إيميل جماعي لـ '+emails.length+' شخص</div>'+
+    '<div style="font-size:11.5px;color:#5b6675;line-height:1.7;margin:4px 0 10px">كل المستلمين في <b>BCC</b>، يعني محدش هيشوف إيميل حد تاني. الإيميلات متقسمة دفعات ('+N+' في كل دفعة) عشان تطبيق الإيميل يفتحها من غير مشاكل. افتح كل دفعة ودوس إرسال.</div>'+
+    '<div style="background:#f6f9fc;border-radius:10px;padding:9px;font-size:12px;margin-bottom:10px"><b>الموضوع:</b> '+esc(subject)+'</div>'+
+    batches.map(function(b,i){ return '<a href="mailto:?bcc='+encodeURIComponent(b.join(','))+'&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body)+'" data-b="'+i+'" style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#1a3a6e;color:#fff;border-radius:11px;padding:11px 12px;margin-bottom:7px;text-decoration:none;font-size:13px;font-weight:800"><span>📤 الدفعة '+(i+1)+' من '+batches.length+'</span><span style="font-size:11px;opacity:.85">'+b.length+' إيميل</span></a>'; }).join('')+
+    '<div style="display:flex;gap:6px;margin-top:6px"><button type="button" id="bcc-copy" style="flex:1;border:1.5px solid #1a3a6e;background:#fff;color:#1a3a6e;border-radius:10px;padding:9px;font-family:Cairo,sans-serif;font-weight:800;font-size:12px;cursor:pointer">📋 نسخ كل الإيميلات</button>'+
+    '<button type="button" id="bcc-msg" style="flex:1;border:1.5px solid #1a3a6e;background:#fff;color:#1a3a6e;border-radius:10px;padding:9px;font-family:Cairo,sans-serif;font-weight:800;font-size:12px;cursor:pointer">📋 نسخ الرسالة</button></div>'+
+    '<div style="font-size:10.5px;color:#8a94a6;margin-top:8px;line-height:1.6">💡 لو الإيميل ماتفتحش: انسخ الإيميلات والصقها في خانة BCC في Gmail. Gmail بيسمح بحوالي 500 مستلم في اليوم.</div></div>';
+  var mc=$('mcall'); if(mc) mc.innerHTML=''; $('modal').classList.add('op');
+  function cp(t,msg){ try{ navigator.clipboard.writeText(t).then(function(){ say(msg); }); }catch(e){ prompt('انسخ:',t); } }
+  $('bcc-copy').onclick=function(){ cp(emails.join(', '),'✅ اتنسخت '+emails.length+' إيميل — الصقهم في BCC'); };
+  $('bcc-msg').onclick=function(){ cp(subject+'\n\n'+body,'✅ اتنسخت الرسالة'); };
+  mb.querySelectorAll('a[data-b]').forEach(function(a){ a.addEventListener('click',function(){ a.style.background='#6b7280'; a.firstChild.textContent='✓ اتفتحت الدفعة '+(+a.getAttribute('data-b')+1); if(onSent) onSent(batches[+a.getAttribute('data-b')]); }); });
 };
 // زرار "مرشحين" في كروت الوظائف في الأدمن
 if(typeof window._renderJobsList==='function'){ var _rl=window._renderJobsList; window._renderJobsList=function(el,jobs,keep){ var r=_rl.apply(this,arguments);

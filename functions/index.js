@@ -328,9 +328,31 @@ function placeMatches(place, govs) {
   const p = normAr(place);
   return govs.some((g) => p.includes(normAr(g)));
 }
-function sectorMatches(sec, secs) {
+// نفس تصنيف الوظائف اللي في التطبيق (8 مجالات)، عشان المجالات القديمة والجديدة تتطابق
+const CAT_RULES=[
+ ['المالية والمحاسبة والمراجعة',/financ(e|ial)\b|\baccount(ant|ants|ing|s)?\b|audit|budget|treasur|payroll|cashier|\brisk\b|compliance|internal control|مال(ي|ية)|محاسب|مراجع|ميزاني|خزين|رواتب/i],
+ ['المشتريات وسلاسل الإمداد واللوجستيات',/procure|supply|logistic|purchas|warehouse|fleet|driver|store ?keeper|سائق|مشتريات|توريد|إمداد|امداد|لوجست|مخاز?ن/i],
+ ['الموارد البشرية والشؤون الإدارية',/\bHR\b|human resource|recruit|talent|\badmin\b|administrati(on|ve)|office manager|reception|secretar|موارد بشرية|الموارد البشرية|شؤون إدارية|الشؤون الإدارية|إداري|اداري|سكرتار|توظيف|شؤون العاملين/i],
+ ['المتابعة والتقييم والمساءلة والتعلم',/\bM&E\b|\bMEAL\b|\bMEL\b|monitoring|evaluation|accountability|data analy|رصد|تقييم|متابعة|مساءلة|مساءله/i],
+ ['المنح والشراكات وتطوير الموارد',/\bgrants?\b|partnership|resource mobili|fundrais|donor relation|business development|proposal writ|منح|شراكات|شراكة|تطوير الموارد|تنمية الموارد|جمع التبرعات|تبرعات|تمويل/i],
+ ['الاتصال والإعلام والعلاقات العامة',/communicat|media|public relation|\bPR\b|advocacy|content|marketing|visibility|إعلام|اعلام|اتصال|علاقات عامة|تواصل|محتوى|تسويق|مناصرة/i],
+ ['تكنولوجيا المعلومات والتحول الرقمي',/\bIT\b|\bICT\b|information tech|software|developer|digital|database|system admin|data (management|engineer)|تكنولوجيا|برمج|رقمي|نظم معلومات|قواعد بيانات/i],
+ ['المشروعات والبرامج',/project|program|coordinator|case ?work|field|مشروع|مشروعات|مشاريع|برنامج|برامج|منسق|ميداني|health|educat|protection|nutrition|livelihood|gender|youth|WASH|shelter|psychosocial|empower|rights|refugee|migra|climate|environment|صح(ة|ي)|تعليم|حماية|تمكين|حقوق|لاجئ|بيئ|زراع|تغذية|إغاثة|نوع اجتماعي|شباب|مجتمع|طفل|المرأة/i]
+];
+function catOf(t) {
+  t = String(t || "");
+  if (!t) return "";
+  for (const [c, re] of CAT_RULES) if (t === c) return c;
+  for (const [c, re] of CAT_RULES) if (re.test(t)) return c;
+  return "";
+}
+function sectorMatches(sec, secs, title) {
   if (!secs || !secs.length) return true;
-  if (!sec) return true;
+  const jc = catOf(title) || catOf(sec);
+  if (jc) {
+    if (secs.some((x) => catOf(x) === jc)) return true;
+  }
+  if (!sec) return !jc;
   const s = normAr(sec);
   return secs.some((x) => { const n = normAr(x); return s.includes(n) || n.includes(s); });
 }
@@ -340,7 +362,7 @@ async function matchedSubscriptions(kind, item) {
   snap.forEach((d) => {
     const p = d.data() || {};
     const place = kind === "tender" ? item.loc : item.gov;
-    const okSec = kind === "tender" ? true : sectorMatches(item.sec, p.secs);
+    const okSec = kind === "tender" ? true : sectorMatches(item.sec, p.secs, item.title);
     if (okSec && placeMatches(place, p.govs)) ids.push(p.subId || d.id);
   });
   return [...new Set(ids)];

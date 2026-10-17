@@ -811,15 +811,14 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   </div>
 
   <!-- بانر منصة فرص التمويل والمنح (مكان بانر أثر) -->
-  <style>@keyframes fpGlow{0%,100%{box-shadow:0 6px 18px rgba(242,153,0,.35)}50%{box-shadow:0 6px 26px rgba(242,153,0,.6)}}@media (prefers-reduced-motion:reduce){.fp-banner{animation:none!important}}</style>
   <div style="padding:0 12px 6px">
-    <div class="fp-banner" onclick="go('funding-screen')" style="background:linear-gradient(135deg,#ffd166,#f6a609 70%,#f08c00);border-radius:16px;padding:12px 16px;cursor:pointer;animation:fpGlow 2.6s ease-in-out infinite;display:flex;align-items:center;gap:12px;border:1.5px solid #ffe3a3">
-      <div style="width:40px;height:40px;background:#0d2347;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">💰</div>
+    <div onclick="go('funding-screen')" style="background:linear-gradient(135deg,#0d2347,#1a3a6e 60%,#0b6a93);border-radius:16px;padding:12px 16px;cursor:pointer;box-shadow:0 4px 16px rgba(26,58,110,.35);display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.12)">
+      <div style="width:38px;height:38px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">💰</div>
       <div style="flex:1">
-        <div style="color:#0d2347;font-size:13px;font-weight:900;margin-bottom:2px">منصة فرص التمويل والمنح <span style="background:#0d2347;color:#ffd166;border-radius:6px;padding:0 6px;font-size:9px">قريبًا</span></div>
-        <div style="color:#3a2a00;font-size:10.5px;font-weight:700">فرص مناسبة لجمعيتك ومسودة مقترح من خبراتها</div>
+        <div style="color:white;font-size:12px;font-weight:900;margin-bottom:2px">منصة فرص التمويل والمنح <span style="background:#00aeef;border-radius:6px;padding:0 6px;font-size:9px">قريبًا</span></div>
+        <div style="color:rgba(255,255,255,.78);font-size:10px">فرص مناسبة لجمعيتك ومسودة مقترح من خبراتها</div>
       </div>
-      <div style="background:#0d2347;color:#fff;border-radius:10px;padding:6px 11px;font-size:11px;font-weight:900;flex-shrink:0;white-space:nowrap">احجز الآن</div>
+      <div style="background:#fff;color:#1a3a6e;border-radius:10px;padding:5px 10px;font-size:11px;font-weight:900;flex-shrink:0;white-space:nowrap">احجز الآن</div>
     </div>
   </div>
 
@@ -926,53 +925,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
       <select id="j-sector" onchange="setJobAdvanced('sector',this.value)" style="padding:9px;border:1px solid #dde6f0;border-radius:9px;font-family:Cairo,sans-serif;font-size:11px;background:#fff">
-        <option value="all">كل القطاعات</option>
-        <option value="المالية">المالية والمحاسبة</option>
-        <option value="المشتريات">المشتريات</option>
-        <option value="سلاسل الإمداد">سلاسل الإمداد واللوجستيات</option>
-        <option value="الموارد البشرية">الموارد البشرية</option>
-        <option value="الإدارة">الإدارة والشؤون الإدارية</option>
-        <option value="البرامج والمشروعات">البرامج والمشروعات</option>
-        <option value="إدارة المشروعات">إدارة المشروعات</option>
-        <option value="الرصد والتقييم">الرصد والتقييم (M&amp;E)</option>
-        <option value="البحث والدراسات">البحث والدراسات</option>
-        <option value="التعليم والتدريب">التعليم والتدريب</option>
-        <option value="الصحة">الصحة</option>
-        <option value="الصحة النفسية">الصحة النفسية</option>
-        <option value="الحماية">الحماية</option>
-        <option value="حماية الطفل">حماية الطفل</option>
-        <option value="العنف القائم على النوع الاجتماعي">العنف القائم على النوع الاجتماعي</option>
-        <option value="الإغاثة والطوارئ">الإغاثة والطوارئ</option>
-        <option value="الأمن الغذائي">الأمن الغذائي والتغذية</option>
-        <option value="سبل العيش">سبل العيش والتمكين الاقتصادي</option>
-        <option value="التنمية المجتمعية">التنمية المجتمعية</option>
-        <option value="التنمية المحلية">التنمية المحلية</option>
-        <option value="الشباب">الشباب</option>
-        <option value="المرأة">المرأة</option>
-        <option value="الطفل والأسرة">الطفل والأسرة</option>
-        <option value="ذوي الإعاقة">ذوي الإعاقة وإعادة التأهيل</option>
-        <option value="حقوق الإنسان">حقوق الإنسان</option>
-        <option value="الحوكمة والمساءلة">الحوكمة والمساءلة</option>
-        <option value="المجتمع المدني">المجتمع المدني</option>
-        <option value="المناصرة والسياسات">المناصرة والسياسات</option>
-        <option value="الاتصالات والإعلام">الاتصالات والإعلام</option>
-        <option value="العلاقات العامة">العلاقات العامة</option>
-        <option value="جمع التبرعات">جمع التبرعات وتنمية الموارد</option>
-        <option value="الشراكات">الشراكات والعلاقات المؤسسية</option>
-        <option value="تكنولوجيا المعلومات">تكنولوجيا المعلومات</option>
-        <option value="البيانات والتحول الرقمي">البيانات والتحول الرقمي</option>
-        <option value="الهندسة والإنشاءات">الهندسة والإنشاءات</option>
-        <option value="البيئة وتغير المناخ">البيئة وتغير المناخ</option>
-        <option value="المياه والإصحاح والنظافة">المياه والإصحاح والنظافة (WASH)</option>
-        <option value="الزراعة والتنمية الريفية">الزراعة والتنمية الريفية</option>
-        <option value="التغذية">التغذية</option>
-        <option value="الشؤون القانونية">الشؤون القانونية</option>
-        <option value="الامتثال">الامتثال وإدارة المخاطر</option>
-        <option value="الجودة">الجودة</option>
-        <option value="الخدمات الاجتماعية">الخدمات الاجتماعية</option>
-        <option value="العمل الميداني">العمل الميداني</option>
-        <option value="التطوع">التطوع</option>
-      </select>
+        <option value="all">كل المجالات</option><option value="المشروعات والبرامج">المشروعات والبرامج (Project & Program Management)</option><option value="المالية والمحاسبة والمراجعة">المالية والمحاسبة والمراجعة (Finance, Accounting & Audit)</option><option value="الموارد البشرية والشؤون الإدارية">الموارد البشرية والشؤون الإدارية (HR & Administration)</option><option value="المشتريات وسلاسل الإمداد واللوجستيات">المشتريات وسلاسل الإمداد واللوجستيات (Procurement, Supply Chain & Logistics)</option><option value="المتابعة والتقييم والمساءلة والتعلم">المتابعة والتقييم والمساءلة والتعلم (MEAL)</option><option value="المنح والشراكات وتطوير الموارد">المنح والشراكات وتطوير الموارد (Grants, Partnerships & Resource Mobilization)</option><option value="الاتصال والإعلام والعلاقات العامة">الاتصال والإعلام والعلاقات العامة (Communications & Public Relations)</option><option value="تكنولوجيا المعلومات والتحول الرقمي">تكنولوجيا المعلومات والتحول الرقمي (IT & Digital Transformation)</option></select>
       <select id="j-workmode" onchange="setJobAdvanced('workmode',this.value)" style="padding:9px;border:1px solid #dde6f0;border-radius:9px;font-family:Cairo,sans-serif;font-size:11px;background:#fff">
         <option value="all">كل أنماط العمل</option><option value="عن بُعد">عن بُعد</option><option value="هجين">هجين</option><option value="من المكتب">من المكتب</option>
       </select>
@@ -997,7 +950,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
   <!-- باحثين عن عمل -->
   <div class="sh" style="margin-top:8px">
-    <div class="sh-t">🔍 باحثون عن عمل</div>
+    <div class="sh-t">👥 بنك المرشحين</div>
     <div class="sh-a" onclick="go('register');switchRegType('jobseeker')">سجّل الآن ←</div>
   </div>
   <div id="jobseekers-list" style="padding:0 12px">
@@ -1814,16 +1767,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       </div>
     </div>
     <div class="fg"><label class="fl">مجال العمل المطلوب *</label>
-      <select id="njs-spec" class="fi"><option value="">اختر...</option>
-        <option>إدارة مشاريع</option><option>الرصد والتقييم M&E</option>
-        <option>التدريب وبناء القدرات</option><option>الصحة المجتمعية</option>
-        <option>التعليم والتنمية</option><option>العمل الاجتماعي</option>
-        <option>تمكين المرأة</option><option>حماية الطفل</option>
-        <option>الزراعة والتنمية الريفية</option><option>الموارد البشرية</option>
-        <option>الإدارة المالية</option><option>المشتريات والتوريدات</option>
-        <option>التواصل والإعلام</option><option>تكنولوجيا المعلومات</option>
-        <option>أي مجال تنموي</option>
-      </select>
+      <select id="njs-spec" class="fi"><option value="">اختر...</option><option value="المشروعات والبرامج">المشروعات والبرامج (Project & Program Management)</option><option value="المالية والمحاسبة والمراجعة">المالية والمحاسبة والمراجعة (Finance, Accounting & Audit)</option><option value="الموارد البشرية والشؤون الإدارية">الموارد البشرية والشؤون الإدارية (HR & Administration)</option><option value="المشتريات وسلاسل الإمداد واللوجستيات">المشتريات وسلاسل الإمداد واللوجستيات (Procurement, Supply Chain & Logistics)</option><option value="المتابعة والتقييم والمساءلة والتعلم">المتابعة والتقييم والمساءلة والتعلم (MEAL)</option><option value="المنح والشراكات وتطوير الموارد">المنح والشراكات وتطوير الموارد (Grants, Partnerships & Resource Mobilization)</option><option value="الاتصال والإعلام والعلاقات العامة">الاتصال والإعلام والعلاقات العامة (Communications & Public Relations)</option><option value="تكنولوجيا المعلومات والتحول الرقمي">تكنولوجيا المعلومات والتحول الرقمي (IT & Digital Transformation)</option><option value="أي مجال تنموي">أي مجال</option></select>
     </div>
     <div class="fr">
       <div class="fg"><label class="fl">نوع العمل المطلوب *</label>
@@ -2313,24 +2257,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
       <div class="fg"><label class="fl">المجال</label>
         <select class="fi" id="nj-sec">
-          <option value="">اختر...</option>
-          <option>الرصد والتقييم M&E</option>
-          <option>إدارة المشاريع</option>
-          <option>التدريب وبناء القدرات</option>
-          <option>الصحة المجتمعية</option>
-          <option>التعليم والتنمية</option>
-          <option>حماية الطفل</option>
-          <option>تمكين المرأة</option>
-          <option>التمكين الاقتصادي</option>
-          <option>النوع الاجتماعي</option>
-          <option>الموارد البشرية</option>
-          <option>الإدارة المالية</option>
-          <option>المشتريات والتوريدات</option>
-          <option>الزراعة والتنمية الريفية</option>
-          <option>التواصل والإعلام</option>
-          <option>الصحة النفسية</option>
-          <option>تكنولوجيا المعلومات</option>
-        </select>
+          <option value="">اختر المجال...</option><option value="المشروعات والبرامج">المشروعات والبرامج (Project & Program Management)</option><option value="المالية والمحاسبة والمراجعة">المالية والمحاسبة والمراجعة (Finance, Accounting & Audit)</option><option value="الموارد البشرية والشؤون الإدارية">الموارد البشرية والشؤون الإدارية (HR & Administration)</option><option value="المشتريات وسلاسل الإمداد واللوجستيات">المشتريات وسلاسل الإمداد واللوجستيات (Procurement, Supply Chain & Logistics)</option><option value="المتابعة والتقييم والمساءلة والتعلم">المتابعة والتقييم والمساءلة والتعلم (MEAL)</option><option value="المنح والشراكات وتطوير الموارد">المنح والشراكات وتطوير الموارد (Grants, Partnerships & Resource Mobilization)</option><option value="الاتصال والإعلام والعلاقات العامة">الاتصال والإعلام والعلاقات العامة (Communications & Public Relations)</option><option value="تكنولوجيا المعلومات والتحول الرقمي">تكنولوجيا المعلومات والتحول الرقمي (IT & Digital Transformation)</option></select>
       </div>
 
       <div class="fr">
@@ -2473,6 +2400,13 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div id="adm-consult-list"></div>
 </div>
 
+<div id="adm-form-candreq" style="display:none;padding:0 16px;padding-bottom:100px">
+  <div style="font-size:13px;font-weight:800;color:#1a3a6e;margin:12px 0 6px">👥 طلبات المرشحين من الجهات</div>
+  <div style="font-size:11px;color:#5b6675;line-height:1.7;margin-bottom:8px">لكل طلب: شوف المرشحين المطابقين، ابعتلهم يأكدوا اهتمامهم، وبعدين نزّل Excel بالمختارين وابعته للجهة. ولكل وظيفة منشورة فيه زرار "👥 مرشحين" في قايمة الوظائف.</div>
+  <div id="candreq-stats" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+  <div id="candreq-list"></div>
+</div>
+
 <div id="adm-form-funding" style="display:none;padding:0 16px;padding-bottom:100px">
   <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px">
     <div style="flex:1;font-size:13px;font-weight:800;color:#1a3a6e">💰 حجوزات منصة فرص التمويل والمنح</div>
@@ -2594,6 +2528,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div id="adm-form-jobs-list" style="display:none;padding:0 16px;padding-bottom:100px">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 10px">
         <div style="font-size:15px;font-weight:800;color:var(--p)">💼 الوظائف</div>
+        <button onclick="tmNormalizeJobCats()" style="padding:6px 10px;background:#fff3cd;color:#8a5a00;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">🏷️ توحيد التصنيف</button>
         <button onclick="exportJobsAdmin()" style="padding:6px 12px;background:#e8f0fe;color:var(--p);border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">📥 Excel</button>
       </div>
       <div id="published-jobs-list-new" style="margin-top:8px"></div>
@@ -3287,11 +3222,12 @@ function updateAllCounts(){
       }).catch(function(){});
     });
 
-    // باحثو عمل
-    db.collection('jobseekers').get().then(function(snap){
-      window._fb_jobseekers = snap.size;
-      var e1=document.getElementById('dash-js-n'); if(e1) e1.textContent=snap.size;
-      var e2=document.getElementById('adm-n-js');  if(e2) e2.textContent=snap.size;
+    // باحثو عمل: العدد بس من إحصائيات البنك (بيانات الباحثين نفسها مش متاحة للعامة)
+    db.collection('settings').doc('js_stats').get().then(function(snap){
+      var n=(snap.exists&&snap.data().total)||0;
+      window._fb_jobseekers = n;
+      var e1=document.getElementById('dash-js-n'); if(e1) e1.textContent=n;
+      var e2=document.getElementById('adm-n-js');  if(e2) e2.textContent=n;
       updateFBStats();
     }).catch(function(){});
   }
@@ -3499,12 +3435,40 @@ function renderTenders(){
 function setTF(el,v){tFilt=v;document.querySelectorAll('#t-tabs .tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderTenders();}
 
 // ============ JOBS ============
+// ===== تصنيف الوظائف (8 مجالات وظيفية) =====
+var TM_JOB_CATS=[
+ {v:'المشروعات والبرامج',en:'Project & Program Management',ic:'📁'},
+ {v:'المالية والمحاسبة والمراجعة',en:'Finance, Accounting & Audit',ic:'💰'},
+ {v:'الموارد البشرية والشؤون الإدارية',en:'HR & Administration',ic:'👥'},
+ {v:'المشتريات وسلاسل الإمداد واللوجستيات',en:'Procurement, Supply Chain & Logistics',ic:'📦'},
+ {v:'المتابعة والتقييم والمساءلة والتعلم',en:'MEAL',ic:'📊'},
+ {v:'المنح والشراكات وتطوير الموارد',en:'Grants, Partnerships & Resource Mobilization',ic:'🤝'},
+ {v:'الاتصال والإعلام والعلاقات العامة',en:'Communications & Public Relations',ic:'📣'},
+ {v:'تكنولوجيا المعلومات والتحول الرقمي',en:'IT & Digital Transformation',ic:'💻'}
+];
+// الترتيب مهم: المالية قبل المنح (Grants Accountant = مالية)، والمشروعات آخر حاجة
+var TM_CAT_RULES=[
+ ['المالية والمحاسبة والمراجعة',/financ(e|ial)\b|\baccount(ant|ants|ing|s)?\b|audit|budget|treasur|payroll|cashier|\brisk\b|compliance|internal control|مال(ي|ية)|محاسب|مراجع|ميزاني|خزين|رواتب/i],
+ ['المشتريات وسلاسل الإمداد واللوجستيات',/procure|supply|logistic|purchas|warehouse|fleet|driver|store ?keeper|سائق|مشتريات|توريد|إمداد|امداد|لوجست|مخاز?ن/i],
+ ['الموارد البشرية والشؤون الإدارية',/\bHR\b|human resource|recruit|talent|\badmin\b|administrati(on|ve)|office manager|reception|secretar|موارد بشرية|الموارد البشرية|شؤون إدارية|الشؤون الإدارية|إداري|اداري|سكرتار|توظيف|شؤون العاملين/i],
+ ['المتابعة والتقييم والمساءلة والتعلم',/\bM&E\b|\bMEAL\b|\bMEL\b|monitoring|evaluation|accountability|data analy|رصد|تقييم|متابعة|مساءلة|مساءله/i],
+ ['المنح والشراكات وتطوير الموارد',/\bgrants?\b|partnership|resource mobili|fundrais|donor relation|business development|proposal writ|منح|شراكات|شراكة|تطوير الموارد|تنمية الموارد|جمع التبرعات|تبرعات|تمويل/i],
+ ['الاتصال والإعلام والعلاقات العامة',/communicat|media|public relation|\bPR\b|advocacy|content|marketing|visibility|إعلام|اعلام|اتصال|علاقات عامة|تواصل|محتوى|تسويق|مناصرة/i],
+ ['تكنولوجيا المعلومات والتحول الرقمي',/\bIT\b|\bICT\b|information tech|software|developer|digital|database|system admin|data (management|engineer)|تكنولوجيا|برمج|رقمي|نظم معلومات|قواعد بيانات/i],
+ ['المشروعات والبرامج',/project|program|coordinator|case ?work|field|مشروع|مشروعات|مشاريع|برنامج|برامج|منسق|ميداني|health|educat|protection|nutrition|livelihood|gender|youth|WASH|shelter|psychosocial|empower|rights|refugee|migra|climate|environment|صح(ة|ي)|تعليم|حماية|تمكين|حقوق|لاجئ|بيئ|زراع|تغذية|إغاثة|نوع اجتماعي|شباب|مجتمع|طفل|المرأة/i]
+];
+function tmCatOfText(t){ t=String(t||''); if(!t) return ''; for(var i=0;i<TM_JOB_CATS.length;i++) if(t===TM_JOB_CATS[i].v) return t; for(var k=0;k<TM_CAT_RULES.length;k++) if(TM_CAT_RULES[k][1].test(t)) return TM_CAT_RULES[k][0]; return ''; }
+// تصنيف وظيفة: المجال المسجّل الأول، وبعدين العنوان، وآخر حاجة الوصف
+function tmJobCat(j){ if(!j) return ''; if(j._cat!==undefined) return j._cat; for(var q=0;q<TM_JOB_CATS.length;q++) if(j.sec===TM_JOB_CATS[q].v) return j.sec; var c=tmCatOfText(j.title)||tmCatOfText(j.sec)||tmCatOfText(String(j.desc||'').slice(0,400)); try{ Object.defineProperty(j,'_cat',{value:c,enumerable:false,configurable:true}); }catch(e){} return c; }
+function tmCatLabel(v){ for(var i=0;i<TM_JOB_CATS.length;i++) if(TM_JOB_CATS[i].v===v) return TM_JOB_CATS[i].ic+' '+v; return v||'قطاع تنموي'; }
+function tmCatSearchText(j){ var c=tmJobCat(j); for(var i=0;i<TM_JOB_CATS.length;i++) if(TM_JOB_CATS[i].v===c) return c+' '+TM_JOB_CATS[i].en; return ''; }
+window.TM_JOB_CATS=TM_JOB_CATS; window.tmCatOfText=tmCatOfText; window.tmJobCat=tmJobCat; window.tmCatLabel=tmCatLabel;
 var JOBS = []; // Firebase هو المصدر الوحيد
 window.JOBS_STATIC = [];
 var jobAdvanced={type:'all',sector:'all',workmode:'all',comp:'all',before:''};
 var jobView='card';
 function jobDeadlineDate(raw){var s=String(raw||'').trim(),d=null,m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);if(m)d=new Date(Number(m[3]),Number(m[2])-1,Number(m[1]),23,59,59);else if(/^\d{4}-\d{2}-\d{2}$/.test(s))d=new Date(s+'T23:59:59');return d&&!isNaN(d.getTime())?d:null;}
-function renderJobs(){const q=(document.getElementById('ji')||{}).value||'';let list=JOBS.filter(function(j){if(j.status&&!['approved','active'].includes(String(j.status)))return false;var d=jobDeadlineDate(j.dl);if(d&&d<new Date())return false;return true;});if(jFilt!=='all')list=list.filter(j=>j.gov===jFilt);if(q)list=list.filter(j=>{var hay=[j.title,j.org,j.sec,j.desc,j.gov,j.type,j.source].filter(Boolean).join(' ').toLowerCase();return hay.includes(q.toLowerCase());});if(jobAdvanced.type!=='all')list=list.filter(j=>String(j.type||'').includes(jobAdvanced.type));if(jobAdvanced.sector!=='all')list=list.filter(j=>String(j.sec||'').includes(jobAdvanced.sector)||String(j.desc||'').includes(jobAdvanced.sector));if(jobAdvanced.workmode!=='all')list=list.filter(j=>[j.type,j.desc,j.title].filter(Boolean).join(' ').includes(jobAdvanced.workmode));if(jobAdvanced.comp!=='all')list=list.filter(j=>{var hay=[j.title,j.org,j.type,j.sec,j.desc,j.source].filter(Boolean).join(' ').toLowerCase();var sal=String(j.sal||'').trim();var volunteer=/(\bvolunteer\b|\bvolunteering\b|تطوع|متطوع|متطوعة|عمل تطوعي)/i.test(hay);var undefinedPay=!sal||['غير محدد','يُحدد لاحقاً','يحدد لاحقاً','—','-'].includes(sal);var contract=volunteer?'تطوع':(undefinedPay?'غير محدد':'مدفوع');return contract===jobAdvanced.comp;});if(jobAdvanced.before){var max=new Date(jobAdvanced.before+'T23:59:59');list=list.filter(j=>{var d=jobDeadlineDate(j.dl);return d&&d<=max;});}var jcnt=document.getElementById('jcnt'),jlist=document.getElementById('jlist');if(jcnt)jcnt.innerHTML=list.length>0?'عرض <strong>'+list.length+'</strong> فرصة':'لا توجد نتائج';var summary=[];if(jFilt!=='all')summary.push(jFilt);if(jobAdvanced.type!=='all')summary.push(jobAdvanced.type);if(jobAdvanced.sector!=='all')summary.push(jobAdvanced.sector);var js=document.getElementById('jfilter-summary');if(js)js.textContent=summary.join(' · ');if(!jlist)return;jlist.classList.toggle('grid',jobView==='card');if(list.length===0){var isLoading=(typeof db!=='undefined')&&JOBS.length===0;jlist.innerHTML=isLoading?skeletonCards(3,'job'):'<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">💼</div><div style="font-size:13px;font-weight:600">لا توجد فرص مطابقة للفلاتر الحالية</div></div>';return;}jlist.innerHTML=list.map(j=>`<div class="jcard" onclick="openJob('${j.id}')"><div class="jc-top"><div class="jc-logo">${j.logo||'💼'}</div><div class="jc-info"><div class="jc-t">${j.title}</div><div class="jc-o">${j.org}</div><div class="jc-tags"><span class="tag tg">📍 ${j.gov}</span><span class="tag tt">${j.type}</span><span class="tag ts">${j.sec||'قطاع تنموي'}</span>${j.urg?'<span class="tag tu">⚡ عاجل</span>':''}</div></div></div><div class="jc-foot"><div class="jc-dl">📅 ${j.dl||'—'}</div><button class="jsave ${saved.has(j.id)?'sv':''}" onclick="event.stopPropagation();tog('${j.id}',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="${saved.has(j.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button></div></div>`).join('');}
+function renderJobs(){const q=(document.getElementById('ji')||{}).value||'';let list=JOBS.filter(function(j){if(j.status&&!['approved','active'].includes(String(j.status)))return false;var d=jobDeadlineDate(j.dl);if(d&&d<new Date())return false;return true;});if(jFilt!=='all')list=list.filter(j=>j.gov===jFilt);if(q)list=list.filter(j=>{var hay=[j.title,j.org,j.sec,tmCatSearchText(j),j.desc,j.gov,j.type,j.source].filter(Boolean).join(' ').toLowerCase();return hay.includes(q.toLowerCase());});if(jobAdvanced.type!=='all')list=list.filter(j=>String(j.type||'').includes(jobAdvanced.type));if(jobAdvanced.sector!=='all')list=list.filter(j=>tmJobCat(j)===jobAdvanced.sector);if(jobAdvanced.workmode!=='all')list=list.filter(j=>[j.type,j.desc,j.title].filter(Boolean).join(' ').includes(jobAdvanced.workmode));if(jobAdvanced.comp!=='all')list=list.filter(j=>{var hay=[j.title,j.org,j.type,j.sec,j.desc,j.source].filter(Boolean).join(' ').toLowerCase();var sal=String(j.sal||'').trim();var volunteer=/(\bvolunteer\b|\bvolunteering\b|تطوع|متطوع|متطوعة|عمل تطوعي)/i.test(hay);var undefinedPay=!sal||['غير محدد','يُحدد لاحقاً','يحدد لاحقاً','—','-'].includes(sal);var contract=volunteer?'تطوع':(undefinedPay?'غير محدد':'مدفوع');return contract===jobAdvanced.comp;});if(jobAdvanced.before){var max=new Date(jobAdvanced.before+'T23:59:59');list=list.filter(j=>{var d=jobDeadlineDate(j.dl);return d&&d<=max;});}var jcnt=document.getElementById('jcnt'),jlist=document.getElementById('jlist');if(jcnt)jcnt.innerHTML=list.length>0?'عرض <strong>'+list.length+'</strong> فرصة':'لا توجد نتائج';var summary=[];if(jFilt!=='all')summary.push(jFilt);if(jobAdvanced.type!=='all')summary.push(jobAdvanced.type);if(jobAdvanced.sector!=='all')summary.push(jobAdvanced.sector);var js=document.getElementById('jfilter-summary');if(js)js.textContent=summary.join(' · ');if(!jlist)return;jlist.classList.toggle('grid',jobView==='card');if(list.length===0){var isLoading=(typeof db!=='undefined')&&JOBS.length===0;jlist.innerHTML=isLoading?skeletonCards(3,'job'):'<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">💼</div><div style="font-size:13px;font-weight:600">لا توجد فرص مطابقة للفلاتر الحالية</div></div>';return;}jlist.innerHTML=list.map(j=>`<div class="jcard" onclick="openJob('${j.id}')"><div class="jc-top"><div class="jc-logo">${j.logo||'💼'}</div><div class="jc-info"><div class="jc-t">${j.title}</div><div class="jc-o">${j.org}</div><div class="jc-tags"><span class="tag tg">📍 ${j.gov}</span><span class="tag tt">${j.type}</span><span class="tag ts">${tmCatLabel(tmJobCat(j))}</span>${j.urg?'<span class="tag tu">⚡ عاجل</span>':''}</div></div></div><div class="jc-foot"><div class="jc-dl">📅 ${j.dl||'—'}</div><button class="jsave ${saved.has(j.id)?'sv':''}" onclick="event.stopPropagation();tog('${j.id}',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="${saved.has(j.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button></div></div>`).join('');}
 function setjf(el,v){jFilt=v;document.querySelectorAll('#j-govs .fchip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderJobs();}function fj(){renderJobs();}
 function setJobAdvanced(key,value,el){jobAdvanced[key]=value;if(el){var row=el.parentElement;row.querySelectorAll('.fchip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}renderJobs();}
 function clearJobAdvanced(){jobAdvanced={type:'all',sector:'all',workmode:'all',comp:'all',before:''};['j-sector','j-workmode','j-comp','j-before'].forEach(id=>{var e=document.getElementById(id);if(e)e.value=id==='j-before'?'':'all';});document.querySelectorAll('[data-jtype]').forEach(c=>c.classList.toggle('on',c.dataset.jtype==='all'));renderJobs();}
@@ -3515,7 +3479,7 @@ function openJob(id){
   const j=JOBS.find(x=>x.id===id||x.id==id);if(!j)return;
   window._currentJob = j;
   document.getElementById('mbody').innerHTML=`
-    <div class="mt-tags"><span class="tag tg">📍 ${j.gov}</span><span class="tag tt">${j.type}</span><span class="tag ts">${j.sec}</span>${j.urg?'<span class="tag tu">⚡ عاجل</span>':''}</div>
+    <div class="mt-tags"><span class="tag tg">📍 ${j.gov}</span><span class="tag tt">${j.type}</span><span class="tag ts">${tmCatLabel(tmJobCat(j))}</span>${j.urg?'<span class="tag tu">⚡ عاجل</span>':''}</div>
     <div class="mt">${j.title}</div>
     <div class="mo">${j.logo} ${j.org}</div>
     <div class="mig"><div class="mii"><div class="mil">الراتب</div><div class="miv">${j.sal}</div></div><div class="mii"><div class="mil">الموعد النهائي</div><div class="miv">${j.dl}</div></div></div>
@@ -3936,6 +3900,10 @@ function doReg(type){
     }).catch(()=>{});
   }
 
+  // نحفظ مجاله ومحافظته على الجهاز عشان نطلعله "الوظائف المناسبة ليك"
+  if(type === 'jobseeker'){
+    try{ if(window.tmSaveJsProfile) window.tmSaveJsProfile({spec:data.spec||'',gov:data.gov||'',mobility:data.mobility||'',jobType:data.jobType||''}); if(window.tmRenderMyJobs) window.tmRenderMyJobs(); }catch(e){}
+  }
   // إضافة الباحث عن عمل لقائمة الباحثين مباشرة
   if(type === 'jobseeker'){
     JOBSEEKERS.push({
@@ -3987,7 +3955,7 @@ function showSuccess(type, data){
     volunteer: 'تم تسجيلك كمتطوع!'
   };
   const subs = {
-    jobseeker: 'بياناتك اتحفظت في قاعدة تنمويين مصر\nسيتواصل معك أصحاب العمل عند توفر فرصة مناسبة 🌟',
+    jobseeker: 'بياناتك اتحفظت في بنك مرشحين تنمويين مصر\nهتلاقي "الوظائف المناسبة ليك" في صفحة الوظائف، وفعّل الإشعارات عشان توصلك فرص مجالك أول ما تنزل 🌟',
     expert:    'ملفك الاستشاري اتحفظ في قاعدة تنمويين مصر\nستظهر بياناتك للجهات الممولة والمنظمات الدولية 🌟',
     sup:       'شركتك اتسجلت في قاعدة الموردين\nستظهر بياناتك للجمعيات والمنظمات الدولية 🌟',
     org:       'مؤسستك اتسجلت في قاعدة تنمويين مصر\nستظهر بياناتك لفرص التمويل والشراكة 🌟',
@@ -4016,6 +3984,12 @@ function showSuccess(type, data){
   window._lastRegData = data;
   window._lastRegType = type;
 
+  if(type==='jobseeker'){
+    var _sp=(window.tmCatOfText&&tmCatOfText(data.spec))||'';
+    document.getElementById('success-info').insertAdjacentHTML('beforeend',
+      '<div style="display:flex;gap:6px;margin-top:10px"><button type="button" onclick="closeSuccess();go(\'jobs\')" style="flex:1;border:0;border-radius:10px;padding:9px;background:#1a3a6e;color:#fff;font-family:Cairo,sans-serif;font-weight:800;font-size:12px;cursor:pointer">🎯 الوظائف المناسبة ليا</button>'+
+      '<button type="button" onclick="closeSuccess();if(window.tmOpenPushPrefs)tmOpenPushPrefs({secs:'+JSON.stringify(_sp?[_sp]:[]).replace(/"/g,'&quot;')+',govs:'+JSON.stringify(data.gov?[data.gov]:[]).replace(/"/g,'&quot;')+'})" style="flex:1;border:0;border-radius:10px;padding:9px;background:#00aeef;color:#fff;font-family:Cairo,sans-serif;font-weight:800;font-size:12px;cursor:pointer">🔔 بلّغني بالجديد</button></div>');
+  }
   document.getElementById('success-overlay').classList.add('on');
 }
 
@@ -4408,6 +4382,8 @@ function approvePending(idx){
     }
     var data = Object.assign({}, item);
     delete data._ptype; delete data.fbId;
+    // تصنيف الوظيفة تلقائي لو مالهاش مجال (عشان الفلتر والإشعارات)
+    if(col==='jobs' && window.tmCatOfText){ var _c=tmCatOfText(data.title)||tmCatOfText(data.sec)||tmCatOfText(String(data.desc||'').slice(0,400)); if(_c) data.sec=_c; }
 
     // امنع تكرار الإعلان قبل اعتماده
     (async function(){
@@ -5334,6 +5310,7 @@ async function loadAdminData(){
   }
 
   window._adminData = allData;
+  try{ if(window.tmUpdateJsStats && allData.some(function(r){return r._type==='jobseeker';})) window.tmUpdateJsStats(false); }catch(e){}
   renderAdmList();
 }
 
@@ -5364,7 +5341,7 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  ['adm-form-registration-requests','adm-form-import-job','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){
+  ['adm-form-registration-requests','adm-form-import-job','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
@@ -5428,6 +5405,11 @@ function setAdmTab(el, tab){
     if(formPending){ formPending.style.display = 'block'; formPending.style.visibility = 'visible'; }
     renderPendingJobs();
     updatePendingBadge();
+  } else if(tab === 'candreq'){
+    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    var lbC=document.getElementById('tm-list-export'); if(lbC) lbC.style.display='none';
+    var cEl=document.getElementById('adm-form-candreq');
+    if(cEl){ cEl.style.display='block'; if(window.tmLoadCandReqs) window.tmLoadCandReqs(); }
   } else if(tab === 'funding'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
     var lbF=document.getElementById('tm-list-export'); if(lbF) lbF.style.display='none';
@@ -5435,17 +5417,17 @@ function setAdmTab(el, tab){
     if(fEl){ fEl.style.display='block'; loadFundingWaitlist(); }
   } else if(tab === 'athar'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var aEl=document.getElementById('adm-form-athar');
     if(aEl){ aEl.style.display='block'; loadAtharTrials(); }
   } else if(tab === 'contact'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar','adm-form-funding'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-contact');
     if(cEl){ cEl.style.display='block'; loadContactMsgs(); }
   } else if(tab === 'broadcast'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var bEl=document.getElementById('adm-form-broadcast');
     if(bEl){ bEl.style.display='block'; }
     // حط الرابط الافتراضي
@@ -5454,7 +5436,7 @@ function setAdmTab(el, tab){
     loadBroadcastHistory();
   } else if(tab === 'settings'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var sEl = document.getElementById('adm-form-settings');
     if(sEl){ sEl.style.display='block'; loadVisibilitySettings(); }
   } else if(tab === 'volunteers-adm'){
@@ -5464,7 +5446,7 @@ function setAdmTab(el, tab){
     loadAdminVols();
   } else if(tab === 'consultations-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-consultations-adm');
     if(cEl){cEl.style.display='block';}
     loadAdminConsultations();
@@ -5473,7 +5455,7 @@ function setAdmTab(el, tab){
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
     // Hide all special forms
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding'].forEach(function(id){
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
     // إظهار القائمة
@@ -6262,6 +6244,19 @@ function _renderTendersList(el, tenders){
 }
 
 
+
+// الأدمن: يحوّل مجال الوظائف القديمة للتصنيف الجديد (عشان الفلتر والإشعارات)
+async function tmNormalizeJobCats(){
+  if(typeof db==='undefined') return;
+  try{
+    var snap=await db.collection('jobs').get(), todo=[], none=0;
+    snap.docs.forEach(function(d){ var j=d.data(); var c=tmJobCat(j); if(!c){ none++; return; } if(j.sec!==c) todo.push([d.id,c]); });
+    if(!todo.length){ toast('✅ كل الوظائف متصنفة بالفعل'+(none?' ('+none+' من غير تصنيف واضح)':'')); return; }
+    if(!confirm('هيتم تحديث مجال '+todo.length+' وظيفة للتصنيف الجديد'+(none?'، و'+none+' وظيفة مش واضح مجالها هتفضل زي ما هي':'')+'. نكمل؟')) return;
+    for(var i=0;i<todo.length;i+=400){ var b=db.batch(); todo.slice(i,i+400).forEach(function(x){ b.update(db.collection('jobs').doc(x[0]),{sec:x[1]}); }); await b.commit(); }
+    toast('🏷️ اتحدّث تصنيف '+todo.length+' وظيفة'); if(typeof renderPublishedJobs==='function') renderPublishedJobs();
+  }catch(e){ toast('❌ '+(e.message||e)); }
+}
 // ===== حذف =====
 function deleteJob(idx, fbId){
   if(!confirm('هتحذف الوظيفة دي — متأكد؟')) return;
@@ -7291,9 +7286,9 @@ function renderFundingList(){
       '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:8px">'+
         row('📋 رقم الإشهار',r.regNumber)+row('📍 المحافظة',r.gov)+row('📞 التليفون',r.phone,1)+row('✉️ إيميل الجمعية',r.orgEmail,1)+
         row('👤 مسؤول التواصل',r.contactName)+row('📧 إيميل شخصي',r.contactEmail,1)+row('📝 طلبات',r.requests)+row('💬 ملاحظات',r.notes)+row('📅 التاريخ',date)+
-      '</table>'+(window.fqCardExtra?fqCardExtra(r):'')+
+      '</table>'+
       '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
-        (r.phone?'<a href="https://wa.me/'+cleanPhone(r.phone)+'?text='+encodeURIComponent('السلام عليكم '+(r.contactName||'')+'، بخصوص حجز جمعية '+(r.orgName||'')+' في منصة تنمويين مصر لفرص التمويل والمنح')+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>':'')+
+        (r.phone?'<a href="'+'https://wa.me/'+cleanPhone(r.phone)+'?text='+encodeURIComponent('السلام عليكم '+(r.contactName||'')+'، بخصوص حجز جمعية '+(r.orgName||'')+' في منصة تنمويين مصر لفرص التمويل والمنح')+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>':'')+
         (r.contactEmail?'<a href="mailto:'+encodeURIComponent(r.contactEmail)+'?subject='+encodeURIComponent('منصة تنمويين مصر لفرص التمويل والمنح - '+(r.orgName||''))+'" style="flex:1;padding:7px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ إيميل</a>':'')+
         '<select onchange="updateFundingStatus(\''+r.id+'\',this.value)" style="flex:1.3;border:1.5px solid #d6dee8;border-radius:8px;padding:5px;font-family:Cairo,sans-serif;font-size:11px">'+
           Object.keys(FUND_ST).map(function(k){ return '<option value="'+k+'"'+((r.status||'pending')===k?' selected':'')+'>'+FUND_ST[k].t+'</option>'; }).join('')+'</select>'+
@@ -7360,7 +7355,7 @@ async function loadAtharTrials(){
           '<tr><td style="color:#6b7a8d;padding:2px 4px">📅 التاريخ</td><td style="padding:2px 4px">'+date+'</td></tr>' +
         '</table>' +
         '<div style="display:flex;gap:6px">' +
-          (r.phone?'<a href="https://wa.me/'+cleanPhone(r.phone)+'?text='+encodeURIComponent('السلام عليكم '+r.contactName+'، بخصوص طلب تجربة برنامج أثر لجمعية '+r.orgName)+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>':'') +
+          (r.phone?'<a href="'+'https://wa.me/'+cleanPhone(r.phone)+'?text='+encodeURIComponent('السلام عليكم '+r.contactName+'، بخصوص طلب تجربة برنامج أثر لجمعية '+r.orgName)+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>':'') +
           (r.contactEmail?'<a href="mailto:'+r.contactEmail+'?subject=تفعيل نسخة أثر التجريبية - '+r.orgName+'" style="flex:1;padding:7px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ إيميل</a>':'') +
           '<button onclick="updateAtharStatus(\''+d.id+'\',\'active\')" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer">✅ تفعيل</button>' +
           '<button onclick="updateAtharStatus(\''+d.id+'\',\'rejected\')" style="padding:7px 10px;background:#feeaea;color:#e05050;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer">🗑️</button>' +
@@ -7781,7 +7776,6 @@ function checkNewRegs(){
     {col:'consultants',  type:'استشاري جديد',    icon:'👨‍💼'},
     {col:'suppliers',    type:'مورد جديد',        icon:'🏭'},
     {col:'organizations',type:'مؤسسة جديدة',     icon:'🏢'},
-    {col:'jobseekers',   type:'باحث عمل جديد',   icon:'🔍'},
   ];
 
   cols.forEach(function(c){
@@ -7920,24 +7914,7 @@ window.addEventListener('load',()=>{
 
       <div class="fg"><label class="fl">المجال</label>
         <select class="fi" id="sj-sec">
-          <option value="">اختر...</option>
-          <option>الرصد والتقييم M&E</option>
-          <option>إدارة المشاريع</option>
-          <option>التدريب وبناء القدرات</option>
-          <option>الصحة المجتمعية</option>
-          <option>التعليم والتنمية</option>
-          <option>حماية الطفل</option>
-          <option>تمكين المرأة</option>
-          <option>التمكين الاقتصادي</option>
-          <option>النوع الاجتماعي</option>
-          <option>الموارد البشرية</option>
-          <option>الإدارة المالية</option>
-          <option>المشتريات والتوريدات</option>
-          <option>الزراعة والتنمية الريفية</option>
-          <option>التواصل والإعلام</option>
-          <option>الصحة النفسية</option>
-          <option>تكنولوجيا المعلومات</option>
-        </select>
+          <option value="">اختر المجال...</option><option value="المشروعات والبرامج">المشروعات والبرامج (Project & Program Management)</option><option value="المالية والمحاسبة والمراجعة">المالية والمحاسبة والمراجعة (Finance, Accounting & Audit)</option><option value="الموارد البشرية والشؤون الإدارية">الموارد البشرية والشؤون الإدارية (HR & Administration)</option><option value="المشتريات وسلاسل الإمداد واللوجستيات">المشتريات وسلاسل الإمداد واللوجستيات (Procurement, Supply Chain & Logistics)</option><option value="المتابعة والتقييم والمساءلة والتعلم">المتابعة والتقييم والمساءلة والتعلم (MEAL)</option><option value="المنح والشراكات وتطوير الموارد">المنح والشراكات وتطوير الموارد (Grants, Partnerships & Resource Mobilization)</option><option value="الاتصال والإعلام والعلاقات العامة">الاتصال والإعلام والعلاقات العامة (Communications & Public Relations)</option><option value="تكنولوجيا المعلومات والتحول الرقمي">تكنولوجيا المعلومات والتحول الرقمي (IT & Digital Transformation)</option></select>
       </div>
 
       <div class="fr">
@@ -10048,7 +10025,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 /* ===== تخصيص الإشعارات (المجال + المحافظة) ===== */
 (function(){
 'use strict';
-var SECS=['الرصد والتقييم M&E','إدارة المشاريع','التدريب وبناء القدرات','الصحة المجتمعية','التعليم والتنمية','حماية الطفل','تمكين المرأة','التمكين الاقتصادي','النوع الاجتماعي','الموارد البشرية','الإدارة المالية','المشتريات والتوريدات','الزراعة والتنمية الريفية','التواصل والإعلام','الصحة النفسية','تكنولوجيا المعلومات'];
+var SECS=(window.TM_JOB_CATS||[]).map(function(c){return c.v;});
 var GOVS=['القاهرة','الإسكندرية','الجيزة','القليوبية','الشرقية','الدقهلية','البحيرة','الغربية','المنوفية','كفر الشيخ','دمياط','بورسعيد','الإسماعيلية','السويس','شمال سيناء','جنوب سيناء','الفيوم','بني سويف','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','الوادي الجديد','مطروح'];
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -10137,7 +10114,7 @@ async function save(){
   }catch(e){ say('❌ '+(e.code==='permission-denied'?'محتاج تحديث قواعد Firestore (push_prefs)':(e.message||e))); }
   finally{ if(btn){ btn.disabled=false; btn.textContent='💾 حفظ التفضيلات'; } }
 }
-window.tmOpenPushPrefs=async function(){
+window.tmOpenPushPrefs=async function(seed){
   css();
   var m=$('tmp');
   if(!m){ m=document.createElement('div'); m.id='tmp'; m.innerHTML='<div class="bx"><div class="hd"><h3>🎯 تخصيص الإشعارات</h3><button class="x" type="button">×</button></div><div id="tmp-body"></div></div>'; document.body.appendChild(m);
@@ -10145,8 +10122,14 @@ window.tmOpenPushPrefs=async function(){
   m.classList.add('on'); $('tmp-body').innerHTML='<div class="hint" style="text-align:center;padding:20px">⏳ ...</div>';
   try{
     SUB=SUB||await getSubId();
-    if(SUB){ var s=await getDb().collection('push_prefs').doc(SUB).get(); if(s.exists){ var d=s.data(); P={jobs:d.jobs!==false,tenders:d.tenders!==false,secs:d.secs||[],govs:d.govs||[]}; } }
+    var had=false;
+    if(SUB){ var s=await getDb().collection('push_prefs').doc(SUB).get(); if(s.exists){ var d=s.data(); had=true; P={jobs:d.jobs!==false,tenders:d.tenders!==false,secs:d.secs||[],govs:d.govs||[]};
+      // تحويل المجالات القديمة للتصنيف الجديد
+      P.secs=P.secs.map(function(x){ return SECS.indexOf(x)>-1?x:(window.tmCatOfText?tmCatOfText(x):''); }).filter(function(x,i,a){ return x&&a.indexOf(x)===i; }); } }
+
   }catch(e){}
+  // جاي من "وظائف مناسبة ليك": نضيف مجاله ومحافظته
+  if(seed&&seed.secs){ P.jobs=true; seed.secs.forEach(function(x){ if(SECS.indexOf(x)>-1&&P.secs.indexOf(x)<0) P.secs.push(x); }); (seed.govs||[]).forEach(function(x){ if(P.govs.indexOf(x)<0) P.govs.push(x); }); }
   draw();
 };
 function refreshLabel(){
@@ -10413,8 +10396,245 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 })();
 
 </script>
-<script src="tmq-quote.js"></script>
-<script src="funding-quotes.js"></script>
-<script src="outreach.js"></script>
+<script>
+/* ===== بنك المرشحين: وظائف مناسبة ليك + اطلب مرشحين + مطابقة في الأدمن ===== */
+(function(){
+'use strict';
+var APP='https://elzieni2007-crypto.github.io/tanmoyeen-masr/';
+var SPECS=(window.TM_JOB_CATS||[]).map(function(c){return c.v;}).concat(['أي مجال تنموي']);
+var GOVS=['القاهرة','الجيزة','الإسكندرية','القليوبية','الشرقية','الدقهلية','البحيرة','الغربية','المنوفية','كفر الشيخ','دمياط','بورسعيد','الإسماعيلية','السويس','الفيوم','بني سويف','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','الوادي الجديد','مطروح','شمال سيناء','جنوب سيناء'];
+function specCat(spec){ if(!spec||spec==='أي مجال تنموي') return ''; return (window.tmCatOfText&&tmCatOfText(spec))||''; }
+// الاسم المقابل في تخصيص الإشعارات
+var PUSH_SEC={};
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function $(i){ return document.getElementById(i); }
+function say(m){ try{ toast(m); }catch(e){} }
+function getDbX(){ try{ return db; }catch(e){ return null; } }
+function phoneDigits(p){ var d=String(p||'').replace(/[٠-٩]/g,function(x){return '٠١٢٣٤٥٦٧٨٩'.indexOf(x);}).replace(/\D/g,''); if(/^01\d{9}$/.test(d)) d='2'+d; return d; }
+function wa(p,text){ return 'https://wa.me/'+phoneDigits(p)+'?text='+encodeURIComponent(text||''); }
+window.tmWaLink=wa;
+function jobOpen(j){
+  if(j.status&&['approved','active'].indexOf(String(j.status))<0) return false;
+  var d=(typeof jobDeadlineDate==='function')?jobDeadlineDate(j.dl):null; return !(d&&d<new Date());
+}
+// درجة المطابقة: المجال أهم حاجة، وبعدين المحافظة
+function matchScore(job,prof){
+  if(!prof) return 0;
+  var spec=prof.spec||'', s=0, want=specCat(spec);
+  if(!want) s+=1; else if(window.tmJobCat&&tmJobCat(job)===want) s+=3; else return 0;
+  var g=String(job.gov||''), remote=/عن ?بُ?عد|remote|online/i.test(g+' '+(job.type||''));
+  if(!prof.gov||g===prof.gov) s+=2; else if(remote) s+=2; else if(prof.mobility&&(prof.mobility===g||/أي|كل/.test(prof.mobility))) s+=1; else if(/مصر|egypt|جميع|كل المحافظات/i.test(g)) s+=1; else return 0;
+  return s;
+}
+window.tmMatchScore=matchScore;
+function getProfile(){ try{ return JSON.parse(localStorage.getItem('tm_js_profile')||'null'); }catch(e){ return null; } }
+function setProfile(p){ try{ localStorage.setItem('tm_js_profile',JSON.stringify(p)); }catch(e){} }
+window.tmSaveJsProfile=setProfile;
+function myJobs(){ var p=getProfile(); if(!p||typeof JOBS==='undefined') return []; return JOBS.filter(jobOpen).map(function(j){return {j:j,s:matchScore(j,p)};}).filter(function(x){return x.s>0;}).sort(function(a,b){return b.s-a.s;}).map(function(x){return x.j;}); }
+function opts(arr,sel,first){ return (first?'<option value="">'+first+'</option>':'')+arr.map(function(v){return '<option'+(v===sel?' selected':'')+'>'+esc(v)+'</option>';}).join(''); }
+
+/* ---------- 1) وظائف مناسبة ليك (شاشة الوظائف) ---------- */
+function renderMyJobs(){
+  var box=$('tm-myjobs'); if(!box) return;
+  var p=getProfile();
+  var card='background:linear-gradient(135deg,#eef6ff,#f6fbff);border:1.5px solid #cfe3fb;border-radius:16px;padding:12px 14px;margin:0 12px 10px;font-family:Cairo,sans-serif';
+  if(!p||box.dataset.edit==='1'){
+    box.innerHTML='<div style="'+card+'"><div style="font-size:13px;font-weight:900;color:#1a3a6e">🎯 عايز نجيبلك الوظائف المناسبة ليك؟</div>'+
+      '<div style="font-size:11px;color:#5b6675;margin:2px 0 8px">اختار مجالك ومحافظتك، وهنطلعلك الفرص اللي تناسبك أول بأول</div>'+
+      '<div style="display:flex;gap:6px"><select id="tmj-spec" class="fi" style="flex:1;padding:8px;font-size:12px">'+opts(SPECS,p&&p.spec,'مجالك...')+'</select>'+
+      '<select id="tmj-gov" class="fi" style="flex:1;padding:8px;font-size:12px">'+opts(GOVS,p&&p.gov,'محافظتك...')+'</select></div>'+
+      '<button type="button" id="tmj-save" style="width:100%;margin-top:8px;border:0;border-radius:10px;padding:9px;background:#1a3a6e;color:#fff;font-family:Cairo,sans-serif;font-weight:900;font-size:12.5px;cursor:pointer">اعرض الوظائف المناسبة ليا</button></div>';
+    $('tmj-save').onclick=function(){ var sp=$('tmj-spec').value, gv=$('tmj-gov').value; if(!sp){ say('⚠️ اختار مجالك'); return; }
+      var old=getProfile()||{}; old.spec=sp; old.gov=gv; setProfile(old); box.dataset.edit=''; renderMyJobs(); };
+    return;
+  }
+  var list=myJobs();
+  var top=list.slice(0,3).map(function(j){ return '<div onclick="openJob(\''+esc(j.id)+'\')" style="background:#fff;border-radius:11px;padding:8px 10px;margin-top:6px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.05)"><div style="font-size:12px;font-weight:800;color:#1a2a3a">'+esc(j.title)+'</div><div style="font-size:10.5px;color:#5b6675">'+esc(j.org||'')+' • 📍 '+esc(j.gov||'')+(j.dl?' • ⏰ '+esc(j.dl):'')+'</div></div>'; }).join('');
+  box.innerHTML='<div style="'+card+'"><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;font-size:13px;font-weight:900;color:#1a3a6e">🎯 مناسبة ليك'+(list.length?' ('+list.length+')':'')+'</div>'+
+    '<span id="tmj-edit" style="font-size:11px;color:#0094cc;font-weight:800;cursor:pointer">✏️ '+esc(specCat(p.spec)||p.spec)+(p.gov?' • '+esc(p.gov):'')+'</span></div>'+
+    (list.length?top:'<div style="font-size:11.5px;color:#5b6675;margin-top:6px">مفيش فرص مفتوحة في مجالك ومحافظتك دلوقتي. فعّل الإشعارات وهنبلغك أول ما تنزل.</div>')+
+    '<div style="display:flex;gap:6px;margin-top:8px">'+(list.length>3?'<button type="button" id="tmj-all" style="flex:1;border:1.5px solid #1a3a6e;background:#fff;color:#1a3a6e;border-radius:10px;padding:7px;font-family:Cairo,sans-serif;font-weight:800;font-size:11.5px;cursor:pointer">عرض الكل ('+list.length+')</button>':'')+
+    '<button type="button" id="tmj-push" style="flex:1;border:0;background:#00aeef;color:#fff;border-radius:10px;padding:7px;font-family:Cairo,sans-serif;font-weight:800;font-size:11.5px;cursor:pointer">🔔 بلّغني بالجديد</button></div></div>';
+  $('tmj-edit').onclick=function(){ box.dataset.edit='1'; renderMyJobs(); };
+  if($('tmj-all')) $('tmj-all').onclick=function(){ showMyJobsAll(list); };
+  $('tmj-push').onclick=function(){
+    var sec=specCat(p.spec); var seed={secs:sec?[sec]:[],govs:p.gov?[p.gov]:[]};
+    if(typeof window.tmOpenPushPrefs==='function') window.tmOpenPushPrefs(seed); else if(typeof window.tmEnablePush==='function') window.tmEnablePush();
+  };
+}
+function showMyJobsAll(list){
+  var mb=$('mbody'); if(!mb) return;
+  mb.innerHTML='<div style="padding:4px 2px 14px"><div style="font-size:15px;font-weight:900;color:#1a3a6e;margin-bottom:8px">🎯 الوظائف المناسبة ليك ('+list.length+')</div>'+
+    list.map(function(j){ return '<div onclick="openJob(\''+esc(j.id)+'\')" style="border:1px solid #e6edf5;border-radius:12px;padding:10px;margin-bottom:8px;cursor:pointer"><div style="font-size:13px;font-weight:800">'+esc(j.title)+'</div><div style="font-size:11px;color:#5b6675">'+esc(j.org||'')+' • 📍 '+esc(j.gov||'')+(j.dl?' • ⏰ '+esc(j.dl):'')+'</div></div>'; }).join('')+'</div>';
+  var mc=$('mcall'); if(mc) mc.innerHTML=''; $('modal').classList.add('op');
+}
+window.tmRenderMyJobs=renderMyJobs;
+if(typeof window.renderJobs==='function'){ var _rj=window.renderJobs; window.renderJobs=function(){ var r=_rj.apply(this,arguments); try{ renderMyJobs(); }catch(e){} return r; }; }
+
+/* ---------- 2) بنك المرشحين (بدل قايمة الباحثين العامة) ---------- */
+async function renderBank(){
+  var box=$('jobseekers-list'); if(!box) return;
+  var st=null; try{ var s=await getDbX().collection('settings').doc('js_stats').get(); if(s.exists) st=s.data(); }catch(e){}
+  var total=st&&st.total||0, by=st&&st.bySpec||{};
+  var tops=Object.keys(by).filter(function(k){return k&&k!=='أي مجال تنموي';}).sort(function(a,b){return by[b]-by[a];}).slice(0,6);
+  box.innerHTML='<div style="background:#fff;border-radius:16px;padding:16px;box-shadow:var(--sh);font-family:Cairo,sans-serif">'+
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="font-size:30px">👥</div><div style="flex:1">'+
+      '<div style="font-size:14px;font-weight:900;color:#1a3a6e">'+(total?total+' باحث عن عمل في بنك المرشحين':'بنك المرشحين')+'</div>'+
+      '<div style="font-size:11px;color:#5b6675;line-height:1.6">انشر وظيفتك مجانًا، وهنوصّلها للباحثين اللي مجالهم ومحافظتهم مناسبين، وهما يقدموا عليها بنفسهم.</div></div></div>'+
+    (tops.length?'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">'+tops.map(function(k){return '<span style="background:#eef4ff;color:#1a3a6e;border-radius:20px;padding:3px 9px;font-size:10.5px;font-weight:800">'+esc(k)+' • '+by[k]+'</span>';}).join('')+'</div>':'')+
+    '<div style="display:flex;gap:8px"><button type="button" onclick="go(\'jobs\');setTimeout(function(){ if(typeof openSubmitJob===\'function\') openSubmitJob(); },300)" style="flex:1;border:0;border-radius:12px;padding:11px;background:#1a3a6e;color:#fff;font-family:Cairo,sans-serif;font-weight:900;font-size:12.5px;cursor:pointer">📢 انشر وظيفتك</button>'+
+    '<button type="button" onclick="go(\'register\');switchRegType(\'jobseeker\')" style="flex:1;border:1.5px solid #00aeef;border-radius:12px;padding:11px;background:#fff;color:#0094cc;font-family:Cairo,sans-serif;font-weight:900;font-size:12.5px;cursor:pointer">🔍 سجّل كباحث عن عمل</button></div></div>';
+  var e1=$('dash-js-n'); if(e1&&total) e1.textContent=total;
+}
+window.tmRenderBank=renderBank;
+window.updateJobseekersList=function(){ renderBank(); };
+
+window.tmOpenCandReq=function(){
+  var mb=$('mbody'); if(!mb) return;
+  mb.innerHTML='<div style="padding:4px 2px 18px;font-family:Cairo,sans-serif">'+
+    '<div style="font-size:16px;font-weight:900;color:#1a3a6e">🏢 اطلب مرشحين لوظيفتك</div>'+
+    '<div style="font-size:11.5px;color:#5b6675;line-height:1.7;margin:4px 0 12px">قولنا محتاجين مين، وهنرشحلك من بنك تنمويين مصر الناس المناسبين لمجال الوظيفة ومحافظتها، وهنبعتلهم الفرصة يقدموا عليها.</div>'+
+    '<div class="fg"><label class="fl">اسم الجهة *</label><input class="fi" id="cr-org" maxlength="150"></div>'+
+    '<div class="fg"><label class="fl">اسم المسؤول *</label><input class="fi" id="cr-name" maxlength="120"></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">الموبايل *</label><input class="fi" id="cr-phone" type="tel" maxlength="20" style="direction:ltr;text-align:right" placeholder="01xxxxxxxxx"></div>'+
+    '<div class="fg"><label class="fl">الإيميل *</label><input class="fi" id="cr-email" type="email" maxlength="120" style="direction:ltr"></div></div>'+
+    '<div class="fg"><label class="fl">المسمى الوظيفي *</label><input class="fi" id="cr-title" maxlength="150" placeholder="مثلًا: مسؤول متابعة وتقييم"></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">مجال الوظيفة *</label><select class="fi" id="cr-spec">'+opts(SPECS,'','اختر...')+'</select></div>'+
+    '<div class="fg"><label class="fl">المحافظة *</label><select class="fi" id="cr-gov">'+opts(GOVS.concat(['عن بُعد']),'','اختر...')+'</select></div></div>'+
+    '<div class="fr"><div class="fg"><label class="fl">الخبرة المطلوبة</label><select class="fi" id="cr-exp">'+opts(['بدون خبرة (حديث التخرج)','أقل من 3 سنوات','3 - 7 سنوات','أكثر من 7 سنوات','أي خبرة'],'','اختر...')+'</select></div>'+
+    '<div class="fg"><label class="fl">آخر موعد</label><input class="fi" id="cr-dl" type="date"></div></div>'+
+    '<div class="fg"><label class="fl">لينك الإعلان أو وصف مختصر</label><textarea class="fi" id="cr-desc" rows="3" maxlength="1500"></textarea></div>'+
+    '<label style="display:flex;gap:8px;font-size:11.5px;color:#5b6675;line-height:1.7;margin:4px 0 10px"><input type="checkbox" id="cr-consent" style="width:18px;height:18px;flex:none"> أوافق إن تنمويين مصر تتواصل معايا بخصوص الطلب، وإن الفرصة تتبعت للمرشحين المناسبين</label>'+
+    '<div id="cr-err" style="color:#e05050;font-size:12px;text-align:center;margin-bottom:8px"></div>'+
+    '<button type="button" id="cr-go" class="sbtn" style="width:100%">📨 ابعت الطلب</button></div>';
+  var mc=$('mcall'); if(mc) mc.innerHTML=''; $('modal').classList.add('op');
+  $('cr-go').onclick=async function(){
+    function v(i){ return String(($(i)||{}).value||'').trim(); }
+    var d={orgName:v('cr-org'),contactName:v('cr-name'),phone:v('cr-phone'),email:v('cr-email').toLowerCase(),jobTitle:v('cr-title'),spec:v('cr-spec'),gov:v('cr-gov'),exp:v('cr-exp'),deadline:v('cr-dl'),desc:v('cr-desc')};
+    var err=$('cr-err'); err.textContent='';
+    if(d.orgName.length<3) return err.textContent='⚠️ اكتب اسم الجهة';
+    if(d.contactName.length<3) return err.textContent='⚠️ اكتب اسم المسؤول';
+    if(phoneDigits(d.phone).length<10) return err.textContent='⚠️ اكتب رقم موبايل صحيح';
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) return err.textContent='⚠️ اكتب إيميل صحيح';
+    if(d.jobTitle.length<3) return err.textContent='⚠️ اكتب المسمى الوظيفي';
+    if(!d.spec||!d.gov) return err.textContent='⚠️ اختار المجال والمحافظة';
+    if(!$('cr-consent').checked) return err.textContent='⚠️ لازم توافق على الشروط';
+    var b=this; b.disabled=true; b.textContent='⏳ جاري الإرسال...';
+    try{
+      await getDbX().collection('candidate_requests').add(Object.assign(d,{consent:true,status:'new',timestamp:firebase.firestore.FieldValue.serverTimestamp()}));
+      $('mbody').innerHTML='<div style="text-align:center;padding:30px 10px;font-family:Cairo,sans-serif"><div style="font-size:50px">✅</div><div style="font-size:16px;font-weight:900;color:#1a3a6e;margin:8px 0">وصلنا طلبك!</div><div style="font-size:12.5px;color:#5b6675;line-height:1.8">هنراجع بنك المرشحين ونتواصل معاك قريب بالمرشحين المناسبين لوظيفة<br><b>'+esc(d.jobTitle)+'</b></div></div>';
+      try{ sendEmailNotif('👥 طلب مرشحين جديد - '+d.orgName,'الجهة: '+d.orgName+'\nالوظيفة: '+d.jobTitle+'\nالمجال: '+d.spec+'\nالمحافظة: '+d.gov+'\nالمسؤول: '+d.contactName+' - '+d.phone); }catch(e){}
+    }catch(e){ err.textContent='❌ تعذر الإرسال، حاول تاني'; b.disabled=false; b.textContent='📨 ابعت الطلب'; }
+  };
+};
+
+/* ---------- 3) الأدمن: إحصائيات البنك + مرشحين مطابقين لكل وظيفة + طلبات الجهات ---------- */
+async function seekers(force){
+  var all=(window._adminData||[]).filter(function(r){return r._type==='jobseeker';});
+  if(all.length&&!force) return all;
+  var snap=await getDbX().collection('jobseekers').get();
+  return snap.docs.map(function(d){ return Object.assign({},d.data(),{fbId:d.id,_type:'jobseeker'}); });
+}
+window.tmUpdateJsStats=async function(force){
+  try{
+    var list=await seekers(force!==false), by={};
+    list.forEach(function(r){ var k=specCat(r.spec)||'أي مجال تنموي'; by[k]=(by[k]||0)+1; });
+    await getDbX().collection('settings').doc('js_stats').set({total:list.length,bySpec:by,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+  }catch(e){ console.warn('js_stats',e); }
+};
+function seekerAsProfile(r){ return {spec:r.spec,gov:r.gov,mobility:r.mobility}; }
+function rankSeekersForJob(list,job){
+  return list.map(function(r){ return {r:r,s:matchScore(job,seekerAsProfile(r))}; }).filter(function(x){return x.s>0;}).sort(function(a,b){return b.s-a.s;}).map(function(x){return x.r;});
+}
+function seekerRow(r,extra){
+  return '<div style="border:1px solid #e6edf5;border-radius:12px;padding:9px 10px;margin-bottom:7px;font-family:Cairo,sans-serif">'+
+    '<div style="display:flex;gap:8px;align-items:center">'+(extra&&extra.cb?'<input type="checkbox" class="cs-cb" data-id="'+esc(r.fbId)+'" checked style="width:17px;height:17px;flex:none">':'')+
+    '<div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#1a2a3a">'+esc(r.name||'—')+'</div>'+
+    '<div style="font-size:10.5px;color:#5b6675">'+[r.spec,r.exp,r.qual,'📍 '+(r.gov||'—')].filter(Boolean).map(esc).join(' • ')+'</div></div>'+(extra&&extra.right||'')+'</div></div>';
+}
+window.tmJobCandidates=async function(jobId){
+  var mb=$('mbody'); if(!mb) return;
+  mb.innerHTML='<div style="padding:20px;text-align:center">⏳ بندوّر على المرشحين...</div>'; var mc=$('mcall'); if(mc) mc.innerHTML=''; $('modal').classList.add('op');
+  try{
+    var js=(window._adminJobs||[]).filter(function(x){return x.fbId===jobId;})[0];
+    if(!js){ var d=await getDbX().collection('jobs').doc(jobId).get(); js=Object.assign({},d.data(),{fbId:d.id}); }
+    var list=rankSeekersForJob(await seekers(), js);
+    var link=APP+'?job='+encodeURIComponent(jobId);
+    var msg=function(r){ return 'أهلًا '+(r.name||'')+' 👋\nفيه فرصة جديدة مناسبة لمجالك على تنمويين مصر:\n💼 '+(js.title||'')+'\n🏢 '+(js.org||'')+'\n📍 '+(js.gov||'')+(js.dl?'\n⏰ آخر موعد: '+js.dl:'')+'\n\nالتفاصيل ولينك التقديم:\n'+link; };
+    mb.innerHTML='<div style="padding:4px 2px 16px;font-family:Cairo,sans-serif"><div style="font-size:15px;font-weight:900;color:#1a3a6e">👥 مرشحين مطابقين ('+list.length+')</div>'+
+      '<div style="font-size:11.5px;color:#5b6675;margin:2px 0 10px">'+esc(js.title||'')+' — '+esc(js.org||'')+'<br>ابعتلهم الفرصة على واتساب، وهتتعلّم ✓ عشان ماتتبعتش مرتين.</div>'+
+      (list.length?list.map(function(r){ var sent=r.notified&&r.notified[jobId];
+        return seekerRow(r,{right:'<a href="'+wa(r.phone,msg(r))+'" target="_blank" data-n="'+esc(r.fbId)+'" style="flex:none;padding:6px 10px;border-radius:9px;text-decoration:none;font-size:11px;font-weight:800;'+(sent?'background:#eef2f6;color:#6b7280">✓ اتبعت':'background:#25d366;color:#fff">💬 ابعت')+'</a>'}); }).join('')
+       :'<div style="text-align:center;padding:16px;color:#6b7280">مفيش باحثين مطابقين لمجال الوظيفة ومحافظتها لسه.</div>')+'</div>';
+    mb.querySelectorAll('a[data-n]').forEach(function(a){ a.addEventListener('click',function(){ var id=a.getAttribute('data-n'); a.textContent='✓ اتبعت'; a.style.background='#eef2f6'; a.style.color='#6b7280';
+      var upd={}; upd['notified.'+jobId]=firebase.firestore.FieldValue.serverTimestamp();
+      getDbX().collection('jobseekers').doc(id).update(upd).catch(function(e){console.warn(e);});
+      list.forEach(function(r){ if(r.fbId===id){ r.notified=r.notified||{}; r.notified[jobId]=true; } }); }); });
+  }catch(e){ mb.innerHTML='<div style="padding:16px;color:#e05050">❌ '+esc(e.message||e)+'</div>'; }
+};
+// زرار "مرشحين" في كروت الوظائف في الأدمن
+if(typeof window._renderJobsList==='function'){ var _rl=window._renderJobsList; window._renderJobsList=function(el,jobs,keep){ var r=_rl.apply(this,arguments);
+  try{ el.querySelectorAll('button[onclick^="editJob("]').forEach(function(b){ var m=b.getAttribute('onclick').match(/'([^']+)'\)/); if(!m||b.parentNode.querySelector('.tm-cand')) return;
+    var c=document.createElement('button'); c.className='tm-cand'; c.type='button'; c.textContent='👥 مرشحين'; c.style.cssText='flex:1.4;padding:6px;background:#e7faf3;color:#00703a;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:11px;font-weight:700;cursor:pointer';
+    c.onclick=function(){ window.tmJobCandidates(m[1]); }; b.parentNode.insertBefore(c,b.nextSibling); }); }catch(e){}
+  return r; }; }
+
+var CR_ST={new:{t:'🆕 جديد',c:'#d49a00'},sent:{t:'📤 اتبعت مرشحين',c:'#1463a5'},done:{t:'✅ اتقفل',c:'#00a37a'},rejected:{t:'❌ مرفوض',c:'#e05050'}};
+var _cr=[];
+window.tmLoadCandReqs=async function(){
+  var box=$('candreq-list'); if(!box) return; box.innerHTML='<div style="text-align:center;padding:20px">⏳ جاري التحميل...</div>';
+  try{
+    var s=await getDbX().collection('candidate_requests').get();
+    _cr=s.docs.map(function(d){return Object.assign({id:d.id},d.data());}).sort(function(a,b){ return (b.timestamp&&b.timestamp.toMillis?b.timestamp.toMillis():0)-(a.timestamp&&a.timestamp.toMillis?a.timestamp.toMillis():0); });
+    var sk=await seekers();
+    var st=$('candreq-stats'); if(st) st.innerHTML='<span style="background:#1a3a6e;color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800">طلبات: '+_cr.length+'</span> <span style="background:#e7faf3;color:#00703a;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800">باحثين في البنك: '+sk.length+'</span> <button type="button" id="cr-stats-up" style="border:0;background:#eef4ff;color:#1a3a6e;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif">🔄 تحديث أرقام البنك في التطبيق</button>';
+    if($('cr-stats-up')) $('cr-stats-up').onclick=async function(){ this.textContent='⏳'; await window.tmUpdateJsStats(); this.textContent='✅ اتحدّث'; };
+    if(!_cr.length){ box.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">📭 لسه مفيش طلبات من الجهات</div>'; return; }
+    box.innerHTML=_cr.map(function(q,qi){
+      var s=CR_ST[q.status||'new']||CR_ST.new;
+      var job={title:q.jobTitle,sec:q.spec,gov:q.gov,desc:q.desc};
+      var want=specCat(q.spec)||specCat(q.jobTitle);
+      var m=sk.map(function(r){ var p=seekerAsProfile(r), c=specCat(p.spec); var sc=(!c)?2:(c===want?3:0); if(!sc) return null;
+        var g=(q.gov==='عن بُعد'||r.gov===q.gov)?2:((r.mobility&&(r.mobility===q.gov||/أي|كل/.test(r.mobility)))?1:0); if(!g) return null; return {r:r,s:sc+g}; }).filter(Boolean).sort(function(a,b){return b.s-a.s;}).map(function(x){return x.r;});
+      q._m=m;
+      return '<div style="background:#fff;border-radius:12px;padding:13px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-right:4px solid #1a3a6e;font-family:Cairo,sans-serif">'+
+        '<div style="display:flex;justify-content:space-between;gap:8px"><div style="font-size:13px;font-weight:900;color:#1a2a3a">'+esc(q.jobTitle)+'</div><span style="font-size:9px;font-weight:800;background:'+s.c+'22;color:'+s.c+';padding:2px 8px;border-radius:8px;white-space:nowrap">'+s.t+'</span></div>'+
+        '<div style="font-size:11px;color:#5b6675;line-height:1.7">🏢 '+esc(q.orgName)+' • 👤 '+esc(q.contactName)+'<br>🎯 '+esc(q.spec)+' • 📍 '+esc(q.gov)+(q.exp?' • '+esc(q.exp):'')+(q.deadline?' • ⏰ '+esc(q.deadline):'')+(q.desc?'<br>📝 '+esc(q.desc):'')+'</div>'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+
+          '<button type="button" data-cand="'+qi+'" style="flex:1.5;padding:7px;background:#e7faf3;color:#00703a;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer">👥 '+m.length+' مرشح مطابق</button>'+
+          '<a href="'+wa(q.phone,'السلام عليكم '+(q.contactName||'')+'، بخصوص طلب مرشحين لوظيفة "'+(q.jobTitle||'')+'" على تنمويين مصر.')+'" target="_blank" style="flex:1;padding:7px;background:#25d36622;color:#128c4a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:800">💬 الجهة</a>'+
+          '<select data-st="'+esc(q.id)+'" style="flex:1.3;border:1.5px solid #d6dee8;border-radius:8px;padding:5px;font-family:Cairo,sans-serif;font-size:11px">'+Object.keys(CR_ST).map(function(k){return '<option value="'+k+'"'+((q.status||'new')===k?' selected':'')+'>'+CR_ST[k].t+'</option>';}).join('')+'</select>'+
+        '</div></div>';
+    }).join('');
+    box.querySelectorAll('[data-cand]').forEach(function(b){ b.onclick=function(){ showReqCands(_cr[+b.getAttribute('data-cand')]); }; });
+    box.querySelectorAll('select[data-st]').forEach(function(sel){ sel.onchange=function(){ getDbX().collection('candidate_requests').doc(sel.getAttribute('data-st')).update({status:sel.value,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){ say('✅ اتغيرت الحالة'); }).catch(function(e){ say('❌ '+e.message); }); }; });
+  }catch(e){ box.innerHTML='<div style="color:#e05050;padding:12px;text-align:center">❌ '+(e.code==='permission-denied'?'محتاج تنشر قواعد Firestore الجديدة (candidate_requests)':esc(e.message||e))+'</div>'; }
+};
+function showReqCands(q){
+  var mb=$('mbody'); if(!mb) return; var m=q._m||[];
+  var msg=function(r){ return 'أهلًا '+(r.name||'')+' 👋\nجهة "'+(q.orgName||'')+'" بتدوّر على '+(q.jobTitle||'')+' في '+(q.gov||'')+'، وملفك على تنمويين مصر مناسب ليها.\nلو مهتم، رد علينا بـ "مهتم" ونبعت ملفك للجهة.'; };
+  mb.innerHTML='<div style="padding:4px 2px 16px;font-family:Cairo,sans-serif"><div style="font-size:15px;font-weight:900;color:#1a3a6e">👥 مرشحين لـ '+esc(q.jobTitle)+' ('+m.length+')</div>'+
+    '<div style="font-size:11.5px;color:#5b6675;margin:2px 0 10px;line-height:1.7">١) ابعت لكل مرشح يأكد اهتمامه ٢) علّم على اللي وافقوا ٣) نزّل Excel بالمختارين وابعته للجهة</div>'+
+    (m.length?m.map(function(r){ return seekerRow(r,{cb:true,right:'<a href="'+wa(r.phone,msg(r))+'" target="_blank" style="flex:none;padding:6px 10px;border-radius:9px;text-decoration:none;font-size:11px;font-weight:800;background:#25d366;color:#fff">💬</a>'}); }).join('')
+     :'<div style="text-align:center;padding:16px;color:#6b7280">مفيش باحثين مطابقين للمجال والمحافظة.</div>')+
+    (m.length?'<button type="button" id="cr-xl" class="sbtn" style="width:100%;margin-top:6px">📥 Excel بالمرشحين المختارين</button>':'')+'</div>';
+  var mc=$('mcall'); if(mc) mc.innerHTML=''; $('modal').classList.add('op');
+  if($('cr-xl')) $('cr-xl').onclick=function(){
+    var ids={}; mb.querySelectorAll('.cs-cb:checked').forEach(function(c){ ids[c.getAttribute('data-id')]=1; });
+    var rows=m.filter(function(r){return ids[r.fbId];}).map(function(r){ return {'الاسم':r.name||'','المجال':r.spec||'','المؤهل':r.qual||'','الخبرة':r.exp||'','المحافظة':r.gov||'','نوع العمل':r.jobType||'','الموبايل':r.phone||'','الإيميل':r.email||'','نبذة':r.notes||''}; });
+    if(!rows.length){ say('⚠️ اختار مرشحين الأول'); return; }
+    if(typeof window.tmExportRows==='function') window.tmExportRows('مرشحين - '+(q.jobTitle||'')+' - '+(q.orgName||''),rows,'xlsx');
+  };
+}
+
+/* ---------- تشغيل ---------- */
+function boot(){
+  var jl=$('jlist'); if(jl&&!$('tm-myjobs')){ var d=document.createElement('div'); d.id='tm-myjobs'; jl.parentNode.insertBefore(d,jl); }
+  renderMyJobs(); renderBank();
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else setTimeout(boot,0);
+})();
+</script>
+
 </body>
 </html>

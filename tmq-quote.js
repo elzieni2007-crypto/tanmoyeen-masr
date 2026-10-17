@@ -211,7 +211,7 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const dateAr=d=>d.toLocaleDateString('ar-EG-u-nu-latn',{day:'numeric',month:'long',year:'numeric'});
 function nextNo(){const y=new Date().getFullYear();const s=ls.get(LSN,{});const n=(s[y]||0)+1;return {no:`TM-FP-${y}-${String(n).padStart(3,'0')}`,commit(){s[y]=n;ls.set(LSN,s)}}}
 let _dx=null;const loadDocx=()=>window.docx?Promise.resolve():(_dx||(_dx=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js';s.onload=res;s.onerror=()=>{_dx=null;rej(new Error('docx'))};document.head.appendChild(s)})));
-const CSS=`.tmq-ov{position:fixed;inset:0;background:rgba(8,20,32,.55);z-index:99990;display:flex;align-items:stretch;justify-content:center;direction:rtl;font-family:'IBM Plex Sans Arabic','Cairo',Tahoma,Arial,sans-serif}
+const CSS=`.tmq-ov{position:fixed;inset:0;background:rgba(8,20,32,.55);z-index:2147483000;display:flex;align-items:stretch;justify-content:center;direction:rtl;font-family:'IBM Plex Sans Arabic','Cairo',Tahoma,Arial,sans-serif}
 .tmq-box{background:#f4f8fb;width:min(1280px,100%);margin:2vh 1vw;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35)}
 .tmq-top{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#0e2a44;color:#fff}.tmq-top h2{margin:0;font-size:18px;flex:1}
 .tmq-top .tmq-st{font-size:13px;background:rgba(255,255,255,.12);padding:4px 10px;border-radius:99px}

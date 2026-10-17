@@ -310,9 +310,19 @@ function open(booking={},opts={}){
   const baseName=()=>`عرض سعر ${d.no}${d.assoc?' - '+d.assoc.replace(/[\\/:*?"<>|]/g,' ').slice(0,60):''}`;
   const fileName=()=>baseName()+'.docx';
   const pdfName=()=>baseName()+'.pdf';
+  // جوه تطبيق الموبايل (Median) التحميل المباشر بيضيّع اسم الملف ويحفظه "download"،
+  // فبنرفع الـ PDF على Firebase Storage باسمه، والتطبيق ينزّله من الرابط بالاسم الصح
+  const inApp=()=>!!(window.median||window.gonative)||/median|gonative/i.test(navigator.userAgent||'');
+  const loadStorage=()=>window.firebase&&firebase.storage?Promise.resolve():new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js';sc.onload=res;sc.onerror=rej;document.head.appendChild(sc)});
+  const uploadPdf=async b=>{await loadStorage();const ref=firebase.storage().ref('quotes/'+String(d.no||'quote').replace(/[^\w.-]/g,'_')+'/'+pdfName());
+    await ref.put(b,{contentType:'application/pdf',contentDisposition:"attachment; filename*=UTF-8''"+encodeURIComponent(pdfName())});return ref.getDownloadURL()};
+  const deliver=async b=>{if(inApp()){try{const url=await uploadPdf(b);const m=window.median||window.gonative;
+      if(m&&m.share&&m.share.downloadFile){m.share.downloadFile({url:url,open:true})}else{location.href=url}return 'app'}
+    catch(e){console.warn('pdf upload',e);msg('⚠️ جوه التطبيق الملف هيتحفظ باسم download لحد ما تفعّل Firebase Storage. الأسهل دلوقتي: افتح لوحة الأدمن من Chrome.')}}
+    saveBlob(b,pdfName());return 'browser'};
   const saveBlob=(b,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)};
   const getPdf=async()=>{msg('بيجهّز ملف PDF…');return buildPdf(d)};
-  const downloadPdf=async()=>{try{const b=await getPdf();saveBlob(b,pdfName());msg('اتحمّل ملف PDF: '+pdfName());return b}catch(e){console.warn(e);msg('معرفناش نجهّز ملف PDF. اتأكد من الإنترنت وجرّب تاني.');return null}};
+  const downloadPdf=async()=>{try{const b=await getPdf();const w=await deliver(b);if(w==='app'||!inApp())msg('اتحمّل ملف PDF: '+pdfName());return b}catch(e){console.warn(e);msg('معرفناش نجهّز ملف PDF. اتأكد من الإنترنت وجرّب تاني.');return null}};
   // مشاركة الملف نفسه (أندرويد/آيفون): بتفتح قايمة المشاركة وتختار Gmail أو واتساب فيتبعت الـ PDF مرفق
   const shareFile=async(blob,title,text)=>{try{const file=new File([blob],pdfName(),{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:title,text:text});return 'shared'}}catch(e){if(e&&e.name==='AbortError')return 'cancel'}return 'nope'};
   const getDocx=async()=>{await loadDocx();d.dateTxt=dateAr(new Date(d.date+'T12:00:00'));return window.docx.Packer.toBlob(buildQuoteDoc(window.docx,d,Uint8Array.from(atob(window.__TMQ_logo),c=>c.charCodeAt(0))))};
@@ -329,12 +339,12 @@ function open(booking={},opts={}){
         const r=await shareFile(blob,subject,body);
         if(r==='shared'){msg('✅ اختار Gmail من قايمة المشاركة: الـ PDF مرفق والرسالة جاهزة. إيميل الجمعية اتنسخ، الصقه في خانة "إلى".');return}
         if(r==='cancel'){msg('اتلغت المشاركة. دوس "إرسال بالإيميل" تاني لما تكون جاهز.');return}
-        saveBlob(blob,pdfName())}
+        await deliver(blob)}
       location.href=`mailto:${encodeURIComponent(d.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       msg(blob?'اتفتح الإيميل، وملف PDF اتحمّل باسم «'+pdfName()+'»: ارفقه من التحميلات وابعت. (المتصفح ده مش بيسمح يرفق الملف لوحده)':'اتفتح الإيميل. حمّل PDF وارفقه.')}
     if(a==='wa'){const p=waPhone(d.phone);if(!p){msg('اكتب رقم موبايل الجمعية الأول.');$('[data-k="phone"]').focus();return}
       let blob=null;try{blob=await getPdf()}catch(e){}
-      if(blob)saveBlob(blob,pdfName());persist('sent');try{opts.onSent&&opts.onSent(booking.quote,'whatsapp',booking)}catch(e){}
+      if(blob)await deliver(blob);persist('sent');try{opts.onSent&&opts.onSent(booking.quote,'whatsapp',booking)}catch(e){}
       window.open(`https://wa.me/${p}?text=${encodeURIComponent(waText(d))}`,'_blank','noopener');msg(blob?'اتفتح واتساب، وملف PDF اتحمّل: ابعته في نفس المحادثة.':'اتفتح واتساب. حمّل PDF وابعته.')}});
   setTimeout(()=>$('[data-k="assoc"]').focus(),50);
   return {close,data:d};

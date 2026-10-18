@@ -796,6 +796,19 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="ds"><div class="ds-n">25K</div><div class="ds-l">عضو FB</div></div>
     </div>
   </div>
+  <!-- بانر خطة تنمويين مصر لتحسين وتطوير اللغة الإنجليزية -->
+  <div id="ep-banner" style="padding:8px 12px 2px">
+    <div onclick="location.href='english-plan/index.html'" style="position:relative;background:linear-gradient(135deg,#1a3a6b,#14305a 60%,#0b6a93);border-radius:16px;padding:13px 16px 13px 40px;cursor:pointer;box-shadow:0 4px 16px rgba(26,58,107,.3);display:flex;align-items:center;gap:12px;border-bottom:3px solid #00aeef">
+      <div style="width:40px;height:40px;background:#00aeef;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🗣️</div>
+      <div style="flex:1;min-width:0">
+        <div style="color:#fff;font-size:12.5px;font-weight:900;line-height:1.5;margin-bottom:2px">اتكلم إنجليزي في شغل التنمية بثقة، في ٥٦ يوم</div>
+        <div style="color:rgba(255,255,255,.8);font-size:10px;line-height:1.6">خطة مجانية مصممة للعاملين في التنمية، تناسب أي مستوى</div>
+      </div>
+      <div style="background:#00aeef;color:#fff;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:900;flex-shrink:0;white-space:nowrap">سجّل مجانًا</div>
+      <button type="button" aria-label="إخفاء" onclick="event.stopPropagation();try{localStorage.setItem('tm_ep_banner_hidden','1')}catch(e){};document.getElementById('ep-banner').style.display='none'" style="position:absolute;top:6px;left:8px;width:24px;height:24px;border:none;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-size:14px;line-height:24px;padding:0;cursor:pointer;font-family:Cairo,sans-serif">×</button>
+    </div>
+  </div>
+  <script>try{if(localStorage.getItem('tm_ep_banner_hidden')==='1')document.getElementById('ep-banner').style.display='none'}catch(e){}</script>
   <div class="sh" style="margin-top:4px;padding:4px 14px 2px"><div class="sh-t" style="font-size:12px">🧭 الأقسام الرئيسية</div></div>
 
   <!-- سجل ملفك - قبل الأقسام مباشرة -->
@@ -862,6 +875,14 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="dg-c" style="color:#f59e0b;font-weight:700">قريباً ✨</div>
     </div>
     <div class="dg-card" onclick="location.href='donor-guide.html'" style="border:2px solid #1a3a6e;background:linear-gradient(135deg,#e5f6fd,#f4fbfe)"><div class="dg-icon" style="background:#1a3a6e">📘</div><div class="dg-t" style="color:#1a3a6e;font-weight:900">دليل الاشتراطات</div><div class="dg-c" style="color:#00aeef;font-weight:700">الجهات المانحة 🆕</div></div>
+    <div class="dg-card" onclick="location.href='english-plan/index.html'" style="grid-column:1/-1;flex-direction:row;text-align:right;gap:12px;border:2px solid #1a3a6b;background:linear-gradient(135deg,#eaf1fb,#f2fbff)">
+      <div class="dg-icon" style="background:#1a3a6b;color:#fff;flex-shrink:0">🗣️</div>
+      <div style="flex:1;min-width:0">
+        <div class="dg-t" style="color:#1a3a6b;font-weight:900;line-height:1.5">خطة تنمويين مصر لتحسين وتطوير اللغة الإنجليزية</div>
+        <div class="dg-c" style="color:#0094cc;font-weight:700;line-height:1.6;margin-top:2px">٥٦ يوم · Shadowing يومي · مناسبة لأي مستوى · شهادة إتمام</div>
+      </div>
+      <div style="background:#00aeef;color:#fff;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:900;flex-shrink:0;white-space:nowrap">ابدأ رحلتك</div>
+    </div>
   </div>
 
   <!-- أزرار المشاركة -->
@@ -2155,6 +2176,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" onclick="setAdmTab(this,'contact')">📧 رسايل</div>
       <div class="adm-tab" onclick="setAdmTab(this,'funding')">💰 حجز منصة المنح</div>
       <div class="adm-tab" onclick="setAdmTab(this,'athar')">🌿 أثر</div>
+      <div class="adm-tab" style="background:#eaf1fb;color:#1a3a6b;border-color:#00aeef" onclick="setAdmTab(this,'english')">🗣️ خطة الإنجليزي</div>
       <div class="adm-tab" style="background:#f3e8ff;color:#7c3aed;border-color:#7c3aed" onclick="setAdmTab(this,'settings')">⚙️ إعدادات</div>
     </div>
     <div style="font-size:10px;color:var(--muted);padding:0 12px 8px;text-align:left">← اسحب للمزيد من التبويبات</div>
@@ -2418,6 +2440,13 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <div id="funding-list"><div style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل...</div></div>
 </div>
 
+<div id="adm-form-english" style="display:none;padding:0 12px;padding-bottom:100px">
+  <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px">
+    <div style="flex:1;font-size:13px;font-weight:800;color:#1a3a6b">🗣️ خطة الإنجليزي: المشاركين والمتابعة</div>
+    <a href="english-plan/admin.html" target="_blank" rel="noopener" style="padding:6px 10px;background:#eaf1fb;color:#1a3a6b;border-radius:8px;text-decoration:none;font-size:11px;font-weight:700">↗ فتح في تاب جديد</a>
+  </div>
+  <iframe id="ep-admin-frame" data-src="english-plan/admin.html" title="لوحة خطة الإنجليزي" style="width:100%;height:85vh;border:0;border-radius:12px;background:#fff"></iframe>
+</div>
 <div id="adm-form-athar" style="display:none;padding:0 16px;padding-bottom:100px">
   <div style="font-size:13px;font-weight:800;color:#00703a;margin:12px 0 8px">🌿 طلبات تجربة أثر</div>
   <div id="athar-trials-list">
@@ -5342,7 +5371,7 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  ['adm-form-registration-requests','adm-form-import-job','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){
+  ['adm-form-registration-requests','adm-form-import-job','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
@@ -5416,19 +5445,24 @@ function setAdmTab(el, tab){
     var lbF=document.getElementById('tm-list-export'); if(lbF) lbF.style.display='none';
     var fEl=document.getElementById('adm-form-funding');
     if(fEl){ fEl.style.display='block'; loadFundingWaitlist(); }
+  } else if(tab === 'english'){
+    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    var lbE=document.getElementById('tm-list-export'); if(lbE) lbE.style.display='none';
+    var eEl=document.getElementById('adm-form-english');
+    if(eEl){ eEl.style.display='block'; var fr=document.getElementById('ep-admin-frame'); if(fr && !fr.getAttribute('src')) fr.setAttribute('src', fr.getAttribute('data-src')); }
   } else if(tab === 'athar'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var aEl=document.getElementById('adm-form-athar');
     if(aEl){ aEl.style.display='block'; loadAtharTrials(); }
   } else if(tab === 'contact'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-contact');
     if(cEl){ cEl.style.display='block'; loadContactMsgs(); }
   } else if(tab === 'broadcast'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var bEl=document.getElementById('adm-form-broadcast');
     if(bEl){ bEl.style.display='block'; }
     // حط الرابط الافتراضي
@@ -5437,7 +5471,7 @@ function setAdmTab(el, tab){
     loadBroadcastHistory();
   } else if(tab === 'settings'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var sEl = document.getElementById('adm-form-settings');
     if(sEl){ sEl.style.display='block'; loadVisibilitySettings(); }
   } else if(tab === 'volunteers-adm'){
@@ -5447,7 +5481,7 @@ function setAdmTab(el, tab){
     loadAdminVols();
   } else if(tab === 'consultations-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-consultations-adm');
     if(cEl){cEl.style.display='block';}
     loadAdminConsultations();
@@ -5456,7 +5490,7 @@ function setAdmTab(el, tab){
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
     // Hide all special forms
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq'].forEach(function(id){
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
     // إظهار القائمة

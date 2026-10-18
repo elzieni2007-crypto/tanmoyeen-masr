@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>خطة تنمويين مصر لتحسين وتطوير اللغة الإنجليزية</title>
+<meta name="description" content="خطة مجانية من تنمويين مصر لتحسين الإنجليزي في شغل التنمية: ٥٦ يوم، Shadowing يومي، عبارات وأمثلة من واقع الشغل، اختبارات وشهادة.">
+<meta property="og:title" content="خطة تنمويين مصر لتحسين وتطوير اللغة الإنجليزية">
+<meta property="og:description" content="خطة مجانية للعاملين في التنمية، تناسب أي مستوى. سجّل وابدأ رحلتك.">
+<meta property="og:image" content="img/logo.webp">
+<link rel="icon" href="img/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,500;1,8..60,400;1,8..60,500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="demo-bar" id="demoBar" hidden>وضع تجريبي: البيانات بتتحفظ على المتصفح ده بس. اربط Firebase من ملف js/config.js</div>
+<header class="hero" dir="rtl">
+  <div class="wrap">
+    <div class="brand">
+      <div class="bl"><span class="logo"><img src="img/logo.webp" alt="تنمويين مصر — لكل تنموي في مصر" width="160" height="68"></span><span>مبادرة مجانية لأعضاء المجتمع</span></div>
+      <div class="who" id="who" hidden><span id="whoName"></span><button type="button" id="logout">خروج</button></div>
+    </div>
+    <div>
+      <span class="eyebrow" style="color:var(--sky);font-size:.85rem">خطة تنمويين مصر لتحسين وتطوير اللغة الإنجليزية</span>
+      <h1 id="heroTitle">اتكلم إنجليزي في شغل التنمية <em>بثقة</em>، في ٥٦ يوم</h1>
+      <p>ساعتين يوميًا مقسمين على ٨ مهام قصيرة، وموضوع جديد كل أسبوع من واقع شغلنا: شرح المشاريع، الشركاء، المتابعة والتقييم، المانحين، والمقابلات. علّم على اللي تخلّصه، والصفحة بتحفظ تقدمك.</p>
+      <a class="cta" id="cta" href="#start">سجّل وابدأ رحلتك ←</a>
+    </div>
+    <div class="ring" aria-label="نسبة الإنجاز">
+      <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="9"/><circle class="bar" id="ringBar" cx="60" cy="60" r="52" fill="none" stroke-width="9" stroke-dasharray="326.7" stroke-dashoffset="326.7"/></svg>
+      <div class="in"><b id="sPct">٠٪</b><small>من الرحلة</small></div>
+    </div>
+    <div class="hstats">
+      <div><b id="sDay">١ / ٥٦</b><span>اليوم</span></div>
+      <div><b id="sStreak">٠</b><span>أيام متتالية</span></div>
+      <div><b id="sMin">٠ / ١٢٠</b><span>دقيقة النهارده</span></div>
+    </div>
+    <div class="hero-pad"></div>
+  </div>
+  <div class="ticker" aria-hidden="true"><div id="ticker"></div></div>
+</header>
+
+<main class="wrap" dir="rtl">
+  <div class="view loading" id="loadingView">جاري التحميل…</div>
+
+  <!-- ===== تسجيل / دخول ===== -->
+  <section class="view" id="authView" hidden>
+    <div class="auth-grid" id="start">
+      <div class="feat">
+        <h2>هتلاقي إيه في الرحلة؟</h2>
+        <ul>
+          <li><span class="ic">١</span><div><b>Shadowing يومي</b><span>تسمع وتكرر ورا متحدثين أصليين لحد ما نطقك ونغمتك يتظبطوا.</span></div></li>
+          <li><span class="ic">٢</span><div><b>لغة شغل التنمية</b><span>عبارات وأمثلة جاهزة عن المشاريع، الشركاء، المتابعة والتقييم، والمانحين، وكل عبارة بزرار ينطقها.</span></div></li>
+          <li><span class="ic">٣</span><div><b>بودكاستات من مجالنا</b><span>البنك الدولي، الأمم المتحدة، The New Humanitarian، وغيرهم.</span></div></li>
+          <li><span class="ic">٤</span><div><b>تدريب كلام كل يوم</b><span>مهمة كلام مسجّلة، ومحادثة يومية تصحح أخطاءك.</span></div></li>
+          <li><span class="ic">٥</span><div><b>متابعة تقدمك</b><span>علّم على اللي خلّصته، وشوف نسبة إنجازك وسلسلة أيامك.</span></div></li>
+        </ul>
+      </div>
+      <div class="card" id="authCard">
+        <div class="tabs2" role="tablist">
+          <button type="button" role="tab" id="tabUp" aria-selected="true">حساب جديد</button>
+          <button type="button" role="tab" id="tabIn" aria-selected="false">عندي حساب</button>
+        </div>
+        <button type="button" class="ghost" id="googleBtn"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>المتابعة بحساب Google</button>
+        <div class="or">أو بالإيميل</div>
+        <form id="authForm" novalidate style="display:flex;flex-direction:column;gap:12px">
+          <label class="field" for="aEmail">الإيميل<input id="aEmail" type="email" autocomplete="email" dir="ltr" required></label>
+          <label class="field" for="aPass">كلمة السر (٦ حروف على الأقل)<input id="aPass" type="password" autocomplete="new-password" dir="ltr" minlength="6" required></label>
+          <div class="msg err" id="authErr" hidden></div>
+          <div class="msg ok" id="authOk" hidden></div>
+          <button class="primary" type="submit" id="authSubmit">إنشاء حساب</button>
+          <button type="button" class="linkbtn" id="forgot" hidden>نسيت كلمة السر؟</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== بيانات المشارك ===== -->
+  <section class="view" id="profileView" hidden>
+    <form class="card" id="profileForm" novalidate style="max-width:720px;margin:0 auto;width:100%">
+      <div><span class="eyebrow">خطوة أخيرة</span><h2 style="font-size:1.4rem">عرّفنا بنفسك</h2><p class="muted" style="margin:4px 0 0;font-size:.9rem">البيانات دي بتساعدنا نطوّر الخطة ونعرف مين معانا في الرحلة.</p></div>
+      <div class="grid2">
+        <label class="field" for="pNameAr">الاسم بالعربي *<input id="pNameAr" type="text" autocomplete="name" required maxlength="60"></label>
+        <label class="field" for="pNameEn">الاسم بالإنجليزي (بيظهر في الأمثلة) *<input id="pNameEn" type="text" dir="ltr" required maxlength="40" placeholder="Ahmed"></label>
+        <label class="field" for="pPhone">رقم الموبايل / واتساب *<input id="pPhone" type="tel" dir="ltr" autocomplete="tel" required maxlength="20" placeholder="01xxxxxxxxx"></label>
+        <label class="field" for="pGov">المحافظة *<select id="pGov" required></select></label>
+        <label class="field" for="pOrg">جهة العمل<input id="pOrg" type="text" maxlength="80" placeholder="اسم الجمعية أو المنظمة"></label>
+        <label class="field" for="pJob">المسمى الوظيفي<input id="pJob" type="text" maxlength="60" placeholder="منسق مشروع، محاسب…"></label>
+        <label class="field" for="pLevel">مستواك في الإنجليزي حاليًا *<select id="pLevel" required><option value="">اختار</option><option>مبتدئ</option><option>متوسط</option><option>متقدم</option></select></label>
+        <label class="field" for="pStart">يوم بداية رحلتك *<input id="pStart" type="date" required></label>
+        <label class="field" for="pMode">وقتك اليومي *<select id="pMode"><option value="2h">ساعتين (٨ مهام)</option><option value="1h">ساعة (٥ مهام أساسية)</option></select></label>
+      </div>
+      <div class="msg err" id="profErr" hidden></div>
+      <button class="primary" type="submit" id="profSubmit">ابدأ الرحلة</button>
+    </form>
+  </section>
+
+  <!-- ===== الخطة ===== -->
+  <div class="view" id="planView" hidden style="display:flex;flex-direction:column;gap:40px">
+  <div class="setup">
+    <label for="nmAr">اسمك بالعربي (للشهادة)<input id="nmAr" type="text" placeholder="أحمد علي"></label>
+    <label for="nm">اسمك بالإنجليزي (بيظهر في الأمثلة)<input id="nm" type="text" placeholder="Ahmed" autocomplete="given-name" dir="ltr"></label>
+    <label for="sd">يوم بداية رحلتك<input id="sd" type="date"></label>
+    <label for="md">وقتك اليومي<select id="md"><option value="2h">ساعتين (٨ مهام)</option><option value="1h">ساعة (٥ مهام أساسية)</option></select></label>
+    <label for="lv">مستواك<select id="lv"><option value="">اختار</option><option>مبتدئ</option><option>متوسط</option><option>متقدم</option></select></label>
+    <span class="save" id="saveState">التقدم بيتحفظ على الجهاز ده</span>
+  </div>
+
+  <section id="today" aria-labelledby="todayTitle">
+    <div class="today">
+      <div class="today-top">
+        <div><span class="eyebrow" id="todayDate"></span><h2 id="todayTitle">مهام النهارده</h2></div>
+        <div class="daynav"><button id="prevDay" aria-label="اليوم السابق">→</button><button id="nextDay" aria-label="اليوم التالي">←</button></div>
+      </div>
+      <div class="timebar"><i id="timeFill"></i></div>
+      <div class="motive"><b>رسالة النهارده</b><p id="motive"></p></div>
+      <div class="testcard" id="testCard" hidden></div>
+      <p class="day-hint" id="dayHint"></p>
+      <div class="tasks" id="tasks"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="jTitle">
+    <div class="sec-head"><h2 id="jTitle">الرحلة: ٨ محطات</h2><span class="muted" style="font-size:.85rem">كل دايرة يوم. اضغط عليها تفتح مهامه.</span></div>
+    <div class="journey" id="journey"></div>
+  </section>
+
+  <section aria-labelledby="weekTitle">
+    <div class="week" id="week"></div>
+  </section>
+
+  <section aria-labelledby="waTitle">
+    <div class="wa">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4a.5.5 0 0 0 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3z"/></svg></span>
+      <div class="tx"><b id="waTitle">مجتمع الخطة على واتساب</b><span>اتكلم مع زمايلك في نفس الرحلة، اسأل، وشارك تسجيلاتك وإنجازاتك.</span></div>
+      <a class="wabtn" id="waBtn" href="#" target="_blank" rel="noopener">انضم للمجتمع</a>
+      <div class="club" id="clubInfo"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="certTitle">
+    <div class="sec-head"><h2 id="certTitle">شهادة الإتمام</h2><span class="muted" style="font-size:.85rem">من أكاديمية تنمويين مصر للتعلم عن بعد</span></div>
+    <div class="cert" id="certBody"></div>
+  </section>
+
+  <section aria-labelledby="glossTitle">
+    <div class="sec-head"><h2 id="glossTitle">قاموس التنمية</h2><span class="muted" style="font-size:.85rem" id="glossCount"></span></div>
+    <input class="gsearch" id="glossQ" type="search" placeholder="ابحث بالعربي أو بالإنجليزي: مؤشر، baseline…">
+    <div class="glist" id="glossList"></div>
+  </section>
+
+  <section aria-labelledby="srcTitle">
+    <div class="sec-head"><h2 id="srcTitle">اسمع إيه كل يوم</h2></div>
+    <div class="src">
+      <a href="https://www.youtube.com/@bbclearningenglish" target="_blank" rel="noopener"><em>للمبتدئين</em><b>BBC Learning English</b><span>قواعد ومفردات بفيديوهات قصيرة. سلسلة 6 Minute English ممتازة للـshadowing.</span></a>
+      <a href="https://www.youtube.com/@rachelsenglish" target="_blank" rel="noopener"><em>نطق</em><b>Rachel's English</b><span>الأصوات، نبرة الكلمة، وربط الكلام زي أهل اللغة.</span></a>
+      <a href="https://news.un.org/un-podcasts" target="_blank" rel="noopener"><em>للمبتدئين</em><b>UN Podcasts</b><span>حلقات قصيرة عن أهداف التنمية المستدامة وحقوق الإنسان بلغة واضحة.</span></a>
+      <a href="https://www.worldbank.org/podcast" target="_blank" rel="noopener"><em>متوسط</em><b>The Development Podcast · World Bank</b><span>تعليم، صحة، مناخ، تشغيل، وفقر.</span></a>
+      <a href="https://next.thenewhumanitarian.org/podcast/rethinking-humanitarianism" target="_blank" rel="noopener"><em>متوسط</em><b>Rethinking Humanitarianism</b><span>مستقبل العمل الإنساني والتوطين ودور المنظمات المحلية.</span></a>
+      <a href="https://podcasts.apple.com/ge/podcast/this-week-in-global-development/id1682882914" target="_blank" rel="noopener"><em>متوسط</em><b>Devex · This Week in Global Development</b><span>أخبار القطاع والمانحين أسبوعيًا.</span></a>
+      <a href="https://podbay.fm/p/the-cgd-podcast" target="_blank" rel="noopener"><em>متقدم</em><b>The CGD Podcast</b><span>نقاشات أعمق عن المساعدات والسياسات التنموية. مناسب من الأسبوع الخامس.</span></a>
+      <a href="https://www.ted.com/talks?sort=newest&amp;topics%5B%5D=social+change" target="_blank" rel="noopener"><em>كل المستويات</em><b>TED Talks · Social change</b><span>شغّل الترجمة الإنجليزية، واعمل shadowing على أول دقيقتين.</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="rulesTitle">
+    <div class="sec-head"><h2 id="rulesTitle">قواعد الرحلة</h2></div>
+    <ol class="rules">
+      <li>طبيعي في الأول ما تفهمش الكلام كويس. عيد مرة واتنين وتلاتة، ودنك بتتعود يوم بعد يوم.</li>
+      <li>اتكلم بصوت عالي كل يوم، حتى لو لوحدك. الطلاقة بتيجي من عدد الدقايق اللي اتكلمت فيها، مش من اللي قريته.</li>
+      <li>سجّل صوتك في مهمة الكلام، واسمعه في المراجعة، وطلّع غلطة واحدة بس.</li>
+      <li>في الـshadowing: اسمع جملة، وقّف، وكررها بنفس السرعة والنغمة.</li>
+      <li>المحادثة اليومية مع Claude بالطلب الجاهز في المهمة، ويفضّل بالصوت (voice mode).</li>
+      <li>لو مش هتقدر تعمل الساعتين ورا بعض، خلي ساعة الصبح وساعة بالليل.</li>
+      <li>لو فوّت يوم، كمّل من النهارده. اليوم بيتحسب في السلسلة لو خلّصت ٥ مهام من ٨.</li>
+      <li>اليوم السابع من كل محطة يوم مراجعة، وفيه جلسة المحادثة الأسبوعية.</li>
+    </ol>
+  </section>
+  </div>
+</main>
+
+<footer dir="rtl"><div class="wrap"><span><b>تنمويين مصر</b> · مجتمع العاملين في التنمية في مصر</span><span>شارك الخطة مع زمايلك، وكل واحد تقدمه بيتحفظ عنده.</span></div></footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/plan-data.js"></script>
+<script src="js/plan-core.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

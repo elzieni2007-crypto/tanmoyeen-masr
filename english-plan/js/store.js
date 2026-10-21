@@ -5,20 +5,28 @@
   const admins = (window.ADMIN_EMAILS || []).map(e => String(e).toLowerCase().trim());
   const toMs = v => v == null ? null : (typeof v === "number" ? v : (v.toMillis ? v.toMillis() : (v.seconds ? v.seconds * 1000 : null)));
 
+  // جوه تطبيق الموبايل (Median) تسجيل الدخول بـGoogle مش بيشتغل، لأن Google بتمنعه جوه الـWebView
+  const IN_APP = !!(window.median || window.gonative || /median|gonative/i.test(navigator.userAgent || ""));
+  const inAppErr = () => Promise.reject({code:"tm/google-in-app"});
+
   if (!DEMO){
     // لو التطبيق عامل initializeApp قبل كده، بنستخدم نفس الـapp
     if (!firebase.apps.length) firebase.initializeApp(cfg);
     const auth = firebase.auth(), fs = firebase.firestore();
+    // نخلي الدخول محفوظ على الجهاز لحد ما الشخص يدوس «خروج»
+    try { auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{}); } catch(e){}
+    // لينك تغيير كلمة السر يرجّع الشخص للخطة بعد ما يغيّرها
+    const backUrl = () => location.href.split("#")[0].split("?")[0];
     const col = fs.collection(window.PLAN_COLLECTION || "englishPlan");
     const ts = () => firebase.firestore.FieldValue.serverTimestamp();
     const wrap = u => u ? {uid:u.uid, email:u.email || "", verified:!!u.emailVerified, displayName:u.displayName || ""} : null;
     window.Store = {
-      demo:false, toMs,
+      demo:false, inApp:IN_APP, toMs,
       onAuth: cb => auth.onAuthStateChanged(u => cb(wrap(u))),
       signUp: (e,p) => auth.createUserWithEmailAndPassword(e,p),
       signIn: (e,p) => auth.signInWithEmailAndPassword(e,p),
-      google: () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()),
-      reset: e => auth.sendPasswordResetEmail(e),
+      google: () => IN_APP ? inAppErr() : auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()),
+      reset: e => auth.sendPasswordResetEmail(e, {url: backUrl()}).catch(err => (err && /continue|domain|url/i.test(err.code || "")) ? auth.sendPasswordResetEmail(e) : Promise.reject(err)),
       sendVerify: () => auth.currentUser.sendEmailVerification(),
       refresh: async () => { await auth.currentUser.reload(); await auth.currentUser.getIdToken(true); return wrap(auth.currentUser); },
       signOut: () => auth.signOut(),
@@ -83,7 +91,7 @@
   }
 
   window.Store = {
-    demo:true, toMs,
+    demo:true, inApp:IN_APP, toMs,
     onAuth: cb => { authL.push(cb); setTimeout(() => cb(me()), 0); },
     signUp: (e) => login(e), signIn: (e) => login(e), google: () => login("demo.user@gmail.com"),
     reset: () => Promise.resolve(), sendVerify: () => Promise.resolve(), refresh: () => Promise.resolve(me()),

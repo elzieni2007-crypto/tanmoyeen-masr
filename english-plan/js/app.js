@@ -148,6 +148,77 @@ function queueSave(){
   } catch(e){}
 })();
 
+/* ---------- النطق جوه التطبيق ----------
+   كل جمل الخطة ليها ملفات صوت جاهزة في english-plan/audio (صوت إنجليزي طبيعي).
+   زرار «اسمع» بيشغلها جوه الصفحة بدل Google Translate. لو جملة مش موجودة في الملفات،
+   الزرار بيشتغل زي الأول. */
+(function(){
+  const BASE = "audio/";
+  let man = null, manP = null, cur = null, failT = null;
+  const players = {};
+  const load = () => manP || (manP = fetch(BASE + "index.json").then(r => r.ok ? r.json() : {}).catch(() => ({})).then(j => (man = j || {})));
+  load();
+  const keyOf = t => {
+    let k = String(t || "").replace(/…/g, "...").trim();
+    try { const n = typeof nameOr === "function" ? nameOr() : ""; if (n && n !== "[your name]" && k.includes(n)) k = k.split(n).join("[your name]"); } catch(e){}
+    return k;
+  };
+  function stop(){
+    clearTimeout(failT);
+    if (!cur) return;
+    try { cur.a.pause(); } catch(e){}
+    cur.btn.classList.remove("on");
+    cur = null;
+  }
+  function play(ent, btn){
+    const g = ent[0], st = ent[1], du = ent[2];
+    let a = players[g];
+    if (!a){
+      a = players[g] = new Audio(BASE + "a" + g + ".mp3"); a.preload = "auto";
+      const a2 = a;
+      ["loadedmetadata","canplay","progress","seeked","timeupdate"].forEach(ev => a2.addEventListener(ev, () => { if (cur && cur.a === a2) cur.tick(); }));
+    }
+    stop();
+    try { speechSynthesis.cancel(); } catch(e){}
+    const end = st + du + 0.12;
+    const inWin = () => a.currentTime >= st - 0.3 && a.currentTime <= st + 0.6;
+    // بنفضل ساكتين لحد ما نوصل لبداية الجملة جوه الملف، وبعدين نطلع الصوت
+    const seek = () => {
+      if (cur !== me) return;
+      if (a.seeking) return;
+      if (!inWin()){ try { a.currentTime = st; } catch(e){} return; }
+      a.muted = false;
+    };
+    const me = {a, btn, tick: () => {
+      if (a.muted || a.seeking){ seek(); return; }
+      if (a.currentTime >= end || a.currentTime < st - 0.5) stop();
+    }};
+    cur = me; btn.classList.add("on");
+    a.muted = true;
+    if (a.readyState >= 1) seek();
+    // play() لازم يتنادى جوه الضغطة نفسها عشان الآيفون والتطبيق يسمحوا بالصوت
+    const pr = a.play();
+    if (pr && pr.catch) pr.catch(() => { if (cur === me){ stop(); if (typeof toast === "function") toast("الصوت ما اشتغلش. اتأكد إن صوت الموبايل مفتوح وجرب تاني."); } });
+    // لو التحميل اتأخر جدًا (نت ضعيف)
+    failT = setTimeout(() => { if (cur === me && a.readyState < 2){ stop(); if (typeof toast === "function") toast("الصوت بيحمّل ببطء. استنى ثواني وجرب تاني."); } }, 15000);
+  }
+  document.addEventListener("click", e => {
+    const btn = e.target && e.target.closest ? e.target.closest("a.say") : null;
+    if (!btn) return;
+    const text = (btn.getAttribute("aria-label") || "").replace(/^اسمع النطق:\s*/, "");
+    if (!man){
+      e.preventDefault(); e.stopPropagation();
+      load().then(() => { if (man[keyOf(text)]) play(man[keyOf(text)], btn); else btn.click(); });
+      return;
+    }
+    const ent = man[keyOf(text)];
+    if (!ent) return;
+    e.preventDefault(); e.stopPropagation();
+    if (cur && cur.btn === btn){ stop(); return; }
+    play(ent, btn);
+  }, true);
+})();
+
 /* ---------- boot ---------- */
 (function(){
   // جوه تطبيق الموبايل: نخفي زرار Google (Google بتمنعه جوه التطبيق وبيطلع صفحة بيضا)

@@ -10705,5 +10705,84 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 <script src="tmq-quote.js"></script>
 <script src="funding-quotes.js"></script>
 <script src="outreach.js"></script>
+<script>
+/* زرار الرجوع: يرجّع للشاشة أو يقفل النافذة المفتوحة بدل ما يخرج من التطبيق.
+   الترتيب: نافذة مفتوحة ← تتقفل، أي قسم ← الرئيسية، الرئيسية ← خروج */
+(function(){
+  if(!window.history||!history.pushState||typeof window.go!=='function') return;
+  var skip=0, pending=null, popping=false, lastN=0, raf=0;
+  function st(){ var s=history.state; return (s&&s.tm)?s:{tm:1,d:0}; }
+  function curScr(){ var e=document.querySelector('.scr.on'); return e?e.id:'home'; }
+  function back(k,fn){ if(k<=0){ fn&&fn(); return; } skip++; pending=fn||null; history.go(-k); }
+  function z(e){ var v=parseInt(getComputedStyle(e).zIndex,10); return isNaN(v)?0:v; }
+  function overlays(){
+    var seen=[], out=[];
+    var c=[].slice.call(document.body.children).concat([].slice.call(document.querySelectorAll('.moverlay,#admin,#tma')));
+    c.forEach(function(e){
+      if(seen.indexOf(e)>=0) return; seen.push(e);
+      if(e.id==='splash'||e.id==='toast'||e.tagName==='SCRIPT'||e.tagName==='STYLE') return;
+      var cs=getComputedStyle(e);
+      if(cs.position!=='fixed'||cs.display==='none'||cs.visibility==='hidden'||cs.opacity==='0') return;
+      var r=e.getBoundingClientRect();
+      if(r.width<innerWidth*0.9||r.height<innerHeight*0.8) return;
+      out.push(e);
+    });
+    out.sort(function(a,b){ return z(a)-z(b) || (a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING?-1:1); });
+    return out;
+  }
+  function closeOne(e){
+    if(e.id==='admin'){ if(typeof window.closeAdmin==='function') window.closeAdmin(); else { e.classList.remove('on'); e.style.cssText='display:none'; } return; }
+    if(e.classList.contains('moverlay')){ e.classList.remove('op'); document.body.style.overflow=''; return; }
+    var b=e.querySelector('.tma-x,[aria-label="إغلاق"],[aria-label="اغلاق"],[data-close]');
+    if(!b){ b=[].slice.call(e.querySelectorAll('button,[role=button],.x,.close')).filter(function(x){ var t=(x.textContent||'').trim(); return /^(×|✕|✖|x|إغلاق|اغلاق|قفل)$/i.test(t); })[0]; }
+    if(b){ b.click(); }
+    if(getComputedStyle(e).display!=='none'){ ['on','op','open','show'].forEach(function(c){ e.classList.remove(c); }); }
+    if(getComputedStyle(e).display!=='none'){ e.style.display='none'; }
+    document.body.style.overflow='';
+  }
+  // كل ما نافذة تتفتح بنحط خطوة في السجل، ولو اتقفلت من زرارها بنشيل الخطوة
+  function check(){
+    raf=0; if(popping) return;
+    var n=overlays().length, s=st();
+    if(n>lastN){
+      for(var i=lastN;i<n;i++){ s=st(); history.pushState({tm:1,d:s.d+1,b:(s.ov?s.b:s.d),scr:s.scr,ov:1},''); }
+    } else if(n<lastN){
+      var ovs=s.ov?(s.d-s.b):0, k=Math.min(ovs,lastN-n);
+      if(k>0) back(k);
+    }
+    lastN=n;
+  }
+  function sched(){ if(!raf) raf=requestAnimationFrame(check); }
+  var origGo=window.go;
+  window.go=function(id){
+    var r=origGo.apply(this,arguments);
+    if(!popping){
+      var s=st();
+      if(id==='home'){ back(s.d); }
+      else if(s.d===0){ history.pushState({tm:1,d:1,scr:id},''); }
+      else if(s.d===1){ history.replaceState({tm:1,d:1,scr:id},''); }
+      else { back(s.d-1,function(){ history.replaceState({tm:1,d:1,scr:id},''); }); }
+      lastN=overlays().length;
+    }
+    return r;
+  };
+  window.addEventListener('popstate',function(ev){
+    if(skip>0){ skip--; var f=pending; pending=null; if(f) f(); lastN=overlays().length; return; }
+    var s=(ev.state&&ev.state.tm)?ev.state:{tm:1,d:0};
+    popping=true;
+    try{
+      var want=s.ov?(s.d-s.b):0, list=overlays(), guard=0;
+      while(list.length>want && guard++<6){ closeOne(list[list.length-1]); list=overlays(); }
+      var target=s.scr||'home';
+      if(curScr()!==target||document.getElementById('admin').style.display==='block') origGo(target);
+    } finally { popping=false; lastN=overlays().length; }
+  });
+  try{ history.replaceState({tm:1,d:0},''); if(curScr()!=='home') history.pushState({tm:1,d:1,scr:curScr()},''); }catch(e){}
+  lastN=overlays().length;
+  if(window.MutationObserver){
+    new MutationObserver(sched).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
+  }
+})();
+</script>
 </body>
 </html>

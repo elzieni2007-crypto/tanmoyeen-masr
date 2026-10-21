@@ -127,6 +127,27 @@ function queueSave(){
   $("clubInfo").textContent = C.club || "نادي المحادثة الأسبوعي: نص ساعة كلام إنجليزي مع متطوع من المجتمع. المواعيد هتتعلن في الجروب.";
 })();
 
+/* ---------- زرار الرجوع بتاع الموبايل ----------
+   أول ما الصفحة تفتح بنحط خطوة «قاعدة» قبلها. أي رجوع من الخطة بيوصل للقاعدة
+   فبنودّي الشخص لرئيسية تنمويين مصر، بدل ما التطبيق يقفل لو الخطة اتفتحت من لينك مباشر. */
+(function(){
+  // جاي من التطبيق؟ يبقى نرجع خطوة لورا (الرئيسية زي ما سابها)، غير كده نفتح الرئيسية
+  const fromApp = (() => { try { const r = new URL(document.referrer); return r.origin === location.origin && (r.pathname === new URL("../", location.href).pathname || r.pathname === new URL("../index.html", location.href).pathname); } catch(e){ return false; } })();
+  window.tmBackToApp = atBase => {
+    if (fromApp){ try { history.go(atBase ? -1 : -2); return; } catch(e){} }
+    location.replace("../index.html");
+  };
+  try {
+    if (!history.replaceState) return;
+    const st = history.state || {};
+    if (!st.epBase && !st.ep){ history.replaceState({epBase:1}, ""); history.pushState({ep:1}, ""); }
+    else if (st.epBase){ history.pushState({ep:1}, ""); }
+    window.addEventListener("popstate", e => {
+      if (e.state && e.state.epBase) window.tmBackToApp(true);
+    });
+  } catch(e){}
+})();
+
 /* ---------- boot ---------- */
 (function(){
   // جوه تطبيق الموبايل: نخفي زرار Google (Google بتمنعه جوه التطبيق وبيطلع صفحة بيضا)
@@ -147,7 +168,7 @@ function queueSave(){
   if (brand){
     const a = document.createElement("a"); a.href = "../index.html"; a.textContent = "→ رجوع لتنمويين مصر";
     a.style.cssText = "display:inline-block;margin-inline-start:10px;font-size:.8rem;font-weight:700;color:inherit;opacity:.85;text-decoration:none;white-space:nowrap";
-    a.onclick = ev => { if (document.referrer && new URL(document.referrer, location.href).pathname.replace(/index\.html$/,"") === new URL("../", location.href).pathname && history.length > 1){ ev.preventDefault(); history.back(); } };
+    a.onclick = ev => { ev.preventDefault(); const st = history.state || {}; if (st.ep) window.tmBackToApp(false); else location.replace("../index.html"); };
     brand.appendChild(a);
   }
 })();

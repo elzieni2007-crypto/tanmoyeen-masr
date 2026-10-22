@@ -3822,7 +3822,7 @@ function switchRegType(type){
     if(form) form.style.display = t===type ? 'block' : 'none';
   });
 }
-function doReg(type){
+async function doReg(type){
   // ============================================================
   // اربط Google Sheets بهذه الخطوات:
   // 1. افتح Google Sheets وأنشئ Spreadsheet جديد
@@ -3918,6 +3918,12 @@ function doReg(type){
     if(!data.gov){ toast('⚠️ اختر المحافظة'); return; }
     if(!data.phone){ toast('⚠️ أدخل رقم الموبايل'); return; }
     if(interests.length === 0){ toast('⚠️ اختر مجال اهتمام واحد على الأقل'); return; }
+  }
+
+  // منع التسجيل المكرر بنفس الموبايل أو الإيميل
+  if(data.name && data.phone && window.tmClaimRegistration){
+    var _dup = await window.tmClaimRegistration(type, data);
+    if(_dup && _dup.dup){ window.tmShowDupMsg(type, _dup.dup); return; }
   }
 
   // إرسال لـ Google Sheets (لو الـ URL متحوط)
@@ -4852,7 +4858,7 @@ function closeVolunteerForm(e){
   }
 }
 
-function submitVolunteer(){
+async function submitVolunteer(){
   var name  = (document.getElementById('vol-name')||{}).value||'';
   var gov   = (document.getElementById('vol-gov')||{}).value||'';
   var phone = (document.getElementById('vol-phone')||{}).value||'';
@@ -4869,6 +4875,12 @@ function submitVolunteer(){
   if((document.getElementById('vol-badge-available')||{}).checked) badges.push('متاح الآن');
   if((document.getElementById('vol-badge-exp')||{}).checked) badges.push('لديه خبرة');
   if((document.getElementById('vol-badge-star')||{}).checked) badges.push('متطوع مميز');
+
+  // منع التسجيل المكرر بنفس الموبايل أو الإيميل
+  if(window.tmClaimRegistration){
+    var _dupV = await window.tmClaimRegistration('volunteer', {phone: phone, email: (document.getElementById('vol-email')||{}).value||''});
+    if(_dupV && _dupV.dup){ window.tmShowDupMsg('volunteer', _dupV.dup); return; }
+  }
 
   var photo = window._volPhotoData || (document.getElementById('vol-photo-url')||{}).value || '';
 
@@ -8623,8 +8635,10 @@ async function runBulkImport(rawJobs, sourceLabel){
       keySet[x.duplicateKey||dupKey(x)]=1;
       var to=normT(x.title)+'|'+normT(x.org); (byTO[to]=byTO[to]||[]).push(normT(x.gov));
     }
+    var seenAll=existing.slice();
     function isDup(j){
       if(keySet[dupKey(j)]) return true;
+      if(window.tmJobSimilar&&seenAll.some(function(x){ return window.tmJobSimilar(j,x); })) return true;
       var g=normT(j.gov), list=byTO[normT(j.title)+'|'+normT(j.org)];
       return !!(list&&list.some(function(eg){ return !g||!eg||eg===g; }));
     }
@@ -8633,7 +8647,7 @@ async function runBulkImport(rawJobs, sourceLabel){
     jobs.forEach(function(j){
       if(rejectedKeys[dupKey(j)]){ rej++; return; }
       if(isDup(j)){ dup++; return; }
-      remember(j);
+      remember(j); seenAll.push(j);
       toAdd.push(Object.assign({},j,{duplicateKey:dupKey(j),status:'pending',ownerUid:user.uid,submittedBy:user.uid,submittedByEmail:user.email||'',importMethod:'bulk_admin',timestamp:FV.serverTimestamp(),importedAt:FV.serverTimestamp()}));
     });
     var added=0, fail=0, firstErr=null;
@@ -10775,6 +10789,322 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 <script src="tmq-quote.js"></script>
 <script src="funding-quotes.js"></script>
 <script src="outreach.js"></script>
+<script>
+/* ===== الوظايف المكررة =====
+   مقارنة «ذكية» بدل التطابق الحرفي: بتتجاهل علامات الترقيم والهمزات والتاء المربوطة،
+   وبتعرف الجهة من اسمها أو اختصارها (UNICEF = United Nations Children's Fund (UNICEF))،
+   وبتعتبر المسمى واحد لو الكلمات نفسها تقريبًا حتى لو المكان مكتوب جوه العنوان.
+   وظيفتين بنفس المسمى ونفس الجهة في محافظتين مختلفتين = وظيفتين مختلفتين. */
+(function(){
+  var STOP={'the':1,'of':1,'and':1,'for':1,'in':1,'at':1,'a':1,'an':1,'to':1,'with':1,'based':1,'position':1,'vacancy':1,'job':1,'egypt':1,'مصر':1,'في':1,'و':1,'وظيفه':1,'مطلوب':1,'مطلوبه':1,'ل':1,'بـ':1};
+  var PLACES=['cairo','giza','alexandria','minya','assiut','asyut','sohag','qena','luxor','aswan','fayoum','beni','suef','beheira','sharqia','dakahlia','gharbia','menoufia','qalyubia','damietta','ismailia','suez','matrouh','sinai','القاهره','الجيزه','الاسكندريه','المنيا','اسيوط','سوهاج','قنا','الاقصر','اسوان','الفيوم','بني','سويف','البحيره','الشرقيه','الدقهليه','الغربيه','المنوفيه','القليوبيه','دمياط','الاسماعيليه','السويس','مطروح','سيناء','الكبري','الكبرى'];
+  PLACES.forEach(function(p){ STOP[p]=1; });
+  function nz(s){
+    return String(s||'').toLowerCase()
+      .replace(/&amp;/g,'&').replace(/&#x27;|&#39;/g,"'")
+      .replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[ً-ْـ]/g,'')
+      .replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\s+/g,' ').trim();
+  }
+  function orgInfo(o){
+    var raw=String(o||''), keys={};
+    var full=nz(raw.replace(/\([^)]*\)/g,' '));
+    var core=(' '+full+' ').replace(/\s(the|egypt|international|intl|org|organization|organisation|foundation|مصر|مؤسسه|جمعيه)(?=\s)/g,' ').replace(/\s+/g,' ').trim()||full;
+    if(core) keys['n:'+core]=1;
+    (raw.match(/\(([^)]+)\)/g)||[]).forEach(function(m){ var a=nz(m).replace(/\s+/g,''); if(a.length>=2&&a.length<=12) keys['a:'+a]=1; });
+    if(/^[a-z]{2,10}$/.test(full)) keys['a:'+full]=1;
+    var words=full.split(' ').filter(function(w){ return w&&!/^(of|the|for|and|in|on|to)$/.test(w); });
+    if(words.length>=3&&/^[a-z ]+$/.test(full)) keys['a:'+words.map(function(w){return w[0];}).join('')]=1;
+    return {keys:keys,core:core};
+  }
+  function orgMatch(A,B){
+    for(var k in A.keys) if(B.keys[k]) return true;
+    var a=A.core, b=B.core; if(!a||!b) return false;
+    if(a===b) return true;
+    var s=a.length<b.length?a:b, l=a.length<b.length?b:a;
+    return s.length>=5&&(' '+l+' ').indexOf(' '+s+' ')>=0;
+  }
+  function titleTokens(t){ var o={}; nz(t).split(' ').forEach(function(w){ if(w&&!STOP[w]) o[w]=1; }); return o; }
+  function jacc(a,b){ var n=0,u=0,k; for(k in a){ u++; if(b[k]) n++; } for(k in b) if(!a[k]) u++; return u?n/u:0; }
+  function govCompat(a,b){ a=nz(a).replace(/(^|\s)الكبري(?=\s|$)/g,' ').trim(); b=nz(b).replace(/(^|\s)الكبري(?=\s|$)/g,' ').trim(); if(!a||!b) return true; if(a===b) return true; return a.indexOf(b)>=0||b.indexOf(a)>=0; }
+  function prep(j){ if(!j) return null; if(j.__tm) return j.__tm; var p={org:orgInfo(j.org),tt:titleTokens(j.title),gov:j.gov,link:(typeof normalizedUrlKey==='function'?normalizedUrlKey(j.link):String(j.link||''))}; try{ Object.defineProperty(j,'__tm',{value:p,enumerable:false,configurable:true}); }catch(e){} return p; }
+  function similar(a,b){
+    var A=prep(a), B=prep(b); if(!A||!B) return false;
+    if(!Object.keys(A.tt).length||!Object.keys(B.tt).length) return false;
+    if(!orgMatch(A.org,B.org)) return false;
+    if(!govCompat(A.gov,B.gov)) return false;
+    var s=jacc(A.tt,B.tt);
+    if(s>=0.8) return true;
+    // نفس لينك الإعلان بالظبط + مسمى قريب
+    var generic=/facebook\.com|linkedin\.com\/(company|feed)|\/careers\/?$|\/jobs\/?$/.test(A.link||'');
+    return !!(A.link&&A.link===B.link&&!generic&&s>=0.6);
+  }
+  window.tmJobSimilar=similar;
+  // الفحص اللي بيحصل قبل النشر والاستيراد بقى يستخدم المقارنة الذكية
+  window.sameJobIdentity=function(a,b){ return similar(a||{},b||{}); };
+
+  /* ---------- أداة الأدمن: تنظيف الوظايف المكررة ---------- */
+  function getDbJ(){ try{ return (typeof db!=='undefined'&&db)||firebase.firestore(); }catch(e){ return null; } }
+  function msOf(x){ var v=x&&(x.publishedAt||x.timestamp||x.importedAt); try{ if(v&&v.toMillis) return v.toMillis(); if(v&&v.seconds) return v.seconds*1000; }catch(e){} return 0; }
+  function dlOf(x){ var d=String(x&&x.dl||''); return /^\d{4}-\d{2}-\d{2}/.test(d)?d.slice(0,10):''; }
+  function empty(v){ return v==null||v===''||v==='—'||v==='تنافسي'||v==='يُحدد لاحقاً'; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  var JPLAN=null;
+  async function scanJobs(){
+    var dbx=getDbJ(), box=document.getElementById('tm-jobdup-out');
+    box.innerHTML='⏳ بنقرا كل الوظايف...';
+    var jobs=(await dbx.collection('jobs').get()).docs.map(function(d){ return {id:d.id,x:d.data()}; });
+    var pend=(await dbx.collection('pending_jobs').get()).docs.map(function(d){ return {id:d.id,x:d.data()}; }).filter(function(r){ return r.x.status==='pending'&&!r.x._ptype&&!r.x.budget; });
+    var parent=jobs.map(function(_,i){return i;});
+    function f(i){ while(parent[i]!==i){ parent[i]=parent[parent[i]]; i=parent[i]; } return i; }
+    for(var i=0;i<jobs.length;i++) for(var k=i+1;k<jobs.length;k++){ if(f(i)!==f(k)&&similar(jobs[i].x,jobs[k].x)) parent[f(k)]=f(i); }
+    var groups={}; jobs.forEach(function(r,i){ (groups[f(i)]=groups[f(i)]||[]).push(r); });
+    var plan={del:[],merge:[],dupPend:[],groups:[]};
+    Object.keys(groups).forEach(function(g){
+      var list=groups[g]; if(list.length<2) return;
+      // بيفضل الإعلان صاحب آخر موعد تقديم، ولو متساويين الأحدث نشرًا
+      list.sort(function(a,b){ var da=dlOf(a.x), db_=dlOf(b.x); if(da!==db_) return da<db_?1:-1; return msOf(b.x)-msOf(a.x); });
+      var keep=list[0], fill={};
+      list.slice(1).forEach(function(r){
+        ['link','desc','contact','sal','sec','type','gov','req','source'].forEach(function(k){ if(empty(keep.x[k])&&empty(fill[k])&&!empty(r.x[k])) fill[k]=r.x[k]; });
+        if(r.x.featured&&!keep.x.featured) fill.featured=true;
+        plan.del.push({r:r,keep:keep});
+      });
+      if(Object.keys(fill).length) plan.merge.push({r:keep,fill:fill});
+      plan.groups.push(list);
+    });
+    pend.forEach(function(p){ var m=jobs.filter(function(j){ return similar(p.x,j.x); })[0]; if(m) plan.dupPend.push({r:p,of:m}); });
+    JPLAN=plan;
+    var n=plan.del.length+plan.dupPend.length;
+    var sample=plan.groups.slice(0,25).map(function(list){
+      return '<div style="padding:6px 0;border-bottom:1px dashed #e2e8f0">✅ <b>'+esc(list[0].x.title)+'</b> — '+esc(list[0].x.org)+' · '+esc(list[0].x.gov||'')+' · '+esc(dlOf(list[0].x)||'بدون موعد')+
+        list.slice(1).map(function(r){ return '<div style="color:#b42318;padding-right:14px">🗑️ '+esc(r.x.title)+' — '+esc(r.x.org)+' · '+esc(r.x.gov||'')+' · '+esc(dlOf(r.x)||'بدون موعد')+'</div>'; }).join('')+'</div>';
+    }).join('');
+    box.innerHTML='<div style="font-size:12px;line-height:1.9">الوظايف المنشورة: <b>'+jobs.length+'</b> · مجموعات مكررة: <b>'+plan.groups.length+'</b> · هيتمسح: <b>'+plan.del.length+'</b> · طلبات معلقة مكررة: <b>'+plan.dupPend.length+'</b></div>'+
+      (n?'<div style="font-size:11px;margin:6px 0;line-height:1.8">لكل مجموعة بيفضل الإعلان اللي ✅ (صاحب آخر موعد تقديم)، وبيتكمّل بأي بيانات ناقصة زي اللينك والوصف من النسخ التانية. هيتنزل ملف نسخة احتياطية قبل الحذف. راجع القايمة: لو فيه وظيفتين اتجمعوا غلط، ما تنظفش وابعتلي.</div><div style="max-height:260px;overflow:auto;font-size:11px;background:#fff;border-radius:8px;padding:6px">'+sample+(plan.groups.length>25?'<div>… و'+(plan.groups.length-25)+' مجموعة تانية</div>':'')+'</div>'+
+        '<button type="button" onclick="tmJobDupApply()" style="margin-top:10px;width:100%;padding:11px;border:0;border-radius:10px;background:#b42318;color:#fff;font-family:Cairo,sans-serif;font-weight:800">🧹 نظّف '+n+' إعلان مكرر</button>'
+       :'<div style="margin-top:6px;font-size:12px;color:#00703a;font-weight:700">✅ مفيش وظايف مكررة.</div>');
+  }
+  window.tmJobDupScan=function(){ scanJobs().catch(function(e){ var b=document.getElementById('tm-jobdup-out'); if(b) b.innerHTML='<span style="color:#b42318">❌ '+esc(e.message||e)+'</span>'; }); };
+  window.tmJobDupApply=async function(){
+    var plan=JPLAN, box=document.getElementById('tm-jobdup-out'), dbx=getDbJ(); if(!plan) return;
+    if(!confirm('هيتمسح '+plan.del.length+' إعلان مكرر ويتعلم '+plan.dupPend.length+' طلب معلق كمكرر. نكمل؟')) return;
+    try{
+      if(plan.del.length){
+        var backup=plan.del.map(function(o){ return Object.assign({_collection:'jobs',_id:o.r.id,_keptId:o.keep.id},JSON.parse(JSON.stringify(o.r.x))); });
+        var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,1)],{type:'application/json'}));
+        a.download='تنمويين-نسخة-احتياطية-وظايف-مكررة-'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a); a.click(); a.remove();
+      }
+      var ops=[], FV=firebase.firestore.FieldValue;
+      plan.merge.forEach(function(m){ ops.push(function(b){ b.update(dbx.collection('jobs').doc(m.r.id),Object.assign({},m.fill,{updatedAt:FV.serverTimestamp()})); }); });
+      plan.del.forEach(function(o){ ops.push(function(b){ b.delete(dbx.collection('jobs').doc(o.r.id)); }); });
+      plan.dupPend.forEach(function(o){ ops.push(function(b){ b.update(dbx.collection('pending_jobs').doc(o.r.id),{status:'duplicate',duplicateOf:o.of.id,duplicateCheckedAt:FV.serverTimestamp()}); }); });
+      box.innerHTML='⏳ بنظّف...';
+      for(var i=0;i<ops.length;i+=400){ var b=dbx.batch(); ops.slice(i,i+400).forEach(function(fn){ fn(b); }); await b.commit(); }
+      box.innerHTML='<div style="color:#00703a;font-weight:800;line-height:1.9">✅ خلصنا: اتمسح '+plan.del.length+' إعلان مكرر، واتكمّل '+plan.merge.length+' إعلان بالبيانات الناقصة، واتعلم '+plan.dupPend.length+' طلب معلق كمكرر.</div>';
+      JPLAN=null;
+      try{ if(typeof renderPublishedJobsNew==='function') renderPublishedJobsNew(); if(typeof updatePendingBadge==='function') updatePendingBadge(); }catch(e){}
+    }catch(e){ box.innerHTML='<span style="color:#b42318">❌ حصلت مشكلة: '+esc(e.message||e)+'</span>'; }
+  };
+  function mountJobTool(){
+    var host=document.getElementById('adm-form-jobs-list'); if(!host||document.getElementById('tm-jobdup')) return;
+    var c=document.createElement('div'); c.id='tm-jobdup';
+    c.style.cssText='background:#fff7ed;border:1px solid #fdba74;border-radius:12px;padding:12px;margin:4px 0 10px;font-family:Cairo,sans-serif';
+    c.innerHTML='<div style="font-weight:800;font-size:13px;color:#9a3412">🧹 الوظايف المكررة</div><div style="font-size:11px;color:#7c2d12;margin:4px 0 8px;line-height:1.8">بيدوّر على نفس الوظيفة منشورة أكتر من مرة (حتى لو المسمى أو اسم الجهة مكتوبين بشكل مختلف شوية)، ويوريك النتيجة قبل أي حذف.</div>'+
+      '<button type="button" onclick="tmJobDupScan()" style="width:100%;padding:10px;border:0;border-radius:10px;background:#ea580c;color:#fff;font-family:Cairo,sans-serif;font-weight:800">🔍 افحص الوظايف المكررة</button><div id="tm-jobdup-out" style="margin-top:8px;font-size:12px"></div>';
+    var list=document.getElementById('published-jobs-list-new'); host.insertBefore(c,list);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountJobTool); else mountJobTool();
+})();
+</script>
+<script>
+/* ===== منع التسجيل المكرر + تنظيف المكرر =====
+   لكل نوع تسجيل (باحث عمل، استشاري، مورد، مؤسسة، متطوع) بنحجز «مفتاح» للموبايل ومفتاح للإيميل
+   في reg_keys. اسم المفتاح بصمة SHA-256 مش الرقم نفسه، ومحدش غير الأدمن يقدر يقرا المجموعة.
+   لو المفتاح محجوز قبل كده، قواعد Firestore بترفض، فبنقول للشخص إنه مسجل بالفعل. */
+(function(){
+  var TYPES={jobseeker:'jobseekers',expert:'consultants',sup:'suppliers',org:'organizations',volunteer:'volunteers'};
+  var TYPE_AR={jobseeker:'باحث عن عمل',expert:'استشاري',sup:'مورد',org:'مؤسسة',volunteer:'متطوع'};
+  var COL2TYPE={}; Object.keys(TYPES).forEach(function(t){ COL2TYPE[TYPES[t]]=t; });
+  function getDbR(){ try{ return (typeof db!=='undefined'&&db)||firebase.firestore(); }catch(e){ return null; } }
+  function ts(){ return firebase.firestore.FieldValue.serverTimestamp(); }
+  function normPhone(p){
+    var s=String(p||'').replace(/[٠-٩]/g,function(c){return '٠١٢٣٤٥٦٧٨٩'.indexOf(c);}).replace(/[۰-۹]/g,function(c){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(c);}).replace(/\D/g,'');
+    if(s.indexOf('0020')===0) s=s.slice(4); else if(s.indexOf('20')===0&&s.length===12) s=s.slice(2);
+    if(s.length===10&&s[0]==='1') s='0'+s;
+    return s.length>=8?s:'';
+  }
+  function normEmail(e){ var s=String(e||'').trim().toLowerCase().replace(/&#x2f;/g,'/').replace(/\s+/g,''); return /^[^@]+@[^@]+\.[^@]+$/.test(s)?s:''; }
+  function fnv(str){ var h1=0x811c9dc5,h2=0x01000193; for(var i=0;i<str.length;i++){ h1^=str.charCodeAt(i); h1=Math.imul(h1,16777619)>>>0; h2=Math.imul(h2^str.charCodeAt(i),2246822519)>>>0; } return ('0000000'+h1.toString(16)).slice(-8)+('0000000'+h2.toString(16)).slice(-8); }
+  async function hash(str){
+    try{ if(window.crypto&&crypto.subtle){ var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str)); return Array.from(new Uint8Array(b)).map(function(x){return ('0'+x.toString(16)).slice(-2);}).join('').slice(0,40); } }catch(e){}
+    return 'f'+fnv(str);
+  }
+  async function keysFor(type,d){
+    var out=[], p=normPhone(d&&d.phone), e=normEmail(d&&d.email);
+    if(p) out.push({id:type+'_p_'+(await hash(type+'|p|'+p)),kind:'phone'});
+    if(e) out.push({id:type+'_e_'+(await hash(type+'|e|'+e)),kind:'email'});
+    return out;
+  }
+  window.tmRegNorm={phone:normPhone,email:normEmail};
+
+  // بيرجع {dup:'phone'|'email'} لو مسجل قبل كده، أو {} لو يكمل عادي
+  window.tmClaimRegistration=async function(type,d){
+    var dbx=getDbR(); if(!dbx||!TYPES[type]) return {};
+    var ks=await keysFor(type,d); if(!ks.length) return {};
+    var col=dbx.collection('reg_keys'), b=dbx.batch();
+    ks.forEach(function(k){ b.set(col.doc(k.id),{t:type,at:ts()}); });
+    try{ await b.commit(); return {ok:true}; }
+    catch(err){
+      if(!err||err.code!=='permission-denied') return {}; // نت ضعيف أو مشكلة تانية: ما نمنعش التسجيل
+      var okAny=false, dup=null;
+      for(var i=0;i<ks.length;i++){
+        try{ await col.doc(ks[i].id).set({t:type,at:ts()}); okAny=true; }
+        catch(e2){ if(e2&&e2.code==='permission-denied'&&!dup) dup=ks[i].kind; }
+      }
+      if(okAny) return dup?{dup:dup}:{};
+      // كل المفاتيح اترفضت: يا إما مكرر فعلًا، يا إما القواعد لسه ما اتنشرتش
+      try{ await col.doc('probe_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)).set({t:'probe',at:ts()}); }
+      catch(e3){ return {}; }
+      return {dup:dup||'phone'};
+    }
+  };
+  window.tmShowDupMsg=function(type,kind){
+    var old=document.getElementById('tm-dup'); if(old) old.remove();
+    var m=document.createElement('div'); m.id='tm-dup';
+    m.style.cssText='position:fixed;inset:0;z-index:100080;background:rgba(9,22,45,.55);display:flex;align-items:center;justify-content:center;padding:18px;font-family:Cairo,sans-serif';
+    m.innerHTML='<div style="background:#fff;border-radius:16px;max-width:380px;width:100%;padding:18px;text-align:center;direction:rtl">'+
+      '<div style="font-size:34px">✅</div>'+
+      '<div style="font-size:15px;font-weight:900;color:#1a3a6e;margin:6px 0">انت مسجل معانا بالفعل</div>'+
+      '<div style="font-size:12.5px;color:#475569;line-height:1.9">'+(kind==='email'?'الإيميل':'رقم الموبايل')+' ده مسجل قبل كده كـ«'+TYPE_AR[type]+'»، فمش محتاج تسجل تاني.<br>لو عايز تعدّل بياناتك ابعتلنا رسالة من «تواصل معانا».</div>'+
+      '<div style="display:flex;gap:8px;margin-top:14px"><button type="button" data-a="ok" style="flex:1;padding:10px;border:0;border-radius:10px;background:#1a3a6e;color:#fff;font-family:inherit;font-weight:800">تمام</button>'+
+      '<button type="button" data-a="contact" style="flex:1;padding:10px;border:1.5px solid #1a3a6e;border-radius:10px;background:#fff;color:#1a3a6e;font-family:inherit;font-weight:800">تواصل معانا</button></div></div>';
+    m.addEventListener('click',function(e){ var a=e.target&&e.target.getAttribute&&e.target.getAttribute('data-a'); if(e.target===m||a==='ok'){ m.remove(); } else if(a==='contact'){ m.remove(); try{ go('contact-screen'); }catch(x){} } });
+    document.body.appendChild(m);
+  };
+  // لما الأدمن يمسح حد أو يرفض طلبه، نفك المفاتيح عشان يقدر يسجل تاني
+  window.tmFreeRegKeys=async function(type,d){
+    var dbx=getDbR(); if(!dbx||!TYPES[type]||!d) return;
+    var ks=await keysFor(type,d);
+    for(var i=0;i<ks.length;i++){ try{ await dbx.collection('reg_keys').doc(ks[i].id).delete(); }catch(e){} }
+  };
+  function wrapDelete(name,getCol){
+    var orig=window[name]; if(typeof orig!=='function') return;
+    window[name]=function(id){
+      var args=arguments, col=getCol.apply(null,args), t=COL2TYPE[col]||(col==='registration_requests'?'req':''), dbx=getDbR();
+      if(!t||!dbx||!id) return orig.apply(this,args);
+      var self=this;
+      dbx.collection(col).doc(id).get().then(function(s){
+        var d=s.exists?s.data():null; var r=orig.apply(self,args);
+        if(!d) return;
+        var type=t==='req'?(d.registrationType||d.type):t;
+        // نستنى الحذف/الرفض يخلص وبعدين نفك المفاتيح
+        var tries=0; var iv=setInterval(function(){
+          tries++;
+          dbx.collection(col).doc(id).get().then(function(s2){
+            var gone=!s2.exists||(t==='req'&&s2.data()&&s2.data().status==='rejected');
+            if(gone){ clearInterval(iv); window.tmFreeRegKeys(type,d); }
+            else if(tries>20) clearInterval(iv);
+          }).catch(function(){ clearInterval(iv); });
+        },1500);
+      }).catch(function(){ orig.apply(self,args); });
+    };
+  }
+  wrapDelete('deleteAdmRecord',function(id,col){ return col; });
+  wrapDelete('deleteVolunteerAdmin',function(){ return 'volunteers'; });
+  wrapDelete('rejectRegistrationRequest',function(){ return 'registration_requests'; });
+
+  /* ---------- أداة الأدمن: تنظيف المكرر وإعادة بناء المفاتيح ---------- */
+  function msOf(x){ var v=x&&(x.approvedAt||x.timestamp||x.createdAt); try{ if(v&&v.toMillis) return v.toMillis(); if(v&&v.seconds) return v.seconds*1000; if(typeof v==='number') return v; }catch(e){} return 0; }
+  function empty(v){ return v==null||v===''||(Array.isArray(v)&&!v.length); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  var PLAN=null;
+  async function scan(){
+    var dbx=getDbR(), box=document.getElementById('tm-dedupe-out');
+    box.innerHTML='⏳ بنقرا كل التسجيلات...';
+    var reqSnap=await dbx.collection('registration_requests').get();
+    var reqs=reqSnap.docs.map(function(d){ return {id:d.id,col:'registration_requests',x:d.data()}; });
+    var plan={del:[],dupReq:[],merge:[],keep:[],byType:{}};
+    for(var t in TYPES){
+      var snap=await dbx.collection(TYPES[t]).get();
+      var recs=snap.docs.map(function(d){ return {id:d.id,col:TYPES[t],x:d.data(),approved:true}; });
+      reqs.forEach(function(r){ var rt=r.x.registrationType||r.x.type; if(rt===t&&r.x.status==='pending') recs.push({id:r.id,col:r.col,x:r.x,approved:false}); });
+      // تجميع بالموبايل أو الإيميل
+      var parent=recs.map(function(_,i){return i;});
+      function f(i){ while(parent[i]!==i){ parent[i]=parent[parent[i]]; i=parent[i]; } return i; }
+      var seen={};
+      recs.forEach(function(r,i){ [['p',normPhone(r.x.phone)],['e',normEmail(r.x.email)]].forEach(function(k){ if(!k[1]) return; var key=k[0]+k[1]; if(seen[key]==null) seen[key]=i; else parent[f(i)]=f(seen[key]); }); });
+      var groups={}; recs.forEach(function(r,i){ (groups[f(i)]=groups[f(i)]||[]).push(r); });
+      var st={total:recs.length,groups:0,del:0,dupReq:0};
+      Object.keys(groups).forEach(function(g){
+        var list=groups[g].sort(function(a,b){ return msOf(b.x)-msOf(a.x); });
+        var appr=list.filter(function(r){return r.approved;}), pend=list.filter(function(r){return !r.approved;});
+        var keep=appr.length?appr[0]:pend[0];
+        plan.keep.push({type:t,r:keep});
+        if(list.length<2) return;
+        st.groups++;
+        // نكمّل البيانات الناقصة في السجل اللي هيفضل من الأقدم
+        var fill={};
+        list.forEach(function(r){ if(r===keep) return; Object.keys(r.x).forEach(function(k){ if(['status','source','timestamp','approvedAt','type','registrationType','notified'].indexOf(k)>=0) return; if(empty(keep.x[k])&&empty(fill[k])&&!empty(r.x[k])) fill[k]=r.x[k]; }); });
+        if(Object.keys(fill).length) plan.merge.push({r:keep,fill:fill});
+        list.forEach(function(r){
+          if(r===keep) return;
+          if(r.approved){ plan.del.push({type:t,r:r,keepName:keep.x.name}); st.del++; }
+          else { plan.dupReq.push({type:t,r:r,keepName:keep.x.name}); st.dupReq++; }
+        });
+      });
+      plan.byType[t]=st;
+    }
+    PLAN=plan;
+    var rows=Object.keys(plan.byType).map(function(t){ var s=plan.byType[t]; return '<tr><td>'+TYPE_AR[t]+'</td><td>'+s.total+'</td><td>'+s.groups+'</td><td><b>'+s.del+'</b></td><td>'+s.dupReq+'</td></tr>'; }).join('');
+    var sample=plan.del.concat(plan.dupReq).slice(0,40).map(function(o){ return '<div style="padding:4px 0;border-bottom:1px dashed #e2e8f0">'+(o.r.approved?'🗑️':'⏸️')+' <b>'+esc(o.r.x.name||'—')+'</b> · '+TYPE_AR[o.type]+' · '+esc(o.r.x.phone||'')+' '+esc(o.r.x.email||'')+' <span style="color:#64748b">← هيفضل: '+esc(o.keepName||'—')+'</span></div>'; }).join('');
+    var n=plan.del.length+plan.dupReq.length;
+    box.innerHTML='<table style="width:100%;font-size:11px;border-collapse:collapse;text-align:center" border="1" cellpadding="4"><tr style="background:#eef2ff"><th>النوع</th><th>الكل</th><th>مجموعات مكررة</th><th>هيتمسح</th><th>طلبات معلقة مكررة</th></tr>'+rows+'</table>'+
+      (n?'<div style="font-size:11px;margin:8px 0;line-height:1.8">بيفضل <b>أحدث سجل</b> لكل شخص، وبنكمّله بالبيانات الناقصة من القديم.<br>🗑️ السجلات المعتمدة القديمة هتتمسح. ⏸️ الطلبات المعلقة المكررة هتتعلم «مكرر» وتختفي من الطلبات (مش هتتمسح).<br>هيتنزل ملف نسخة احتياطية بكل اللي هيتمسح قبل الحذف.</div><div style="max-height:220px;overflow:auto;font-size:11px;background:#fff;border-radius:8px;padding:6px">'+sample+(n>40?'<div>… و'+(n-40)+' غيرهم</div>':'')+'</div>'+
+        '<button type="button" onclick="tmDedupeApply()" style="margin-top:10px;width:100%;padding:11px;border:0;border-radius:10px;background:#b42318;color:#fff;font-family:Cairo,sans-serif;font-weight:800">🧹 نظّف '+n+' سجل مكرر وابني الحماية</button>'
+       :'<div style="margin-top:8px;font-size:12px;color:#00703a;font-weight:700">✅ مفيش تكرار. دوس «ابني الحماية» عشان التسجيلات القديمة تتحمي من التكرار.</div><button type="button" onclick="tmDedupeApply()" style="margin-top:8px;width:100%;padding:11px;border:0;border-radius:10px;background:#1a3a6e;color:#fff;font-family:Cairo,sans-serif;font-weight:800">🛡️ ابني الحماية من التكرار</button>');
+  }
+  window.tmDedupeScan=function(){ scan().catch(function(e){ var b=document.getElementById('tm-dedupe-out'); if(b) b.innerHTML='<span style="color:#b42318">❌ '+esc(e.message||e)+'</span>'; }); };
+  window.tmDedupeApply=async function(){
+    var plan=PLAN, box=document.getElementById('tm-dedupe-out'), dbx=getDbR(); if(!plan) return;
+    var n=plan.del.length+plan.dupReq.length;
+    if(n&&!confirm('هيتمسح '+plan.del.length+' سجل قديم ويتعلم '+plan.dupReq.length+' طلب كمكرر. نكمل؟')) return;
+    try{
+      if(plan.del.length){
+        var backup=plan.del.map(function(o){ return Object.assign({_collection:o.r.col,_id:o.r.id},JSON.parse(JSON.stringify(o.r.x))); });
+        var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,1)],{type:'application/json'}));
+        a.download='تنمويين-نسخة-احتياطية-المكرر-'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a); a.click(); a.remove();
+      }
+      var ops=[];
+      plan.merge.forEach(function(m){ ops.push(function(b){ b.update(dbx.collection(m.r.col).doc(m.r.id),m.fill); }); });
+      plan.del.forEach(function(o){ ops.push(function(b){ b.delete(dbx.collection(o.r.col).doc(o.r.id)); }); });
+      plan.dupReq.forEach(function(o){ ops.push(function(b){ b.update(dbx.collection('registration_requests').doc(o.r.id),{status:'duplicate',duplicateAt:ts()}); }); });
+      box.innerHTML='⏳ بنظّف...';
+      for(var i=0;i<ops.length;i+=400){ var b=dbx.batch(); ops.slice(i,i+400).forEach(function(f){ f(b); }); await b.commit(); }
+      // إعادة بناء المفاتيح من الأول
+      box.innerHTML='⏳ بنبني الحماية من التكرار...';
+      var old=await dbx.collection('reg_keys').get(), dels=old.docs.map(function(d){return d.ref;});
+      for(var j=0;j<dels.length;j+=400){ var b2=dbx.batch(); dels.slice(j,j+400).forEach(function(r){ b2.delete(r); }); await b2.commit(); }
+      var sets={};
+      for(var k=0;k<plan.keep.length;k++){ var kp=plan.keep[k]; var ks=await keysFor(kp.type,kp.r.x); ks.forEach(function(x){ sets[x.id]=kp.type; }); }
+      var ids=Object.keys(sets);
+      for(var q=0;q<ids.length;q+=400){ var b3=dbx.batch(); ids.slice(q,q+400).forEach(function(id){ b3.set(dbx.collection('reg_keys').doc(id),{t:sets[id],at:ts()}); }); await b3.commit(); }
+      box.innerHTML='<div style="color:#00703a;font-weight:800;line-height:1.9">✅ خلصنا: اتمسح '+plan.del.length+' سجل قديم، واتعلم '+plan.dupReq.length+' طلب كمكرر، واتكمّل '+plan.merge.length+' سجل بالبيانات الناقصة.<br>🛡️ الحماية اتبنت لـ'+plan.keep.length+' شخص ('+ids.length+' مفتاح). من دلوقتي أي حد يحاول يسجل تاني بنفس الموبايل أو الإيميل هيتقاله إنه مسجل.</div>';
+      PLAN=null;
+      try{ if(typeof loadAdminData==='function') loadAdminData(); if(typeof loadRegistrationRequests==='function') loadRegistrationRequests(); }catch(e){}
+    }catch(e){ box.innerHTML='<span style="color:#b42318">❌ حصلت مشكلة: '+esc(e.message||e)+(e.code==='permission-denied'?' — اتأكد إن قواعد Firestore الجديدة (reg_keys) اتنشرت.':'')+'</span>'; }
+  };
+  // كارت الأداة في تاب «طلبات التسجيل»
+  function mountTool(){
+    var host=document.getElementById('adm-form-registration-requests'); if(!host||document.getElementById('tm-dedupe')) return;
+    var c=document.createElement('div'); c.id='tm-dedupe';
+    c.style.cssText='background:#fff7ed;border:1px solid #fdba74;border-radius:12px;padding:12px;margin-bottom:12px;font-family:Cairo,sans-serif';
+    c.innerHTML='<div style="font-weight:800;font-size:13px;color:#9a3412">🧹 التسجيلات المكررة</div><div style="font-size:11px;color:#7c2d12;margin:4px 0 8px;line-height:1.8">بيدوّر على نفس الموبايل أو الإيميل متسجل أكتر من مرة في نفس النوع، ويوريك النتيجة قبل أي حذف.</div>'+
+      '<button type="button" onclick="tmDedupeScan()" style="width:100%;padding:10px;border:0;border-radius:10px;background:#ea580c;color:#fff;font-family:Cairo,sans-serif;font-weight:800">🔍 افحص التكرار</button><div id="tm-dedupe-out" style="margin-top:8px;font-size:12px"></div>';
+    var list=document.getElementById('registration-requests-list'); host.insertBefore(c,list);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountTool); else mountTool();
+})();
+</script>
 <script>
 /* زرار الرجوع: يرجّع للشاشة أو يقفل النافذة المفتوحة بدل ما يخرج من التطبيق.
    الترتيب: نافذة مفتوحة ← تتقفل، أي قسم ← الرئيسية، الرئيسية ← خروج */

@@ -14,10 +14,19 @@
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <!-- OneSignal -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<!-- OneSignal بيتحمّل في آخر الصفحة (async) عشان لو اتأخر ما يعطّلش فتح التطبيق -->
 <!-- EmailJS -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script>emailjs.init("rDGGadB5Kv6SSx3uZ");</script>
+<script>
+/* لو حاجة خارجية علّقت التحميل، بدل الشاشة البيضا نوري رسالة وزرار إعادة المحاولة */
+setTimeout(function(){ if(window.__tmBooted) return; try{
+  var d=document.createElement('div'); d.id='tm-boot-fail';
+  d.setAttribute('style','position:fixed;inset:0;z-index:2147483647;background:#1a3a6e;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:Tahoma,Arial,sans-serif;direction:rtl');
+  d.innerHTML='<div style="font-size:20px;font-weight:bold;margin-bottom:10px">التطبيق بياخد وقت أطول من العادي</div><div style="font-size:14px;line-height:1.9;opacity:.9;max-width:320px">غالبًا النت بطيء أو فيه مشكلة مؤقتة في الاتصال. جرّب تاني، أو غيّر بين الواي فاي وبيانات الموبايل.</div><button onclick="location.reload()" style="margin-top:18px;padding:12px 26px;border:0;border-radius:12px;background:#00aeef;color:#06243f;font-size:15px;font-weight:bold">إعادة المحاولة</button>';
+  (document.body||document.documentElement).appendChild(d);
+}catch(e){} }, 15000);
+</script>
+<script src="vendor/email.min.js" defer></script>
+<script>document.addEventListener('DOMContentLoaded',function(){ try{ if(window.emailjs) emailjs.init("rDGGadB5Kv6SSx3uZ"); }catch(e){} });</script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
@@ -56,7 +65,8 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://elzieni2007-crypto.github.io/tanmoyeen-masr/site-og.jpg">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet"></noscript>
 <style>
 :root{
   --p:#1a3a6e;--p2:#2557a7;--a:#00aeef;--a2:#4dc8f7;
@@ -583,8 +593,8 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 .fd-h{font-size:13px;font-weight:900;color:#1a3a6e;margin-bottom:14px;border-bottom:2px solid #f0f0f0;padding-bottom:8px}
 </style>
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="vendor/firebase-app-compat.js"></script>
+  <script src="vendor/firebase-firestore-compat.js"></script>
 <script>
 /* ===== حماية من حقن HTML/JavaScript (XSS) =====
    كل بيانات Firestore بتتنضف أول ما تتقري: الرموز اللي ممكن تتحول لكود (< > " ' `) بتتبدل
@@ -626,9 +636,9 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 })();
 
 </script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="vendor/firebase-auth-compat.js"></script>
+<script src="vendor/firebase-functions-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" async></script>
 </head>
 <body>
 
@@ -11184,5 +11194,12 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
   }
 })();
 </script>
+<script>
+/* المكتبات الخارجية الاختيارية بتتحمّل في الخلفية، ولو اتأخرت التطبيق بيفتح عادي */
+(function(){ try{ var s=document.createElement('script'); s.src='https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js'; s.async=true; document.head.appendChild(s); }catch(e){} })();
+/* لو صفحة البداية فضلت ظاهرة (مثلًا صورة أو مكتبة خارجية اتأخرت)، ندخل التطبيق بعد ٨ ثواني */
+setTimeout(function(){ try{ var sp=document.getElementById('splash'); if(sp&&sp.style.display!=='none'&&getComputedStyle(sp).display!=='none'){ enterApp(); if(typeof handleUrlParams==='function') handleUrlParams(); } }catch(e){} }, 8000);
+</script>
+<script>window.__tmBooted=true; try{ var _bf=document.getElementById("tm-boot-fail"); if(_bf) _bf.remove(); }catch(e){}</script>
 </body>
 </html>

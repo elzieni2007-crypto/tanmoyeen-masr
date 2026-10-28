@@ -4,6 +4,7 @@ const {onSchedule} = require("firebase-functions/v2/scheduler");
 const {defineSecret} = require("firebase-functions/params");
 const {initializeApp} = require("firebase-admin/app");
 const {getFirestore, FieldValue} = require("firebase-admin/firestore");
+const {getAuth} = require("firebase-admin/auth");
 
 initializeApp();
 const db = getFirestore();
@@ -724,3 +725,116 @@ exports.fetchJobPage = onCall(
     }
   }
 );
+
+
+// ============================================================
+// حسابات المستخدمين: ربط التسجيلات القديمة + أدوات الأدمن
+// ============================================================
+const ADMIN_EMAIL = "elzieni2007@gmail.com";
+const PROFILE_COLS = ["jobseekers", "consultants", "suppliers", "volunteers", "organizations", "registration_requests"];
+
+function assertAdmin(request) {
+  const email = String((request.auth && request.auth.token.email) || "").toLowerCase();
+  if (!request.auth || email !== ADMIN_EMAIL) {
+    throw new HttpsError("permission-denied", "الأدمن بس");
+  }
+}
+function normEmail(v) {
+  const s = String(v || "").trim().toLowerCase().replace(/\s+/g, "");
+  return /^[^@]+@[^@]+\.[^@]+$/.test(s) ? s : "";
+}
+
+// المستخدم بيربط تسجيلاته القديمة اللي بنفس إيميله (لازم الإيميل يكون متأكد منه)
+exports.claimMyProfiles = onCall({region: "europe-west1"}, async (request) => {
+  if (!request.auth) throw new HttpsError("unauthenticated", "سجّل دخول الأول");
+  const tok = request.auth.token || {};
+  const uid = request.auth.uid;
+  const email = normEmail(tok.email);
+  const viaGoogle = tok.firebase && tok.firebase.sign_in_provider === "google.com";
+  if (!email) throw new HttpsError("failed-precondition", "no-email");
+  if (tok.email_verified !== true && !viaGoogle) throw new HttpsError("failed-precondition", "not-verified");
+
+  const linked = [];
+  let taken = 0;
+  for (const col of PROFILE_COLS) {
+    const found = new Map();
+    for (const field of ["emailNorm", "email"]) {
+      try {
+        const snap = await db.collection(col).where(field, "==", email).get();
+        snap.forEach((d) => found.set(d.id, d));
+      } catch (e) { /* ignore */ }
+    }
+    if (!found.size) {
+      // إيميلات قديمة مكتوبة بحروف كبيرة أو مسافات
+      const snap = await db.collection(col).select("email", "ownerUid", "status", "name").limit(5000).get();
+      snap.forEach((d) => { if (normEmail(d.get("email")) === email) found.set(d.id, d); });
+    }
+    for (const d of found.values()) {
+      const x = d.data() || {};
+      if (col === "registration_requests" && x.status !== "pending") continue;
+      if (x.ownerUid && x.ownerUid !== uid) { taken++; continue; }
+      if (!x.ownerUid) {
+        await d.ref.update({ownerUid: uid, claimedAt: FieldValue.serverTimestamp(), emailNorm: email});
+      }
+      linked.push({col, id: d.id, name: x.name || ""});
+    }
+  }
+  await db.collection("users").doc(uid).set({email, lastActive: FieldValue.serverTimestamp()}, {merge: true});
+  return {linked, taken};
+});
+
+// الأدمن: قايمة الحسابات
+exports.adminListUsers = onCall({region: "europe-west1"}, async (request) => {
+  assertAdmin(request);
+  const pageToken = (request.data && request.data.pageToken) || undefined;
+  const res = await getAuth().listUsers(1000, pageToken);
+  return {
+    users: res.users.map((u) => ({
+      uid: u.uid,
+      email: u.email || "",
+      name: u.displayName || "",
+      verified: !!u.emailVerified,
+      providers: (u.providerData || []).map((p) => p.providerId),
+      created: u.metadata.creationTime || "",
+      lastSignIn: u.metadata.lastSignInTime || "",
+      lastRefresh: u.metadata.lastRefreshTime || "",
+      disabled: !!u.disabled,
+    })),
+    next: res.pageToken || null,
+  };
+});
+
+// الأدمن: لينك تغيير كلمة السر / كلمة سر مؤقتة / تأكيد الإيميل يدويًا
+exports.adminResetPassword = onCall({region: "europe-west1"}, async (request) => {
+  assertAdmin(request);
+  const uid = String((request.data && request.data.uid) || "");
+  const mode = String((request.data && request.data.mode) || "link");
+  if (!uid) throw new HttpsError("invalid-argument", "uid");
+  const u = await getAuth().getUser(uid);
+  if (String(u.email || "").toLowerCase() === ADMIN_EMAIL) {
+    throw new HttpsError("permission-denied", "مش مسموح على حساب الأدمن من هنا");
+  }
+  if (mode === "link") {
+    if (!u.email) throw new HttpsError("failed-precondition", "الحساب ده مالوش إيميل");
+    let link;
+    try {
+      link = await getAuth().generatePasswordResetLink(u.email, {url: PUBLIC_APP_URL});
+    } catch (e) {
+      link = await getAuth().generatePasswordResetLink(u.email);
+    }
+    return {link, email: u.email};
+  }
+  if (mode === "temp") {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    const bytes = require("crypto").randomBytes(10);
+    let pw = "";
+    for (let i = 0; i < 10; i++) pw += chars[bytes[i] % chars.length];
+    await getAuth().updateUser(uid, {password: pw});
+    return {password: pw, email: u.email || ""};
+  }
+  if (mode === "verify") {
+    await getAuth().updateUser(uid, {emailVerified: true});
+    return {ok: true, email: u.email || ""};
+  }
+  throw new HttpsError("invalid-argument", "mode");
+});

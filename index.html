@@ -25,8 +25,8 @@ setTimeout(function(){ if(window.__tmBooted) return; try{
   (document.body||document.documentElement).appendChild(d);
 }catch(e){} }, 15000);
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js" async></script>
-<script>(function(){ var n=0, t=setInterval(function(){ n++; try{ if(window.emailjs){ emailjs.init("rDGGadB5Kv6SSx3uZ"); clearInterval(t); } }catch(e){ clearInterval(t); } if(n>60) clearInterval(t); },500); })();</script>
+<script src="vendor/email.min.js" defer></script>
+<script>document.addEventListener('DOMContentLoaded',function(){ try{ if(window.emailjs) emailjs.init("rDGGadB5Kv6SSx3uZ"); }catch(e){} });</script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
@@ -593,8 +593,8 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 .fd-h{font-size:13px;font-weight:900;color:#1a3a6e;margin-bottom:14px;border-bottom:2px solid #f0f0f0;padding-bottom:8px}
 </style>
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="vendor/firebase-app-compat.js"></script>
+  <script src="vendor/firebase-firestore-compat.js"></script>
 <script>
 /* ===== حماية من حقن HTML/JavaScript (XSS) =====
    كل بيانات Firestore بتتنضف أول ما تتقري: الرموز اللي ممكن تتحول لكود (< > " ' `) بتتبدل
@@ -636,8 +636,8 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 })();
 
 </script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
+  <script src="vendor/firebase-auth-compat.js"></script>
+<script src="vendor/firebase-functions-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" async></script>
 </head>
 <body>

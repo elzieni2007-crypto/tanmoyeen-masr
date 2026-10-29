@@ -117,6 +117,8 @@ html,body{scroll-behavior:auto;overflow-x:hidden}
 .tb-t{color:#fff;font-size:16px;font-weight:800;line-height:1.2}
 .tb-s{color:var(--a2);font-size:10px}
 .tb-acts{display:flex;gap:6px}
+.tb-t,.tb-s{white-space:nowrap}
+@media(max-width:430px){#dl-btn>span{display:none}#dl-btn{padding:8px!important}}
 .ib{width:38px;height:38px;background:rgba(255,255,255,.13);border:none;border-radius:10px;color:#fff;display:flex;align-items:center;justify-content:center;transition:.2s;position:relative}
 .ib:hover{background:rgba(255,255,255,.22)}
 .nd{position:absolute;width:7px;height:7px;background:var(--red);border-radius:50%;top:7px;left:7px;border:1.5px solid var(--p)}
@@ -803,7 +805,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="ds"><div class="ds-n" id="dash-orgs-n">...</div><div class="ds-l">مؤسسة</div></div>
       <div class="ds"><div class="ds-n" id="dash-vols-n">...</div><div class="ds-l">متطوع</div></div>
       <div class="ds"><div class="ds-n" id="dash-js-n">...</div><div class="ds-l">باحث عمل</div></div>
-      <div class="ds"><div class="ds-n">25K</div><div class="ds-l">عضو FB</div></div>
+      <div class="ds"><div class="ds-n">+30K</div><div class="ds-l">عضو FB</div></div>
     </div>
   </div>
   <!-- بانر خطة تنمويين مصر لتحسين وتطوير اللغة الإنجليزية -->
@@ -1017,7 +1019,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 <!-- CONSULTANTS -->
 <div id="consultants" class="scr">
-  <div class="sh"><div class="sh-t">قاعدة الاستشاريين</div><div class="cnt" id="con-cnt">جاري التحميل...</div></div>
+  <div class="sh"><div class="sh-t">قاعدة الاستشاريين</div><div class="cnt" id="con-cnt-scr">جاري التحميل...</div></div>
   <div class="search-wrap" style="padding-top:0"><div class="sbar">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aab" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input id="ci" placeholder="ابحث باسم أو تخصص أو محافظة..." oninput="fc()">
@@ -1038,7 +1040,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 <!-- SUPPLIERS -->
 <div id="suppliers" class="scr">
-  <div class="sh"><div class="sh-t">قاعدة الموردين</div><div class="cnt" id="sup-cnt">جاري التحميل...</div></div>
+  <div class="sh"><div class="sh-t">قاعدة الموردين</div><div class="cnt" id="sup-cnt-scr">جاري التحميل...</div></div>
   <div class="search-wrap" style="padding-top:0"><div class="sbar">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aab" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input id="si" placeholder="ابحث باسم المورد أو النشاط..." oninput="fs()">
@@ -2081,21 +2083,21 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   </div>
   <div class="pcard">
     <div class="pstats">
-      <div class="ps"><div class="ps-n">٣٠١</div><div class="ps-l">استشاري</div></div>
-      <div class="ps"><div class="ps-n">٧٣</div><div class="ps-l">مورد</div></div>
-      <div class="ps"><div class="ps-n">٢٥K</div><div class="ps-l">عضو</div></div>
+      <div class="ps"><div class="ps-n" id="prof-cons-n">—</div><div class="ps-l">استشاري</div></div>
+      <div class="ps"><div class="ps-n" id="prof-sups-n">—</div><div class="ps-l">مورد</div></div>
+      <div class="ps"><div class="ps-n">+30K</div><div class="ps-l">عضو</div></div>
     </div>
     <div class="msec">
       <div class="mstit">حسابي</div>
       <div class="mitem" onclick="go('register')"><div class="mico" style="background:#e8f0fe">📝</div><div class="mtxt"><div class="mtt">تسجيل / تحديث ملفي</div><div class="mst">أضف بياناتك لقاعدة المعلومات</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="go('consultants')"><div class="mico" style="background:#e7faf3">👨‍💼</div><div class="mtxt"><div class="mtt">قاعدة الاستشاريين</div><div class="mst" id="menu-cons-count">استشاريين مسجّلين</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
-      <div class="mitem" onclick="go('suppliers')"><div class="mico" style="background:#f0e8fe">🏭</div><div class="mtxt"><div class="mtt">قاعدة الموردين</div><div class="mst">87 مورد مسجّل</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div class="mitem" onclick="go('suppliers')"><div class="mico" style="background:#f0e8fe">🏭</div><div class="mtxt"><div class="mtt">قاعدة الموردين</div><div class="mst" id="menu-sups-count">موردين مسجّلين</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="tmEnablePush()"><div class="mico" style="background:#fff4e0">🔔</div><div class="mtxt"><div class="mtt">إشعارات الوظائف الجديدة</div><div class="mst" id="tm-push-state">اضغط لتفعيل الإشعارات</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="location.href='donor-guide.html'"><div class="mico" style="background:#e5f6fd">📘</div><div class="mtxt"><div class="mtt">دليل اشتراطات الجهات المانحة</div><div class="mst">EU وGIZ والأمم المتحدة والقانون المصري</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
     </div>
     <div class="msec">
       <div class="mstit">الإعدادات</div>
-      <div class="mitem" onclick="window.open('https://www.facebook.com/groups/346107035759429/?ref=share&mibextid=NSMWBT','_blank')"><div class="mico" style="background:#e8f0fe">📘</div><div class="mtxt"><div class="mtt">مجموعة فيسبوك</div><div class="mst">٢٥,٠٠٠ عضو - انضم الآن</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div class="mitem" onclick="window.open('https://www.facebook.com/groups/346107035759429/?ref=share&mibextid=NSMWBT','_blank')"><div class="mico" style="background:#e8f0fe">📘</div><div class="mtxt"><div class="mtt">مجموعة فيسبوك</div><div class="mst">+30,000 عضو - انضم الآن</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="window.open(WA_GROUP_URL,'_blank')"><div class="mico" style="background:#e7faf3">👥</div><div class="mtxt"><div class="mtt">جروب واتساب</div><div class="mst">انضم لجروب تنمويين مصر</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
       <div class="mitem" onclick="go('contact-screen')"><div class="mico" style="background:#fef3e8">📧</div><div class="mtxt"><div class="mtt">تواصل مع الإدارة</div><div class="mst">مشكلة أو اقتراح؟ راسلنا</div></div><svg class="marr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></div>
     </div>
@@ -2478,7 +2480,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
     <div style="background:linear-gradient(135deg,#00703a,#00b894);border-radius:14px;padding:16px;color:white;margin-bottom:16px;text-align:center">
       <div style="font-size:32px;margin-bottom:8px">💬</div>
       <div style="font-size:16px;font-weight:900">إشعار واتساب للأعضاء</div>
-      <div style="font-size:11px;opacity:.8;margin-top:4px">ابعت إشعار لـ 25,000 عضو في المجموعة</div>
+      <div style="font-size:11px;opacity:.8;margin-top:4px">ابعت إشعار لأكتر من 30,000 عضو في المجموعة</div>
     </div>
 
     <div class="fg"><label class="fl">عنوان الإشعار *</label>
@@ -2953,7 +2955,7 @@ function loadFromFirebase(){
         try{localStorage.setItem('cache_cons',JSON.stringify(fresh.slice(0,100)));}catch(e){}
         renderCons();renderDash();updateAllCounts();
         var menuEl = document.getElementById('menu-cons-count');
-        if(menuEl) menuEl.textContent = fresh.length + ' استشاري مسجّل';
+        if(menuEl) menuEl.textContent = (window._fb_consultants||fresh.length) + ' استشاري مسجّل';
       }
     }).catch(function(){
       try{ var c=JSON.parse(localStorage.getItem('cache_cons')||'[]'); if(c.length){window.CONS=c;renderCons();renderDash();} }catch(e){}
@@ -3241,6 +3243,7 @@ function updateAllCounts(){
   e=document.getElementById('dash-orgs-count');
   if(e && orgsCount > 0) e.textContent = orgsCount + ' مؤسسة';
 
+  try{ updateFBStats(); }catch(_e){}
   // Firebase live registrations - direct counts
   if(typeof db !== 'undefined'){
     var fbCollections = [
@@ -3279,6 +3282,13 @@ function updateAllCounts(){
 }
 
 function updateFBStats(){
+  (function(){
+    function put(id,t){ var e=document.getElementById(id); if(e&&t!==null) e.textContent=t; }
+    var c=window._fb_consultants||((window.CONS||[]).length?deduplicateArray(CONS,['phone','email','name']).length:0);
+    var s=window._fb_suppliers||((window.SUPS||[]).length?deduplicateArray(SUPS,['phone','email','name']).length:0);
+    if(c){ put('prof-cons-n',c); put('menu-cons-count',c+' استشاري مسجّل'); var cs=document.getElementById('con-cnt-scr'); if(cs&&!/من/.test(cs.textContent)) cs.textContent=c+' مسجّل'; }
+    if(s){ put('prof-sups-n',s); put('menu-sups-count',s+' مورد مسجّل'); var ss=document.getElementById('sup-cnt-scr'); if(ss&&!/من/.test(ss.textContent)) ss.textContent=s+' مورد'; }
+  })();
   var total = (window._fb_consultants||0) + (window._fb_suppliers||0) + 
               (window._fb_volunteers||0) + (window._fb_organizations||0) + 
               (window._fb_jobseekers||0);
@@ -3391,8 +3401,9 @@ function renderCons(){
   if(cFilt!=='all')list=list.filter(c=>c.specs&&c.specs.some(s=>s.includes(cFilt))||c.spec&&c.spec.includes(cFilt));
   if(q)list=list.filter(c=>c.name&&(c.name.includes(q)||c.spec&&c.spec.includes(q)||c.gov&&c.gov.includes(q)));
   var clistEl = document.getElementById('clist');
-  var cntEl = document.getElementById('con-cnt');
-  if(cntEl) cntEl.textContent = list.length;
+  var cntEl = document.getElementById('con-cnt-scr');
+  var allC = window._fb_consultants || deduplicateArray(CONS, ['phone','email','name']).length;
+  if(cntEl && CONS.length) cntEl.textContent = (cFilt!=='all'||q) ? (list.length+' من '+allC) : (allC+' مسجّل');
   if(list.length === 0 && CONS.length === 0){
     if(clistEl) clistEl.innerHTML = skeletonCards(4,'con');
     return;
@@ -3422,8 +3433,9 @@ function renderSups(){
   if(sFilt!=='all')list=list.filter(s=>s.cat&&s.cat.includes(sFilt));
   if(q)list=list.filter(s=>s.name&&(s.name.includes(q)||s.cat&&s.cat.includes(q)||s.gov&&s.gov.includes(q)));
   var slistEl = document.getElementById('slist');
-  var scntEl = document.getElementById('sup-cnt');
-  if(scntEl) scntEl.textContent = list.length;
+  var scntEl = document.getElementById('sup-cnt-scr');
+  var allS = window._fb_suppliers || deduplicateArray(SUPS, ['phone','email','name']).length;
+  if(scntEl && SUPS.length) scntEl.textContent = (sFilt!=='all'||q) ? (list.length+' من '+allS) : (allS+' مورد');
   if(list.length === 0 && SUPS.length === 0){
     if(slistEl) slistEl.innerHTML = skeletonCards(4,'con');
     return;
@@ -6532,8 +6544,8 @@ const EMAIL_TEMPLATES = {
 ندعوكم للانضمام إلى منصة تنمويين مصر - المنصة الشاملة للعمل التنموي في مصر.
 
 ✅ ما ستجدون على المنصة:
-- 301 استشاري تنموي متخصص
-- 87 مورد ومزود خدمات
+- أكتر من 350 استشاري تنموي متخصص
+- أكتر من 100 مورد ومزود خدمات
 - فرص وظيفية ومناقصات جديدة يومياً
 
 سجّل الآن مجاناً:
@@ -10525,9 +10537,17 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
     var bell=document.getElementById('notif-bell-btn');
     if(!bell||document.getElementById('tm-profile-btn')) return;
     var b=document.createElement('button');
-    b.id='tm-profile-btn'; b.className=bell.className||'ib'; b.type='button'; b.setAttribute('aria-label','حسابي');
-    b.style.cssText='position:relative;display:flex;align-items:center;justify-content:center';
-    b.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    b.id='tm-profile-btn'; b.className=bell.className||'ib'; b.type='button'; b.setAttribute('aria-label','تسجيل الدخول');
+    // زرار فيه كلمة واضحة جنب الأيقونة: «تسجيل الدخول» للزائر و«حسابي» بعد الدخول
+    b.style.cssText='position:relative;display:flex;align-items:center;justify-content:center;gap:5px;width:auto;padding:0 10px 0 9px;white-space:nowrap';
+    var ico='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    function setLabel(u){
+      var t=u?'حسابي':'تسجيل الدخول';
+      b.innerHTML=ico+'<span style="font-size:11px;font-weight:800;font-family:Cairo,sans-serif;line-height:1">'+t+'</span>';
+      b.setAttribute('aria-label',t);
+    }
+    setLabel(null);
+    try{ firebase.auth().onAuthStateChanged(function(u){ setLabel(u&&!u.isAnonymous?u:null); }); }catch(e){}
     b.onclick=function(){ try{ go('profile'); }catch(e){} };
     bell.parentNode.insertBefore(b,bell);
   }

@@ -2187,6 +2187,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" onclick="setAdmTab(this,'funding')">💰 حجز منصة المنح</div>
       <div class="adm-tab" onclick="setAdmTab(this,'athar')">🌿 أثر</div>
       <div class="adm-tab" style="background:#eaf1fb;color:#1a3a6b;border-color:#00aeef" onclick="setAdmTab(this,'english')">🗣️ خطة الإنجليزي</div>
+      <div class="adm-tab" style="background:#e8f0fe;color:#1a3a6e;border-color:#1a3a6e" onclick="setAdmTab(this,'accounts')">👤 الحسابات</div>
       <div class="adm-tab" style="background:#f3e8ff;color:#7c3aed;border-color:#7c3aed" onclick="setAdmTab(this,'settings')">⚙️ إعدادات</div>
     </div>
     <div style="font-size:10px;color:var(--muted);padding:0 12px 8px;text-align:left">← اسحب للمزيد من التبويبات</div>
@@ -2846,6 +2847,10 @@ async function saveToFirebase(type, data){
       }
     });
 
+    if(col === 'registration_requests'){
+      try{ if(window.tmRegNorm){ var _pn=window.tmRegNorm.phone(cleanData.phone), _en=window.tmRegNorm.email(cleanData.email); if(_pn) cleanData.phoneNorm=_pn; if(_en) cleanData.emailNorm=_en; } }catch(e){}
+      try{ var _cu=(typeof auth!=='undefined')&&auth.currentUser; if(_cu && !(typeof tmIsAdminUser==='function'&&tmIsAdminUser(_cu))) cleanData.ownerUid=_cu.uid; }catch(e){}
+    }
     await db.collection(col).add({
       ...cleanData,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -5393,7 +5398,7 @@ function setAdmTab(el, tab){
   const formJob  = document.getElementById('adm-form-job');
   const formTend = document.getElementById('adm-form-tender');
 
-  ['adm-form-registration-requests','adm-form-import-job','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){
+  ['adm-form-registration-requests','adm-form-import-job','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english','adm-form-accounts'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
 
@@ -5467,6 +5472,11 @@ function setAdmTab(el, tab){
     var lbF=document.getElementById('tm-list-export'); if(lbF) lbF.style.display='none';
     var fEl=document.getElementById('adm-form-funding');
     if(fEl){ fEl.style.display='block'; loadFundingWaitlist(); }
+  } else if(tab === 'accounts'){
+    listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
+    var lbA=document.getElementById('tm-list-export'); if(lbA) lbA.style.display='none';
+    if(window.tmLoadAccountsAdmin) window.tmLoadAccountsAdmin();
+    var acEl=document.getElementById('adm-form-accounts'); if(acEl) acEl.style.display='block';
   } else if(tab === 'english'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
     var lbE=document.getElementById('tm-list-export'); if(lbE) lbE.style.display='none';
@@ -5474,17 +5484,17 @@ function setAdmTab(el, tab){
     if(eEl){ eEl.style.display='block'; var fr=document.getElementById('ep-admin-frame'); if(fr && !fr.getAttribute('src')) fr.setAttribute('src', fr.getAttribute('data-src')); }
   } else if(tab === 'athar'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english','adm-form-accounts'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var aEl=document.getElementById('adm-form-athar');
     if(aEl){ aEl.style.display='block'; loadAtharTrials(); }
   } else if(tab === 'contact'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-broadcast','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english','adm-form-accounts'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-contact');
     if(cEl){ cEl.style.display='block'; loadContactMsgs(); }
   } else if(tab === 'broadcast'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-settings','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english','adm-form-accounts'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var bEl=document.getElementById('adm-form-broadcast');
     if(bEl){ bEl.style.display='block'; }
     // حط الرابط الافتراضي
@@ -5493,7 +5503,7 @@ function setAdmTab(el, tab){
     loadBroadcastHistory();
   } else if(tab === 'settings'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english','adm-form-accounts'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var sEl = document.getElementById('adm-form-settings');
     if(sEl){ sEl.style.display='block'; loadVisibilitySettings(); }
   } else if(tab === 'volunteers-adm'){
@@ -5503,7 +5513,7 @@ function setAdmTab(el, tab){
     loadAdminVols();
   } else if(tab === 'consultations-adm'){
     listEl.style.display='none'; formJob.style.display='none'; formTend.style.display='none';
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english','adm-form-accounts'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     var cEl=document.getElementById('adm-form-consultations-adm');
     if(cEl){cEl.style.display='block';}
     loadAdminConsultations();
@@ -5512,7 +5522,7 @@ function setAdmTab(el, tab){
     formJob.style.display  = 'none';
     formTend.style.display = 'none';
     // Hide all special forms
-    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english'].forEach(function(id){
+    ['adm-form-registration-requests','adm-form-email','adm-form-pending','adm-form-featured','adm-form-broadcast','adm-form-volunteers-adm','adm-form-consultations-adm','adm-form-jobs-list','adm-form-tenders-list','adm-form-settings','adm-form-contact','adm-form-athar','adm-form-funding','adm-form-candreq','adm-form-english','adm-form-accounts'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='none';
     });
     // إظهار القائمة
@@ -10799,6 +10809,401 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 <script src="tmq-quote.js"></script>
 <script src="funding-quotes.js"></script>
 <script src="outreach.js"></script>
+<script>
+/* ===== حسابي: حساب واحد لكل مستخدم (نفس حساب خطة الإنجليزي) =====
+   - الملفات (باحث عمل / استشاري / مورد / متطوع / مؤسسة) بتتربط بالحساب عن طريق ownerUid
+   - التسجيلات القديمة بتتربط تلقائي بالإيميل المتأكد منه (claimMyProfiles)، أو بطلب ربط برقم الموبايل يوافق عليه الأدمن
+   - الأدمن: تاب «الحسابات» فيه طلبات الربط، والنشاط، وإعادة تعيين كلمة السر */
+(function(){
+  var TYPES={jobseeker:'jobseekers',expert:'consultants',sup:'suppliers',volunteer:'volunteers',org:'organizations'};
+  var TYPE_AR={jobseeker:'باحث عن عمل',expert:'استشاري',sup:'مورد',volunteer:'متطوع',org:'مؤسسة'};
+  var TYPE_IC={jobseeker:'🔍',expert:'👨‍💼',sup:'🏭',volunteer:'🤝',org:'🏢'};
+  var COL2TYPE={}; Object.keys(TYPES).forEach(function(t){ COL2TYPE[TYPES[t]]=t; });
+  var IN_APP=!!(window.median||window.gonative||/median|gonative/i.test(navigator.userAgent||''));
+  var LS_EMAIL='tm-eng-last-email'; // نفس مفتاح خطة الإنجليزي عشان الإيميل يتكتب لوحده
+  function A(){ try{ return (typeof auth!=='undefined'&&auth)||firebase.auth(); }catch(e){ return null; } }
+  function D(){ try{ return (typeof db!=='undefined'&&db)||firebase.firestore(); }catch(e){ return null; } }
+  function FN(name){ return firebase.app().functions('europe-west1').httpsCallable(name); }
+  function TS(){ return firebase.firestore.FieldValue.serverTimestamp(); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function $(id){ return document.getElementById(id); }
+  function lsGet(k){ try{ return localStorage.getItem(k)||''; }catch(e){ return ''; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function say(m){ try{ toast(m); }catch(e){} }
+  function isAdm(u){ try{ return typeof tmIsAdminUser==='function'?tmIsAdminUser(u):false; }catch(e){ return false; } }
+  function nPhone(p){ return (window.tmRegNorm&&window.tmRegNorm.phone)?window.tmRegNorm.phone(p):String(p||'').replace(/\D/g,''); }
+  function nEmail(e){ return (window.tmRegNorm&&window.tmRegNorm.email)?window.tmRegNorm.email(e):String(e||'').trim().toLowerCase(); }
+  function waNumber(p){ var s=nPhone(p); if(!s) return ''; return s[0]==='0'?'2'+s:s; }
+  function fnErr(e){
+    var c=(e&&e.code)||'', m=(e&&e.message)||'';
+    if(/not-found|internal|unavailable/.test(c)&&!/not-verified/.test(m)) return 'الخدمة دي لسه بتتجهز على السيرفر. جرّب بعد شوية.';
+    return m||String(e);
+  }
+  var AUTH_ERR={
+    'auth/email-already-in-use':'الإيميل ده عليه حساب بالفعل. اختار «عندي حساب».',
+    'auth/invalid-email':'الإيميل مكتوب غلط، راجعه.',
+    'auth/weak-password':'كلمة السر لازم تكون ٦ حروف على الأقل.',
+    'auth/wrong-password':'الإيميل أو كلمة السر مش مظبوطين، أو الإيميل ده مالوش حساب لسه.',
+    'auth/user-not-found':'الإيميل أو كلمة السر مش مظبوطين، أو الإيميل ده مالوش حساب لسه.',
+    'auth/invalid-credential':'الإيميل أو كلمة السر مش مظبوطين، أو الإيميل ده مالوش حساب لسه.',
+    'auth/invalid-login-credentials':'الإيميل أو كلمة السر مش مظبوطين، أو الإيميل ده مالوش حساب لسه.',
+    'auth/too-many-requests':'محاولات كتير ورا بعض. استنى دقايق وجرب تاني.',
+    'auth/popup-closed-by-user':'اتقفلت نافذة Google قبل ما تكمل.',
+    'auth/network-request-failed':'مفيش اتصال بالإنترنت.',
+    'auth/requires-recent-login':'لأمان حسابك: اعمل خروج وادخل تاني، وبعدين غيّر كلمة السر.',
+    'auth/unauthorized-domain':'الدخول بـGoogle مش متاح هنا دلوقتي. سجّل بالإيميل وكلمة السر.',
+    'auth/operation-not-allowed':'الدخول بـGoogle مش متاح دلوقتي. سجّل بالإيميل وكلمة السر.'
+  };
+  function authErr(e){ return AUTH_ERR[e&&e.code]||('حصلت مشكلة: '+((e&&e.message)||'جرب تاني')); }
+
+  /* ---------- الحقول القابلة للتعديل ---------- */
+  var F={
+    name:['الاسم','text'], phone:['الموبايل','tel'], email:['الإيميل','email'], gov:['المحافظة','gov'],
+    spec:['المجال / التخصص','text'], qual:['المؤهل','text'], exp:['سنين الخبرة','text'], jobType:['نوع الشغل المطلوب','text'], mobility:['إمكانية التنقل','text'],
+    orgs:['جهات اشتغلت معاها','textarea'], linkedin:['لينك LinkedIn','url'], bio:['نبذة','textarea'],
+    cat:['نشاط المورد','text'], desc:['الوصف','textarea'], address:['العنوان','text'], delivery:['التوصيل','text'], cert:['الشهادات / التسجيل','text'],
+    interests:['مجالات التطوع','text'], skills:['المهارات','textarea'], hours:['الساعات المتاحة','text'],
+    orgtype:['نوع المؤسسة','text'], field:['مجال العمل','text'], notes:['ملاحظات','textarea'],
+    showPhone:['اظهر رقم الموبايل للناس','bool'], showEmail:['اظهر الإيميل للناس','bool']
+  };
+  var BY_TYPE={
+    jobseeker:['name','phone','email','gov','spec','qual','exp','jobType','mobility','notes'],
+    expert:['name','phone','email','gov','spec','exp','orgs','linkedin','bio','showPhone','showEmail'],
+    sup:['name','phone','email','gov','cat','desc','address','delivery','cert','showPhone','showEmail'],
+    volunteer:['name','phone','email','gov','interests','skills','hours','showPhone','showEmail'],
+    org:['name','phone','email','gov','orgtype','field','desc','showPhone','showEmail']
+  };
+  var GOV_LIST=['القاهرة','الجيزة','الإسكندرية','القليوبية','الشرقية','الدقهلية','الغربية','المنوفية','البحيرة','كفر الشيخ','دمياط','بورسعيد','الإسماعيلية','السويس','الفيوم','بني سويف','المنيا','أسيوط','سوهاج','قنا','الأقصر','أسوان','البحر الأحمر','الوادي الجديد','مطروح','شمال سيناء','جنوب سيناء','خارج مصر'];
+
+  /* ---------- شاشة حسابي ---------- */
+  var ST={mode:'in', profiles:null, claims:null, busy:false};
+  function host(){
+    var scr=$('profile'); if(!scr) return null;
+    var h=$('tm-acct');
+    if(!h){
+      h=document.createElement('div'); h.id='tm-acct';
+      h.style.cssText='background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.07);padding:14px;margin:0 0 12px;font-family:Cairo,sans-serif;direction:rtl';
+      var pc=scr.querySelector('.pcard'); if(pc) pc.insertBefore(h,pc.firstChild); else scr.appendChild(h);
+      var st=scr.querySelector('.pstats'); if(st) st.style.display='none'; // أرقام ثابتة قديمة
+    }
+    return h;
+  }
+  var BTN='width:100%;padding:11px;border:0;border-radius:11px;font-family:Cairo,sans-serif;font-weight:800;font-size:13px;cursor:pointer;margin-top:8px';
+  var INP='width:100%;box-sizing:border-box;padding:11px 12px;border:1.5px solid #dfe6ee;border-radius:10px;font-family:Cairo,sans-serif;font-size:14px;margin-top:4px;background:#f8fafc';
+  function renderLoggedOut(h){
+    var up=ST.mode==='up';
+    h.innerHTML='<div style="font-size:15px;font-weight:900;color:#1a3a6e">👤 حسابك على تنمويين مصر</div>'+
+      '<div style="font-size:11.5px;color:#5b6b7f;line-height:1.8;margin:4px 0 10px">عدّل ملفك بنفسك (باحث عمل، استشاري، مورد، متطوع)، وتابع خطة الإنجليزي وشهادات الأكاديمية بنفس الحساب. لو سجلت قبل كده بإيميل، ادخل بنفس الإيميل وهنربط ملفك.</div>'+
+      '<div style="display:flex;background:#eef3f9;border-radius:11px;padding:4px;gap:4px">'+
+        '<button type="button" data-m="up" style="flex:1;padding:8px;border:0;border-radius:9px;font-family:Cairo,sans-serif;font-weight:800;background:'+(up?'#fff':'transparent')+';color:'+(up?'#0094cc':'#1a3a6e')+'">حساب جديد</button>'+
+        '<button type="button" data-m="in" style="flex:1;padding:8px;border:0;border-radius:9px;font-family:Cairo,sans-serif;font-weight:800;background:'+(!up?'#fff':'transparent')+';color:'+(!up?'#0094cc':'#1a3a6e')+'">عندي حساب</button></div>'+
+      (IN_APP?'':'<button type="button" id="ta-google" style="'+BTN+';background:#fff;border:1.5px solid #dfe6ee;color:#1a2a3a">المتابعة بحساب Google</button><div style="text-align:center;font-size:11px;color:#8a99ab;margin-top:8px">أو بالإيميل</div>')+
+      '<label style="display:block;font-size:12px;font-weight:700;color:#1a3a6e;margin-top:8px">الإيميل<input id="ta-email" type="email" dir="ltr" autocomplete="email" style="'+INP+'" value="'+esc(lsGet(LS_EMAIL))+'"></label>'+
+      '<label style="display:block;font-size:12px;font-weight:700;color:#1a3a6e;margin-top:8px">كلمة السر (٦ حروف على الأقل)<input id="ta-pass" type="password" dir="ltr" autocomplete="'+(up?'new-password':'current-password')+'" style="'+INP+'"></label>'+
+      '<button type="button" id="ta-show" style="background:none;border:0;padding:4px 0;font-family:Cairo,sans-serif;font-size:11.5px;text-decoration:underline;color:#5b6b7f">إظهار كلمة السر</button>'+
+      '<div id="ta-msg" style="display:none;font-size:12px;line-height:1.8;border-radius:10px;padding:9px 11px;margin-top:6px"></div>'+
+      '<button type="button" id="ta-go" style="'+BTN+';background:linear-gradient(135deg,#1a3a6e,#0094cc);color:#fff">'+(up?'إنشاء حساب':'دخول')+'</button>'+
+      (up?'':'<button type="button" id="ta-forgot" style="background:none;border:0;padding:8px 0 0;font-family:Cairo,sans-serif;font-size:12px;color:#0094cc;font-weight:700">نسيت كلمة السر؟</button>');
+    h.querySelectorAll('[data-m]').forEach(function(b){ b.onclick=function(){ ST.mode=b.getAttribute('data-m'); var em=$('ta-email').value; render(); $('ta-email').value=em; }; });
+    $('ta-show').onclick=function(){ var p=$('ta-pass'), v=p.type==='password'; p.type=v?'text':'password'; this.textContent=v?'إخفاء كلمة السر':'إظهار كلمة السر'; };
+    function msg(t,ok){ var m=$('ta-msg'); m.style.display='block'; m.style.background=ok?'#e7faf3':'#fdecec'; m.style.color=ok?'#00703a':'#9b1c1c'; m.textContent=t; }
+    $('ta-go').onclick=async function(){
+      var e=$('ta-email').value.trim(), p=$('ta-pass').value;
+      if(!/^\S+@\S+\.\S+$/.test(e)) return msg('اكتب إيميل صحيح.');
+      if(p.length<6) return msg('كلمة السر لازم تكون ٦ حروف على الأقل.');
+      this.disabled=true;
+      try{
+        if(up){ var cr=await A().createUserWithEmailAndPassword(e,p); try{ await cr.user.sendEmailVerification({url:location.href.split('#')[0].split('?')[0]}); }catch(x){ try{ await cr.user.sendEmailVerification(); }catch(y){} } }
+        else await A().signInWithEmailAndPassword(e,p);
+        lsSet(LS_EMAIL,e);
+      }catch(err){ msg(authErr(err)); this.disabled=false; }
+    };
+    if($('ta-google')) $('ta-google').onclick=async function(){ try{ await A().signInWithPopup(new firebase.auth.GoogleAuthProvider()); }catch(err){ msg(authErr(err)); } };
+    if($('ta-forgot')) $('ta-forgot').onclick=async function(){
+      var e=$('ta-email').value.trim(); if(!/^\S+@\S+\.\S+$/.test(e)) return msg('اكتب إيميلك الأول، وبعدين دوس «نسيت كلمة السر».');
+      try{ await A().sendPasswordResetEmail(e,{url:location.href.split('#')[0].split('?')[0]}); }catch(err){ try{ await A().sendPasswordResetEmail(e); }catch(err2){ return msg(authErr(err2)); } }
+      msg('لو الإيميل '+e+' عليه حساب، هيوصلك لينك تغيير كلمة السر خلال دقايق. بص في Spam وPromotions، واستخدم آخر رسالة بس. ولو ما وصلش، كلمنا من «تواصل مع الإدارة».',true);
+    };
+  }
+  function viaGoogle(u){ return (u.providerData||[]).some(function(p){ return p.providerId==='google.com'; }); }
+  function verified(u){ return u.emailVerified||viaGoogle(u); }
+  async function loadProfiles(u){
+    var dbx=D(), out=[];
+    for(var t in TYPES){
+      try{ var s=await dbx.collection(TYPES[t]).where('ownerUid','==',u.uid).get(); s.forEach(function(d){ out.push({type:t,col:TYPES[t],id:d.id,x:d.data(),live:true}); }); }catch(e){}
+    }
+    try{ var r=await dbx.collection('registration_requests').where('ownerUid','==',u.uid).get(); r.forEach(function(d){ var x=d.data(); if(x.status==='pending') out.push({type:x.registrationType||x.type,col:'registration_requests',id:d.id,x:x,live:false}); }); }catch(e){}
+    var claims=[];
+    try{ var c=await dbx.collection('profile_claims').where('uid','==',u.uid).get(); c.forEach(function(d){ claims.push(Object.assign({id:d.id},d.data())); }); }catch(e){}
+    ST.profiles=out; ST.claims=claims;
+  }
+  function profileCard(p,i){
+    var x=p.x||{};
+    return '<div style="border:1.5px solid #e6edf5;border-radius:12px;padding:10px 12px;margin-top:8px">'+
+      '<div style="display:flex;align-items:center;gap:8px"><div style="font-size:20px">'+(TYPE_IC[p.type]||'📄')+'</div><div style="flex:1;min-width:0"><div style="font-weight:900;font-size:13px;color:#1a2a3a">'+esc(x.name||'—')+'</div>'+
+      '<div style="font-size:11px;color:#5b6b7f">'+esc(TYPE_AR[p.type]||'')+' · '+esc(x.gov||'')+' · '+(p.live?'<span style="color:#00703a;font-weight:800">منشور</span>':'<span style="color:#b26b00;font-weight:800">قيد المراجعة</span>')+'</div></div></div>'+
+      '<div style="display:flex;gap:6px;margin-top:8px"><button type="button" data-ed="'+i+'" style="flex:1;padding:8px;border:0;border-radius:9px;background:#e8f0fe;color:#1a3a6e;font-family:Cairo,sans-serif;font-weight:800">✏️ تعديل</button>'+
+      '<button type="button" data-del="'+i+'" style="padding:8px 12px;border:0;border-radius:9px;background:#fdecec;color:#9b1c1c;font-family:Cairo,sans-serif;font-weight:800">🗑️</button></div></div>';
+  }
+  function renderLoggedIn(h,u){
+    var v=verified(u), list=ST.profiles;
+    var claimsP=(ST.claims||[]).filter(function(c){ return c.status==='pending'; });
+    h.innerHTML='<div style="display:flex;align-items:center;gap:10px"><div style="width:42px;height:42px;border-radius:50%;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:900;font-size:14px;color:#1a3a6e">حسابي</div><div dir="ltr" style="font-size:12px;color:#5b6b7f;text-align:right;overflow:hidden;text-overflow:ellipsis">'+esc(u.email||'')+'</div></div>'+
+      '<button type="button" id="ta-out" style="padding:6px 10px;border:1.5px solid #dfe6ee;border-radius:9px;background:#fff;font-family:Cairo,sans-serif;font-size:11.5px;font-weight:700;color:#5b6b7f">خروج</button></div>'+
+      (v?'':'<div style="background:#fff7e6;border:1px solid #ffd27a;border-radius:11px;padding:10px;margin-top:10px;font-size:12px;color:#6b4a00;line-height:1.8">📩 أكّد إيميلك عشان نقدر نلاقي تسجيلاتك القديمة ونربطها بحسابك. بعتنالك رسالة تأكيد (بص في Spam).'+
+        '<div style="display:flex;gap:6px;margin-top:6px"><button type="button" id="ta-resend" style="flex:1;padding:8px;border:0;border-radius:9px;background:#fff;color:#6b4a00;font-family:Cairo,sans-serif;font-weight:800">ابعت تاني</button><button type="button" id="ta-checkv" style="flex:1;padding:8px;border:0;border-radius:9px;background:#f59e0b;color:#fff;font-family:Cairo,sans-serif;font-weight:800">أكدت خلاص ✅</button></div></div>')+
+      '<div style="font-weight:900;font-size:13px;color:#1a3a6e;margin-top:14px">📂 ملفاتي</div>'+
+      (list===null?'<div style="font-size:12px;color:#8a99ab;padding:10px 0">⏳ بنحمّل ملفاتك...</div>':
+        (list.length?list.map(profileCard).join(''):'<div style="font-size:12px;color:#5b6b7f;line-height:1.8;padding:8px 0">مفيش ملفات مربوطة بحسابك لسه.</div>'))+
+      (claimsP.length?'<div style="background:#eef6ff;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:11.5px;color:#1a3a6e">⏳ عندك طلب ربط برقم '+esc(claimsP[0].phone)+' قيد المراجعة، هنكلمك واتساب للتأكيد.</div>':'')+
+      '<div id="ta-msg" style="display:none;font-size:12px;line-height:1.8;border-radius:10px;padding:9px 11px;margin-top:8px"></div>'+
+      '<button type="button" id="ta-claim" style="'+BTN+';background:#e7faf3;color:#00703a">🔍 دوّر على تسجيلاتي القديمة بإيميلي</button>'+
+      '<button type="button" id="ta-phone" style="'+BTN+';background:#f1f5f9;color:#1a3a6e">📱 سجلت قبل كده برقم موبايل؟ اطلب ربطه</button>'+
+      '<button type="button" id="ta-new" style="'+BTN+';background:linear-gradient(135deg,#1a3a6e,#0094cc);color:#fff">➕ سجّل ملف جديد</button>'+
+      '<button type="button" id="ta-pw" style="background:none;border:0;padding:10px 0 0;font-family:Cairo,sans-serif;font-size:12px;color:#5b6b7f;text-decoration:underline">🔑 تغيير كلمة السر</button>';
+    function msg(t,ok){ var m=$('ta-msg'); if(!m) return; m.style.display='block'; m.style.background=ok?'#e7faf3':'#fdecec'; m.style.color=ok?'#00703a':'#9b1c1c'; m.textContent=t; }
+    $('ta-out').onclick=function(){ A().signOut(); };
+    if($('ta-resend')) $('ta-resend').onclick=async function(){ try{ await u.sendEmailVerification(); msg('اتبعتت رسالة تأكيد جديدة. استخدم آخر رسالة بس.',true); }catch(e){ msg(authErr(e)); } };
+    if($('ta-checkv')) $('ta-checkv').onclick=async function(){ try{ await u.reload(); await u.getIdToken(true); }catch(e){} if(A().currentUser&&A().currentUser.emailVerified){ claim(true); } else msg('لسه الإيميل مش متأكد. افتح الرسالة اللي وصلتك ودوس على اللينك اللي فيها، وبعدين ارجع هنا.'); };
+    $('ta-claim').onclick=function(){ claim(false); };
+    $('ta-phone').onclick=openPhoneClaim;
+    $('ta-new').onclick=function(){ try{ go('register'); }catch(e){} };
+    $('ta-pw').onclick=changePassword;
+    h.querySelectorAll('[data-ed]').forEach(function(b){ b.onclick=function(){ openEdit(ST.profiles[+b.getAttribute('data-ed')]); }; });
+    h.querySelectorAll('[data-del]').forEach(function(b){ b.onclick=function(){ delProfile(ST.profiles[+b.getAttribute('data-del')]); }; });
+    window._taMsg=msg;
+  }
+  async function claim(auto){
+    var u=A().currentUser; if(!u) return;
+    if(!verified(u)){ if(!auto&&window._taMsg) window._taMsg('أكّد إيميلك الأول من الرسالة اللي وصلتك، وبعدين دوس «أكدت خلاص».'); return; }
+    if(window._taMsg&&!auto) window._taMsg('⏳ بندوّر...',true);
+    try{
+      try{ await u.getIdToken(true); }catch(e){}
+      var r=await FN('claimMyProfiles')({});
+      var d=r.data||{}, n=(d.linked||[]).length;
+      lsSet('tm_claimed_'+u.uid,'1');
+      await loadProfiles(u); render();
+      if(window._taMsg){ if(n) window._taMsg('✅ لقينا '+n+' تسجيل بإيميلك واتربطوا بحسابك.',true); else if(!auto) window._taMsg('مفيش تسجيلات قديمة بالإيميل ده. لو سجلت قبل كده برقم موبايل بس أو بإيميل تاني، دوس «اطلب ربطه».'); }
+      if(d.taken&&window._taMsg) window._taMsg('⚠️ فيه '+d.taken+' تسجيل بنفس إيميلك مربوط بحساب تاني. كلمنا من «تواصل مع الإدارة».');
+    }catch(e){ if(!auto&&window._taMsg) window._taMsg(fnErr(e)); }
+  }
+  function sheet(title,bodyHtml,onOk,okText){
+    var old=document.getElementById('tm-acct-sheet'); if(old) old.remove();
+    var m=document.createElement('div'); m.id='tm-acct-sheet';
+    m.style.cssText='position:fixed;inset:0;z-index:100075;background:rgba(9,22,45,.55);display:flex;align-items:flex-end;justify-content:center;font-family:Cairo,sans-serif';
+    m.innerHTML='<div style="background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:520px;max-height:88vh;overflow:auto;padding:16px;direction:rtl">'+
+      '<div style="display:flex;align-items:center;margin-bottom:8px"><div style="flex:1;font-weight:900;font-size:15px;color:#1a3a6e">'+title+'</div><button type="button" data-x aria-label="إغلاق" style="border:0;background:#eef3f9;border-radius:50%;width:30px;height:30px;font-size:16px">×</button></div>'+
+      bodyHtml+'<div id="tm-sheet-msg" style="display:none;font-size:12px;border-radius:10px;padding:8px 10px;margin-top:8px;background:#fdecec;color:#9b1c1c"></div>'+
+      (onOk?'<button type="button" data-ok style="'+BTN+';background:linear-gradient(135deg,#1a3a6e,#0094cc);color:#fff">'+(okText||'حفظ')+'</button>':'')+'</div>';
+    function close(){ m.remove(); }
+    m.addEventListener('click',function(e){ if(e.target===m||(e.target.hasAttribute&&e.target.hasAttribute('data-x'))) close(); });
+    if(onOk) m.querySelector('[data-ok]').onclick=async function(){ var b=this; b.disabled=true; try{ var r=await onOk(m); if(r!==false) close(); }catch(err){ var em=m.querySelector('#tm-sheet-msg'); em.style.display='block'; em.textContent=(err&&err.message)||String(err); } b.disabled=false; };
+    document.body.appendChild(m); return m;
+  }
+  function fieldHtml(k,v){
+    var f=F[k]; if(!f) return '';
+    if(f[1]==='bool') return '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;margin-top:10px"><input type="checkbox" data-k="'+k+'" '+(v!==false?'checked':'')+'> '+f[0]+'</label>';
+    var lab='<label style="display:block;font-size:12px;font-weight:700;color:#1a3a6e;margin-top:10px">'+f[0];
+    if(f[1]==='gov'){ var opts=GOV_LIST.slice(); if(v&&opts.indexOf(v)<0) opts.unshift(v); return lab+'<select data-k="gov" style="'+INP+'"><option value="">اختار</option>'+opts.map(function(g){ return '<option'+(g===v?' selected':'')+'>'+esc(g)+'</option>'; }).join('')+'</select></label>'; }
+    if(f[1]==='textarea') return lab+'<textarea data-k="'+k+'" rows="3" style="'+INP+'">'+esc(v||'')+'</textarea></label>';
+    return lab+'<input data-k="'+k+'" type="'+(f[1]==='tel'?'tel':f[1]==='email'?'email':'text')+'" '+(/tel|email|url/.test(f[1])?'dir="ltr"':'')+' value="'+esc(v||'')+'" style="'+INP+'"></label>';
+  }
+  function openEdit(p){
+    if(!p) return;
+    var keys=BY_TYPE[p.type]||['name','phone','email','gov','notes'];
+    sheet('✏️ تعديل ملفك كـ'+esc(TYPE_AR[p.type]||''),keys.map(function(k){ return fieldHtml(k,p.x[k]); }).join(''),async function(m){
+      var upd={}, x=p.x||{};
+      m.querySelectorAll('[data-k]').forEach(function(el){ var k=el.getAttribute('data-k'); var v=el.type==='checkbox'?el.checked:String(el.value||'').trim().slice(0,2000); if(v!==(x[k]==null?(el.type==='checkbox'?true:''):x[k])) upd[k]=v; });
+      if('name' in upd&&!upd.name) throw new Error('الاسم مطلوب.');
+      if('phone' in upd&&!nPhone(upd.phone)) throw new Error('رقم الموبايل مكتوب غلط.');
+      if(!Object.keys(upd).length) return true;
+      if('phone' in upd) upd.phoneNorm=nPhone(upd.phone);
+      if('email' in upd) upd.emailNorm=nEmail(upd.email);
+      upd.updatedAt=TS();
+      await D().collection(p.col).doc(p.id).update(upd);
+      say('✅ اتحفظ');
+      await loadProfiles(A().currentUser); render();
+    },'💾 حفظ التعديلات');
+  }
+  async function delProfile(p){
+    if(!p) return;
+    if(!confirm('هتمسح ملفك كـ'+(TYPE_AR[p.type]||'')+' نهائيًا من تنمويين مصر. متأكد؟')) return;
+    try{ await D().collection(p.col).doc(p.id).delete(); say('🗑️ اتمسح'); await loadProfiles(A().currentUser); render(); }
+    catch(e){ say('❌ '+(e.message||e)); }
+  }
+  function openPhoneClaim(){
+    sheet('📱 ربط تسجيل قديم برقم الموبايل','<div style="font-size:12px;color:#5b6b7f;line-height:1.8">اكتب رقم الموبايل اللي سجلت بيه قبل كده. هنتواصل معاك على واتساب على الرقم ده عشان نتأكد إنه بتاعك، وبعدين نربط ملفك بحسابك.</div>'+
+      '<label style="display:block;font-size:12px;font-weight:700;color:#1a3a6e;margin-top:10px">رقم الموبايل<input id="tc-phone" type="tel" dir="ltr" style="'+INP+'"></label>'+
+      '<label style="display:block;font-size:12px;font-weight:700;color:#1a3a6e;margin-top:10px">ملاحظة (اختياري)<input id="tc-note" type="text" maxlength="300" placeholder="مثلًا: سجلت كاستشاري ومورد" style="'+INP+'"></label>',async function(m){
+      var u=A().currentUser, ph=m.querySelector('#tc-phone').value.trim(), n=nPhone(ph);
+      if(!n) throw new Error('اكتب رقم موبايل صحيح.');
+      await D().collection('profile_claims').add({uid:u.uid,email:u.email||'',phone:n,note:m.querySelector('#tc-note').value.trim().slice(0,300),status:'pending',at:TS()});
+      say('✅ طلبك اتبعت، هنكلمك واتساب للتأكيد');
+      await loadProfiles(u); render();
+    },'ابعت طلب الربط');
+  }
+  function changePassword(){
+    var u=A().currentUser; if(!u) return;
+    sheet('🔑 تغيير كلمة السر','<label style="display:block;font-size:12px;font-weight:700;color:#1a3a6e">كلمة السر الجديدة (٦ حروف على الأقل)<input id="tp-new" type="password" dir="ltr" style="'+INP+'"></label>',async function(m){
+      var p=m.querySelector('#tp-new').value; if(p.length<6) throw new Error('كلمة السر لازم تكون ٦ حروف على الأقل.');
+      try{ await u.updatePassword(p); }catch(e){ throw new Error(authErr(e)); }
+      say('✅ كلمة السر اتغيرت');
+    },'تغيير');
+  }
+  async function render(){
+    var h=host(); if(!h) return;
+    var a=A(); var u=a&&a.currentUser;
+    if(!u||isAdm(u)){ if(u&&isAdm(u)){ h.innerHTML='<div style="font-size:12.5px;color:#1a3a6e">🛡️ انت داخل بحساب الأدمن. الحسابات في لوحة التحكم ← تاب «الحسابات».</div>'; return; } renderLoggedOut(h); return; }
+    renderLoggedIn(h,u);
+    var pn=document.querySelector('#profile .pn'), pr=document.querySelector('#profile .pr');
+    if(pn) pn.textContent=(ST.profiles&&ST.profiles[0]&&ST.profiles[0].x.name)||'حسابي';
+    if(pr) pr.textContent=u.email||'';
+    if(ST.profiles===null&&!ST.busy){ ST.busy=true; try{ await loadProfiles(u); }finally{ ST.busy=false; } renderLoggedIn(h,u); if(pn&&ST.profiles[0]) pn.textContent=ST.profiles[0].x.name||'حسابي'; }
+  }
+  window.tmRenderAccount=render;
+  // نعرض الحساب لما شاشة «حسابي» تتفتح
+  var _go=window.go;
+  if(typeof _go==='function'){ window.go=function(id){ var r=_go.apply(this,arguments); if(id==='profile'){ ST.profiles=null; render(); } return r; }; }
+  // متابعة تسجيل الدخول + النشاط اليومي + الربط التلقائي أول مرة
+  function onUser(u){
+    ST.profiles=null; ST.claims=null;
+    var pn=document.querySelector('#profile .pn'), pr=document.querySelector('#profile .pr');
+    if(!u){ if(pn) pn.textContent='مستخدم تنمويين مصر'; if(pr) pr.textContent='سجّل دخول عشان تعدّل ملفك'; }
+    if(u&&!isAdm(u)){
+      if(u.email) lsSet(LS_EMAIL,u.email);
+      var day=new Date().toISOString().slice(0,10), k='tm_act_'+u.uid;
+      if(lsGet(k)!==day){ D().collection('users').doc(u.uid).set({email:u.email||'',lastActive:TS(),platform:IN_APP?'app':'web'},{merge:true}).then(function(){ lsSet(k,day); }).catch(function(){}); }
+      if(verified(u)&&!lsGet('tm_claimed_'+u.uid)) setTimeout(function(){ claim(true); },800);
+    }
+    var scr=$('profile'); if(scr&&scr.classList.contains('on')) render();
+  }
+  try{ A().onAuthStateChanged(onUser); }catch(e){}
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ host(); render(); }); else { host(); render(); }
+
+  /* ================= الأدمن: تاب «الحسابات» ================= */
+  var AD={users:null,acts:{},recs:{},claims:[],filter:'all',q:''};
+  function fmtD(v){ if(!v) return '—'; var d=(v&&v.toDate)?v.toDate():new Date(v); if(isNaN(d)) return '—'; return d.toLocaleDateString('ar-EG',{day:'numeric',month:'short',year:'numeric'}); }
+  function msOf(v){ if(!v) return 0; if(v.toMillis) return v.toMillis(); var d=new Date(v); return isNaN(d)?0:+d; }
+  async function admLoad(){
+    var box=$('tm-acc-list'); box.innerHTML='⏳ بنحمّل الحسابات...';
+    var dbx=D();
+    // الملفات المربوطة + كل الملفات (لمطابقة طلبات الربط بالموبايل)
+    AD.recs={}; AD.all=[];
+    for(var t in TYPES){ try{ var s=await dbx.collection(TYPES[t]).get(); s.forEach(function(d){ var x=d.data(); var r={type:t,col:TYPES[t],id:d.id,x:x}; AD.all.push(r); if(x.ownerUid) (AD.recs[x.ownerUid]=AD.recs[x.ownerUid]||[]).push(r); }); }catch(e){} }
+    try{ var rq=await dbx.collection('registration_requests').where('status','==','pending').get(); rq.forEach(function(d){ var x=d.data(); var r={type:x.registrationType||x.type,col:'registration_requests',id:d.id,x:x,pending:true}; AD.all.push(r); if(x.ownerUid) (AD.recs[x.ownerUid]=AD.recs[x.ownerUid]||[]).push(r); }); }catch(e){}
+    AD.acts={}; try{ var us=await dbx.collection('users').get(); us.forEach(function(d){ AD.acts[d.id]=d.data(); }); }catch(e){}
+    AD.claims=[]; try{ var cl=await dbx.collection('profile_claims').where('status','==','pending').get(); cl.forEach(function(d){ AD.claims.push(Object.assign({id:d.id},d.data())); }); }catch(e){}
+    // قايمة الحسابات من Firebase Authentication (محتاجة الدالة adminListUsers)
+    AD.users=null; AD.err='';
+    try{ var all=[], tok=null, n=0; do{ var r=await FN('adminListUsers')({pageToken:tok}); all=all.concat(r.data.users||[]); tok=r.data.next; n++; }while(tok&&n<10); AD.users=all; }
+    catch(e){ AD.err=fnErr(e); }
+    admRender();
+  }
+  function lastSeen(u){ var a=AD.acts[u.uid]; return Math.max(msOf(a&&a.lastActive),msOf(u.lastRefresh),msOf(u.lastSignIn)); }
+  function admRender(){
+    var cBox=$('tm-acc-claims'), box=$('tm-acc-list');
+    // طلبات الربط
+    cBox.innerHTML=AD.claims.length?('<div style="font-weight:900;font-size:13px;color:#9a3412;margin-bottom:6px">📱 طلبات ربط برقم موبايل ('+AD.claims.length+')</div>'+AD.claims.map(function(c,i){
+      var m=AD.all.filter(function(r){ return nPhone(r.x.phone)===c.phone; });
+      return '<div style="background:#fff;border:1px solid #fed7aa;border-radius:11px;padding:10px;margin-bottom:8px;font-size:12px;line-height:1.8">'+
+        '<div><b dir="ltr">'+esc(c.email)+'</b> عايز يربط <b dir="ltr">'+esc(c.phone)+'</b>'+(c.note?' · '+esc(c.note):'')+'</div>'+
+        (m.length?m.map(function(r){ return '<div style="color:#475569">'+(TYPE_IC[r.type]||'📄')+' '+esc(r.x.name||'—')+' · '+esc(TYPE_AR[r.type]||'')+(r.pending?' (قيد المراجعة)':'')+(r.x.ownerUid?(r.x.ownerUid===c.uid?' · ✅ مربوط بيه':' · ⚠️ مربوط بحساب تاني'):'')+'</div>'; }).join(''):'<div style="color:#b42318">مفيش أي تسجيل بالرقم ده.</div>')+
+        '<div style="display:flex;gap:6px;margin-top:6px"><a href="https://wa.me/'+waNumber(c.phone)+'?text='+encodeURIComponent('السلام عليكم، معاك تنمويين مصر. وصلنا طلب ربط تسجيلك القديم بحسابك ('+c.email+'). ممكن تأكدلنا إن ده انت؟')+'" target="_blank" style="flex:1;padding:8px;background:#e7faf3;color:#00703a;border-radius:9px;text-align:center;text-decoration:none;font-weight:800">💬 واتساب</a>'+
+        '<button type="button" data-cl-ok="'+i+'" '+(m.length?'':'disabled')+' style="flex:1;padding:8px;border:0;border-radius:9px;background:#00703a;color:#fff;font-family:Cairo,sans-serif;font-weight:800">✅ اربط</button>'+
+        '<button type="button" data-cl-no="'+i+'" style="padding:8px 12px;border:0;border-radius:9px;background:#fdecec;color:#9b1c1c;font-family:Cairo,sans-serif;font-weight:800">✖</button></div></div>';
+    }).join('')):'';
+    cBox.querySelectorAll('[data-cl-ok]').forEach(function(b){ b.onclick=function(){ claimDecide(AD.claims[+b.getAttribute('data-cl-ok')],true); }; });
+    cBox.querySelectorAll('[data-cl-no]').forEach(function(b){ b.onclick=function(){ claimDecide(AD.claims[+b.getAttribute('data-cl-no')],false); }; });
+    if(!AD.users){
+      box.innerHTML='<div style="background:#fff7e6;border-radius:10px;padding:10px;font-size:12px;color:#6b4a00;line-height:1.8">⚠️ قايمة الحسابات وإعادة تعيين كلمة السر محتاجين الدوال الجديدة على السيرفر (adminListUsers وadminResetPassword). انشر الـFunctions وجرّب تاني.<br><small>'+esc(AD.err||'')+'</small></div>';
+      return;
+    }
+    var now=Date.now(), D30=30*86400000;
+    var linkedSet=AD.recs;
+    var ADM=String(typeof TM_ADMIN_EMAIL!=='undefined'?TM_ADMIN_EMAIL:'elzieni2007@gmail.com').toLowerCase();
+    AD.users=AD.users.filter(function(u){ return String(u.email).toLowerCase()!==ADM; });
+    var st={all:AD.users.length, active:0, linked:0, unverified:0};
+    AD.users.forEach(function(u){ if(now-lastSeen(u)<D30) st.active++; if(linkedSet[u.uid]) st.linked++; if(!u.verified&&u.providers.indexOf('google.com')<0) st.unverified++; });
+    var q=AD.q.trim().toLowerCase();
+    var list=AD.users.filter(function(u){
+      if(String(u.email).toLowerCase()===String(typeof TM_ADMIN_EMAIL!=='undefined'?TM_ADMIN_EMAIL:'').toLowerCase()) return false;
+      if(AD.filter==='active'&&!(now-lastSeen(u)<D30)) return false;
+      if(AD.filter==='linked'&&!linkedSet[u.uid]) return false;
+      if(AD.filter==='unlinked'&&linkedSet[u.uid]) return false;
+      if(AD.filter==='unverified'&&(u.verified||u.providers.indexOf('google.com')>=0)) return false;
+      if(q){ var recs=linkedSet[u.uid]||[]; var hay=(u.email+' '+u.name+' '+recs.map(function(r){ return (r.x.name||'')+' '+(r.x.phone||''); }).join(' ')).toLowerCase(); if(hay.indexOf(q)<0&&hay.replace(/\D/g,'').indexOf(q.replace(/\D/g,'')||'@@')<0) return false; }
+      return true;
+    }).sort(function(a,b){ return lastSeen(b)-lastSeen(a); });
+    var chip=function(k,l,n){ return '<button type="button" data-f="'+k+'" style="padding:6px 10px;border-radius:20px;border:1.5px solid '+(AD.filter===k?'#1a3a6e':'#dfe6ee')+';background:'+(AD.filter===k?'#1a3a6e':'#fff')+';color:'+(AD.filter===k?'#fff':'#1a3a6e')+';font-family:Cairo,sans-serif;font-size:11px;font-weight:800;white-space:nowrap">'+l+' ('+n+')</button>'; };
+    box.innerHTML='<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px">'+chip('all','الكل',st.all)+chip('active','نشط آخر ٣٠ يوم',st.active)+chip('linked','مربوط بملف',st.linked)+chip('unlinked','مش مربوط',st.all-st.linked)+chip('unverified','إيميل مش متأكد',st.unverified)+'</div>'+
+      '<input id="tm-acc-q" placeholder="🔍 دوّر بالإيميل أو الاسم أو الموبايل" value="'+esc(AD.q)+'" style="'+INP+';margin-bottom:6px">'+
+      '<div style="font-size:11px;color:#64748b;margin-bottom:4px">عرض '+Math.min(list.length,200)+' من '+list.length+'</div>'+
+      list.slice(0,200).map(function(u,i){
+        var recs=linkedSet[u.uid]||[], ph=(recs.filter(function(r){return r.x.phone;})[0]||{x:{}}).x.phone||'';
+        var g=u.providers.indexOf('google.com')>=0, act=AD.acts[u.uid];
+        return '<div style="background:#fff;border:1px solid #e6edf5;border-radius:12px;padding:10px;margin-bottom:8px;font-size:12px;line-height:1.8">'+
+          '<div style="display:flex;align-items:center;gap:6px"><b dir="ltr" style="flex:1;overflow:hidden;text-overflow:ellipsis">'+esc(u.email||u.uid)+'</b>'+(g?'<span title="Google">🟦G</span>':'')+(u.verified||g?'<span style="color:#00703a">✔ متأكد</span>':'<span style="color:#b26b00">✖ مش متأكد</span>')+'</div>'+
+          '<div style="color:#64748b">اتعمل: '+fmtD(u.created)+' · آخر دخول: '+fmtD(lastSeen(u)?new Date(lastSeen(u)):null)+(act&&act.platform?' · '+(act.platform==='app'?'📱 التطبيق':'🌐 الموقع'):'')+'</div>'+
+          (recs.length?'<div>'+recs.map(function(r){ return (TYPE_IC[r.type]||'📄')+' '+esc(r.x.name||'—')+(r.pending?' (قيد المراجعة)':''); }).join(' · ')+(ph?' · <span dir="ltr">'+esc(ph)+'</span>':'')+'</div>':'<div style="color:#94a3b8">مش مربوط بملف</div>')+
+          '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button type="button" data-rs="link" data-i="'+i+'" style="flex:1;padding:7px;border:0;border-radius:9px;background:#e8f0fe;color:#1a3a6e;font-family:Cairo,sans-serif;font-weight:800;font-size:11px">🔑 لينك تغيير كلمة السر</button>'+
+          '<button type="button" data-rs="temp" data-i="'+i+'" style="flex:1;padding:7px;border:0;border-radius:9px;background:#fff7e6;color:#8a5a00;font-family:Cairo,sans-serif;font-weight:800;font-size:11px">🔐 كلمة سر مؤقتة</button>'+
+          (u.verified||g?'':'<button type="button" data-rs="verify" data-i="'+i+'" style="flex:1;padding:7px;border:0;border-radius:9px;background:#e7faf3;color:#00703a;font-family:Cairo,sans-serif;font-weight:800;font-size:11px">✉️ أكّد الإيميل</button>')+'</div></div>';
+      }).join('');
+    box.querySelectorAll('[data-f]').forEach(function(b){ b.onclick=function(){ AD.filter=b.getAttribute('data-f'); admRender(); }; });
+    var qi=$('tm-acc-q'); qi.oninput=function(){ AD.q=qi.value; clearTimeout(qi._t); qi._t=setTimeout(function(){ admRender(); var n=$('tm-acc-q'); n.focus(); n.setSelectionRange(n.value.length,n.value.length); },350); };
+    box.querySelectorAll('[data-rs]').forEach(function(b){ b.onclick=function(){ resetAction(list[+b.getAttribute('data-i')],b.getAttribute('data-rs')); }; });
+  }
+  async function claimDecide(c,ok){
+    var dbx=D();
+    try{
+      if(ok){
+        var m=AD.all.filter(function(r){ return nPhone(r.x.phone)===c.phone&&!r.x.ownerUid; });
+        if(!m.length){ say('⚠️ مفيش تسجيل متاح للربط بالرقم ده'); return; }
+        if(!confirm('هيتربط '+m.length+' تسجيل بالحساب '+c.email+'. اتأكدت إنه صاحب الرقم؟')) return;
+        var b=dbx.batch();
+        m.forEach(function(r){ b.update(dbx.collection(r.col).doc(r.id),{ownerUid:c.uid,claimedAt:TS()}); });
+        b.update(dbx.collection('profile_claims').doc(c.id),{status:'approved',linked:m.length,decidedAt:TS()});
+        await b.commit(); say('✅ اتربط '+m.length+' تسجيل');
+      } else {
+        if(!confirm('هترفض طلب الربط ده؟')) return;
+        await dbx.collection('profile_claims').doc(c.id).update({status:'rejected',decidedAt:TS()}); say('اترفض');
+      }
+      admLoad();
+    }catch(e){ say('❌ '+(e.message||e)); }
+  }
+  function copy(t){ try{ navigator.clipboard.writeText(t).then(function(){ say('📋 اتنسخ'); },fb); }catch(e){ fb(); } function fb(){ var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); say('📋 اتنسخ'); }catch(x){} ta.remove(); } }
+  async function resetAction(u,mode){
+    if(!u) return;
+    var recs=AD.recs[u.uid]||[], ph=(recs.filter(function(r){return r.x.phone;})[0]||{x:{}}).x.phone||'';
+    if(mode==='temp'&&!confirm('هيتعمل كلمة سر مؤقتة لـ '+u.email+' وكلمة السر القديمة هتبطل. نكمل؟')) return;
+    say('⏳ ...');
+    try{
+      var r=(await FN('adminResetPassword')({uid:u.uid,mode:mode})).data||{};
+      if(mode==='verify'){ say('✅ الإيميل اتأكد'); u.verified=true; admRender(); return; }
+      var text=mode==='link'
+        ?'السلام عليكم، معاك تنمويين مصر 👋\nده لينك تغيير كلمة السر لحسابك ('+u.email+'):\n'+r.link+'\nافتحه واكتب كلمة سر جديدة، وبعدين ادخل بيها. اللينك بيشتغل مرة واحدة ولمدة محدودة.'
+        :'السلام عليكم، معاك تنمويين مصر 👋\nكلمة سر مؤقتة لحسابك ('+u.email+'):\n'+r.password+'\nادخل بيها، وبعدين من «حسابي» ← «تغيير كلمة السر» اعمل كلمة سر جديدة.';
+      var wa=ph?'https://wa.me/'+waNumber(ph)+'?text='+encodeURIComponent(text):'';
+      sheet(mode==='link'?'🔑 لينك تغيير كلمة السر':'🔐 كلمة سر مؤقتة','<div style="font-size:12px;color:#475569;line-height:1.8">ابعته للمستخدم بنفسك (واتساب أو إيميل). ما تنشروش في أي جروب.</div>'+
+        '<textarea readonly rows="7" dir="auto" style="'+INP+';font-size:12px">'+esc(text)+'</textarea>'+
+        '<button type="button" id="rs-copy" style="'+BTN+';background:#e8f0fe;color:#1a3a6e">📋 انسخ الرسالة</button>'+
+        (wa?'<a href="'+wa+'" target="_blank" style="display:block;text-align:center;text-decoration:none;'+BTN+';background:#25d366;color:#fff">💬 ابعتها واتساب ('+esc(ph)+')</a>':'<div style="font-size:11px;color:#94a3b8;margin-top:6px">مفيش رقم موبايل مربوط بالحساب ده.</div>'));
+      var cb=$('rs-copy'); if(cb) cb.onclick=function(){ copy(text); };
+    }catch(e){ say('❌ '+fnErr(e)); }
+  }
+  function mountAdmin(){
+    var anchor=$('adm-form-athar'); if(!anchor||$('adm-form-accounts')) return;
+    var c=document.createElement('div'); c.id='adm-form-accounts'; c.style.cssText='display:none;padding:0 16px 100px;font-family:Cairo,sans-serif';
+    c.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px"><div style="flex:1;font-size:14px;font-weight:900;color:#1a3a6e">👤 حسابات المستخدمين</div><button type="button" id="tm-acc-reload" style="padding:6px 10px;border:0;border-radius:8px;background:#e8f0fe;color:#1a3a6e;font-family:Cairo,sans-serif;font-weight:800;font-size:11px">🔄 تحديث</button></div>'+
+      '<div id="tm-acc-claims"></div><div id="tm-acc-list"></div>';
+    anchor.parentNode.insertBefore(c,anchor);
+    $('tm-acc-reload').onclick=admLoad;
+  }
+  window.tmLoadAccountsAdmin=function(){ mountAdmin(); admLoad(); };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountAdmin); else mountAdmin();
+})();
+</script>
 <script>
 /* ===== الوظايف المكررة =====
    مقارنة «ذكية» بدل التطابق الحرفي: بتتجاهل علامات الترقيم والهمزات والتاء المربوطة،

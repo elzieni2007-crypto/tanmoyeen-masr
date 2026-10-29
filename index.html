@@ -2975,7 +2975,7 @@ function loadFromFirebase(){
       try{ var s=JSON.parse(localStorage.getItem('cache_sups')||'[]'); if(s.length){window.SUPS=s;renderSups();renderDash();} }catch(e){}
     });
 
-    db.collection('volunteers').orderBy('timestamp','desc').limit(300).get().then(function(snap){
+    db.collection('volunteers').orderBy('timestamp','desc').limit(600).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id,interests:r.interests||[],badges:r.badges||[],photo:r.photo||''}));});
       if(fresh.length){
@@ -2987,7 +2987,7 @@ function loadFromFirebase(){
       try{ var v=JSON.parse(localStorage.getItem('cache_vols')||'[]'); if(v.length){window.VOLUNTEERS_PRELOAD=v;loadVolunteers();} }catch(e){}
     });
 
-    db.collection('organizations').orderBy('timestamp','desc').limit(300).get().then(function(snap){
+    db.collection('organizations').orderBy('timestamp','desc').limit(600).get().then(function(snap){
       var fresh=[];
       snap.docs.forEach(function(d){var r=d.data();if(r.name)fresh.push(Object.assign({},r,{id:d.id}));});
       if(fresh.length){
@@ -5362,8 +5362,10 @@ async function loadAdminData(){
       for(var i=0; i<collections.length; i++){
         var col = collections[i];
         try {
-          var snap = await db.collection(col).orderBy('timestamp','desc').limit(200).get();
-          snap.docs.forEach(function(d){
+          // كل السجلات من غير limit ومن غير orderBy (orderBy كان بيستبعد أي سجل مالوش timestamp)، والترتيب هنا
+          var snap = await db.collection(col).get();
+          var _ts=function(d){ var t=d.data().timestamp; return t&&t.toMillis?t.toMillis():(t?new Date(t).getTime()||0:0); };
+          snap.docs.slice().sort(function(a,b){ return _ts(b)-_ts(a); }).forEach(function(d){
             var typeKey = col==='consultants'?'expert':col==='suppliers'?'sup':col==='organizations'?'org':col==='jobseekers'?'jobseeker':col;
             allData.push(Object.assign({}, d.data(), {fbId:d.id, _type:typeKey, _col:col, _label:labels[col]||col}));
           });
@@ -5549,7 +5551,10 @@ function renderAdmList(){
   filterAdmList('');
 }
 
-function filterAdmList(query){
+var ADM_PAGE = 50;
+function admShowMore(){ ADM_PAGE += 50; var s=document.getElementById('adm-search'); filterAdmList(s?s.value:'', true); }
+function filterAdmList(query, keepPage){
+  if(!keepPage) ADM_PAGE = 50;
   var q = query.trim().toLowerCase();
   var fbData = window._adminData || [];
   var list = fbData.filter(function(r){ return r._type === admTab; });
@@ -5585,9 +5590,12 @@ function filterAdmList(query){
   var isSup = admTab==='sup';
   var colName = admTab==='expert'?'consultants':admTab==='sup'?'suppliers':admTab==='org'?'organizations':'jobseekers';
 
+  var totalAll = fbData.filter(function(r){ return r._type === admTab; }).length;
+  var shown = list.slice(0, ADM_PAGE);
   container.innerHTML = '<div style="padding:4px 4px 8px;font-size:11px;color:var(--muted)">' +
-    'عرض '+list.length+' نتيجة' + (q ? ' لـ "'+query+'"' : '') + '</div>' +
-  list.map(function(r, idx){
+    (q ? (list.length+' نتيجة لـ "'+query+'" من '+totalAll) : ('الإجمالي '+totalAll+' سجل')) +
+    (shown.length<list.length ? ' · معروض أول '+shown.length : '') + '</div>' +
+  shown.map(function(r, idx){
     return '<div class="adm-card" id="adm-card-'+idx+'" style="border-right:3px solid '+tc.color+';padding:12px">' +
       // Header
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
@@ -5619,7 +5627,8 @@ function filterAdmList(query){
         '<button style="flex:1;padding:6px;background:#feeaea;color:#e05050;border:none;border-radius:6px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer" onclick="deleteAdmRecord(\''+(r.fbId||r.id)+'\',\''+colName+'\')">🗑️</button>' +
       '</div>' +
     '</div>';
-  }).join('');
+  }).join('') + (shown.length<list.length ?
+    '<button onclick="admShowMore()" style="width:100%;min-height:44px;margin:6px 0 14px;border:1.5px solid var(--p);background:#fff;color:var(--p);border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:800;cursor:pointer">اعرض 50 كمان ('+(list.length-shown.length)+' باقيين)</button>' : '');
   window._admListData = list;
 }
 function admMail(email){ window.location.href = 'mailto:' + email; }

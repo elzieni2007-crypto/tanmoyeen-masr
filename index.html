@@ -2184,7 +2184,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="adm-tab" style="background:#eef2ff;color:#4338ca;border-color:#6366f1" onclick="setAdmTab(this,'registration-requests')">👥 طلبات التسجيل</div>
       <div class="adm-tab" style="background:#e7faf3;color:#00703a;border-color:#00b894" onclick="setAdmTab(this,'volunteers-adm')">🤝 متطوعين</div>
       <div class="adm-tab" style="background:#fef3e8;color:#c06010;border-color:#c06010" onclick="setAdmTab(this,'consultations-adm')">📋 استشارات</div>
-      <div class="adm-tab" style="background:#dcfce7;color:#00703a;border-color:#00703a" onclick="setAdmTab(this,'broadcast')">💬 واتساب</div>
+      <div class="adm-tab" style="background:#dcfce7;color:#00703a;border-color:#00703a" onclick="setAdmTab(this,'broadcast')">💬 واتساب وإشعارات</div>
       <div class="adm-tab" onclick="setAdmTab(this,'contact')">📧 رسايل</div>
       <div class="adm-tab" onclick="setAdmTab(this,'funding')">💰 حجز منصة المنح</div>
       <div class="adm-tab" onclick="setAdmTab(this,'athar')">🌿 أثر</div>
@@ -2476,6 +2476,30 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 <div id="adm-form-broadcast" style="display:none;padding:0 16px;padding-bottom:100px">
   <div style="margin-top:16px">
+
+    <!-- إشعار مخصص للتطبيق -->
+    <div id="tm-cpush" style="background:#fff;border-radius:14px;padding:14px;margin-bottom:16px;border:1.5px solid #1a3a6e;font-family:Cairo,sans-serif">
+      <div style="font-size:15px;font-weight:900;color:#1a3a6e">🔔 إشعار مخصص للتطبيق</div>
+      <div style="font-size:11.5px;color:#5b6675;line-height:1.7;margin:2px 0 10px">بيوصل لكل اللي مفعّلين الإشعارات، ولما يدوسوا عليه بيفتح الصفحة اللي تختارها.</div>
+      <button type="button" onclick="tmCpushTpl('account')" style="border:1.5px dashed #9fb3c8;background:#f6f9fc;color:#1a3a6e;border-radius:10px;padding:7px 10px;font-family:Cairo,sans-serif;font-size:11.5px;font-weight:800;margin-bottom:8px">✏️ قالب: تعديل الملف بنفسك</button>
+      <label class="fl" for="cp-title">العنوان <span id="cp-title-n" style="color:#8a94a6;font-weight:600"></span></label>
+      <input class="fi" id="cp-title" maxlength="80" oninput="tmCpushCount()" placeholder="مثلًا: تقدر دلوقتي تعدّل ملفك بنفسك ✏️">
+      <label class="fl" for="cp-msg" style="margin-top:8px;display:block">الرسالة <span id="cp-msg-n" style="color:#8a94a6;font-weight:600"></span></label>
+      <textarea class="fi" id="cp-msg" rows="3" maxlength="300" oninput="tmCpushCount()" placeholder="سطرين بالكتير، الموبايل بيقطع الباقي"></textarea>
+      <label class="fl" for="cp-to" style="margin-top:8px;display:block">يفتح على</label>
+      <select class="fi" id="cp-to" onchange="document.getElementById('cp-url').style.display=this.value==='custom'?'block':'none'">
+        <option value="?form=account">👤 حسابي (تعديل الملف)</option>
+        <option value="">🏠 الرئيسية</option>
+        <option value="?form=jobs">💼 الوظايف</option>
+        <option value="?form=tenders">📋 المناقصات والفرص</option>
+        <option value="?form=funding">💰 منصة المنح</option>
+        <option value="custom">🔗 رابط تاني (وظيفة معينة مثلًا)</option>
+      </select>
+      <input class="fi" id="cp-url" dir="ltr" style="display:none;margin-top:6px" placeholder="https://elzieni2007-crypto.github.io/tanmoyeen-masr/?job=...">
+      <div id="cp-prev" style="display:none;margin-top:10px;background:#f1f5f9;border-radius:12px;padding:10px 12px"></div>
+      <button type="button" id="cp-send" onclick="tmCpushSend()" style="width:100%;min-height:46px;margin-top:10px;border:0;border-radius:12px;background:linear-gradient(135deg,#1a3a6e,#0094cc);color:#fff;font-family:Cairo,sans-serif;font-size:14px;font-weight:900">🔔 ابعت الإشعار</button>
+      <div id="cp-res" style="font-size:12px;margin-top:8px;line-height:1.7"></div>
+    </div>
 
     <div style="background:linear-gradient(135deg,#00703a,#00b894);border-radius:14px;padding:16px;color:white;margin-bottom:16px;text-align:center">
       <div style="font-size:32px;margin-bottom:8px">💬</div>
@@ -9261,7 +9285,8 @@ function tmOpenPushUrl(u){
     var q=new URL(String(u),location.href).searchParams, f=q.get('form');
     if(q.get('job')) openFromLink('job',q.get('job'));
     else if(q.get('tender')) openFromLink('tender',q.get('tender'));
-    else if(f==='jobs'||f==='tenders'||f==='profile'||f==='account') setTimeout(function(){ try{ go(f==='account'?'profile':f); }catch(e){} },300);
+    else if(f){ var M={jobs:'jobs',tenders:'tenders',profile:'profile',account:'profile',funding:'funding-screen',grants:'funding-screen',consult:'consult-screen',athar:'athar-screen'}; if(M[f]) setTimeout(function(){ try{ go(M[f]); }catch(e){} },300); }
+    else setTimeout(function(){ try{ go('home'); }catch(e){} },300);
   }catch(e){ console.warn('push open',e); }
 }
 window.median_onesignal_push_opened=window.gonative_onesignal_push_opened=function(data){
@@ -11170,9 +11195,14 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
     // طلبات الربط
     cBox.innerHTML=AD.claims.length?('<div style="font-weight:900;font-size:13px;color:#9a3412;margin-bottom:6px">📱 طلبات ربط برقم موبايل ('+AD.claims.length+')</div>'+AD.claims.map(function(c,i){
       var m=AD.all.filter(function(r){ return nPhone(r.x.phone)===c.phone; });
+      var fuzzy=false, tail=String(c.phone||'').replace(/\D/g,'').slice(-10);
+      if(!m.length&&tail.length===10){ m=AD.all.filter(function(r){ return String(r.x.phone||'').replace(/\D/g,'').slice(-10)===tail; }); fuzzy=m.length>0; }
+      var mine=AD.recs[c.uid]||[];
       return '<div style="background:#fff;border:1px solid #fed7aa;border-radius:11px;padding:10px;margin-bottom:8px;font-size:12px;line-height:1.8">'+
+        '<div style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span style="background:#fff4e0;color:#8a5a00;border-radius:20px;padding:1px 9px;font-size:11px;font-weight:800">⏳ مستني قرارك</span><span style="color:#64748b;font-size:11px">'+fmtD(c.at)+'</span></div>'+
         '<div><b dir="ltr">'+esc(c.email)+'</b> عايز يربط <b dir="ltr">'+esc(c.phone)+'</b>'+(c.note?' · '+esc(c.note):'')+'</div>'+
-        (m.length?m.map(function(r){ return '<div style="color:#475569">'+(TYPE_IC[r.type]||'📄')+' '+esc(r.x.name||'—')+' · '+esc(TYPE_AR[r.type]||'')+(r.pending?' (قيد المراجعة)':'')+(r.x.ownerUid?(r.x.ownerUid===c.uid?' · ✅ مربوط بيه':' · ⚠️ مربوط بحساب تاني'):'')+'</div>'; }).join(''):'<div style="color:#b42318">مفيش أي تسجيل بالرقم ده.</div>')+
+        (m.length?(fuzzy?'<div style="color:#8a5a00;font-size:11px">⚠️ الرقم متسجل بصيغة مختلفة شوية، اتأكد إنه نفس الرقم:</div>':'')+m.map(function(r){ return '<div style="color:#475569">'+(TYPE_IC[r.type]||'📄')+' '+esc(r.x.name||'—')+' · '+esc(TYPE_AR[r.type]||'')+(fuzzy?' · <span dir="ltr">'+esc(r.x.phone||'')+'</span>':'')+(r.pending?' (قيد المراجعة)':'')+(r.x.ownerUid?(r.x.ownerUid===c.uid?' · <b style="color:#00703a">✅ مربوط بيه خلاص</b>':' · <b style="color:#b42318">⚠️ مربوط بحساب تاني</b>'):' · <b style="color:#1a3a6e">🔓 مش مربوط لسه، جاهز للربط</b>')+'</div>'; }).join(''):'<div style="color:#b42318">مفيش أي تسجيل بالرقم ده. اسأله سجل بأنهي رقم أو إيميل.</div>')+
+        '<div style="color:#64748b;font-size:11px">حسابه دلوقتي: '+(mine.length?mine.map(function(r){ return (TYPE_IC[r.type]||'📄')+' '+esc(r.x.name||'—'); }).join(' · '):'مش مربوط بأي ملف')+'</div>'+
         '<div style="display:flex;gap:6px;margin-top:6px"><a href="https://wa.me/'+waNumber(c.phone)+'?text='+encodeURIComponent('السلام عليكم، معاك تنمويين مصر. وصلنا طلب ربط تسجيلك القديم بحسابك ('+c.email+'). ممكن تأكدلنا إن ده انت؟')+'" target="_blank" style="flex:1;padding:8px;background:#e7faf3;color:#00703a;border-radius:9px;text-align:center;text-decoration:none;font-weight:800">💬 واتساب</a>'+
         '<button type="button" data-cl-ok="'+i+'" '+(m.length?'':'disabled')+' style="flex:1;padding:8px;border:0;border-radius:9px;background:#00703a;color:#fff;font-family:Cairo,sans-serif;font-weight:800">✅ اربط</button>'+
         '<button type="button" data-cl-no="'+i+'" style="padding:8px 12px;border:0;border-radius:9px;background:#fdecec;color:#9b1c1c;font-family:Cairo,sans-serif;font-weight:800">✖</button></div></div>';
@@ -11202,8 +11232,8 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
     var chip=function(k,l,n){ return '<button type="button" data-f="'+k+'" style="padding:6px 10px;border-radius:20px;border:1.5px solid '+(AD.filter===k?'#1a3a6e':'#dfe6ee')+';background:'+(AD.filter===k?'#1a3a6e':'#fff')+';color:'+(AD.filter===k?'#fff':'#1a3a6e')+';font-family:Cairo,sans-serif;font-size:11px;font-weight:800;white-space:nowrap">'+l+' ('+n+')</button>'; };
     box.innerHTML='<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px">'+chip('all','الكل',st.all)+chip('active','نشط آخر ٣٠ يوم',st.active)+chip('linked','مربوط بملف',st.linked)+chip('unlinked','مش مربوط',st.all-st.linked)+chip('unverified','إيميل مش متأكد',st.unverified)+'</div>'+
       '<input id="tm-acc-q" placeholder="🔍 دوّر بالإيميل أو الاسم أو الموبايل" value="'+esc(AD.q)+'" style="'+INP+';margin-bottom:6px">'+
-      '<div style="font-size:11px;color:#64748b;margin-bottom:4px">عرض '+Math.min(list.length,200)+' من '+list.length+'</div>'+
-      list.slice(0,200).map(function(u,i){
+      '<div style="font-size:11px;color:#64748b;margin-bottom:4px">'+(list.length>(AD.page||50)?'معروض '+(AD.page||50)+' من '+list.length:'الإجمالي '+list.length)+'</div>'+
+      list.slice(0,AD.page||50).map(function(u,i){
         var recs=linkedSet[u.uid]||[], ph=(recs.filter(function(r){return r.x.phone;})[0]||{x:{}}).x.phone||'';
         var g=u.providers.indexOf('google.com')>=0, act=AD.acts[u.uid];
         return '<div style="background:#fff;border:1px solid #e6edf5;border-radius:12px;padding:10px;margin-bottom:8px;font-size:12px;line-height:1.8">'+
@@ -11213,9 +11243,10 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
           '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button type="button" data-rs="link" data-i="'+i+'" style="flex:1;padding:7px;border:0;border-radius:9px;background:#e8f0fe;color:#1a3a6e;font-family:Cairo,sans-serif;font-weight:800;font-size:11px">🔑 لينك تغيير كلمة السر</button>'+
           '<button type="button" data-rs="temp" data-i="'+i+'" style="flex:1;padding:7px;border:0;border-radius:9px;background:#fff7e6;color:#8a5a00;font-family:Cairo,sans-serif;font-weight:800;font-size:11px">🔐 كلمة سر مؤقتة</button>'+
           (u.verified||g?'':'<button type="button" data-rs="verify" data-i="'+i+'" style="flex:1;padding:7px;border:0;border-radius:9px;background:#e7faf3;color:#00703a;font-family:Cairo,sans-serif;font-weight:800;font-size:11px">✉️ أكّد الإيميل</button>')+'</div></div>';
-      }).join('');
-    box.querySelectorAll('[data-f]').forEach(function(b){ b.onclick=function(){ AD.filter=b.getAttribute('data-f'); admRender(); }; });
-    var qi=$('tm-acc-q'); qi.oninput=function(){ AD.q=qi.value; clearTimeout(qi._t); qi._t=setTimeout(function(){ admRender(); var n=$('tm-acc-q'); n.focus(); n.setSelectionRange(n.value.length,n.value.length); },350); };
+      }).join('')+(list.length>(AD.page||50)?'<button type="button" id="tm-acc-more" style="width:100%;min-height:44px;margin:4px 0 12px;border:1.5px solid #1a3a6e;background:#fff;color:#1a3a6e;border-radius:12px;font-family:Cairo,sans-serif;font-size:13px;font-weight:800">اعرض 50 كمان ('+(list.length-(AD.page||50))+' باقيين)</button>':'');
+    var more=$('tm-acc-more'); if(more) more.onclick=function(){ AD.page=(AD.page||50)+50; admRender(); };
+    box.querySelectorAll('[data-f]').forEach(function(b){ b.onclick=function(){ AD.filter=b.getAttribute('data-f'); AD.page=50; admRender(); }; });
+    var qi=$('tm-acc-q'); qi.oninput=function(){ AD.q=qi.value; AD.page=50; clearTimeout(qi._t); qi._t=setTimeout(function(){ admRender(); var n=$('tm-acc-q'); n.focus(); n.setSelectionRange(n.value.length,n.value.length); },350); };
     box.querySelectorAll('[data-rs]').forEach(function(b){ b.onclick=function(){ resetAction(list[+b.getAttribute('data-i')],b.getAttribute('data-rs')); }; });
   }
   async function claimDecide(c,ok){
@@ -11223,6 +11254,8 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
     try{
       if(ok){
         var m=AD.all.filter(function(r){ return nPhone(r.x.phone)===c.phone&&!r.x.ownerUid; });
+        var tail=String(c.phone||'').replace(/\D/g,'').slice(-10);
+        if(!m.length&&tail.length===10) m=AD.all.filter(function(r){ return String(r.x.phone||'').replace(/\D/g,'').slice(-10)===tail&&!r.x.ownerUid; });
         if(!m.length){ say('⚠️ مفيش تسجيل متاح للربط بالرقم ده'); return; }
         if(!confirm('هيتربط '+m.length+' تسجيل بالحساب '+c.email+'. اتأكدت إنه صاحب الرقم؟')) return;
         var b=dbx.batch();
@@ -11668,6 +11701,50 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 (function(){ try{ var s=document.createElement('script'); s.src='https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js'; s.async=true; document.head.appendChild(s); }catch(e){} })();
 /* لو صفحة البداية فضلت ظاهرة (مثلًا صورة أو مكتبة خارجية اتأخرت)، ندخل التطبيق بعد ٨ ثواني */
 setTimeout(function(){ try{ var sp=document.getElementById('splash'); if(sp&&sp.style.display!=='none'&&getComputedStyle(sp).display!=='none'){ enterApp(); if(typeof handleUrlParams==='function') handleUrlParams(); } }catch(e){} }, 8000);
+</script>
+
+<script>
+/* ===== الأدمن: إشعار مخصص للتطبيق (الدالة sendCustomPush) ===== */
+(function(){
+  var APP='https://elzieni2007-crypto.github.io/tanmoyeen-masr/';
+  function $(i){ return document.getElementById(i); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  window.tmCpushCount=function(){
+    var t=$('cp-title').value.trim(), m=$('cp-msg').value.trim();
+    $('cp-title-n').textContent='('+t.length+'/80)'; $('cp-msg-n').textContent='('+m.length+'/300)';
+    var pv=$('cp-prev'); pv.style.display=(t||m)?'block':'none';
+    pv.innerHTML='<div style="font-size:10.5px;color:#64748b;margin-bottom:3px">👁️ شكله على الموبايل تقريبًا</div><div style="font-weight:800;font-size:13px">'+esc(t)+'</div><div style="font-size:12.5px;color:#334155;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+esc(m)+'</div>';
+  };
+  window.tmCpushTpl=function(k){
+    if(k==='account'){
+      $('cp-title').value='تقدر دلوقتي تعدّل ملفك بنفسك ✏️';
+      $('cp-msg').value='بناءً على طلبكم: ادخل بنفس الإيميل اللي سجلت بيه وحدّث بياناتك من غير ما تسجل من الأول. اضغط هنا 👈';
+      $('cp-to').value='?form=account'; $('cp-url').style.display='none';
+    }
+    tmCpushCount();
+  };
+  function target(){
+    var v=$('cp-to').value;
+    if(v==='custom') return $('cp-url').value.trim();
+    return APP+v;
+  }
+  window.tmCpushSend=async function(){
+    var t=$('cp-title').value.trim(), m=$('cp-msg').value.trim(), u=target(), res=$('cp-res'), b=$('cp-send');
+    if(!t||!m){ res.innerHTML='<span style="color:#b42318">⚠️ اكتب العنوان والرسالة</span>'; return; }
+    if(!/^https:\/\//i.test(u)){ res.innerHTML='<span style="color:#b42318">⚠️ الرابط لازم يبدأ بـ https://</span>'; return; }
+    if(!confirm('هيتبعت الإشعار ده دلوقتي لكل المشتركين:\n\n'+t+'\n'+m+'\n\nمتأكد؟')) return;
+    b.disabled=true; b.textContent='⏳ بنبعت...'; res.innerHTML='';
+    try{
+      var r=await firebase.app().functions('europe-west1').httpsCallable('sendCustomPush')({title:t,message:m,url:u});
+      var d=(r&&r.data)||{};
+      if(d.errors&&!d.id) res.innerHTML='<span style="color:#b42318">⚠️ OneSignal ماوصّلش: <span dir="ltr">'+esc(JSON.stringify(d.errors))+'</span></span>';
+      else res.innerHTML='<span style="color:#00703a;font-weight:800">✅ الإشعار اتبعت'+(d.recipients!=null?' لـ '+d.recipients+' مشترك':'')+'</span>';
+    }catch(e){
+      var code=String((e&&e.code)||'').replace('functions/',''), msg=(e&&e.message)||String(e);
+      res.innerHTML='<span style="color:#b42318">❌ '+(code==='not-found'||/not.?found/i.test(msg)?'الدالة sendCustomPush لسه مش منشورة. اعمل deploy للـFunctions من Cloud Shell.':code==='permission-denied'?'لازم تكون داخل بإيميل الأدمن.':esc(msg))+'</span>';
+    }finally{ b.disabled=false; b.textContent='🔔 ابعت الإشعار'; }
+  };
+})();
 </script>
 <script>window.__tmBooted=true; try{ var _bf=document.getElementById("tm-boot-fail"); if(_bf) _bf.remove(); }catch(e){}</script>
 </body>

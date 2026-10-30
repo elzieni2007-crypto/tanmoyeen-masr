@@ -3067,6 +3067,7 @@ function handleUrlParams(){
   else if(fp==='athar'){setTimeout(()=>{go('athar-screen');},300);}
   else if(fp==='funding'||fp==='grants'){setTimeout(()=>{go('funding-screen');},300);}
   else if(fp==='guide'){location.href='donor-guide.html';}
+  else if(fp==='account'||fp==='profile'){setTimeout(()=>{go('profile');},300);}
   else if(fp==='expert'||fp==='sup'||fp==='org'||fp==='jobseeker'||fp==='volunteer'){
     setTimeout(()=>{go('register');setTimeout(function(){ selectRegType(fp); },400);},300);
   }
@@ -9224,14 +9225,18 @@ withOS(function(OS){ try{ OS.User.PushSubscription.addEventListener('change',ref
 
 /* فتح الإعلان مباشرة من رابط الإشعار: ?job=ID أو ?tender=ID أو ?form=jobs */
 function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+var _tmDL={};
 async function openFromLink(kind,id){
+  if(!id||_tmDL[kind+id]) return; _tmDL[kind+id]=1; setTimeout(function(){ delete _tmDL[kind+id]; },20000);
   var listName=kind==='job'?'JOBS':'TENDERS', screen=kind==='job'?'jobs':'tenders', col=kind==='job'?'jobs':'tenders';
   var getList=function(){ try{ return (new Function('return typeof '+listName+'!=="undefined"?'+listName+':null'))(); }catch(e){ return null; } };
   var open=function(){ try{ if(typeof go==='function') go(screen); }catch(e){}
     setTimeout(function(){ try{ (kind==='job'?openJob:openTender)(id); }catch(e){ console.warn(e); } },350); };
-  for(var i=0;i<24;i++){
-    var L=getList(); if(L&&L.some(function(x){return x.id==id;})){ open(); return; }
-    await sleep(500);
+  for(var i=0;i<40;i++){
+    var appOn=(document.getElementById('app')||{}).style; appOn=appOn&&appOn.display!=='none';
+    var L=getList(); if(appOn&&L&&L.some(function(x){return x.id==id;})){ open(); return; }
+    if(appOn&&i>=12) break; // القائمة اتأخرت: هات الإعلان نفسه من Firebase
+    await sleep(250);
   }
   try{
     var d=(typeof db!=='undefined')?db:null; if(!d) return;
@@ -9248,6 +9253,22 @@ function handleDeepLink(){
   else if(f==='jobs'||f==='tenders') setTimeout(function(){ try{ go(f); }catch(e){} },800);
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(handleDeepLink,1500); }); else setTimeout(handleDeepLink,1500);
+/* الضغط على الإشعار جوه تطبيق أندرويد (Median): لو التطبيق كان مفتوح أصلا ممكن مايعملش reload للينك،
+   فـ Median بيندّه الدالة دي ببيانات الإشعار، ونفتح الوظيفة/المناقصة منها مباشرة */
+function tmOpenPushUrl(u){
+  try{
+    if(!u) return;
+    var q=new URL(String(u),location.href).searchParams, f=q.get('form');
+    if(q.get('job')) openFromLink('job',q.get('job'));
+    else if(q.get('tender')) openFromLink('tender',q.get('tender'));
+    else if(f==='jobs'||f==='tenders'||f==='profile'||f==='account') setTimeout(function(){ try{ go(f==='account'?'profile':f); }catch(e){} },300);
+  }catch(e){ console.warn('push open',e); }
+}
+window.median_onesignal_push_opened=window.gonative_onesignal_push_opened=function(data){
+  try{ if(typeof data==='string') data=JSON.parse(data); }catch(e){}
+  data=data||{}; var d=data.additionalData||data.data||data;
+  tmOpenPushUrl(d.targetUrl||d.url||d.openUrl||data.targetUrl||data.url);
+};
 
 /* زرار تجربة الإشعارات + فحص كامل للأسباب */
 var ADMIN_EMAIL='elzieni2007@gmail.com';

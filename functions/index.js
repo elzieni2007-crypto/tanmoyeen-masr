@@ -838,3 +838,29 @@ exports.adminResetPassword = onCall({region: "europe-west1"}, async (request) =>
   }
   throw new HttpsError("invalid-argument", "mode");
 });
+
+// الأدمن: إشعار مخصص لكل المشتركين (عنوان + رسالة + صفحة يفتح عليها)
+exports.sendCustomPush = onCall({region: "europe-west1", secrets: [ONESIGNAL_REST_API_KEY]}, async (request) => {
+  assertAdmin(request);
+  const d = request.data || {};
+  const title = String(d.title || "").trim();
+  const message = String(d.message || "").trim();
+  let url = String(d.url || "").trim() || PUBLIC_APP_URL;
+  if (!title || title.length > 80) throw new HttpsError("invalid-argument", "العنوان لازم يكون من 1 لـ 80 حرف");
+  if (!message || message.length > 300) throw new HttpsError("invalid-argument", "الرسالة لازم تكون من 1 لـ 300 حرف");
+  if (!/^https:\/\//i.test(url)) throw new HttpsError("invalid-argument", "الرابط لازم يبدأ بـ https://");
+  let res;
+  try {
+    res = await sendOneSignal({title, message, url, topic: "tanmoyeen-custom-" + Date.now()});
+  } catch (e) {
+    throw new HttpsError("failed-precondition", String(e.message || e).slice(0, 400));
+  }
+  let parsed = {};
+  try { parsed = JSON.parse(res); } catch (e) { /* ignore */ }
+  try {
+    await db.collection("push_log").add({title, message, url, kind: "custom",
+      recipients: parsed.recipients == null ? null : parsed.recipients, onesignalId: parsed.id || "",
+      by: String(request.auth.token.email || ""), at: FieldValue.serverTimestamp()});
+  } catch (e) { console.warn("push_log", e.message); }
+  return {ok: true, id: parsed.id || "", recipients: parsed.recipients, errors: parsed.errors || null};
+});

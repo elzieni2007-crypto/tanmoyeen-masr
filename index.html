@@ -2609,11 +2609,12 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
       <div class="fg">
         <label class="fl">إرسال لـ *</label>
         <select class="fi" id="email-to-type" onchange="updateEmailList()">
-          <option value="all">الكل (باحثين + استشاريين + موردين)</option>
+          <option value="all">الكل (كل اللي سجلوا بإيميل)</option>
           <option value="jobseeker">باحثون عن عمل فقط</option>
           <option value="expert">استشاريون فقط</option>
           <option value="sup">موردون فقط</option>
           <option value="org">مؤسسات فقط</option>
+          <option value="volunteer">متطوعين فقط</option>
         </select>
       </div>
 
@@ -2622,6 +2623,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
         <label class="fl">نوع الرسالة</label>
         <select class="fi" id="email-template" onchange="applyEmailTemplate()">
           <option value="">اختر قالب جاهز...</option>
+          <option value="account">✏️ تعديل الملف بنفسك (إعلان الحسابات)</option>
           <option value="job">💼 إعلان وظيفة جديدة</option>
           <option value="tender">📋 إعلان مناقصة جديدة</option>
           <option value="news">📰 أخبار تنمويين مصر</option>
@@ -6498,6 +6500,10 @@ function deleteCustomTender(idx){ deleteTender(idx,''); }
 
 // ============ EMAIL SYSTEM ============
 const EMAIL_TEMPLATES = {
+  account: {
+    subject: "بناءً على طلبكم: تقدر دلوقتي تعدّل ملفك بنفسك على تنمويين مصر ✏️",
+    body: "كتير منكم طلب يقدر يحدّث بياناته من غير ما يسجل من الأول، وده بقى متاح لكل الملفات: باحث عمل، استشاري، مورد، متطوع، ومؤسسة.\n\nتعملها ازاي؟\n1️⃣ افتح التطبيق، ودوس على أيقونة الشخص 👤 فوق.\n2️⃣ اختار «حساب جديد» واكتب نفس الإيميل اللي سجلت بيه قبل كده.\n3️⃣ أكّد إيميلك من الرسالة اللي هتوصلك (بص في Spam لو مش لاقيها)، وارجع التطبيق ودوس «أكدت خلاص ✅»، وهتلاقي ملفك جاهز تعدّله.\n\n📱 لو سجلت قبل كده برقم موبايل بس، دوس «سجلت قبل كده برقم موبايل؟ اطلب ربطه» وهنتواصل معاك واتساب.\n\n✅ والحساب اختياري: تقدر تتصفح الوظايف والمناقصات وكل الأقسام زي العادي من غير تسجيل دخول.\n\n📲 حمّل التطبيق (أندرويد):\nhttps://play.google.com/store/apps/details?id=co.median.android.xlpkzqd\n\n🌐 أو افتحه من الموقع (آيفون وكمبيوتر):\nhttps://elzieni2007-crypto.github.io/tanmoyeen-masr/"
+  },
   job: {
     subject: '💼 فرصة وظيفية جديدة - تنمويين مصر',
     body: `السلام عليكم،
@@ -6603,7 +6609,7 @@ async function updateEmailList(){
   var all = await loadEmailsFromFirebase();
   var list = type === 'all' ? all : all.filter(function(r){ return r.type === type; });
 
-  document.getElementById('email-count-all').textContent = all.length;
+  document.getElementById('email-count-all').textContent = all.map(function(r){return String(r.email).trim().toLowerCase();}).filter(function(e,i,a){return a.indexOf(e)===i;}).length;
   document.getElementById('email-count-js').textContent  = all.filter(function(r){ return r.type==='jobseeker'; }).length;
 
   if(list.length === 0){
@@ -10756,9 +10762,17 @@ window.tmJobCandidates=async function(jobId){
 window.tmBccEmail=function(emails,subject,body,onSent){
   emails=emails.map(function(e){return String(e||'').trim().toLowerCase();}).filter(function(e,i,a){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)&&a.indexOf(e)===i; });
   if(!emails.length){ say('⚠️ مفيش إيميلات صالحة'); return; }
-  var N=40, batches=[]; for(var i=0;i<emails.length;i+=N) batches.push(emails.slice(i,i+N));
+  // كل إيميل يتبعتله الرسالة دي مرة واحدة بس: بنفتكر مين اتبعتله (على الجهاز ده) ونستبعده المرة الجاية
+  var SK='tm_bcc_sent_'+String(subject).split('').reduce(function(h,c){return (h*31+c.charCodeAt(0))|0;},7);
+  var sentBefore=[]; try{ sentBefore=JSON.parse(localStorage.getItem(SK)||'[]'); }catch(e){}
+  var skipped=emails.filter(function(e){return sentBefore.indexOf(e)>=0;}).length;
+  emails=emails.filter(function(e){return sentBefore.indexOf(e)<0;});
+  if(!emails.length){ say('✅ الرسالة دي اتبعتت قبل كده لكل الإيميلات ('+skipped+')'); return; }
+  var _userOnSent=onSent;
+  onSent=function(batch){ try{ var cur=JSON.parse(localStorage.getItem(SK)||'[]'); batch.forEach(function(e){ if(cur.indexOf(e)<0) cur.push(e); }); localStorage.setItem(SK,JSON.stringify(cur)); }catch(e){} if(_userOnSent) _userOnSent(batch); };
+  var N=90, batches=[]; for(var i=0;i<emails.length;i+=N) batches.push(emails.slice(i,i+N));
   var mb=$('mbody'); if(!mb) return;
-  mb.innerHTML='<div style="padding:4px 2px 16px;font-family:Cairo,sans-serif"><div style="font-size:15px;font-weight:900;color:#1a3a6e">✉️ إيميل جماعي لـ '+emails.length+' شخص</div>'+
+  mb.innerHTML='<div style="padding:4px 2px 16px;font-family:Cairo,sans-serif"><div style="font-size:15px;font-weight:900;color:#1a3a6e">✉️ إيميل جماعي لـ '+emails.length+' شخص</div>'+(skipped?'<div style="font-size:11.5px;color:#00703a;font-weight:700;margin-top:2px">✓ '+skipped+' إيميل اتبعتلهم الرسالة دي قبل كده ومش هيتكرروا</div>':'')+
     '<div style="font-size:11.5px;color:#5b6675;line-height:1.7;margin:4px 0 10px">كل المستلمين في <b>BCC</b>، يعني محدش هيشوف إيميل حد تاني. الإيميلات متقسمة دفعات ('+N+' في كل دفعة) عشان تطبيق الإيميل يفتحها من غير مشاكل. افتح كل دفعة ودوس إرسال.</div>'+
     '<div style="background:#f6f9fc;border-radius:10px;padding:9px;font-size:12px;margin-bottom:10px"><b>الموضوع:</b> '+esc(subject)+'</div>'+
     batches.map(function(b,i){ return '<a href="mailto:?bcc='+encodeURIComponent(b.join(','))+'&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body)+'" data-b="'+i+'" style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#1a3a6e;color:#fff;border-radius:11px;padding:11px 12px;margin-bottom:7px;text-decoration:none;font-size:13px;font-weight:800"><span>📤 الدفعة '+(i+1)+' من '+batches.length+'</span><span style="font-size:11px;opacity:.85">'+b.length+' إيميل</span></a>'; }).join('')+

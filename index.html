@@ -3224,6 +3224,27 @@ function openJobseekerById(idx){
   if(!js) return;
   openJobseeker(js);
 }
+// عدد سجلات مجموعة عامة بقراءة واحدة (Firestore REST count) + كاش 6 ساعات
+function tmCount(col){
+  var KEY='tm_cnt_'+col, now=Date.now();
+  try{ var c=JSON.parse(localStorage.getItem(KEY)||'null'); if(c&&now-c.t<6*3600*1000) return Promise.resolve(c.n); }catch(e){}
+  var key=''; try{ key=firebase.app().options.apiKey; }catch(e){}
+  var pid='tanmoyeen-masr26'; try{ pid=firebase.app().options.projectId||pid; }catch(e){}
+  return fetch('https://firestore.googleapis.com/v1/projects/'+pid+'/databases/(default)/documents:runAggregationQuery?key='+encodeURIComponent(key),{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({structuredAggregationQuery:{structuredQuery:{from:[{collectionId:col}]},aggregations:[{alias:'n',count:{}}]}})
+  }).then(function(r){ return r.json(); }).then(function(j){
+    var n=+(j&&j[0]&&j[0].result&&j[0].result.aggregateFields&&j[0].result.aggregateFields.n&&j[0].result.aggregateFields.n.integerValue);
+    if(!(n>=0)||isNaN(n)) throw new Error('count');
+    try{ localStorage.setItem(KEY,JSON.stringify({n:n,t:now})); }catch(e){}
+    return n;
+  }).catch(function(){
+    // لو الـREST ماشتغلش: من القوائم اللي اتحملت أصلًا (من غير أي قراءة زيادة)
+    var L={consultants:window.CONS,suppliers:window.SUPS,organizations:window.ORGS,volunteers:(window.VOLUNTEERS_PRELOAD||[])}[col]||[];
+    if(!L.length){ window.__tmCountsStarted=false; throw new Error('no data'); }
+    return L.length;
+  });
+}
 function updateAllCounts(){
   // ============ Local data counts ============
   var uniqueCons = deduplicateArray(CONS||[], ['phone','email','name']);
@@ -3280,11 +3301,18 @@ function updateAllCounts(){
       {col:'volunteers',   el:null,        dashEl:'dash-vols-n', cntEl:'vol-dash-count', suffix:' متطوع'},
       {col:'pending_jobs', el:'pending-count-badge', dashEl:null, cntEl:null, suffix:''},
     ];
+    // توفير: الدالة دي بتتنده 6-7 مرات في كل فتحة، وكانت كل مرة بتقرا كل السجلات (حوالي 4,700 قراءة لكل زيارة).
+    // دلوقتي العدد بييجي مرة واحدة بس، من count aggregation (قراءة واحدة لكل 1000 سجل) ومحفوظ 6 ساعات على الجهاز.
+    if(window.__tmCountsStarted) { updateFBStats(); return; }
+    window.__tmCountsStarted = true;
+    var _isAdm = false; try{ var _u=firebase.auth().currentUser; _isAdm=!!(_u&&String(_u.email||'').toLowerCase()==='elzieni2007@gmail.com'); }catch(_e){}
     fbCollections.forEach(function(item){
-      db.collection(item.col).get().then(function(snap){
-        var count = item.col === 'pending_jobs'
-          ? snap.docs.filter(function(d){ return d.data().status === 'pending'; }).length
-          : snap.size;
+      if(item.col==='pending_jobs' && !_isAdm) return;
+      var getCount = item.col === 'pending_jobs'
+        ? db.collection('pending_jobs').where('status','==','pending').get().then(function(sn){ return sn.size; })
+        : tmCount(item.col);
+      getCount.then(function(count){
+        var snap = {size: count};
         if(item.el){ var e=document.getElementById(item.el); if(e) e.textContent=count; }
         if(item.dashEl){ var e=document.getElementById(item.dashEl); if(e) e.textContent=count; }
         if(item.cntEl){ var e=document.getElementById(item.cntEl); if(e) e.textContent=count+item.suffix; }
@@ -3297,6 +3325,7 @@ function updateAllCounts(){
       }).catch(function(){});
     });
 
+    if(window.__tmJsStatsDone) return; window.__tmJsStatsDone = true;
     // باحثو عمل: العدد بس من إحصائيات البنك (بيانات الباحثين نفسها مش متاحة للعامة)
     db.collection('settings').doc('js_stats').get().then(function(snap){
       var n=(snap.exists&&snap.data().total)||0;

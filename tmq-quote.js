@@ -285,9 +285,9 @@ async function buildPdf(d){
     const pages=[...doc.querySelectorAll('.tmq-pg')];const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'pt',format:'a4',compress:true});
     const W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight();
     for(let i=0;i<pages.length;i++){const pg=pages[i];pg.style.boxShadow='none';pg.style.margin='0';pg.style.width='794px';pg.style.minHeight='1123px';
-      const cv=await window.html2canvas(pg,{scale:1.5,backgroundColor:'#ffffff',useCORS:true,logging:false,imageTimeout:4000,windowWidth:794});
+      const cv=await window.html2canvas(pg,{scale:1.3,backgroundColor:'#ffffff',useCORS:true,logging:false,imageTimeout:4000,windowWidth:794});
       let w=W,h=cv.height*W/cv.width;if(h>H){h=H;w=cv.width*H/cv.height}
-      if(i)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',0.85),'JPEG',(W-w)/2,0,w,h,undefined,'FAST')}
+      if(i)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',0.78),'JPEG',(W-w)/2,0,w,h,undefined,'FAST')}
     pdf.setProperties({title:'عرض سعر '+(d.no||'')+(d.assoc?' - '+d.assoc:'')});
     return pdf.output('blob')}finally{f.remove()}}
 function open(booking={},opts={}){
@@ -339,13 +339,16 @@ function open(booking={},opts={}){
   // بعد ما توقف تعديل بثانيتين ونص، ولما تدوس «تحميل PDF» بينزل على طول
   let _pre=null,_preT=null,_lastUp=null;
   const keyNow=()=>JSON.stringify(snapshot('x'),(key,v)=>key==='updatedAt'||key==='status'?undefined:v);
-  const prepare=()=>{if(!inApp())return;clearTimeout(_preT);_preT=setTimeout(()=>{const k=keyNow();if(_pre&&_pre.k===k)return;
-      const job={k,url:null};job.p=getPdf(true).then(b=>uploadPdf(b).then(u=>{job.url=u;job.b=b;return job})).catch(e=>{console.warn('pre-upload',e);if(_pre===job)_pre=null;return null});_pre=job},2500)};
+  let _firstPre=true,_preErr='';
+  const startJob=()=>{_preT=null;const k=keyNow();if(_pre&&_pre.k===k)return _pre;
+      const job={k,url:null};job.p=getPdf(true).then(b=>uploadPdf(b).then(u=>{job.url=u;job.b=b;return job})).catch(e=>{console.warn('pre-upload',e);_preErr=String((e&&(e.code||e.message))||e).slice(0,80);if(_pre===job)_pre=null;return null});_pre=job;return job};
+  const prepare=()=>{if(!inApp())return;clearTimeout(_preT);const wait=_firstPre?600:2500;_firstPre=false;_preT=setTimeout(startJob,wait)};
   const canShareFiles=()=>{try{return !!(navigator.canShare&&navigator.canShare({files:[new File([new Blob(['x'],{type:'application/pdf'})],'x.pdf',{type:'application/pdf'})]}))}catch(e){return false}};
-  const downloadPdf=async()=>{try{const t0=Date.now();clearTimeout(_preT);
-    if(inApp()&&_pre&&_pre.k===keyNow()){msg('بيجهّز الملف…');const j=await _pre.p;if(j&&j.url){const m=window.median||window.gonative;if(m&&m.share&&m.share.downloadFile)m.share.downloadFile({url:j.url,open:true});else location.href=j.url;msg('اتحمّل ملف PDF: '+pdfName()+' · ('+((Date.now()-t0)/1000).toFixed(1)+' ث)');return j.b}}
+  const downloadPdf=async()=>{try{const t0=Date.now();
+    if(inApp()){if(_preT){clearTimeout(_preT);startJob()}else if(!(_pre&&_pre.k===keyNow()))startJob()}
+    if(inApp()&&_pre&&_pre.k===keyNow()){msg('بيجهّز الملف…');const j=await _pre.p;if(j&&j.url){const m=window.median||window.gonative;if(m&&m.share&&m.share.downloadFile)m.share.downloadFile({url:j.url,open:true});else location.href=j.url;msg('اتحمّل ملف PDF: '+pdfName()+' · (جاهز من الخلفية، استنينا '+((Date.now()-t0)/1000).toFixed(1)+' ث)');return j.b}}
     const b=await getPdf();const t1=Date.now();if(inApp())msg('بيرفع الملف عشان يتحفظ باسمه…');_lastUp=null;const w=await deliver(b);const t2=Date.now();if(w==='app'&&_lastUp){clearTimeout(_preT);const j={k:keyNow(),url:_lastUp,b};j.p=Promise.resolve(j);_pre=j}
-    const sec=x=>(x/1000).toFixed(1);if(w==='app'||!inApp())msg('اتحمّل ملف PDF: '+pdfName()+' · (تجهيز '+sec(t1-t0)+' ث'+(w==='app'?' + رفع '+sec(t2-t1)+' ث':'')+')');return b}catch(e){console.warn(e);msg('معرفناش نجهّز ملف PDF. اتأكد من الإنترنت وجرّب تاني.');return null}};
+    const sec=x=>(x/1000).toFixed(1);if(w==='app'||!inApp())msg('اتحمّل ملف PDF: '+pdfName()+' · (تجهيز '+sec(t1-t0)+' ث'+(w==='app'?' + رفع '+sec(t2-t1)+' ث':'')+')'+(_preErr?' · خلفية: '+_preErr:''));return b}catch(e){console.warn(e);msg('معرفناش نجهّز ملف PDF. اتأكد من الإنترنت وجرّب تاني.');return null}};
   // مشاركة الملف نفسه (أندرويد/آيفون): بتفتح قايمة المشاركة وتختار Gmail أو واتساب فيتبعت الـ PDF مرفق
   const shareFile=async(blob,title,text)=>{try{const file=new File([blob],pdfName(),{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:title,text:text});return 'shared'}}catch(e){if(e&&e.name==='AbortError')return 'cancel'}return 'nope'};
   const getDocx=async()=>{await loadDocx();d.dateTxt=dateAr(new Date(d.date+'T12:00:00'));return window.docx.Packer.toBlob(buildQuoteDoc(window.docx,d,Uint8Array.from(atob(window.__TMQ_logo),c=>c.charCodeAt(0))))};

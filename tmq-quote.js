@@ -311,7 +311,7 @@ function open(booking={},opts={}){
   const $=s=>ov.querySelector(s);const msg=t=>{$('#tmqMsg').textContent=t};
   const num=['setup','monthly','deposit','cap','valid','annualMonths'];
   ov.querySelectorAll('[data-k]').forEach(el=>{el.value=d[el.dataset.k]??'';el.addEventListener('input',()=>{const k=el.dataset.k;d[k]=num.includes(k)?Math.max(0,+el.value||0):el.value;render()})});
-  const render=()=>{d.dateTxt=dateAr(new Date(d.date+'T12:00:00'));$('#tmqPrev').innerHTML=previewHTML(d);$('.tmq-top h2').textContent='عرض سعر · '+d.no};render();
+  const render=()=>{d.dateTxt=dateAr(new Date(d.date+'T12:00:00'));$('#tmqPrev').innerHTML=previewHTML(d);$('.tmq-top h2').textContent='عرض سعر · '+d.no;try{prepare()}catch(e){}};
   const close=()=>{ov.remove();document.body.style.overflow=''};
   $('.tmq-x').onclick=close;ov.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
   const snapshot=status=>{const q=Object.assign({},d,{status:status||(saved?.status==='sent'?'sent':'draft'),updatedAt:new Date().toISOString()});delete q.dateTxt;return q};
@@ -326,22 +326,31 @@ function open(booking={},opts={}){
   const loadStorage=()=>window.firebase&&firebase.storage?Promise.resolve():new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js';sc.onload=res;sc.onerror=rej;document.head.appendChild(sc)});
   const uploadPdf=async b=>{await loadStorage();const ref=firebase.storage().ref('quotes/'+String(d.no||'quote').replace(/[^\w.-]/g,'_')+'/'+pdfName());
     await ref.put(b,{contentType:'application/pdf',contentDisposition:"attachment; filename*=UTF-8''"+encodeURIComponent(pdfName())});return ref.getDownloadURL()};
-  const deliver=async b=>{if(inApp()){try{const url=await uploadPdf(b);const m=window.median||window.gonative;
+  const deliver=async(b,readyUrl)=>{if(inApp()){try{const url=readyUrl||await uploadPdf(b);_lastUp=url;const m=window.median||window.gonative;
       if(m&&m.share&&m.share.downloadFile){m.share.downloadFile({url:url,open:true})}else{location.href=url}return 'app'}
     catch(e){console.warn('pdf upload',e);msg('⚠️ جوه التطبيق الملف هيتحفظ باسم download لحد ما تفعّل Firebase Storage. الأسهل دلوقتي: افتح لوحة الأدمن من Chrome.')}}
     saveBlob(b,pdfName());return 'browser'};
   const saveBlob=(b,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)};
   // نفس العرض من غير تعديل = نفس الملف: مانعيدش تجهيزه تاني (التجهيز هو أبطأ خطوة)
   let _pdfCache=null;
-  const getPdf=async()=>{const k=JSON.stringify(snapshot('x'),(key,v)=>key==='updatedAt'||key==='status'?undefined:v);
-    if(_pdfCache&&_pdfCache.k===k)return _pdfCache.b;msg('بيجهّز ملف PDF… (ثواني)');const b=await buildPdf(d);_pdfCache={k,b};return b};
+  const getPdf=async(silent)=>{const k=JSON.stringify(snapshot('x'),(key,v)=>key==='updatedAt'||key==='status'?undefined:v);
+    if(_pdfCache&&_pdfCache.k===k)return _pdfCache.b;if(!silent)msg('بيجهّز ملف PDF… (ثواني)');const b=await buildPdf(d);_pdfCache={k,b};return b};
+  // جوه التطبيق: الرفع على Storage هو اللي بياخد الوقت (حوالي 10 ثواني)، فبنجهّز ونرفع الملف في الخلفية
+  // بعد ما توقف تعديل بثانيتين ونص، ولما تدوس «تحميل PDF» بينزل على طول
+  let _pre=null,_preT=null,_lastUp=null;
+  const keyNow=()=>JSON.stringify(snapshot('x'),(key,v)=>key==='updatedAt'||key==='status'?undefined:v);
+  const prepare=()=>{if(!inApp())return;clearTimeout(_preT);_preT=setTimeout(()=>{const k=keyNow();if(_pre&&_pre.k===k)return;
+      const job={k,url:null};job.p=getPdf(true).then(b=>uploadPdf(b).then(u=>{job.url=u;job.b=b;return job})).catch(e=>{console.warn('pre-upload',e);if(_pre===job)_pre=null;return null});_pre=job},2500)};
   const canShareFiles=()=>{try{return !!(navigator.canShare&&navigator.canShare({files:[new File([new Blob(['x'],{type:'application/pdf'})],'x.pdf',{type:'application/pdf'})]}))}catch(e){return false}};
-  const downloadPdf=async()=>{try{const t0=Date.now();const b=await getPdf();const t1=Date.now();if(inApp())msg('بيرفع الملف عشان يتحفظ باسمه…');const w=await deliver(b);const t2=Date.now();
+  const downloadPdf=async()=>{try{const t0=Date.now();clearTimeout(_preT);
+    if(inApp()&&_pre&&_pre.k===keyNow()){msg('بيجهّز الملف…');const j=await _pre.p;if(j&&j.url){const m=window.median||window.gonative;if(m&&m.share&&m.share.downloadFile)m.share.downloadFile({url:j.url,open:true});else location.href=j.url;msg('اتحمّل ملف PDF: '+pdfName()+' · ('+((Date.now()-t0)/1000).toFixed(1)+' ث)');return j.b}}
+    const b=await getPdf();const t1=Date.now();if(inApp())msg('بيرفع الملف عشان يتحفظ باسمه…');_lastUp=null;const w=await deliver(b);const t2=Date.now();if(w==='app'&&_lastUp){clearTimeout(_preT);const j={k:keyNow(),url:_lastUp,b};j.p=Promise.resolve(j);_pre=j}
     const sec=x=>(x/1000).toFixed(1);if(w==='app'||!inApp())msg('اتحمّل ملف PDF: '+pdfName()+' · (تجهيز '+sec(t1-t0)+' ث'+(w==='app'?' + رفع '+sec(t2-t1)+' ث':'')+')');return b}catch(e){console.warn(e);msg('معرفناش نجهّز ملف PDF. اتأكد من الإنترنت وجرّب تاني.');return null}};
   // مشاركة الملف نفسه (أندرويد/آيفون): بتفتح قايمة المشاركة وتختار Gmail أو واتساب فيتبعت الـ PDF مرفق
   const shareFile=async(blob,title,text)=>{try{const file=new File([blob],pdfName(),{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:title,text:text});return 'shared'}}catch(e){if(e&&e.name==='AbortError')return 'cancel'}return 'nope'};
   const getDocx=async()=>{await loadDocx();d.dateTxt=dateAr(new Date(d.date+'T12:00:00'));return window.docx.Packer.toBlob(buildQuoteDoc(window.docx,d,Uint8Array.from(atob(window.__TMQ_logo),c=>c.charCodeAt(0))))};
   const download=async()=>{msg('بيجهّز ملف Word…');try{const b=await getDocx();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fileName();document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);msg('اتحمّل ملف Word.');return true}catch(e){msg('معرفناش نجهّز ملف Word. اتأكد من الإنترنت وجرّب تاني.');return false}};
+  render();
   ov.addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
     if(a==='save'){persist();msg('اتحفظت المسودة.')}
     if(a==='docx'){persist();await download()}

@@ -270,18 +270,26 @@ const waPhone=p=>{let x=String(p||'').replace(/[^\d]/g,'');if(x.startsWith('00')
 // ملف PDF من نفس صفحات العرض (صفحة A4 لكل صفحة في المعاينة)
 let _pdfLibs=null;const loadPdfLibs=()=>_pdfLibs||(_pdfLibs=Promise.all(['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js','https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'].map(src=>new Promise((res,rej)=>{if((src.includes('html2canvas')&&window.html2canvas)||(src.includes('jspdf')&&window.jspdf)){res();return}const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>{_pdfLibs=null;rej(new Error('lib'))};document.head.appendChild(sc)}))));
 async function buildPdf(d){
-  await loadPdfLibs();if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+  await loadPdfLibs();
   d.dateTxt=dateAr(new Date((d.date||new Date().toISOString().slice(0,10))+'T12:00:00'));
-  const host=document.createElement('div');host.style.cssText='position:fixed;left:-30000px;top:0;width:794px;direction:rtl;background:#fff';
-  host.innerHTML='<div class="tmq-prev" style="padding:0;background:#fff">'+previewHTML(d)+'</div>';document.body.appendChild(host);
-  try{const pages=[...host.querySelectorAll('.tmq-pg')];const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'pt',format:'a4',compress:true});
+  // بنرسم العرض جوه iframe منفصل فيه العرض بس: html2canvas كان بينسخ صفحة التطبيق كلها (حوالي 12 ألف عنصر) مع كل صفحة، وده كان سبب البطء
+  const f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;left:-30000px;top:0;width:794px;height:1123px;border:0;visibility:hidden';
+  document.body.appendChild(f);
+  try{
+    const fonts=[...document.querySelectorAll('link[rel="stylesheet"][href*="fonts.googleapis"]')].map(l=>'<link rel="stylesheet" href="'+l.href+'">').join('')||'<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap">';
+    const doc=f.contentDocument;doc.open();
+    doc.write('<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">'+fonts+'<style>'+CSS+'</style></head><body style="margin:0;background:#fff;direction:rtl"><div class="tmq-prev" style="padding:0;background:#fff">'+previewHTML(d)+'</div></body></html>');
+    doc.close();
+    await new Promise(r=>{if(doc.readyState==='complete')r();else f.onload=()=>r();setTimeout(r,3000)});
+    try{if(doc.fonts&&doc.fonts.ready)await Promise.race([doc.fonts.ready,new Promise(r=>setTimeout(r,3000))])}catch(e){}
+    const pages=[...doc.querySelectorAll('.tmq-pg')];const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'pt',format:'a4',compress:true});
     const W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight();
     for(let i=0;i<pages.length;i++){const pg=pages[i];pg.style.boxShadow='none';pg.style.margin='0';pg.style.width='794px';pg.style.minHeight='1123px';
-      const cv=await window.html2canvas(pg,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
+      const cv=await window.html2canvas(pg,{scale:1.5,backgroundColor:'#ffffff',useCORS:true,logging:false,imageTimeout:4000,windowWidth:794});
       let w=W,h=cv.height*W/cv.width;if(h>H){h=H;w=cv.width*H/cv.height}
-      if(i)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',0.9),'JPEG',(W-w)/2,0,w,h)}
+      if(i)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',0.85),'JPEG',(W-w)/2,0,w,h,undefined,'FAST')}
     pdf.setProperties({title:'عرض سعر '+(d.no||'')+(d.assoc?' - '+d.assoc:'')});
-    return pdf.output('blob')}finally{host.remove()}}
+    return pdf.output('blob')}finally{f.remove()}}
 function open(booking={},opts={}){
   if(!document.getElementById('tmq-css')){const s=document.createElement('style');s.id='tmq-css';s.textContent=CSS;document.head.appendChild(s)}
   const saved=booking.quote||null;const seq=saved?null:nextNo();
@@ -298,6 +306,8 @@ function open(booking={},opts={}){
    </div><div class="tmq-prev" id="tmqPrev"></div></div>
    <div class="tmq-acts"><button class="tmq-b s" data-a="save">حفظ المسودة</button><button class="tmq-b" data-a="pdf">تحميل PDF</button><button class="tmq-b s" data-a="docx">تحميل Word</button><button class="tmq-b g" data-a="mail">إرسال بالإيميل</button><button class="tmq-b g" data-a="wa">إرسال واتساب</button><span class="tmq-msg" id="tmqMsg">راجع العرض وعدّل، وبعدين ابعته.</span></div></div>`;
   document.body.appendChild(ov);document.body.style.overflow='hidden';
+  // نحمّل مكتبات الـPDF في الخلفية من أول ما العرض يتفتح، عشان الزرار يبقى أسرع
+  setTimeout(()=>{loadPdfLibs().catch(()=>{});if(inApp())loadStorage().catch(()=>{})},400);
   const $=s=>ov.querySelector(s);const msg=t=>{$('#tmqMsg').textContent=t};
   const num=['setup','monthly','deposit','cap','valid','annualMonths'];
   ov.querySelectorAll('[data-k]').forEach(el=>{el.value=d[el.dataset.k]??'';el.addEventListener('input',()=>{const k=el.dataset.k;d[k]=num.includes(k)?Math.max(0,+el.value||0):el.value;render()})});
@@ -321,7 +331,11 @@ function open(booking={},opts={}){
     catch(e){console.warn('pdf upload',e);msg('⚠️ جوه التطبيق الملف هيتحفظ باسم download لحد ما تفعّل Firebase Storage. الأسهل دلوقتي: افتح لوحة الأدمن من Chrome.')}}
     saveBlob(b,pdfName());return 'browser'};
   const saveBlob=(b,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)};
-  const getPdf=async()=>{msg('بيجهّز ملف PDF…');return buildPdf(d)};
+  // نفس العرض من غير تعديل = نفس الملف: مانعيدش تجهيزه تاني (التجهيز هو أبطأ خطوة)
+  let _pdfCache=null;
+  const getPdf=async()=>{const k=JSON.stringify(snapshot('x'),(key,v)=>key==='updatedAt'||key==='status'?undefined:v);
+    if(_pdfCache&&_pdfCache.k===k)return _pdfCache.b;msg('بيجهّز ملف PDF… (ثواني)');const b=await buildPdf(d);_pdfCache={k,b};return b};
+  const canShareFiles=()=>{try{return !!(navigator.canShare&&navigator.canShare({files:[new File([new Blob(['x'],{type:'application/pdf'})],'x.pdf',{type:'application/pdf'})]}))}catch(e){return false}};
   const downloadPdf=async()=>{try{const b=await getPdf();const w=await deliver(b);if(w==='app'||!inApp())msg('اتحمّل ملف PDF: '+pdfName());return b}catch(e){console.warn(e);msg('معرفناش نجهّز ملف PDF. اتأكد من الإنترنت وجرّب تاني.');return null}};
   // مشاركة الملف نفسه (أندرويد/آيفون): بتفتح قايمة المشاركة وتختار Gmail أو واتساب فيتبعت الـ PDF مرفق
   const shareFile=async(blob,title,text)=>{try{const file=new File([blob],pdfName(),{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:title,text:text});return 'shared'}}catch(e){if(e&&e.name==='AbortError')return 'cancel'}return 'nope'};
@@ -333,8 +347,10 @@ function open(booking={},opts={}){
     if(a==='pdf'){persist();await downloadPdf()}
     if(a==='mail'){if(!d.email){msg('اكتب إيميل الجمعية الأول.');$('[data-k="email"]').focus();return}
       const subject='عرض سعر منصة الفرص والمنح – '+d.no,body=mailBody(d);
-      let blob=null;try{blob=await getPdf()}catch(e){console.warn(e)}
       persist('sent');try{opts.onSent&&opts.onSent(booking.quote,'email',booking)}catch(e){}
+      // لو الجهاز مش بيقدر يرفق الملف لوحده (زي جوه التطبيق) مانجهزش PDF خالص ونفتح الإيميل على طول، وانت بترفق الملف بإيدك
+      if(!canShareFiles()){location.href=`mailto:${encodeURIComponent(d.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;msg('اتفتح الإيميل ✅ ارفق ملف PDF اللي حمّلته («'+pdfName()+'») وابعت.');return}
+      let blob=null;try{blob=await getPdf()}catch(e){console.warn(e)}
       if(blob){try{navigator.clipboard&&navigator.clipboard.writeText(d.email)}catch(e){}
         const r=await shareFile(blob,subject,body);
         if(r==='shared'){msg('✅ اختار Gmail من قايمة المشاركة: الـ PDF مرفق والرسالة جاهزة. إيميل الجمعية اتنسخ، الصقه في خانة "إلى".');return}
@@ -343,9 +359,8 @@ function open(booking={},opts={}){
       location.href=`mailto:${encodeURIComponent(d.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       msg(blob?'اتفتح الإيميل، وملف PDF اتحمّل باسم «'+pdfName()+'»: ارفقه من التحميلات وابعت. (المتصفح ده مش بيسمح يرفق الملف لوحده)':'اتفتح الإيميل. حمّل PDF وارفقه.')}
     if(a==='wa'){const p=waPhone(d.phone);if(!p){msg('اكتب رقم موبايل الجمعية الأول.');$('[data-k="phone"]').focus();return}
-      let blob=null;try{blob=await getPdf()}catch(e){}
-      if(blob)await deliver(blob);persist('sent');try{opts.onSent&&opts.onSent(booking.quote,'whatsapp',booking)}catch(e){}
-      window.open(`https://wa.me/${p}?text=${encodeURIComponent(waText(d))}`,'_blank','noopener');msg(blob?'اتفتح واتساب، وملف PDF اتحمّل: ابعته في نفس المحادثة.':'اتفتح واتساب. حمّل PDF وابعته.')}});
+      persist('sent');try{opts.onSent&&opts.onSent(booking.quote,'whatsapp',booking)}catch(e){}
+      window.open(`https://wa.me/${p}?text=${encodeURIComponent(waText(d))}`,'_blank','noopener');msg('اتفتح واتساب ✅ ابعت ملف PDF اللي حمّلته في نفس المحادثة.')}});
   setTimeout(()=>$('[data-k="assoc"]').focus(),50);
   return {close,data:d};
 }

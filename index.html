@@ -7429,10 +7429,13 @@ function renderFundingList(){
   var list=document.getElementById('funding-list'); if(!list) return;
   var cnt={all:_fundingRows.length}; _fundingRows.forEach(function(r){ var k=r.status||'pending'; cnt[k]=(cnt[k]||0)+1; });
   var st=document.getElementById('funding-stats');
-  if(st) st.innerHTML='<span style="background:#1a3a6e;color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800">الكل: '+cnt.all+'</span>'+Object.keys(FUND_ST).filter(function(k){return cnt[k];}).map(function(k){return '<span style="background:'+FUND_ST[k].c+'22;color:'+FUND_ST[k].c+';border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800">'+FUND_ST[k].t+': '+cnt[k]+'</span>';}).join('');
+  // الفلترة بالحالة: دوس على أي حالة تظهر جمعياتها بس، ودوس تاني (أو «الكل») ترجع الكل
+  var F=window._fundFilter||'all'; if(F!=='all'&&!cnt[F]) F=window._fundFilter='all';
+  var chip=function(k,label,col,n){ var on=F===k; return '<button type="button" onclick="setFundFilter(\''+k+'\')" aria-pressed="'+on+'" style="cursor:pointer;font-family:Cairo,sans-serif;border:2px solid '+(on?col:'transparent')+';background:'+(on?col:col+'22')+';color:'+(on?'#fff':col)+';border-radius:20px;padding:4px 11px;font-size:11px;font-weight:800;min-height:32px">'+(on&&k!=='all'?'✓ ':'')+label+': '+n+'</button>'; };
+  if(st) st.innerHTML=chip('all','الكل','#1a3a6e',cnt.all)+Object.keys(FUND_ST).filter(function(k){return cnt[k];}).map(function(k){return chip(k,FUND_ST[k].t,FUND_ST[k].c,cnt[k]);}).join('');
   var q=String((document.getElementById('funding-q')||{}).value||'').trim().toLowerCase();
-  var rows=_fundingRows.filter(function(r){ return !q||[r.orgName,r.gov,r.contactName,r.phone,r.regNumber].join(' ').toLowerCase().indexOf(q)>-1; });
-  if(!rows.length){ list.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">📭 لا توجد حجوزات</div>'; return; }
+  var rows=_fundingRows.filter(function(r){ return (F==='all'||(r.status||'pending')===F)&&(!q||[r.orgName,r.gov,r.contactName,r.phone,r.regNumber].join(' ').toLowerCase().indexOf(q)>-1); });
+  if(!rows.length){ list.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">📭 لا توجد حجوزات'+(F!=='all'?' في الحالة دي':'')+'</div>'; return; }
   var E=escapeHtml;
   list.innerHTML=rows.map(function(r){
     var s=FUND_ST[r.status||'pending']||FUND_ST.pending;
@@ -7454,6 +7457,7 @@ function renderFundingList(){
       '</div></div>';
   }).join('');
 }
+function setFundFilter(k){ window._fundFilter=(window._fundFilter===k?'all':k); renderFundingList(); }
 function updateFundingStatus(id,status){
   db.collection('funding_waitlist').doc(id).update({status:status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){
     _fundingRows.forEach(function(r){ if(r.id===id) r.status=status; }); toast('✅ اتغيرت الحالة'); renderFundingList();

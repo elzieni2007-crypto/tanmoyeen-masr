@@ -329,6 +329,37 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
+    // ===== بيانات منصة الفرص المشتركة (الفرص والممولين وآخر بحث) =====
+    // أي عضو نشط في جمعية اشتراكها ساري يقراها، والأدمن وحساب المزامنة بس يكتبوها.
+    function myOrg() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.orgId;
+    }
+    function isActiveOrgUser() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && isMember(myOrg()) && orgActive(myOrg());
+    }
+    function isSyncBot() {
+      return isSignedIn() && request.auth.token.email == 'fp-sync-bot@tanmoyeen-masr26.firebaseapp.com';
+    }
+    match /fp_opps/{id} {
+      allow read: if isAdmin() || isSyncBot() || isActiveOrgUser();
+      allow write: if isAdmin() || isSyncBot();
+    }
+    match /fp_funders/{id} {
+      allow read: if isAdmin() || isSyncBot() || isActiveOrgUser();
+      allow write: if isAdmin() || isSyncBot();
+    }
+    match /fp_meta/{id} {
+      allow read: if isAdmin() || isSyncBot() || isActiveOrgUser();
+      allow write: if isAdmin() || isSyncBot();
+    }
+    // استهلاك الذكاء الاصطناعي لكل جمعية: بتكتبه الدالة بس، والأدمن يقراه
+    match /fp_usage/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // Deny everything else by default.
     match /{document=**} {
       allow read, write: if false;

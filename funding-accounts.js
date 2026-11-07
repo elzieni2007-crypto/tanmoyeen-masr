@@ -74,7 +74,7 @@
     return rows.map(function(o){var st=state(o),until=toD(o.paidUntil);
       return '<div class="tma-card" data-org="'+o.id+'"><div class="tma-row" style="justify-content:space-between"><div><b style="font-size:15px">'+esc(o.name)+'</b> <span class="tma-pill" style="color:'+st.c+';background:'+st.bg+'">'+st.t+'</span>'+
         '<div class="tma-m" dir="ltr" style="text-align:right">'+esc(o.email)+(o.phone?' · '+esc(o.phone):'')+'</div></div>'+
-        '<div class="tma-m">الاشتراك حتى: <b style="color:#11243a">'+fmt(until)+'</b><br>آخر دخول: '+fmt(lastIn(o))+'</div></div>'+
+        '<div class="tma-m">الاشتراك حتى: <b style="color:#11243a">'+fmt(until)+'</b><br>آخر دخول: '+fmt(lastIn(o))+'<br>'+useTxt(o)+'</div></div>'+
         '<div class="tma-row" style="margin-top:10px"><button class="tma-b g" data-ext="1">+ شهر</button><button class="tma-b g" data-ext="3">+ 3 شهور</button><button class="tma-b g" data-ext="12">+ سنة</button>'+
         '<input class="tma-in" type="date" data-date value="'+ymd(until)+'" style="flex:none"><button class="tma-b" data-set>فعّل حتى التاريخ</button>'+
         (o.status==='active'?'<button class="tma-b r" data-off>⏸ إيقاف الحساب</button>':'<button class="tma-b g" data-on>▶ تشغيل الحساب</button>')+
@@ -82,6 +82,9 @@
         teamHTML(o)+
         '<div class="tma-row" style="margin-top:8px"><input class="tma-in" data-notes placeholder="ملاحظات الأدمن (رقم الإيصال، طريقة الدفع…)" value="'+esc(o.notes||'')+'"></div></div>'}).join('')}
   function mems(o){return S.mem[o.id]||[]}
+  // استهلاك الذكاء الاصطناعي للجمعية الشهر ده (fp_usage بتكتبه دالة fpai)
+  function useTxt(o){var u=(S.use||{})[o.id];if(!u)return 'الذكاء الاصطناعي الشهر ده: 0 طلب';var k=function(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?Math.round(n/1e3)+'K':String(n||0)};var f=(u.by&&u.by.full&&u.by.full.calls)||0;
+    return 'الذكاء الاصطناعي الشهر ده: <b style="color:#11243a">'+(u.calls||0)+'</b> طلب ('+f+' مقترح كامل) · '+k(u.inTok)+' داخل / '+k(u.outTok)+' خارج'}
   function lastIn(o){var t=0;mems(o).forEach(function(m){var d=toD(m.lastLogin);if(d&&d>t)t=d});return t||null}
   function teamHTML(o){var ms=mems(o).slice().sort(function(a,b){return (a.role==='owner'?0:1)-(b.role==='owner'?0:1)}),act=ms.filter(function(m){return m.status==='active'}).length;
     return '<details style="margin-top:8px"><summary class="tma-m" style="cursor:pointer">👥 فريق الجمعية: '+act+' من '+(o.seats||3)+' مستخدمين</summary>'+
@@ -91,7 +94,8 @@
   function render(){var h=g('tma-head'),l=g('tma-list');if(!h||!l)return;h.innerHTML=head();l.innerHTML=listHTML();var f=g('tma-f');if(f)f.value=S.f;bind()}
   function renderList(){var l=g('tma-list');if(l){l.innerHTML=listHTML();bindList()}}
   async function load(){var l=g('tma-list');if(l)l.innerHTML='<div class="tma-m" style="text-align:center;padding:20px">⏳ جاري التحميل…</div>';
-    try{var s=await db.collection('orgs').get();S.orgs=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return (toD(b.createdAt)||0)-(toD(a.createdAt)||0)})}
+    try{S.use={};var mon=new Date().toISOString().slice(0,7);db.collection('fp_usage').where('month','==',mon).get().then(function(q){q.docs.forEach(function(d){var x=d.data();S.use[x.orgId]=x});renderList()}).catch(function(){});
+      var s=await db.collection('orgs').get();S.orgs=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return (toD(b.createdAt)||0)-(toD(a.createdAt)||0)})}
     catch(e){if(l)l.innerHTML='<div style="color:#b33a3a;padding:12px;text-align:center">❌ '+(e.code==='permission-denied'?'محتاج تنشر قواعد Firestore الجديدة (orgs)':esc(e.message))+'</div>';return}
     S.mem={};try{var ms=await db.collectionGroup('members').get();ms.docs.forEach(function(d){var x=d.data();x.uid=d.id;var oid=d.ref.parent.parent.id;(S.mem[oid]=S.mem[oid]||[]).push(x)})}catch(e){console.warn('members',e)}
     try{var w=await db.collection('funding_waitlist').get();S.wait=w.docs.map(function(d){var x=d.data();x.id=d.id;return x})}catch(e){S.wait=[]}

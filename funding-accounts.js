@@ -93,12 +93,17 @@
       '<div class="tma-row" style="padding-top:6px"><label class="tma-m">الحد الأقصى للمستخدمين <input class="tma-in" type="number" min="1" max="20" data-seats value="'+(o.seats||3)+'" style="width:70px;flex:none"></label></div></details>'}
   function render(){var h=g('tma-head'),l=g('tma-list');if(!h||!l)return;h.innerHTML=head();l.innerHTML=listHTML();var f=g('tma-f');if(f)f.value=S.f;bind()}
   function renderList(){var l=g('tma-list');if(l){l.innerHTML=listHTML();bindList()}}
+  // كل الطلبات بتتبعت مع بعض بدل ما تستنى واحدة ورا التانية
   async function load(){var l=g('tma-list');if(l)l.innerHTML='<div class="tma-m" style="text-align:center;padding:20px">⏳ جاري التحميل…</div>';
-    try{S.use={};var mon=new Date().toISOString().slice(0,7);db.collection('fp_usage').where('month','==',mon).get().then(function(q){q.docs.forEach(function(d){var x=d.data();S.use[x.orgId]=x});renderList()}).catch(function(){});
-      var s=await db.collection('orgs').get();S.orgs=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return (toD(b.createdAt)||0)-(toD(a.createdAt)||0)})}
+    var mon=new Date().toISOString().slice(0,7);
+    var pOrgs=db.collection('orgs').get(),pMem=db.collectionGroup('members').get().catch(function(e){console.warn('members',e);return null}),
+      pWait=db.collection('funding_waitlist').get().catch(function(){return null}),pUse=db.collection('fp_usage').where('month','==',mon).get().catch(function(){return null});
+    try{var s=await pOrgs;S.orgs=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return (toD(b.createdAt)||0)-(toD(a.createdAt)||0)})}
     catch(e){if(l)l.innerHTML='<div style="color:#b33a3a;padding:12px;text-align:center">❌ '+(e.code==='permission-denied'?'محتاج تنشر قواعد Firestore الجديدة (orgs)':esc(e.message))+'</div>';return}
-    S.mem={};try{var ms=await db.collectionGroup('members').get();ms.docs.forEach(function(d){var x=d.data();x.uid=d.id;var oid=d.ref.parent.parent.id;(S.mem[oid]=S.mem[oid]||[]).push(x)})}catch(e){console.warn('members',e)}
-    try{var w=await db.collection('funding_waitlist').get();S.wait=w.docs.map(function(d){var x=d.data();x.id=d.id;return x})}catch(e){S.wait=[]}
+    var r=await Promise.all([pMem,pWait,pUse]);
+    S.mem={};if(r[0])r[0].docs.forEach(function(d){var x=d.data();x.uid=d.id;var oid=d.ref.parent.parent.id;(S.mem[oid]=S.mem[oid]||[]).push(x)});
+    S.wait=r[1]?r[1].docs.map(function(d){var x=d.data();x.id=d.id;return x}):[];
+    S.use={};if(r[2])r[2].docs.forEach(function(d){var x=d.data();S.use[x.orgId]=x});
     render()}
   async function upd(id,data,msg){data.updatedAt=FV().serverTimestamp();try{await db.collection('orgs').doc(id).update(data);var o=S.orgs.find(function(x){return x.id===id});
       if(o){Object.keys(data).forEach(function(k){if(k!=='updatedAt')o[k]=data[k]})}T(msg);render()}catch(e){T('❌ '+(e.code==='permission-denied'?'مش مسموح: اتأكد إنك داخل بحساب الأدمن':e.message))}}

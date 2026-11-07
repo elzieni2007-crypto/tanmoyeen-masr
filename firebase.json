@@ -1,16 +1,5 @@
 {
-  "functions": {
-    "source": "functions"
-  },
-  "hosting": {
-    "public": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ]
-  },
-  "firestore": {
-    "rules": "firestore.rules"
-  }
+  "functions": [
+    { "source": "functions", "codebase": "platform", "runtime": "nodejs22" }
+  ]
 }

@@ -128,15 +128,15 @@
   function mount(){var bar=document.querySelector('.adm-tab[onclick*="\'settings\'"]');var list=g('adm-list');
     if(!bar||!list)return false;if(document.querySelector('.adm-tab[data-tma]'))return true;
     var t=document.createElement('div');t.className='adm-tab';t.setAttribute('data-tma','1');t.style.cssText='background:#eef3ff;color:#1a3a6e;border-color:#1a3a6e';t.textContent='🔑 حسابات المنصة';
-    t.onclick=function(){try{setAdmTab(t,'accounts')}catch(e){console.warn(e)}};bar.parentNode.insertBefore(t,bar);
-    var box=document.createElement('div');box.id='adm-form-accounts';box.style.cssText='display:none;padding:0 16px 100px';
+    t.onclick=function(){try{setAdmTab(t,'fpaccounts')}catch(e){console.warn(e)}};bar.parentNode.insertBefore(t,bar);
+    var box=document.createElement('div');box.id='adm-form-fpaccounts';box.style.cssText='display:none;padding:0 16px 100px';
     box.innerHTML='<div style="font-size:13px;font-weight:800;color:#1a3a6e;margin:12px 0 8px">🔑 حسابات الجمعيات على منصة الفرص</div><div id="tma-head"></div><div id="tma-list"></div>';
     list.parentNode.insertBefore(box,list.nextSibling);
     var orig=window.setAdmTab;
-    window.setAdmTab=function(el,tab){var b=g('adm-form-accounts');
-      if(tab==='accounts'){try{admTab='accounts'}catch(e){}
+    window.setAdmTab=function(el,tab){var b=g('adm-form-fpaccounts');
+      if(tab==='fpaccounts'){try{admTab='fpaccounts'}catch(e){}
         document.querySelectorAll('.adm-tab').forEach(function(x){x.classList.remove('on')});el.classList.add('on');
-        document.querySelectorAll('[id^="adm-form-"]').forEach(function(x){if(x.id!=='adm-form-accounts')x.style.display='none'});
+        document.querySelectorAll('[id^="adm-form-"]').forEach(function(x){if(x.id!=='adm-form-fpaccounts')x.style.display='none'});
         ['adm-list','tm-list-export'].forEach(function(id){var x=g(id);if(x)x.style.display='none'});
         b.style.display='block';if(typeof auth==='undefined'||!auth.currentUser){g('tma-list').innerHTML='<div style="text-align:center;padding:20px;color:#e05050">❌ يجب تسجيل دخول الأدمن أولاً</div>';return}
         load();return}

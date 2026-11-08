@@ -23,23 +23,22 @@
   // ---------- إنشاء الحساب: تطبيق Firebase تاني علشان الأدمن ما يخرجش من حسابه ----------
   function secAuth(){var app=firebase.apps.filter(function(a){return a.name==='tmAcct'})[0]||firebase.initializeApp(firebaseConfig,'tmAcct');var a=app.auth();a.languageCode='ar';if(window.TM_EMU&&!a._tmEmu){a.useEmulator(TM_EMU.auth);a._tmEmu=1}return a}
   function rndPass(){var a=new Uint8Array(24);crypto.getRandomValues(a);return Array.from(a,function(x){return ('0'+x.toString(16)).slice(-2)}).join('')+'Aa1!'}
+  // بيعمل الجمعية، وبعدين دالة fpteam بتربط الإيميل كمدير حساب: لو الإيميل عليه حساب على تنمويين مصر (مورد، باحث عن عمل، عضو في جمعية تانية…)
+  // بيتربط بنفس الحساب وكلمة المرور، ولو مش عليه حساب بيتعمل حساب جديد ويوصله رابط كلمة المرور.
+  var TEAM_URL=(window.TM_EMU&&TM_EMU.team)||'https://us-central1-tanmoyeen-masr26.cloudfunctions.net/fpteam';
+  async function team(body){var tok=await auth.currentUser.getIdToken();var r=await fetch(TEAM_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},body:JSON.stringify(body)});
+    var j={};try{j=await r.json()}catch(e){}if(!r.ok)throw new Error(j.error||('حصلت مشكلة ('+r.status+')'));return j}
   async function createAccount(d){
     var email=String(d.email||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw new Error('الإيميل مش صحيح');
     if(!d.name)throw new Error('اكتب اسم الجمعية');if(!d.until)throw new Error('حدد تاريخ انتهاء الاشتراك');
-    var sa=secAuth(),uid,orgId=db.collection('orgs').doc().id,by=(auth.currentUser&&auth.currentUser.email)||'';
-    try{var cred=await sa.createUserWithEmailAndPassword(email,rndPass());uid=cred.user.uid}
-    catch(e){if(e.code==='auth/email-already-in-use')throw new Error('الإيميل ده عليه حساب بالفعل. لو هو حساب جمعية موجود، دوّر عليه في القائمة');
-      if(e.code==='auth/operation-not-allowed')throw new Error('فعّل تسجيل الدخول بالإيميل وكلمة المرور من Firebase Console ← Authentication');throw e}
-    try{
-      var b=db.batch(),now=FV().serverTimestamp(),O=db.collection('orgs').doc(orgId);
-      b.set(O,{name:d.name,email:email,phone:d.phone||'',gov:d.gov||'',regNumber:d.regNumber||'',contactName:d.contactName||'',ownerUid:uid,seats:+d.seats||3,
-        status:'active',paidUntil:TS(d.until),notes:d.notes||'',waitlistId:d.waitlistId||'',createdAt:now,updatedAt:now,createdBy:by});
-      b.set(O.collection('members').doc(uid),{email:email,name:d.contactName||'',role:'owner',status:'active',addedAt:now,addedBy:by});
-      b.set(db.collection('users').doc(uid),{orgId:orgId,addedAt:now,addedBy:by});
-      await b.commit();
-      await sa.sendPasswordResetEmail(email,{url:PORTAL_URL});
-    }finally{try{await sa.signOut()}catch(e){}}
+    var orgId=db.collection('orgs').doc().id,by=(auth.currentUser&&auth.currentUser.email)||'',now=FV().serverTimestamp(),O=db.collection('orgs').doc(orgId);
+    await O.set({name:d.name,email:email,phone:d.phone||'',gov:d.gov||'',regNumber:d.regNumber||'',contactName:d.contactName||'',ownerUid:'',seats:+d.seats||3,
+      status:'active',paidUntil:TS(d.until),notes:d.notes||'',waitlistId:d.waitlistId||'',createdAt:now,updatedAt:now,createdBy:by});
+    var r;try{r=await team({action:'add',orgId:orgId,email:email,name:d.contactName||'',role:'owner'})}
+    catch(e){try{await O.delete()}catch(_){}throw e}
+    if(!r.existed){auth.languageCode='ar';await auth.sendPasswordResetEmail(email,{url:PORTAL_URL})}
     if(d.waitlistId){try{await db.collection('funding_waitlist').doc(d.waitlistId).update({status:'active',orgId:orgId,updatedAt:FV().serverTimestamp()})}catch(e){}}
+    S.lastExisted=!!r.existed;
     return orgId}
   // ---------- منع تكرار الجمعية: نفس رقم الإشهار أو الاسم أو الموبايل ----------
   var normName=function(x){return String(x||'').replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').toLowerCase()
@@ -114,7 +113,7 @@
         '\n\nكل جمعية المفروض يبقى ليها حساب واحد. لو عايزة تغير الإيميل، تغيره من لوحتها.\n\nتكمل وتعمل حساب جديد برضه؟'))return;c.disabled=true;st.textContent='⏳ جاري الإنشاء…';
       try{var u=g('tma-until').value;await createAccount({name:g('tma-name').value.trim(),email:g('tma-email').value,phone:g('tma-phone').value.trim(),gov:g('tma-gov').value.trim(),regNumber:g('tma-reg').value.trim(),contactName:g('tma-cn').value.trim(),
           until:u?new Date(u+'T23:59:00'):null,waitlistId:g('tma-wid').value});
-        T('✅ اتعمل الحساب واتبعت للجمعية إيميل تحط منه كلمة المرور');['tma-name','tma-email','tma-reg','tma-phone','tma-gov','tma-wid','tma-cn'].forEach(function(k){g(k).value=''});c.disabled=false;g('tma-st').textContent='';await load()}
+        T(S.lastExisted?'✅ اتعمل حساب الجمعية. الإيميل ده عليه حساب على تنمويين مصر بالفعل، فهيدخلوا المنصة بنفس كلمة المرور بتاعته':'✅ اتعمل الحساب واتبعت للجمعية إيميل تحط منه كلمة المرور');['tma-name','tma-email','tma-reg','tma-phone','tma-gov','tma-wid','tma-cn'].forEach(function(k){g(k).value=''});c.disabled=false;g('tma-st').textContent='';await load()}
       catch(e){st.textContent='❌ '+e.message;c.disabled=false}};
     document.querySelectorAll('[data-fill]').forEach(function(b){b.onclick=function(){var w=S.wait.find(function(x){return x.id===b.dataset.fill});if(!w)return;
       g('tma-name').value=w.orgName||'';g('tma-email').value=w.contactEmail||w.email||'';g('tma-phone').value=w.phone||'';g('tma-gov').value=w.gov||'';g('tma-reg').value=w.regNumber||'';g('tma-cn').value=w.contactName||'';g('tma-wid').value=w.id;g('tma-name').scrollIntoView({behavior:'smooth',block:'center'})}});

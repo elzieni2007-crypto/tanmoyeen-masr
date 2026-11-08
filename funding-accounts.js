@@ -130,7 +130,9 @@
       catch(e){st.textContent='❌ '+e.message;c.disabled=false}};
     document.querySelectorAll('[data-fill]').forEach(function(b){b.onclick=function(){var w=S.wait.find(function(x){return x.id===b.dataset.fill});if(!w)return;
       g('fpa-name').value=w.orgName||'';g('fpa-email').value=w.contactEmail||w.email||'';g('fpa-phone').value=w.phone||'';g('fpa-gov').value=w.gov||'';g('fpa-reg').value=w.regNumber||'';g('fpa-cn').value=w.contactName||'';g('fpa-wid').value=w.id;g('fpa-name').scrollIntoView({behavior:'smooth',block:'center'})}});
-    var q=g('fpa-q');if(q)q.oninput=function(){S.q=q.value;renderList()};var f=g('fpa-f');if(f)f.onchange=function(){S.f=f.value;renderList()};
+    var q=g('fpa-q');if(q)q.oninput=function(){S.q=q.value;var a=g('adm-search');if(a)a.value=q.value;renderList()};
+    // خانة البحث اللي فوق خالص في لوحة الأدمن بتبحث هنا كمان لما تبويب حسابات المنصة مفتوح
+    var top=g('adm-search');if(top&&!top._fpa){top._fpa=1;top.addEventListener('input',function(){var b=g('adm-form-fpaccounts');if(!b||b.style.display==='none')return;S.q=top.value;var m=g('fpa-q');if(m)m.value=top.value;renderList()})}var f=g('fpa-f');if(f)f.onchange=function(){S.f=f.value;renderList()};
     bindList()}
   function bindList(){document.querySelectorAll('#fpa-list [data-org]').forEach(function(card){var id=card.dataset.org;var o=S.orgs.find(function(x){return x.id===id});if(!o)return;
     card.querySelectorAll('[data-ext]').forEach(function(b){b.onclick=function(){var d=addMonths(toD(o.paidUntil),+b.dataset.ext);upd(id,{paidUntil:TS(d),status:'active'},'✅ اتمد الاشتراك حتى '+fmt(d))}});
@@ -156,7 +158,7 @@
         document.querySelectorAll('[id^="adm-form-"]').forEach(function(x){if(x.id!=='adm-form-fpaccounts')x.style.display='none'});
         ['adm-list','tm-list-export'].forEach(function(id){var x=g(id);if(x)x.style.display='none'});
         b.style.display='block';if(typeof auth==='undefined'||!auth.currentUser){g('fpa-list').innerHTML='<div style="text-align:center;padding:20px;color:#e05050">❌ يجب تسجيل دخول الأدمن أولاً</div>';return}
-        load();return}
+        var tq=g('adm-search');S.q=tq?tq.value:'';load();return}
       if(b)b.style.display='none';return orig.apply(this,arguments)};
     for(var k in orig)window.setAdmTab[k]=orig[k];
     return true}

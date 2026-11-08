@@ -37,19 +37,20 @@
    document.head.appendChild(st)}
 
   async function load(){var h=g('fpf-body');if(h)h.innerHTML='<div class="fpf-m" style="text-align:center;padding:20px">⏳ جاري التحميل…</div>';
-    var r=await Promise.all([db.collection('receipts').get().catch(function(e){return {err:e}}),db.collection('fp_finance').get().catch(function(e){return {err:e}}),db.collection('fp_usage').get().catch(function(){return null})]);
+    var r=await Promise.all([db.collection('receipts').get().catch(function(e){return {err:e}}),db.collection('fp_finance').get().catch(function(e){return {err:e}}),db.collection('fp_usage').get().catch(function(){return null}),db.collection('orgs').get().catch(function(){return null}),db.collection('fp_meta').doc('ai').get().catch(function(){return null})]);
     if(r[1].err&&r[1].err.code==='permission-denied'){h.innerHTML='<div class="fpf-card" style="color:#b33a3a">❌ لازم تضيف قاعدة <b>fp_finance</b> في قواعد Firestore الأول (ابعتها لـ Claude لو مش متأكد).</div>';return}
     S.rc=r[0].err?[]:r[0].docs.map(function(d){var x=d.data();x.id=d.id;return x});
     S.ex=r[1].err?[]:r[1].docs.map(function(d){var x=d.data();x.id=d.id;return x});
-    S.use=r[2]?r[2].docs.map(function(d){return d.data()}):[];S.rcErr=r[0].err?r[0].err.message:'';S.loaded=true;render()}
+    S.use=r[2]?r[2].docs.map(function(d){return d.data()}):[];
+    S.orgs=r[3]?r[3].docs.map(function(d){var x=d.data();x.id=d.id;return x}):[];S.ai=Object.assign({enabled:true,orgMonthUsd:0,orgDayUsd:0,totalMonthUsd:0},(r[4]&&r[4].exists&&r[4].data())||{});S.rcErr=r[0].err?r[0].err.message:'';S.loaded=true;render()}
 
   function sums(rg){var rc=S.rc.filter(function(x){return x.status!=='void'&&inR(x.date,rg)}),ex=S.ex.filter(function(x){return inR(x.date,rg)});
     var rev=rc.reduce(function(a,x){return a+(+x.amount||0)},0),exp=ex.reduce(function(a,x){return a+(+x.egp||0)},0);
     var byK={};rc.forEach(function(x){byK[x.kind]=(byK[x.kind]||0)+(+x.amount||0)});var byC={};ex.forEach(function(x){byC[x.cat]=(byC[x.cat]||0)+(+x.egp||0)});
     var assoc={};rc.forEach(function(x){if(x.assoc)assoc[x.assoc]=1});return {rc:rc,ex:ex,rev:rev,exp:exp,net:rev-exp,byK:byK,byC:byC,n:Object.keys(assoc).length}}
   function apiEst(rg){var m0=rg[0].slice(0,7),m1=rg[1].slice(0,7),usd=0,calls=0;
-    S.use.forEach(function(u){if(!u.month||u.month<m0||u.month>m1)return;calls+=+u.calls||0;var by=u.by||{};
-      Object.keys(by).forEach(function(t){var R=RATES[t]||RATES.full;usd+=((+by[t].in||0)*R[0]+(+by[t].out||0)*R[1])/1e6})});return {usd:usd,calls:calls}}
+    S.use.forEach(function(u){if(!u.month||u.month<m0||u.month>m1||u.orgId==='_total')return;calls+=+u.calls||0;var by=u.by||{};
+      Object.keys(by).forEach(function(t){if(by[t].usd!=null){usd+=+by[t].usd;return}var R=RATES[t]||RATES.full;usd+=((+by[t].in||0)*R[0]+(+by[t].out||0)*R[1])/1e6})});return {usd:usd,calls:calls}}
   function bars(obj,labels){var tot=Object.keys(obj).reduce(function(a,k){return a+obj[k]},0)||1;
     return Object.keys(obj).sort(function(a,b){return obj[b]-obj[a]}).map(function(k){return '<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:12.5px"><span>'+esc(labels[k]||k)+'</span><b>'+EGP(obj[k])+'</b></div><div class="fpf-bar"><i style="width:'+Math.round(obj[k]/tot*100)+'%"></i></div></div>'}).join('')||'<div class="fpf-m">مفيش</div>'}
   function monthly(){var M={};S.rc.forEach(function(x){if(x.status==='void'||!x.date)return;var k=x.date.slice(0,7);M[k]=M[k]||{r:0,e:0};M[k].r+=+x.amount||0});
@@ -58,6 +59,20 @@
     return '<div class="fpf-card"><b style="color:#1a3a6e">📅 شهر بشهر</b><div class="fpf-tw"><table class="fpf-t" style="margin-top:8px"><thead><tr><th>الشهر</th><th>الإيرادات</th><th>المصروفات</th><th>الصافي</th></tr></thead><tbody>'+
       ks.map(function(k){var v=M[k],n=v.r-v.e;return '<tr><td>'+k+'</td><td>'+EGP(v.r)+'</td><td>'+EGP(v.e)+'</td><td class="'+(n>=0?'fpf-pos':'fpf-neg')+'"><b>'+EGP(n)+'</b></td></tr>'}).join('')+'</tbody></table></div></div>'}
 
+  function aiHTML(){var a=S.ai||{},mon=iso(new Date()).slice(0,7),day=new Date(Date.now()+2*3600e3).toISOString().slice(0,10);
+    var U={};S.use.forEach(function(u){if(u.month===mon)U[u.orgId]=u});var tot=U._total||{};
+    var rows=S.orgs.map(function(o){var u=U[o.id]||{},m=+u.usd||0,d=+((u.days||{})[day]||{}).usd||0,cm=+o.aiMonthUsd>0?+o.aiMonthUsd:+a.orgMonthUsd,cd=+o.aiDayUsd>0?+o.aiDayUsd:+a.orgDayUsd;return {o:o,m:m,d:d,cm:cm,cd:cd,calls:+u.calls||0}}).sort(function(x,y){return y.m-x.m});
+    var pc=function(v,c){return c>0?Math.round(v/c*100):-1},col=function(p){return p<0?'#11243a':p>=100?'#b33a3a':p>=80?'#c27803':'#0a8f6a'},pt=function(p){return p<0?'':'<div class="fpf-m">'+p+'%</div>'},lim=function(v){return +v>0?'$'+(+v):'من غير حد'};
+    return '<div class="fpf-card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b style="color:#1a3a6e">🤖 مراقبة تكلفة الذكاء الاصطناعي (الشهر ده)</b>'+
+      '<label style="display:flex;gap:6px;align-items:center;font-size:13px;font-weight:700"><input type="checkbox" id="fpf-ai-on"'+(a.enabled!==false?' checked':'')+'> الكتابة شغالة لكل الجمعيات</label></div>'+
+      '<div class="fpf-m" style="margin:6px 0">الإجمالي الشهر ده: <b>$'+(+tot.usd||0).toFixed(2)+'</b> (≈ '+EGP((+tot.usd||0)*S.lastRate)+') · الحد الكلي: '+lim(a.totalMonthUsd)+' · النهارده: <b>$'+(+((tot.days||{})[day]||{}).usd||0).toFixed(2)+'</b></div>'+
+      '<div class="fpf-grid"><div><label>حد الشهر لكل جمعية ($، 0 = من غير حد)</label><input class="fpf-in" id="fpf-ai-m" inputmode="decimal" value="'+esc(a.orgMonthUsd)+'"></div><div><label>حد اليوم لكل جمعية ($، 0 = من غير حد)</label><input class="fpf-in" id="fpf-ai-d" inputmode="decimal" value="'+esc(a.orgDayUsd)+'"></div><div><label>حد كلي للمنصة في الشهر ($، 0 = من غير حد)</label><input class="fpf-in" id="fpf-ai-t" inputmode="decimal" value="'+esc(a.totalMonthUsd)+'"></div></div>'+
+      '<div style="margin-top:8px"><button class="fpf-b p" id="fpf-ai-save">احفظ الحدود</button></div>'+
+      '<div class="fpf-m" style="margin-top:6px">دلوقتي مراقبة بس: الحدود صفر يعني من غير حد. لو حطيت حد ووصلت له جمعية، الكتابة بالذكاء الاصطناعي بتقف عندها لحد اليوم اللي بعده أو الشهر اللي بعده، والتعديل بالإيد بيفضل شغال. حد اليوم بيمنع إن جمعية تخلص حد الشهر كله في يوم تجارب.</div>'+
+      '<div class="fpf-tw"><table class="fpf-t" style="margin-top:10px"><thead><tr><th>الجمعية</th><th>النهارده</th><th>الشهر</th><th>طلبات</th><th>حد خاص (يوم/شهر $)</th></tr></thead><tbody>'+
+      rows.map(function(x){var pd=pc(x.d,x.cd),pm=pc(x.m,x.cm);return '<tr><td>'+esc(x.o.name||x.o.id)+(x.o.aiUnlimited?' <span class="fpf-m">(من غير حد)</span>':'')+'</td><td style="color:'+col(pd)+'">$'+x.d.toFixed(2)+pt(pd)+'</td><td style="color:'+col(pm)+'"><b>$'+x.m.toFixed(2)+'</b><div class="fpf-m">'+(pm<0?'':pm+'% · ')+'≈ '+EGP(x.m*S.lastRate)+'</div></td><td>'+x.calls+'</td>'+
+        '<td style="white-space:nowrap"><input class="fpf-in" style="width:56px;display:inline-block;padding:5px" data-cd="'+esc(x.o.id)+'" placeholder="'+(+a.orgDayUsd>0?esc(a.orgDayUsd):'—')+'" value="'+esc(x.o.aiDayUsd||'')+'"> / <input class="fpf-in" style="width:56px;display:inline-block;padding:5px" data-cm="'+esc(x.o.id)+'" placeholder="'+(+a.orgMonthUsd>0?esc(a.orgMonthUsd):'—')+'" value="'+esc(x.o.aiMonthUsd||'')+'"> <button class="fpf-b" data-cap="'+esc(x.o.id)+'">حفظ</button></td></tr>'}).join('')+
+      '</tbody></table></div><div class="fpf-m">الحد الخاص الفاضي معناه إن الجمعية ماشية على الحد العام. التكلفة تقديرية بأسعار Claude الرسمية، والمدفوع الحقيقي في console.anthropic.com.</div></div>'}
   function formHTML(){var e=S.edit||{};var today=iso(new Date());
     return '<div class="fpf-card" id="fpf-form"><b style="color:#1a3a6e">'+(e.id?'✏️ تعديل مصروف':'➕ تسجيل مصروف')+'</b><div class="fpf-grid" style="margin-top:8px">'+
       '<div><label>التاريخ</label><input class="fpf-in" type="date" id="fpf-date" value="'+esc(e.date||today)+'"></div>'+
@@ -83,6 +98,7 @@
      '<div class="fpf-k"><b class="'+(s.net>=0?'fpf-pos':'fpf-neg')+'">'+EGP(s.net)+'</b><span>الصافي'+(s.rev?' · هامش '+Math.round(s.net/s.rev*100)+'%':'')+'</span></div>'+
      '<div class="fpf-k"><b>'+s.n+'</b><span>جمعيات دفعت'+(s.n?' · متوسط '+EGP(s.rev/s.n):'')+'</span></div></div>'+
      '<div class="fpf-card"><b style="color:#1a3a6e">🤖 الذكاء الاصطناعي في الفترة دي</b><div class="fpf-m" style="margin-top:6px">'+api.calls+' طلب من الجمعيات · تكلفة تقديرية حسب الاستهلاك <b>$'+api.usd.toFixed(2)+'</b> (≈ '+EGP(api.usd*S.lastRate)+' بسعر '+S.lastRate+') · المدفوع فعلًا لـ API ومسجل هنا: <b>'+EGP(paidApi)+'</b></div><div class="fpf-m" style="margin-top:4px">التقدير للمقارنة بس. الرقم الحقيقي في console.anthropic.com ← Cost، والمدفوع هو اللي بيتحسب في الصافي.</div></div>'+
+     aiHTML()+
      formHTML()+
      '<div class="fpf-grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px"><div class="fpf-card"><b style="color:#1a3a6e">💰 الإيرادات حسب النوع</b>'+bars(s.byK,KINDS)+'</div><div class="fpf-card"><b style="color:#1a3a6e">💸 المصروفات حسب البند</b>'+bars(s.byC,CATS)+'</div></div>'+
      monthly()+
@@ -99,7 +115,12 @@
     var sv=g('fpf-save');if(sv)sv.onclick=save;var cn=g('fpf-cancel');if(cn)cn.onclick=function(){S.edit=null;render()};
     document.querySelectorAll('#fpf-body [data-ed]').forEach(function(b){b.onclick=function(){S.edit=S.ex.find(function(x){return x.id===b.dataset.ed})||null;render();g('fpf-form').scrollIntoView({behavior:'smooth',block:'center'})}});
     document.querySelectorAll('#fpf-body [data-del]').forEach(function(b){b.onclick=async function(){if(!confirm('تمسح المصروف ده؟'))return;try{await db.collection('fp_finance').doc(b.dataset.del).delete();S.ex=S.ex.filter(function(x){return x.id!==b.dataset.del});T('اتمسح');render()}catch(e){T('❌ '+e.message)}}});
-    var cv=g('fpf-csv');if(cv)cv.onclick=csv}
+    var cv=g('fpf-csv');if(cv)cv.onclick=csv;
+    var as=g('fpf-ai-save');if(as)as.onclick=async function(){var n=function(id){return +String(g(id).value).replace(/[^\d.]/g,'')||0};var d={enabled:g('fpf-ai-on').checked,orgMonthUsd:n('fpf-ai-m'),orgDayUsd:n('fpf-ai-d'),totalMonthUsd:n('fpf-ai-t'),updatedAt:FV().serverTimestamp()};
+      try{await db.collection('fp_meta').doc('ai').set(d,{merge:true});Object.assign(S.ai,d);T('✅ اتحفظت الحدود، وبتسري خلال دقيقة');render()}catch(e){T('❌ '+e.message)}};
+    var on=g('fpf-ai-on');if(on)on.onchange=async function(){try{await db.collection('fp_meta').doc('ai').set({enabled:on.checked,updatedAt:FV().serverTimestamp()},{merge:true});S.ai.enabled=on.checked;T(on.checked?'✅ الكتابة بالذكاء الاصطناعي شغالة':'⏸ الكتابة بالذكاء الاصطناعي اتوقفت لكل الجمعيات')}catch(e){T('❌ '+e.message)}};
+    document.querySelectorAll('#fpf-body [data-cap]').forEach(function(b){b.onclick=async function(){var id=b.dataset.cap,v=function(sel){var x=document.querySelector(sel+'="'+id+'"]');return +String(x.value).replace(/[^\d.]/g,'')||0};
+      var d={aiDayUsd:v('[data-cd'),aiMonthUsd:v('[data-cm')};try{await db.collection('orgs').doc(id).update({aiDayUsd:d.aiDayUsd||firebase.firestore.FieldValue.delete(),aiMonthUsd:d.aiMonthUsd||firebase.firestore.FieldValue.delete()});var o=S.orgs.find(function(x){return x.id===id});if(o){o.aiDayUsd=d.aiDayUsd;o.aiMonthUsd=d.aiMonthUsd}T('✅ اتحفظ حد الجمعية')}catch(e){T('❌ '+e.message)}}})}
   async function save(){var num=function(id){return +String(g(id).value).replace(/[^\d.]/g,'')||0};
     var d={date:g('fpf-date').value,cat:g('fpf-cat').value,desc:g('fpf-desc').value.trim(),amt:num('fpf-amt'),cur:g('fpf-cur').value,rate:g('fpf-cur').value==='EGP'?1:num('fpf-rate'),egp:num('fpf-egp'),pay:g('fpf-pay').value.trim(),ref:g('fpf-ref').value.trim()};
     if(!d.date||!d.amt){T('اكتب التاريخ والمبلغ');return}if(!d.egp){if(!d.rate){T('اكتب سعر الصرف أو المعادل بالجنيه');return}d.egp=Math.round(d.amt*d.rate*100)/100}

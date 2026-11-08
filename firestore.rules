@@ -30,6 +30,18 @@ service cloud.firestore {
         && request.resource.data.status == 'pending';
     }
 
+    // صاحب الملف (المستخدم اللي حسابه مربوط بالملف) يعدّل بياناته بس،
+    // ومايقدرش يغيّر صاحب الملف ولا حالة الاعتماد ولا أي حقل إداري.
+    function ownerEdit() {
+      return isSignedIn()
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['ownerUid','status','featured','verified','approvedAt','claimedAt','notified','timestamp','source','registrationType','duplicateOf']);
+    }
+    function ownsDoc() {
+      return isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
     // Public collections: anyone can browse, only admin can write.
     match /jobs/{doc} {
       allow read: if true;
@@ -47,22 +59,32 @@ service cloud.firestore {
 
     match /consultants/{doc} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || ownerEdit();
+      allow delete: if isAdmin() || ownsDoc();
     }
 
     match /suppliers/{doc} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || ownerEdit();
+      allow delete: if isAdmin() || ownsDoc();
     }
 
     match /volunteers/{doc} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || ownerEdit();
+      allow delete: if isAdmin() || ownsDoc();
     }
 
+    // باحثو العمل: بياناتهم (الأسماء والموبايلات) مش متاحة للعامة.
+    // صاحب الملف بس يشوف ملفه ويعدّله، والأدمن يشوف الكل.
     match /jobseekers/{doc} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read: if isAdmin() || ownsDoc();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || ownerEdit();
+      allow delete: if isAdmin() || ownsDoc();
     }
 
     match /settings/{doc} {
@@ -75,8 +97,8 @@ service cloud.firestore {
     match /organizations/{doc} {
       allow read: if true;
       allow create: if isAdmin();
-      allow update: if isAdmin() || isOwner(resource);
-      allow delete: if isAdmin();
+      allow update: if isAdmin() || ownerEdit();
+      allow delete: if isAdmin() || ownsDoc();
     }
 
     // Public submissions are allowed without registration.
@@ -103,14 +125,121 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // طلبات التسجيل: أي حد يسجل. لو مسجل دخول، الطلب بيتربط بحسابه هو بس.
     match /registration_requests/{doc} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow create: if !('ownerUid' in request.resource.data)
+        || (isSignedIn() && request.resource.data.ownerUid == request.auth.uid);
+      allow read: if isAdmin() || ownsDoc();
+      allow update: if isAdmin() || (ownerEdit() && resource.data.status == 'pending');
+      allow delete: if isAdmin() || (ownsDoc() && resource.data.status == 'pending');
+    }
+
+    // طلبات ربط تسجيل قديم برقم موبايل: المستخدم يطلب، والأدمن يتأكد ويربط
+    match /profile_claims/{doc} {
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasOnly(['uid','email','phone','note','status','at'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.phone is string && request.resource.data.phone.size() >= 8 && request.resource.data.phone.size() <= 20
+        && request.resource.data.get('note', '') is string && request.resource.data.get('note', '').size() <= 300
+        && request.resource.data.status == 'pending'
+        && request.resource.data.at == request.time;
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow update, delete: if isAdmin();
     }
 
     match /consultations/{doc} {
       allow create: if true;
       allow read, update, delete: if isAdmin();
+    }
+
+    // طلبات تجربة أثر: أي حد يبعت الطلب، والأدمن بس يشوف ويعدّل
+    match /athar_trials/{doc} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // حجز منصة تنمويين مصر لفرص التمويل والمنح: أي جمعية تحجز، والأدمن بس يشوف ويعدّل
+    match /funding_waitlist/{doc} {
+      allow create: if request.resource.data.keys().hasOnly(['orgName','regNumber','gov','phone','orgEmail','contactName','contactEmail','requests','notes','consent','status','source','timestamp'])
+        && request.resource.data.orgName is string && request.resource.data.orgName.size() >= 3 && request.resource.data.orgName.size() <= 150
+        && request.resource.data.regNumber is string && request.resource.data.regNumber.size() >= 1 && request.resource.data.regNumber.size() <= 60
+        && request.resource.data.gov is string && request.resource.data.gov.size() <= 40
+        && request.resource.data.phone is string && request.resource.data.phone.size() >= 8 && request.resource.data.phone.size() <= 20
+        && request.resource.data.contactName is string && request.resource.data.contactName.size() >= 3 && request.resource.data.contactName.size() <= 120
+        && request.resource.data.contactEmail is string && request.resource.data.contactEmail.size() <= 120
+        && request.resource.data.get('orgEmail', '') is string && request.resource.data.get('orgEmail', '').size() <= 120
+        && request.resource.data.get('requests', '') is string && request.resource.data.get('requests', '').size() <= 1500
+        && request.resource.data.get('notes', '') is string && request.resource.data.get('notes', '').size() <= 1500
+        && request.resource.data.consent == true
+        && request.resource.data.status == 'pending'
+        && request.resource.data.timestamp == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // عروض أسعار منصة المنح: نسخة العرض اللي الجمعية بتفتحها برابط سري (رقم عشوائي طويل)
+    match /quote_public/{tok} {
+      allow get: if true;
+      allow list, write: if isAdmin();
+    }
+
+    // رد الجمعية على عرض السعر (موافقة أو استفسار): مسموح بس لعرض موجود فعلًا وبالحقول دي بس
+    match /quote_responses/{tok} {
+      allow get: if true;
+      allow list, delete: if isAdmin();
+      allow create, update: if isAdmin() || (
+        exists(/databases/$(database)/documents/quote_public/$(tok))
+        && request.resource.data.keys().hasOnly(['decision','name','title','phone','note','quoteNo','at'])
+        && request.resource.data.decision in ['accepted','question']
+        && request.resource.data.name is string && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 110
+        && request.resource.data.get('title', '') is string && request.resource.data.get('title', '').size() <= 110
+        && request.resource.data.get('phone', '') is string && request.resource.data.get('phone', '').size() <= 30
+        && request.resource.data.get('note', '') is string && request.resource.data.get('note', '').size() <= 900
+        && request.resource.data.get('quoteNo', '') is string && request.resource.data.get('quoteNo', '').size() <= 40
+        && request.resource.data.at == request.time);
+    }
+
+    // إيصالات الاستلام: السجل الكامل والترقيم للأدمن بس، ونسخة التحقق العامة بالرابط السري (قراءة فقط)
+    match /receipts/{no} {
+      allow read, write: if isAdmin();
+    }
+    match /receipt_counters/{year} {
+      allow read, write: if isAdmin();
+    }
+    // إعدادات الأدمن (زي بيانات الطرف الأول في العقود): للأدمن بس
+    match /admin_settings/{doc} {
+      allow read, write: if isAdmin();
+    }
+    match /receipt_public/{tok} {
+      allow get: if true;
+      allow list, write: if isAdmin();
+    }
+
+    // قسم التواصل في الأدمن (الحملات): للأدمن بس
+    match /outreach_log/{doc} {
+      allow read, write: if isAdmin();
+    }
+    match /outreach_optout/{doc} {
+      allow read, write: if isAdmin();
+    }
+    match /outreach_templates/{doc} {
+      allow read, write: if isAdmin();
+    }
+
+    // رسائل "تواصل مع الإدارة": أي حد يبعت، والأدمن بس يقرا
+    match /contact_messages/{doc} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // الإعلانات والتنبيهات اللي بتظهر للمستخدمين: الكل يقرا، والأدمن بس ينشر
+    match /broadcasts/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // اختبار الاتصال من لوحة الأدمن
+    match /test/{doc} {
+      allow read, write: if isAdmin();
     }
 
     // ===== أكاديمية تنمويين مصر =====
@@ -139,8 +268,26 @@ service cloud.firestore {
 
     // شهادات الأكاديمية: أي حد يقدر يتحقق منها، والأدمن بس يصدرها
     match /certificates/{certId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      // فتح شهادة برقمها مسموح للكل (للتحقق)، لكن البحث محدود بـ 5 نتايج بس
+      // عشان محدش يقدر يسحب كل الشهادات مرة واحدة
+      allow get: if true;
+      allow list: if isAdmin() || request.query.limit <= 5;
+      allow create, delete: if isAdmin();
+      // أي حد يفتح الشهادة يقدر يزوّد عدادات المتابعة بس (+1) وتواريخ الفتح،
+      // ومايقدرش يغيّر الاسم أو التدريب أو أي بيانات تانية
+      allow update: if isAdmin() || certTrackOnly();
+    }
+    function certTrackOnly() {
+      let n = request.resource.data;
+      let o = resource.data;
+      let ch = n.diff(o).affectedKeys();
+      return ch.hasOnly(['views','downloads','shares','firstViewedAt','lastViewedAt','ownerViewedAt'])
+        && n.get('views', 0) is int && n.get('views', 0) >= o.get('views', 0) && n.get('views', 0) <= o.get('views', 0) + 1
+        && n.get('downloads', 0) is int && n.get('downloads', 0) >= o.get('downloads', 0) && n.get('downloads', 0) <= o.get('downloads', 0) + 1
+        && n.get('shares', 0) is int && n.get('shares', 0) >= o.get('shares', 0) && n.get('shares', 0) <= o.get('shares', 0) + 1
+        && (!ch.hasAny(['firstViewedAt']) || (!('firstViewedAt' in o) && n.firstViewedAt == request.time))
+        && (!ch.hasAny(['ownerViewedAt']) || (!('ownerViewedAt' in o) && n.ownerViewedAt == request.time))
+        && (!ch.hasAny(['lastViewedAt']) || n.lastViewedAt == request.time);
     }
 
     // تسجيلات التدريب: أي حد يسجل (لو التدريب مفتوح)، والأدمن بس يقرا ويعدل.
@@ -165,74 +312,45 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
-    // ===== حجوزات منصة الفرص والمنح =====
-    match /funding_waitlist/{doc} {
-      allow create: if request.resource.data.status == 'pending';
+    // ===== خطة تنمويين مصر لتحسين وتطوير اللغة الإنجليزية =====
+
+    function isEnglishAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower() in [
+          'elzieni2007@gmail.com'
+        ];
+    }
+
+    function englishPlanFields() {
+      return request.resource.data.keys().hasOnly([
+        'nameAr','nameEn','email','phone','gov','org','job','level','start','mode',
+        'days','ratings','quiz','pre','post','preSkip','act','createdAt','lastActive'
+      ]);
+    }
+
+    match /englishPlan/{uid} {
+      // المشارك يقرا ويعدّل ملفه بس، والأدمن يقرا الكل
+      allow read: if (request.auth != null && request.auth.uid == uid) || isEnglishAdmin();
+      allow create: if request.auth != null && request.auth.uid == uid
+                    && englishPlanFields()
+                    && request.resource.data.createdAt == request.time;
+      allow update: if request.auth != null && request.auth.uid == uid
+                    && englishPlanFields()
+                    && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isEnglishAdmin();
+    }
+
+    // منع التسجيل المكرر: مفتاح لكل (نوع التسجيل + الموبايل) و(النوع + الإيميل).
+    // اسم المفتاح بصمة SHA-256 مش الرقم نفسه. أي حد يحجز مفتاح جديد، ومحدش يقدر يكتب على مفتاح موجود
+    // (فالتسجيل التاني بنفس الرقم بيترفض)، والأدمن بس يقرا ويمسح ويعيد البناء.
+    match /reg_keys/{key} {
+      allow create: if key.size() <= 100
+        && request.resource.data.keys().hasOnly(['t','at'])
+        && request.resource.data.t is string && request.resource.data.t.size() <= 20
+        && request.resource.data.at == request.time;
       allow read, update, delete: if isAdmin();
     }
-
-    // طلبات تجربة أثر ورسائل التواصل: أي حد يبعت، والأدمن بس يقرا
-    match /athar_trials/{doc} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
-    }
-
-    match /contact_messages/{doc} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
-    }
-
-    // الإشعارات العامة: الكل يشوفها والأدمن بس يبعت
-    match /broadcasts/{doc} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // اختبار الاتصال من لوحة التحكم
-    match /test/{doc} {
-      allow read, write: if isAdmin();
-    }
-
-    // ===== عروض أسعار منصة الفرص والمنح =====
-    // نسخة العرض اللي الجمعية بتشوفها من الرابط (اللي معاه الرابط بس يقدر يفتحها)
-    match /quote_public/{k} {
-      allow get: if true;
-      allow list: if isAdmin();
-      allow create, update, delete: if isAdmin();
-    }
-    // رد الجمعية: موافقة أو استفسار (مرة واحدة، والاستفسار ممكن يتحول لموافقة)
-    match /quote_responses/{k} {
-      function validResp(d) {
-        return d.keys().hasOnly(['decision','name','title','phone','note','quoteNo','at'])
-          && d.decision in ['accepted','question']
-          && d.name is string && d.name.size() > 2 && d.name.size() <= 110
-          && d.title is string && d.title.size() <= 110
-          && d.phone is string && d.phone.size() <= 30
-          && d.note is string && d.note.size() <= 900
-          && d.quoteNo is string && d.quoteNo.size() <= 40
-          && d.at == request.time;
-      }
-      allow get: if true;
-      allow list, delete: if isAdmin();
-      allow create: if exists(/databases/$(database)/documents/quote_public/$(k))
-        && validResp(request.resource.data);
-      allow update: if isAdmin()
-        || (resource.data.decision == 'question'
-            && request.resource.data.decision == 'accepted'
-            && validResp(request.resource.data));
-    }
-
-    // ===== قسم التواصل في لوحة الأدمن =====
-    match /outreach_log/{d} {
-      allow read, write: if isAdmin();
-    }
-    match /outreach_optout/{d} {
-      allow read, write: if isAdmin();
-    }
-    match /outreach_templates/{d} {
-      allow read, write: if isAdmin();
-    }
-
 
     // ===== حسابات الجمعيات على منصة الفرص =====
     // الجمعية كيان واحد: orgs/{orgId} فيه الاشتراك وتاريخ الانتهاء والحالة (الأدمن بس يغيرهم).
@@ -255,16 +373,26 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys();
     }
 
+    // users/{uid}: نشاط الحساب (آخر دخول) + ربط المستخدم بجمعيته على منصة الفرص (orgId)
     match /users/{uid} {
       allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
-      // مدير الحساب بيضيف زميل لجمعيته بس، ومع مستند العضوية في نفس العملية
       allow create: if isAdmin()
+        // المستخدم يسجّل آخر دخول لنفسه
+        || (isSignedIn() && request.auth.uid == uid
+            && request.resource.data.keys().hasOnly(['email','name','lastActive','createdAt','platform'])
+            && request.resource.data.lastActive == request.time)
+        // مدير الحساب بيضيف زميل لجمعيته بس، ومع مستند العضوية في نفس العملية
         || (isSignedIn() && uid != request.auth.uid
             && request.resource.data.keys().hasOnly(['orgId', 'addedAt', 'addedBy'])
             && roleIn(request.resource.data.orgId, ['owner'])
             && orgActive(request.resource.data.orgId)
             && existsAfter(/databases/$(database)/documents/orgs/$(request.resource.data.orgId)/members/$(uid)));
-      allow update, delete: if isAdmin();
+      // المستخدم يحدّث بيانات نشاطه بس، ومايقدرش يغيّر الجمعية المربوط بيها (orgId)
+      allow update: if isAdmin()
+        || (isSignedIn() && request.auth.uid == uid
+            && changedKeys().hasOnly(['email','name','lastActive','createdAt','platform'])
+            && request.resource.data.lastActive == request.time);
+      allow delete: if isAdmin();
     }
 
     match /orgs/{orgId} {
@@ -358,6 +486,11 @@ service cloud.firestore {
     match /fp_usage/{id} {
       allow read: if isAdmin();
       allow write: if false;
+    }
+
+    // ===== مالية منصة الفرص: مصروفات المنصة (الإيرادات بتتحسب من receipts) — الأدمن بس =====
+    match /fp_finance/{id} {
+      allow read, write: if isAdmin();
     }
 
     // Deny everything else by default.

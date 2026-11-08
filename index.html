@@ -7394,6 +7394,11 @@ async function submitFunding(){
   if(!em.test(contactEmail)) return bad('أدخل البريد الإلكتروني الشخصي صح');
   if(!consent) return bad('لازم توافق على التواصل معاك بخصوص المنصة');
   var btn=document.getElementById('fd-btn'); btn.textContent='⏳ جاري الحجز...'; btn.disabled=true;
+  // منع الحجز المكرر: نفس رقم الإشهار أو نفس التليفون اتحجز بيه قبل كده
+  try{
+    if(window.tmClaimRegistration){ var dupR=await tmClaimRegistration('fund',{phone:phone,email:orgEmail||contactEmail,reg:reg,gov:gov});
+      if(dupR&&dupR.dup){ btn.textContent='📌 احجز مكان جمعيتك'; btn.disabled=false; try{ tmShowDupMsg('fund',dupR.dup); }catch(_e){ bad('جمعيتك حاجزة قبل كده، وهنتواصل معاك'); } return; } }
+  }catch(_e){}
   try{
     await db.collection('funding_waitlist').add({
       orgName:name, regNumber:reg, gov:gov, phone:phone, orgEmail:orgEmail,
@@ -7421,6 +7426,10 @@ async function loadFundingWaitlist(){
     _fundingRows=snap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }).sort(function(a,b){
       return (b.timestamp&&b.timestamp.toMillis?b.timestamp.toMillis():0)-(a.timestamp&&a.timestamp.toMillis?a.timestamp.toMillis():0); });
     renderFundingList();
+    // الحجوزات القديمة: نحجز مفاتيحها عشان محدش يحجز بنفس الرقم أو الإشهار تاني (مرة واحدة لكل حجز على الجهاز ده)
+    setTimeout(async function(){ if(!window.tmClaimRegistration) return; var done={}; try{ done=JSON.parse(localStorage.getItem('tm_fund_keys2')||'{}'); }catch(_e){}
+      for(var i=0;i<_fundingRows.length;i++){ var r=_fundingRows[i]; if(done[r.id]) continue; try{ await tmClaimRegistration('fund',{phone:r.phone,email:r.orgEmail||r.contactEmail,reg:r.regNumber,gov:r.gov}); done[r.id]=1; }catch(_e){} }
+      try{ localStorage.setItem('tm_fund_keys2',JSON.stringify(done)); }catch(_e){} },1500);
   }catch(e){
     list.innerHTML='<div style="color:#e05050;padding:12px;text-align:center">❌ '+(e.code==='permission-denied'?'محتاج تنشر قواعد Firestore الجديدة (funding_waitlist)':escapeHtml(e.message||String(e)))+'</div>';
   }
@@ -7437,8 +7446,14 @@ function renderFundingList(){
   var rows=_fundingRows.filter(function(r){ return (F==='all'||(r.status||'pending')===F)&&(!q||[r.orgName,r.gov,r.contactName,r.phone,r.regNumber].join(' ').toLowerCase().indexOf(q)>-1); });
   if(!rows.length){ list.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">📭 لا توجد حجوزات'+(F!=='all'?' في الحالة دي':'')+'</div>'; return; }
   var E=escapeHtml;
+  // الحجوزات المكررة (نفس رقم الإشهار أو نفس التليفون)
+  var NR=window.tmRegNorm||{phone:function(x){return String(x||'').replace(/\D/g,'');},email:function(x){return String(x||'').trim().toLowerCase();},reg:function(x){return String(x||'').replace(/\D/g,'');}};
+  var fkeys=function(r){ var rg=NR.reg(r.regNumber); return [['p',NR.phone(r.phone)],['e',NR.email(r.orgEmail||r.contactEmail)],['r',rg&&r.gov?r.gov+'|'+rg:'']]; };
+  var byKey={}; _fundingRows.forEach(function(r){ fkeys(r).forEach(function(k){ if(k[1]){ var kk=k[0]+k[1]; (byKey[kk]=byKey[kk]||[]).push(r); } }); });
+  var dupOf=function(r){ var o=[]; fkeys(r).forEach(function(k){ if(k[1]) (byKey[k[0]+k[1]]||[]).forEach(function(x){ if(x.id!==r.id&&o.indexOf(x)<0) o.push(x); }); }); return o; };
   list.innerHTML=rows.map(function(r){
     var s=FUND_ST[r.status||'pending']||FUND_ST.pending;
+    var dd=dupOf(r);
     var date=r.timestamp&&r.timestamp.toMillis?new Date(r.timestamp.toMillis()).toLocaleDateString('ar-EG'):'—';
     var row=function(l,v,ltr){ return v?'<tr><td style="color:#6b7a8d;padding:2px 4px;width:35%">'+l+'</td><td style="padding:2px 4px;font-weight:600'+(ltr?';direction:ltr;text-align:right;font-size:10.5px':'')+'">'+E(v)+'</td></tr>':''; };
     return '<div style="background:white;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-right:4px solid #1a3a6e">'+
@@ -7447,7 +7462,7 @@ function renderFundingList(){
       '<table style="width:100%;font-size:11px;border-collapse:collapse;margin-bottom:8px">'+
         row('📋 رقم الإشهار',r.regNumber)+row('📍 المحافظة',r.gov)+row('📞 التليفون',r.phone,1)+row('✉️ إيميل الجمعية',r.orgEmail,1)+
         row('👤 مسؤول التواصل',r.contactName)+row('📧 إيميل شخصي',r.contactEmail,1)+row('📝 طلبات',r.requests)+row('💬 ملاحظات',r.notes)+row('📅 التاريخ',date)+
-      '</table>'+(window.fqCardExtra?fqCardExtra(r):'')+
+      '</table>'+(dd.length?'<div style="background:#fff4e0;border-radius:8px;padding:6px 10px;margin-bottom:8px;font-size:11px;color:#8a5a00;font-weight:700">⚠️ حجز مكرر مع: '+dd.map(function(x){ return E(x.orgName||'—')+(x.timestamp&&x.timestamp.toMillis?' ('+new Date(x.timestamp.toMillis()).toLocaleDateString('ar-EG')+')':''); }).join('، ')+'. امسح النسخة الزيادة واحتفظ بواحدة.</div>':'')+(window.fqCardExtra?fqCardExtra(r):'')+
       '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
         (r.phone?'<a href="'+'https://wa.me/'+cleanPhone(r.phone)+'?text='+encodeURIComponent('السلام عليكم '+(r.contactName||'')+'، بخصوص حجز جمعية '+(r.orgName||'')+' في منصة تنمويين مصر لفرص التمويل والمنح')+'" target="_blank" style="flex:1;padding:7px;background:#e7faf3;color:#00703a;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">💬 واتساب</a>':'')+
         (r.contactEmail?'<a href="mailto:'+encodeURIComponent(r.contactEmail)+'?subject='+encodeURIComponent('منصة تنمويين مصر لفرص التمويل والمنح - '+(r.orgName||''))+'" style="flex:1;padding:7px;background:#fff3cd;color:#c06010;border-radius:8px;text-align:center;text-decoration:none;font-size:11px;font-weight:700">✉️ إيميل</a>':'')+
@@ -7465,7 +7480,11 @@ function updateFundingStatus(id,status){
 }
 function deleteFunding(id){
   if(!confirm('تحذف الحجز ده نهائيًا؟')) return;
+  var gone=_fundingRows.filter(function(r){return r.id===id;})[0];
   db.collection('funding_waitlist').doc(id).delete().then(function(){
+    // نفك المفاتيح بس لو مفيش حجز تاني بنفس الرقم أو الإشهار
+    try{ if(gone&&window.tmFreeRegKeys&&window.tmRegNorm){ var N=tmRegNorm, em=function(r){ return N.email(r.orgEmail||r.contactEmail); }, other=_fundingRows.some(function(r){ return r.id!==id&&((N.phone(r.phone)&&N.phone(r.phone)===N.phone(gone.phone))||(em(r)&&em(r)===em(gone))||(N.reg(r.regNumber)&&r.gov===gone.gov&&N.reg(r.regNumber)===N.reg(gone.regNumber))); });
+      if(!other) tmFreeRegKeys('fund',{phone:gone.phone,email:gone.orgEmail||gone.contactEmail,reg:gone.regNumber,gov:gone.gov}); } }catch(_e){}
     _fundingRows=_fundingRows.filter(function(r){return r.id!==id;}); toast('🗑️ اتحذف'); renderFundingList();
   }).catch(function(e){ toast('❌ '+e.message); });
 }
@@ -11472,8 +11491,9 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
    لو المفتاح محجوز قبل كده، قواعد Firestore بترفض، فبنقول للشخص إنه مسجل بالفعل. */
 (function(){
   var TYPES={jobseeker:'jobseekers',expert:'consultants',sup:'suppliers',org:'organizations',volunteer:'volunteers'};
-  var TYPE_AR={jobseeker:'باحث عن عمل',expert:'استشاري',sup:'مورد',org:'مؤسسة',volunteer:'متطوع'};
+  var TYPE_AR={jobseeker:'باحث عن عمل',expert:'استشاري',sup:'مورد',org:'مؤسسة',volunteer:'متطوع',fund:'حجز منصة المنح'};
   var COL2TYPE={}; Object.keys(TYPES).forEach(function(t){ COL2TYPE[TYPES[t]]=t; });
+  var EXTRA={fund:1}; // أنواع بتستخدم نفس المفاتيح من غير ما تدخل في أدوات التنظيف العامة
   function getDbR(){ try{ return (typeof db!=='undefined'&&db)||firebase.firestore(); }catch(e){ return null; } }
   function ts(){ return firebase.firestore.FieldValue.serverTimestamp(); }
   function normPhone(p){
@@ -11492,13 +11512,17 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
     var out=[], p=normPhone(d&&d.phone), e=normEmail(d&&d.email);
     if(p) out.push({id:type+'_p_'+(await hash(type+'|p|'+p)),kind:'phone'});
     if(e) out.push({id:type+'_e_'+(await hash(type+'|e|'+e)),kind:'email'});
+    // رقم الإشهار بيتكرر بين المحافظات، فبنستخدمه مع المحافظة بس (الرقم الموحد بيبقى مختلف أصلا)
+    var rg=normReg(d&&d.reg), gv=String((d&&d.gov)||'').trim(); if(rg&&gv) out.push({id:type+'_r_'+(await hash(type+'|r|'+gv+'|'+rg)),kind:'reg'});
     return out;
   }
-  window.tmRegNorm={phone:normPhone,email:normEmail};
+  // رقم الإشهار: أرقام بس (بالعربي أو الإنجليزي)، من غير «لسنة» والمسافات
+  function normReg(r){ var x=String(r||'').replace(/[٠-٩]/g,function(c){return '٠١٢٣٤٥٦٧٨٩'.indexOf(c);}).replace(/[۰-۹]/g,function(c){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(c);}).replace(/\D/g,''); return x.length>=3?x:''; }
+  window.tmRegNorm={phone:normPhone,email:normEmail,reg:normReg};
 
   // بيرجع {dup:'phone'|'email'} لو مسجل قبل كده، أو {} لو يكمل عادي
   window.tmClaimRegistration=async function(type,d){
-    var dbx=getDbR(); if(!dbx||!TYPES[type]) return {};
+    var dbx=getDbR(); if(!dbx||!(TYPES[type]||EXTRA[type])) return {};
     var ks=await keysFor(type,d); if(!ks.length) return {};
     var col=dbx.collection('reg_keys'), b=dbx.batch();
     ks.forEach(function(k){ b.set(col.doc(k.id),{t:type,at:ts()}); });
@@ -11524,7 +11548,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
     m.innerHTML='<div style="background:#fff;border-radius:16px;max-width:380px;width:100%;padding:18px;text-align:center;direction:rtl">'+
       '<div style="font-size:34px">✅</div>'+
       '<div style="font-size:15px;font-weight:900;color:#1a3a6e;margin:6px 0">انت مسجل معانا بالفعل</div>'+
-      '<div style="font-size:12.5px;color:#475569;line-height:1.9">'+(kind==='email'?'الإيميل':'رقم الموبايل')+' ده مسجل قبل كده كـ«'+TYPE_AR[type]+'»، فمش محتاج تسجل تاني.<br>لو عايز تعدّل بياناتك ابعتلنا رسالة من «تواصل معانا».</div>'+
+      '<div style="font-size:12.5px;color:#475569;line-height:1.9">'+(type==='fund'?('جمعيتك حاجزة مكانها في منصة المنح قبل كده ('+(kind==='reg'?'بنفس رقم الإشهار في نفس المحافظة':kind==='email'?'بنفس الإيميل':'بنفس رقم الموبايل')+')، والطلب عندنا وهنتواصل معاك.<br>'):((kind==='email'?'الإيميل':'رقم الموبايل')+' ده مسجل قبل كده كـ«'+TYPE_AR[type]+'»، فمش محتاج تسجل تاني.<br>'))+'لو عايز تعدّل بياناتك ابعتلنا رسالة من «تواصل معانا».</div>'+
       '<div style="display:flex;gap:8px;margin-top:14px"><button type="button" data-a="ok" style="flex:1;padding:10px;border:0;border-radius:10px;background:#1a3a6e;color:#fff;font-family:inherit;font-weight:800">تمام</button>'+
       '<button type="button" data-a="contact" style="flex:1;padding:10px;border:1.5px solid #1a3a6e;border-radius:10px;background:#fff;color:#1a3a6e;font-family:inherit;font-weight:800">تواصل معانا</button></div></div>';
     m.addEventListener('click',function(e){ var a=e.target&&e.target.getAttribute&&e.target.getAttribute('data-a'); if(e.target===m||a==='ok'){ m.remove(); } else if(a==='contact'){ m.remove(); try{ go('contact-screen'); }catch(x){} } });
@@ -11532,7 +11556,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
   };
   // لما الأدمن يمسح حد أو يرفض طلبه، نفك المفاتيح عشان يقدر يسجل تاني
   window.tmFreeRegKeys=async function(type,d){
-    var dbx=getDbR(); if(!dbx||!TYPES[type]||!d) return;
+    var dbx=getDbR(); if(!dbx||!(TYPES[type]||EXTRA[type])||!d) return;
     var ks=await keysFor(type,d);
     for(var i=0;i<ks.length;i++){ try{ await dbx.collection('reg_keys').doc(ks[i].id).delete(); }catch(e){} }
   };

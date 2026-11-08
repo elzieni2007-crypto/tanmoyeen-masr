@@ -90,7 +90,8 @@
         '<div class="fpa-row" style="margin-top:10px"><button class="fpa-b g" data-ext="1">+ شهر</button><button class="fpa-b g" data-ext="3">+ 3 شهور</button><button class="fpa-b g" data-ext="12">+ سنة</button>'+
         '<input class="fpa-in" type="date" data-date value="'+ymd(until)+'" style="flex:none"><button class="fpa-b" data-set>فعّل حتى التاريخ</button>'+
         (o.status==='active'?'<button class="fpa-b r" data-off>⏸ إيقاف الحساب</button>':'<button class="fpa-b g" data-on>▶ تشغيل الحساب</button>')+
-        '<button class="fpa-b" data-reset>🔑 إرسال رابط كلمة المرور</button></div>'+
+        '<button class="fpa-b" data-reset>🔑 إرسال رابط كلمة المرور</button>'+
+        '<a class="fpa-b" style="text-decoration:none;background:#f3e8ff;color:#7c3aed" target="_blank" rel="noopener" href="'+PORTAL_URL+'app.html?org='+encodeURIComponent(o.id)+'">🛠 دعم فني: افتح حسابهم</a></div>'+
         teamHTML(o)+
         '<div class="fpa-row" style="margin-top:8px"><input class="fpa-in" data-notes placeholder="ملاحظات الأدمن (رقم الإيصال، طريقة الدفع…)" value="'+esc(o.notes||'')+'"></div></div>'}).join('')}
   function mems(o){return S.mem[o.id]||[]}

@@ -67,14 +67,14 @@
   function waitHTML(){var ord={paid:0,accepted:1,quoted:2,contacted:3,pending:4};
     var qq=nq(S.q);
     var ready=S.wait.filter(function(w){return !w.orgUid&&!w.orgId&&w.status!=='rejected'&&w.status!=='active'&&(w.contactEmail||w.orgEmail||w.email)
-        &&(!qq||qq.split(' ').every(function(t){return nq([w.orgName,w.contactName,w.contactEmail,w.orgEmail,w.email,w.phone,w.regNumber,w.gov,w.quote&&w.quote.no].join(' ')).indexOf(t)>-1}))})
+        &&(!qq||qq.split(' ').every(function(t){return nq([w.orgName,w.contactName,w.contactEmail,w.orgEmail,w.email,w.phone,w.regNumber,w.gov,w.quote&&w.quote.no,(w._rc||[]).map(function(r){return r.no}).join(' ')].join(' ')).indexOf(t)>-1}))})
       .sort(function(a,b){return (ord[a.status]??9)-(ord[b.status]??9)});
     if(!ready.length)return qq?'<div class="fpa-m" style="padding:4px 2px 8px">مفيش حجوزات من غير حساب بالبحث ده</div>':'';
     var hot=ready.filter(function(w){return w.status==='accepted'||w.status==='paid'}).length;
-    return '<div class="fpa-card"><div style="font-weight:800;color:#1a3a6e;margin-bottom:6px">💰 حجوزات منصة المنح من غير حساب ('+ready.length+')'+(hot?' · <span style="color:#0a8f6a">'+hot+' وافقوا على العرض</span>':'')+'</div>'+ready.map(function(w,ix){
+    return '<div class="fpa-card"><div style="font-weight:800;color:#1a3a6e;margin-bottom:6px">💰 حجوزات منصة المنح من غير حساب ('+ready.length+')'+(function(){var pd=ready.filter(function(x){return x.status==='paid'}).length,ac=hot-pd;return (pd?' · <span style="color:#0a8f6a">'+pd+' حوّلوا الجدية</span>':'')+(ac?' · <span style="color:#0a8f6a">'+ac+' وافقوا على العرض</span>':'')})()+'</div>'+ready.map(function(w,ix){
       var hotw=w.status==='accepted'||w.status==='paid',em=w.orgEmail||w.contactEmail||w.email||'';
       return '<div class="fpa-row" style="border-top:1px dashed #e2e9f1;padding-top:6px;margin-top:6px'+(hotw?';background:#effaf5;border-radius:10px;padding:8px':'')+'"><div style="flex:1;min-width:180px"><b>'+esc(w.orgName||'')+'</b><div class="fpa-m" dir="ltr" style="text-align:right">'+esc(em)+(w.phone?' · '+esc(w.phone):'')+'</div>'+
-        '<div class="fpa-m">'+esc(WST[w.status]||w.status||'')+(w.quote&&w.quote.no?' · عرض '+esc(w.quote.no):'')+'</div></div>'+
+        '<div class="fpa-m">'+esc(WST[w.status]||w.status||'')+(w.quote&&w.quote.no?' · عرض '+esc(w.quote.no):'')+(w._rc?' · إيصال '+esc(w._rc[0].no||'')+' · '+Math.round(w._paid).toLocaleString('en-US')+' ج':'')+'</div></div>'+
         '<button class="fpa-b'+(hotw?' p':'')+'" data-fill="'+esc(w.id)+'">جهّز الحساب</button></div>'}).map(function(h,ix){var w=ready[ix],hotw=w.status==='accepted'||w.status==='paid';
         if(qq||hotw)return h;var first=!ready.slice(0,ix).some(function(x){return x.status!=='accepted'&&x.status!=='paid'});
         return (first?'<details style="margin-top:8px"><summary class="fpa-m" style="cursor:pointer;font-weight:700">باقي الحجوزات ('+ready.filter(function(x){return x.status!=='accepted'&&x.status!=='paid'}).length+')</summary>':'')+h+(ix===ready.length-1?'</details>':'')}).join('')+
@@ -86,7 +86,7 @@
     return rows.map(function(o){var st=state(o),until=toD(o.paidUntil);
       return '<div class="fpa-card" data-org="'+o.id+'"><div class="fpa-row" style="justify-content:space-between"><div><b style="font-size:15px">'+esc(o.name)+'</b> <span class="fpa-pill" style="color:'+st.c+';background:'+st.bg+'">'+st.t+'</span>'+
         '<div class="fpa-m" dir="ltr" style="text-align:right">'+esc(o.email)+(o.phone?' · '+esc(o.phone):'')+'</div></div>'+
-        (function(){var w=bk(o);return w?'<div class="fpa-m">🔗 الحجز: '+esc(WST[w.status]||w.status||'')+(w.quote&&w.quote.no?' · عرض '+esc(w.quote.no):'')+'</div>':''})()+'<div class="fpa-m">الاشتراك حتى: <b style="color:#11243a">'+fmt(until)+'</b><br>آخر دخول: '+fmt(lastIn(o))+'<br>'+useTxt(o)+'</div></div>'+
+        (function(){var w=bk(o);return w?'<div class="fpa-m">🔗 الحجز: '+esc(WST[w.status]||w.status||'')+(w.quote&&w.quote.no?' · عرض '+esc(w.quote.no):'')+(w._rc?' · مدفوع '+Math.round(w._paid).toLocaleString('en-US')+' ج ('+w._rc.length+' إيصال)':'')+'</div>':''})()+'<div class="fpa-m">الاشتراك حتى: <b style="color:#11243a">'+fmt(until)+'</b><br>آخر دخول: '+fmt(lastIn(o))+'<br>'+useTxt(o)+'</div></div>'+
         '<div class="fpa-row" style="margin-top:10px"><button class="fpa-b g" data-ext="1">+ شهر</button><button class="fpa-b g" data-ext="3">+ 3 شهور</button><button class="fpa-b g" data-ext="12">+ سنة</button>'+
         '<input class="fpa-in" type="date" data-date value="'+ymd(until)+'" style="flex:none"><button class="fpa-b" data-set>فعّل حتى التاريخ</button>'+
         (o.status==='active'?'<button class="fpa-b r" data-off>⏸ إيقاف الحساب</button>':'<button class="fpa-b g" data-on>▶ تشغيل الحساب</button>')+
@@ -120,6 +120,10 @@
     S.wait=r[1]?r[1].docs.map(function(d){var x=d.data();x.id=d.id;return x}):[];
     try{var qr=await db.collection('quote_responses').get();var RESP={};qr.docs.forEach(function(d){RESP[d.id]=d.data()});
       S.wait.forEach(function(w){var tok=w.quoteToken||(w.quote&&w.quote.token);var x=tok&&RESP[tok];if(x&&x.decision==='accepted'&&['pending','contacted','quoted'].indexOf(w.status||'pending')>-1)w.status='accepted'})}catch(e){}
+    // أي حجز عليه إيصال صالح (عربون أو إعداد أو اشتراك) يبقى «حوّل الجدية» حتى لو حالته في الحجوزات لسه متحدثتش
+    try{var rq=await db.collection('receipts').get();var RC={};rq.docs.forEach(function(d){var x=d.data();if(x.status==='void'||!x.bookingId)return;(RC[x.bookingId]=RC[x.bookingId]||[]).push(x)});
+      S.wait.forEach(function(w){var L=RC[w.id];if(!L)return;w._rc=L.sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});w._paid=L.reduce(function(a,x){return a+(+x.amount||0)},0);
+        if(['pending','contacted','quoted','accepted'].indexOf(w.status||'pending')>-1)w.status='paid'})}catch(e){console.warn('receipts',e)}
     S.use={};if(r[2])r[2].docs.forEach(function(d){var x=d.data();S.use[x.orgId]=x});
     render()}
   async function upd(id,data,msg){data.updatedAt=FV().serverTimestamp();try{await db.collection('orgs').doc(id).update(data);var o=S.orgs.find(function(x){return x.id===id});

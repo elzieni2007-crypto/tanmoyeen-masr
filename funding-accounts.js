@@ -98,8 +98,9 @@
   function bk(o){return (S.wait||[]).find(function(w){return (o.waitlistId&&w.id===o.waitlistId)||w.orgId===o.id})}
   var WST={pending:'⏳ جديد',contacted:'📞 تم التواصل',quoted:'📄 العرض اتبعت',accepted:'🤝 وافق على العرض',paid:'💰 حوّل الجدية',active:'✅ مفعّل',rejected:'❌ مستبعد'};
   // استهلاك الذكاء الاصطناعي للجمعية الشهر ده (fp_usage بتكتبه دالة fpai)
-  function useTxt(o){var u=(S.use||{})[o.id];if(!u)return 'الذكاء الاصطناعي الشهر ده: 0 طلب';var k=function(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?Math.round(n/1e3)+'K':String(n||0)};var f=(u.by&&u.by.full&&u.by.full.calls)||0;
-    return 'الذكاء الاصطناعي الشهر ده: <b style="color:#11243a">'+(u.calls||0)+'</b> طلب ('+f+' مقترح كامل) · '+k(u.inTok)+' داخل / '+k(u.outTok)+' خارج'}
+  function useTxt(o){var u=(S.use||{})[o.id];if(!u)return 'الذكاء الاصطناعي الشهر ده: 0 طلب';var k=function(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?Math.round(n/1e3)+'K':String(n||0)};var f=(u.by&&u.by.full&&u.by.full.calls)||0,usd=+u.usd||0;
+    // كل قسم في المقترح بيتكتب في طلب لوحده، فعدد الطلبات مش عدد المقترحات
+    return 'الذكاء الاصطناعي الشهر ده: <b style="color:#11243a">'+(u.calls||0)+'</b> طلب'+(f?' (منهم '+f+' كتابة أقسام مقترح)':'')+(usd?' · تكلفة تقريبية <b style="color:#11243a">$'+usd.toFixed(2)+'</b>':'')+' · '+k(u.inTok)+' داخل / '+k(u.outTok)+' خارج'}
   function lastIn(o){var t=0;mems(o).forEach(function(m){var d=toD(m.lastLogin);if(d&&d>t)t=d});return t||null}
   function teamHTML(o){var ms=mems(o).slice().sort(function(a,b){return (a.role==='owner'?0:1)-(b.role==='owner'?0:1)}),act=ms.filter(function(m){return m.status==='active'}).length;
     return '<details style="margin-top:8px"><summary class="fpa-m" style="cursor:pointer">👥 فريق الجمعية: '+act+' من '+(o.seats||3)+' مستخدمين</summary>'+

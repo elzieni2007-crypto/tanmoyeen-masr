@@ -11646,6 +11646,46 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
       try{ if(typeof loadAdminData==='function') loadAdminData(); if(typeof loadRegistrationRequests==='function') loadRegistrationRequests(); }catch(e){}
     }catch(e){ box.innerHTML='<span style="color:#b42318">❌ حصلت مشكلة: '+esc(e.message||e)+(e.code==='permission-denied'?' — اتأكد إن قواعد Firestore الجديدة (reg_keys) اتنشرت.':'')+'</span>'; }
   };
+  /* ---------- أداة الأدمن: مين مسجل بالإيميل أو الموبايل ده؟ ---------- */
+  var LOOK=null;
+  window.tmRegLookup=async function(){
+    var inp=document.getElementById('tm-look-q'), box=document.getElementById('tm-look-out'), dbx=getDbR(); if(!inp||!box||!dbx) return;
+    var q=String(inp.value||'').trim(); if(!q){ box.innerHTML='⚠️ اكتب إيميل أو رقم موبايل'; return; }
+    var isMail=q.indexOf('@')>0, e=isMail?normEmail(q):'', p=isMail?'':normPhone(q);
+    if(!e&&!p){ box.innerHTML='⚠️ الرقم ده مش رقم موبايل صحيح'; return; }
+    box.innerHTML='⏳ بندوّر في كل التسجيلات...';
+    try{
+      var hits=[];
+      var match=function(x){ if(!x) return false; if(e) return [x.email,x.orgEmail,x.contactEmail].some(function(v){ return v&&normEmail(v)===e; }); return [x.phone,x.whatsapp,x.mobile].some(function(v){ return v&&normPhone(v)===p; }); };
+      var cols=[]; for(var t in TYPES) cols.push([TYPES[t],TYPE_AR[t]]);
+      cols.push(['registration_requests','طلب تسجيل'],['funding_waitlist','حجز منصة المنح']);
+      for(var i=0;i<cols.length;i++){
+        var sn=await dbx.collection(cols[i][0]).get();
+        sn.docs.forEach(function(d){ var x=d.data(); if(match(x)) hits.push({col:cols[i][0],label:cols[i][1],id:d.id,x:x}); });
+      }
+      // المفاتيح المحجوزة (اللي بتطلّع رسالة «مسجل قبل كده») لكل نوع
+      var keys=[], types=Object.keys(TYPES).concat(['fund']);
+      for(var j=0;j<types.length;j++){
+        var ks=await keysFor(types[j],e?{email:e}:{phone:p});
+        for(var k=0;k<ks.length;k++){ var kd=await dbx.collection('reg_keys').doc(ks[k].id).get(); if(kd.exists) keys.push({type:types[j],id:ks[k].id}); }
+      }
+      LOOK={keys:keys,q:q};
+      var stTxt=function(h){ var s=h.x.status; return h.col==='registration_requests'?(s==='pending'?'⏳ مستني موافقة':s==='duplicate'?'مكرر':s==='rejected'?'مرفوض':(s||'')):h.col==='funding_waitlist'?(s||'جديد'):'✅ منشور'; };
+      var dt=function(x){ var v=x.timestamp||x.createdAt||x.approvedAt; try{ return v&&v.toDate?v.toDate().toLocaleDateString('ar-EG'):''; }catch(_e){ return ''; } };
+      var html=hits.length?hits.map(function(h){ var rt=h.x.registrationType||h.x.type; return '<div style="padding:7px 0;border-bottom:1px dashed #fed7aa"><b>'+esc(h.x.name||h.x.orgName||'—')+'</b> · '+esc(h.label)+(h.col==='registration_requests'&&rt&&TYPE_AR[rt]?' ('+TYPE_AR[rt]+')':'')+' · '+stTxt(h)+(dt(h.x)?' · '+dt(h.x):'')+'<div style="font-size:10.5px;color:#7c2d12" dir="ltr">'+esc([h.x.email||h.x.orgEmail||h.x.contactEmail||'',h.x.phone||''].filter(Boolean).join(' · '))+'</div></div>'; }).join(''):'<div>مفيش أي تسجيل بالـ'+(e?'إيميل':'رقم')+' ده في البيانات.</div>';
+      var orphan=keys.filter(function(k){ return !hits.some(function(h){ var rt=h.col==='funding_waitlist'?'fund':(h.x.registrationType||h.x.type||(function(){ for(var t in TYPES) if(TYPES[t]===h.col) return t; })()); return rt===k.type; }); });
+      html+='<div style="margin-top:8px"><b>الحجز ضد التكرار:</b> '+(keys.length?keys.map(function(k){ return TYPE_AR[k.type]; }).join('، '):'مفيش')+'</div>';
+      if(orphan.length) html+='<div style="margin-top:6px;color:#b42318;font-weight:700">⚠️ محجوز كـ«'+orphan.map(function(k){ return TYPE_AR[k.type]; }).join('، ')+'» من غير تسجيل موجود (غالبًا تسجيل اتمسح). عشان كده بتطلعله رسالة «مسجل قبل كده».</div><button type="button" onclick="tmRegLookupFree()" style="margin-top:8px;width:100%;padding:10px;border:0;border-radius:10px;background:#0b6a93;color:#fff;font-family:Cairo,sans-serif;font-weight:800">🔓 فك الحجز عشان يقدر يسجل</button>';
+      LOOK.orphan=orphan;
+      box.innerHTML=html;
+    }catch(err){ box.innerHTML='<span style="color:#b42318">❌ '+esc(err.message||err)+'</span>'; }
+  };
+  window.tmRegLookupFree=async function(){
+    if(!LOOK||!LOOK.orphan||!LOOK.orphan.length) return; var dbx=getDbR(), box=document.getElementById('tm-look-out');
+    if(!confirm('هيتفك حجز «'+LOOK.q+'» عشان يقدر يسجل تاني. نكمل؟')) return;
+    try{ for(var i=0;i<LOOK.orphan.length;i++) await dbx.collection('reg_keys').doc(LOOK.orphan[i].id).delete(); box.innerHTML+='<div style="margin-top:6px;color:#00703a;font-weight:800">✅ اتفك الحجز. يقدر يسجل دلوقتي.</div>'; LOOK.orphan=[]; }
+    catch(err){ box.innerHTML+='<div style="color:#b42318">❌ '+esc(err.message||err)+'</div>'; }
+  };
   // كارت الأداة في تاب «طلبات التسجيل»
   function mountTool(){
     var host=document.getElementById('adm-form-registration-requests'); if(!host||document.getElementById('tm-dedupe')) return;
@@ -11654,6 +11694,11 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
     c.innerHTML='<div style="font-weight:800;font-size:13px;color:#9a3412">🧹 التسجيلات المكررة</div><div style="font-size:11px;color:#7c2d12;margin:4px 0 8px;line-height:1.8">بيدوّر على نفس الموبايل أو الإيميل متسجل أكتر من مرة في نفس النوع، ويوريك النتيجة قبل أي حذف.</div>'+
       '<button type="button" onclick="tmDedupeScan()" style="width:100%;padding:10px;border:0;border-radius:10px;background:#ea580c;color:#fff;font-family:Cairo,sans-serif;font-weight:800">🔍 افحص التكرار</button><div id="tm-dedupe-out" style="margin-top:8px;font-size:12px"></div>';
     var list=document.getElementById('registration-requests-list'); host.insertBefore(c,list);
+    var l=document.createElement('div'); l.id='tm-look';
+    l.style.cssText='background:#fff7ed;border:1px solid #fdba74;border-radius:12px;padding:12px;margin-bottom:12px;font-family:Cairo,sans-serif;font-size:12px;color:#7c2d12;line-height:1.8';
+    l.innerHTML='<div style="font-weight:800;font-size:13px;color:#9a3412">🔎 مين مسجل بالإيميل أو الموبايل ده؟</div><div style="font-size:11px;margin:2px 0 8px">لو حد اشتكى إن التطبيق بيقوله «مسجل قبل كده»، اكتب إيميله أو رقمه هنا.</div>'+
+      '<div style="display:flex;gap:6px"><input id="tm-look-q" dir="ltr" placeholder="name@gmail.com أو 01xxxxxxxxx" style="flex:1;min-width:0;min-height:42px;border:1.5px solid #fdba74;border-radius:10px;padding:0 10px;font-family:Cairo,sans-serif;font-size:13px" onkeydown="if(event.key===\'Enter\')tmRegLookup()"><button type="button" onclick="tmRegLookup()" style="min-height:42px;padding:0 14px;border:0;border-radius:10px;background:#ea580c;color:#fff;font-family:Cairo,sans-serif;font-weight:800">دوّر</button></div><div id="tm-look-out" style="margin-top:8px"></div>';
+    host.insertBefore(l,c);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountTool); else mountTool();
 })();

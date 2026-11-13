@@ -57,7 +57,7 @@
     '.fpa-m{font-size:12.5px;color:#64758a}@media(max-width:600px){.fpa-k{grid-template-columns:repeat(2,1fr)}}';
   function head(){var c={on:0,soon:0,exp:0,off:0};S.orgs.forEach(function(o){c[state(o).k]++});
     return '<style>'+css+'</style><div class="fpa-k"><div><b>'+(c.on+c.soon)+'</b><small>نشط</small></div><div><b>'+c.soon+'</b><small>ينتهي خلال أسبوع</small></div><div><b>'+c.exp+'</b><small>اشتراك منتهي</small></div><div><b>'+c.off+'</b><small>موقوف</small></div></div>'+
-    hotHTML()+trialCfgHTML()+
+    hotHTML()+mailHTML()+trialCfgHTML()+
     '<div class="fpa-card"><div style="font-weight:800;color:#1a3a6e;margin-bottom:8px">➕ حساب جديد لجمعية</div>'+
     '<div class="fpa-row" style="margin-bottom:8px"><input class="fpa-in" id="fpa-name" placeholder="اسم الجمعية"><input class="fpa-in" id="fpa-email" type="email" dir="ltr" placeholder="إيميل الجمعية (هيوصله رابط كلمة المرور)"></div>'+
     '<div class="fpa-row" style="margin-bottom:8px"><input class="fpa-in" id="fpa-reg" placeholder="رقم الإشهار"><input class="fpa-in" id="fpa-phone" placeholder="الموبايل (اختياري)"><input class="fpa-in" id="fpa-gov" placeholder="المحافظة (اختياري)"><label class="fpa-m" style="display:flex;gap:6px;align-items:center">الاشتراك ساري حتى <input class="fpa-in" id="fpa-until" type="date" value="'+ymd(addMonths(null,12))+'" style="flex:none"></label></div>'+
@@ -77,6 +77,42 @@
           (waLink(o.phone)?'<a class="fpa-b g" style="text-decoration:none" target="_blank" rel="noopener" href="'+waLink(o.phone,t)+'">💬 واتساب</a>':'')+'</div>'}).join(''):'<div class="fpa-m">لسه مفيش عملاء ساخنين.</div>')+
       '<div class="fpa-m" style="margin-top:8px">لما جمعية تجريبية تدفع، دوس «+ شهر» أو «+ سنة» على حسابها وهيتحول لاشتراك عادي بـ 3 مستخدمين.</div></div>'}
   var FEAT={write:'كتابة المقترح','كتابة المقترح':'كتابة المقترح'};
+  // ---------- إيميل التجربة المجانية للحجوزات ----------
+  // مفيش خدمة إرسال إيميلات، فالأدمن بيبعت من Gmail على دفعات (Bcc) والنص جاهز للنسخ
+  var MAIL_SUBJ='تجربة مجانية لمنصة فرص التمويل حتى 30 نوفمبر – تنمويين مصر';
+  var MAIL_BODY=['السلام عليكم ورحمة الله،','',
+    'نشكركم على تسجيل بيانات جمعيتكم على منصة فرص التمويل من تنمويين مصر.','',
+    'بمناسبة الوايت فرايداي، فتحنا المنصة لتجربة مجانية حتى 30 نوفمبر 2026، تقدرون خلالها:',
+    '• متابعة فرص التمويل المفتوحة لمصر ونسبة توافق كل فرصة مع ملف جمعيتكم',
+    '• تحليل أي دعوة: الشروط والمخاطر وقرار التقديم من عدمه',
+    '• تصفح دليل الممولين في مصر وطريقة التقديم لكل جهة',
+    '• الحصول على أفكار مقترحات للفرصة التي تختارونها','',
+    'ومن الفرص المتاحة حاليا دعوة صندوق دعم مشروعات الجمعيات والمؤسسات الأهلية، وآخر موعد للتقديم عليها 13 ديسمبر 2026.','',
+    'لتفعيل التجربة في دقيقة، بنفس رقم الموبايل ورقم الإشهار المسجلين في الحجز:',PORTAL_URL+'trial.html','',
+    'دليل استخدام المنصة بالصور:',PORTAL_URL+'guide.html','',
+    'كتابة المقترح الكامل والموازنة وخطة العمل والنسخة الإنجليزية وإيميل التقديم متاحة للجمعيات المشتركة، ويمكنكم طلب عرض السعر من داخل المنصة في أي وقت.','',
+    'ملاحظة: تنمويين مصر ليست جهة مانحة ولا تضمن الحصول على التمويل، ودورنا تسهيل وصولكم للفرص المناسبة وتقديم طلبات قوية.','',
+    'مع خالص التحية،','فريق تنمويين مصر','',
+    'إذا لم ترغبوا في تلقي رسائل منا، يرجى الرد على هذا الإيميل بكلمة «إلغاء».'].join('\n');
+  var MAIL_TYPO=/@(gmail\.(co|con|cm|om|comm|cpm|coom)|gmal|gmai|gamil|gmial|gmaill|gimail|yaho|yahoo\.(co|con|cm)|yahooo|yhoo|hotmail\.(co|con)|hotmial|hotmal|hotmil|homail|outlook\.(co|con)|outlok)\b/i;
+  function mailList(){var ok=[],bad=[],seen={};
+    (S.wait||[]).forEach(function(w){if(w.orgId||w.orgUid||w.status==='rejected'||w.status==='active')return;
+      [w.contactEmail,w.orgEmail,w.email].forEach(function(e){e=String(e||'').trim().toLowerCase();if(!e||seen[e])return;seen[e]=1;
+        if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(e)||MAIL_TYPO.test(e))bad.push({e:e,n:w.orgName||'',ph:w.phone||''});else ok.push(e)})});
+    return {ok:ok,bad:bad}}
+  function mailHTML(){if(!S.wait||!S.wait.length)return '';var L=mailList(),B=[],n=40;for(var i=0;i<L.ok.length;i+=n)B.push(L.ok.slice(i,i+n));
+    return '<details class="fpa-card" id="fpa-mail"><summary style="font-weight:800;color:#1a3a6e;cursor:pointer">📧 إيميل التجربة المجانية للحجوزات ('+L.ok.length+' إيميل)</summary>'+
+      '<div class="fpa-m" style="margin:8px 0">إيميل الجمعية وإيميل الشخص المسئول لكل الحجوزات اللي لسه ما اتفعلش لها حساب، من غير تكرار. ابعت من Gmail دفعة دفعة في «Bcc» علشان محدش يشوف إيميلات التانيين، وسيب بين الدفعات كام دقيقة.</div>'+
+      '<div class="fpa-row" style="margin-bottom:8px"><button class="fpa-b p" id="fpa-msubj">📋 انسخ العنوان</button><button class="fpa-b p" id="fpa-mbody">📋 انسخ نص الإيميل</button></div>'+
+      B.map(function(b,k){return '<div class="fpa-row" style="border-top:1px dashed #d3dee8;padding-top:6px;margin-top:6px"><b style="min-width:90px">دفعة '+(k+1)+' ('+b.length+')</b>'+
+        '<button class="fpa-b" data-mcopy="'+k+'">📋 انسخ الإيميلات</button><a class="fpa-b g" style="text-decoration:none" target="_blank" rel="noopener" href="https://mail.google.com/mail/?view=cm&fs=1&bcc='+encodeURIComponent(b.join(','))+'&su='+encodeURIComponent(MAIL_SUBJ)+'">✉️ افتح في Gmail</a><span class="fpa-m" data-mdone="'+k+'"></span></div>'}).join('')+
+      (L.bad.length?'<div class="fpa-m" style="margin-top:10px"><b style="color:#a86300">⚠️ '+L.bad.length+' إيميل شكله غلط ومش في الدفعات</b> (الجمعيات دي تتبلغ على واتساب):<br>'+L.bad.map(function(x){return esc(x.n)+' · <span dir="ltr">'+esc(x.e)+'</span>'+(x.ph?' · <span dir="ltr">'+esc(x.ph)+'</span>':'')}).join('<br>')+'</div>':'')+
+      '<div class="fpa-m" style="margin-top:8px">بعد ما يفتح Gmail: الصق نص الإيميل في الرسالة، واتأكد إن الإيميلات في خانة Bcc، وابعت. Gmail بيسمح بحوالي 500 مستلم في اليوم.</div></details>'}
+  function bindMail(){var L=null,get=function(){return L||(L=mailList())};
+    var cp=async function(t,msg){try{await navigator.clipboard.writeText(t);T('📋 '+msg)}catch(e){window.prompt('انسخ:',t)}};
+    var a=g('fpa-msubj');if(a)a.onclick=function(){cp(MAIL_SUBJ,'اتنسخ العنوان')};
+    var b=g('fpa-mbody');if(b)b.onclick=function(){cp(MAIL_BODY,'اتنسخ نص الإيميل')};
+    document.querySelectorAll('[data-mcopy]').forEach(function(x){x.onclick=function(){var k=+x.dataset.mcopy,ok=get().ok.slice(k*40,k*40+40);cp(ok.join(', '),'اتنسخت إيميلات الدفعة '+(k+1));var d=document.querySelector('[data-mdone="'+k+'"]');if(d)d.textContent='✓ اتنسخت'}})}
   function trialCfgHTML(){var t=S.trial||{};
     return '<details class="fpa-card" id="fpa-trialcfg"><summary style="font-weight:800;color:#1a3a6e;cursor:pointer">⚙️ إعدادات الحساب التجريبي '+(t.open===false?'(مقفول)':'(مفتوح لحد '+esc(t.until||'2026-11-30')+')')+'</summary>'+
       '<div class="fpa-row" style="margin-top:10px"><label class="fpa-m" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="fpa-topen"'+(t.open===false?'':' checked')+'> التفعيل الذاتي مفتوح</label>'+
@@ -176,7 +212,7 @@
           until:u?new Date(u+'T23:59:00'):null,waitlistId:g('fpa-wid').value});
         T(S.lastExisted?'✅ اتعمل حساب الجمعية. الإيميل ده عليه حساب على تنمويين مصر بالفعل، فهيدخلوا المنصة بنفس كلمة المرور بتاعته':'✅ اتعمل الحساب واتبعت للجمعية إيميل تحط منه كلمة المرور');['fpa-name','fpa-email','fpa-reg','fpa-phone','fpa-gov','fpa-wid','fpa-cn'].forEach(function(k){g(k).value=''});c.disabled=false;g('fpa-st').textContent='';await load()}
       catch(e){st.textContent='❌ '+e.message;c.disabled=false}};
-    bindFill();bindTrial();
+    bindFill();bindTrial();bindMail();
     var q=g('fpa-q');if(q)q.oninput=function(){S.q=q.value;var a=g('adm-search');if(a)a.value=q.value;renderList()};
     // خانة البحث اللي فوق خالص في لوحة الأدمن بتبحث هنا كمان لما تبويب حسابات المنصة مفتوح
     var top=g('adm-search');if(top&&!top._fpa){top._fpa=1;top.addEventListener('input',function(){var b=g('adm-form-fpaccounts');if(!b||b.style.display==='none')return;S.q=top.value;var m=g('fpa-q');if(m)m.value=top.value;renderList()})}var f=g('fpa-f');if(f)f.onchange=function(){S.f=f.value;renderList()};

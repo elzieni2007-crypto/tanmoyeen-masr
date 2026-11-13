@@ -116,7 +116,7 @@
         '<div class="fpa-row" style="margin-top:10px"><button class="fpa-b g" data-ext="1">+ شهر</button><button class="fpa-b g" data-ext="3">+ 3 شهور</button><button class="fpa-b g" data-ext="12">+ سنة</button>'+
         '<input class="fpa-in" type="date" data-date value="'+ymd(until)+'" style="flex:none"><button class="fpa-b" data-set>فعّل حتى التاريخ</button>'+
         (o.status==='active'?'<button class="fpa-b r" data-off>⏸ إيقاف الحساب</button>':'<button class="fpa-b g" data-on>▶ تشغيل الحساب</button>')+
-        '<button class="fpa-b" data-reset>🔑 إرسال رابط كلمة المرور</button>'+
+        '<button class="fpa-b" data-reset>🔑 إرسال رابط كلمة المرور</button><button class="fpa-b" data-rlink>📋 انسخ رابط كلمة المرور</button>'+
         '<a class="fpa-b" style="text-decoration:none;background:#f3e8ff;color:#7c3aed" target="_blank" rel="noopener" href="'+PORTAL_URL+'app.html?org='+encodeURIComponent(o.id)+'">🛠 دعم فني: افتح حسابهم</a></div>'+
         teamHTML(o)+
         '<div class="fpa-row" style="margin-top:8px"><input class="fpa-in" data-notes placeholder="ملاحظات الأدمن (رقم الإيصال، طريقة الدفع…)" value="'+esc(o.notes||'')+'"></div></div>'}).join('')}
@@ -128,10 +128,19 @@
     // كل قسم في المقترح بيتكتب في طلب لوحده، فعدد الطلبات مش عدد المقترحات
     return 'الذكاء الاصطناعي الشهر ده: <b style="color:#11243a">'+(u.calls||0)+'</b> طلب'+(f?' (منهم '+f+' كتابة أقسام مقترح)':'')+(usd?' · تكلفة تقريبية <b style="color:#11243a">$'+usd.toFixed(2)+'</b>':'')+' · '+k(u.inTok)+' داخل / '+k(u.outTok)+' خارج'}
   function lastIn(o){var t=0;mems(o).forEach(function(m){var d=toD(m.lastLogin);if(d&&d>t)t=d});return t||null}
+  // رابط تعيين كلمة المرور: بيتنسخ علشان يتبعت على واتساب لو الإيميل ما وصلش. الرابط بيشتغل مرة واحدة ولمدة ساعة تقريبا
+  async function copyReset(email,ph,name,btn){if(!email){T('❌ مفيش إيميل للحساب');return}var t0=btn.textContent;btn.disabled=true;btn.textContent='⏳ …';
+    try{var r=await team({action:'resetlink',email:email});
+      var msg='السلام عليكم، ده رابط تحديد كلمة المرور لحساب '+(name||'جمعيتكم')+' على منصة فرص التمويل (الإيميل: '+email+'):\n'+r.link+'\n\nالرابط بيشتغل مرة واحدة ولمدة ساعة. بعد ما تحطوا كلمة المرور ادخلوا من هنا:\n'+PORTAL_URL;
+      var ok=false;try{await navigator.clipboard.writeText(msg);ok=true}catch(e){}
+      if(!ok)window.prompt('انسخ الرسالة:',msg);
+      T(ok?'📋 اتنسخت الرسالة والرابط، ابعتها للجمعية':'انسخ الرسالة من المربع');
+      var w=waLink(ph,msg);if(w&&confirm('اتنسخت الرسالة. تفتح واتساب الجمعية وتبعتها على طول؟'))window.open(w,'_blank')}
+    catch(e){T('❌ '+e.message)}finally{btn.disabled=false;btn.textContent=t0}}
   function teamHTML(o){var ms=mems(o).slice().sort(function(a,b){return (a.role==='owner'?0:1)-(b.role==='owner'?0:1)}),act=ms.filter(function(m){return m.status==='active'}).length;
     return '<details style="margin-top:8px"><summary class="fpa-m" style="cursor:pointer">👥 فريق الجمعية: '+act+' من '+(o.seats||3)+' مستخدمين</summary>'+
       ms.map(function(m){return '<div class="fpa-row" style="padding:5px 0;border-top:1px dashed #e2e9f1"><span style="flex:1;min-width:160px"><b>'+esc(m.name||'—')+'</b> · '+ROLE[m.role]+(m.status!=='active'?' · <span style="color:#b33a3a">موقوف</span>':'')+
-        '<br><span class="fpa-m" dir="ltr">'+esc(m.email)+'</span></span><span class="fpa-m">آخر دخول: '+fmt(toD(m.lastLogin))+'</span><button class="fpa-b" data-mreset="'+esc(m.email)+'">🔑 رابط كلمة المرور</button></div>'}).join('')+
+        '<br><span class="fpa-m" dir="ltr">'+esc(m.email)+'</span></span><span class="fpa-m">آخر دخول: '+fmt(toD(m.lastLogin))+'</span><button class="fpa-b" data-mreset="'+esc(m.email)+'">🔑 ابعت رابط كلمة المرور</button><button class="fpa-b" data-mlink="'+esc(m.email)+'">📋 انسخ الرابط</button></div>'}).join('')+
       '<div class="fpa-row" style="padding-top:6px"><label class="fpa-m">الحد الأقصى للمستخدمين <input class="fpa-in" type="number" min="1" max="20" data-seats value="'+(o.seats||3)+'" style="width:70px;flex:none"></label></div></details>'}
   function render(){var h=g('fpa-head'),l=g('fpa-list');if(!h||!l)return;h.innerHTML=head();l.innerHTML=listHTML();var f=g('fpa-f');if(f)f.value=S.f;bind()}
   function renderList(){var w=g('fpa-wait');if(w){w.innerHTML=waitHTML();bindFill()}var l=g('fpa-list');if(l){l.innerHTML=listHTML();bindList()}}
@@ -180,6 +189,8 @@
     var off=card.querySelector('[data-off]');if(off)off.onclick=function(){if(confirm('إيقاف حساب '+o.name+'؟ الجمعية مش هتقدر تستخدم المنصة لحد ما تشغله تاني.'))upd(id,{status:'suspended'},'⏸ اتوقف الحساب')};
     var on=card.querySelector('[data-on]');if(on)on.onclick=function(){var until=toD(o.paidUntil);if(!until||until<new Date()){T('الاشتراك منتهي: مد الاشتراك أو حدد تاريخ جديد');return}upd(id,{status:'active'},'▶ اتشغل الحساب')};
     var r=card.querySelector('[data-reset]');if(r)r.onclick=async function(){try{auth.languageCode='ar';await auth.sendPasswordResetEmail(o.email,{url:PORTAL_URL});T('📧 اتبعت رابط كلمة المرور لـ '+o.email)}catch(e){T('❌ '+e.message)}};
+    var rl=card.querySelector('[data-rlink]');if(rl)rl.onclick=function(){copyReset(o.email,o.phone,o.name,rl)};
+    card.querySelectorAll('[data-mlink]').forEach(function(b){b.onclick=function(){copyReset(b.dataset.mlink,o.phone,o.name,b)}});
     card.querySelectorAll('[data-mreset]').forEach(function(b){b.onclick=async function(){try{auth.languageCode='ar';await auth.sendPasswordResetEmail(b.dataset.mreset,{url:PORTAL_URL});T('📧 اتبعت رابط كلمة المرور لـ '+b.dataset.mreset)}catch(e){T('❌ '+e.message)}}});
     var se=card.querySelector('[data-seats]');if(se)se.onchange=function(){var v=Math.max(1,Math.min(20,+se.value||3));upd(id,{seats:v},'✅ الحد الأقصى بقى '+v+' مستخدمين')};
     var n=card.querySelector('[data-notes]');if(n)n.onchange=function(){upd(id,{notes:n.value.trim()},'اتحفظت الملاحظة')}})}

@@ -15,7 +15,7 @@
   var fmt=function(d){return d?d.toLocaleDateString('ar-EG-u-nu-latn',{year:'numeric',month:'short',day:'numeric'}):'—'};
   var ymd=function(d){return d?new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10):''};
   var addMonths=function(base,n){var d=new Date(Math.max(Date.now(),base?base.getTime():0));d.setMonth(d.getMonth()+n);d.setHours(23,59,0,0);return d};
-  var S={orgs:[],wait:[],mem:{},q:'',f:''};
+  var S={orgs:[],wait:[],mem:{},q:'',f:'',trial:{}};
   var ROLE={owner:'مدير الحساب',editor:'مُعِد',reviewer:'مراجع'};
   function state(o){var until=toD(o.paidUntil);if(o.status!=='active')return {k:'off',t:'موقوف',c:'#b33a3a',bg:'#fbe6e6'};
     if(!until||until<new Date())return {k:'exp',t:'الاشتراك انتهى',c:'#a86300',bg:'#fdf0d7'};
@@ -57,13 +57,38 @@
     '.fpa-m{font-size:12.5px;color:#64758a}@media(max-width:600px){.fpa-k{grid-template-columns:repeat(2,1fr)}}';
   function head(){var c={on:0,soon:0,exp:0,off:0};S.orgs.forEach(function(o){c[state(o).k]++});
     return '<style>'+css+'</style><div class="fpa-k"><div><b>'+(c.on+c.soon)+'</b><small>نشط</small></div><div><b>'+c.soon+'</b><small>ينتهي خلال أسبوع</small></div><div><b>'+c.exp+'</b><small>اشتراك منتهي</small></div><div><b>'+c.off+'</b><small>موقوف</small></div></div>'+
+    hotHTML()+trialCfgHTML()+
     '<div class="fpa-card"><div style="font-weight:800;color:#1a3a6e;margin-bottom:8px">➕ حساب جديد لجمعية</div>'+
     '<div class="fpa-row" style="margin-bottom:8px"><input class="fpa-in" id="fpa-name" placeholder="اسم الجمعية"><input class="fpa-in" id="fpa-email" type="email" dir="ltr" placeholder="إيميل الجمعية (هيوصله رابط كلمة المرور)"></div>'+
     '<div class="fpa-row" style="margin-bottom:8px"><input class="fpa-in" id="fpa-reg" placeholder="رقم الإشهار"><input class="fpa-in" id="fpa-phone" placeholder="الموبايل (اختياري)"><input class="fpa-in" id="fpa-gov" placeholder="المحافظة (اختياري)"><label class="fpa-m" style="display:flex;gap:6px;align-items:center">الاشتراك ساري حتى <input class="fpa-in" id="fpa-until" type="date" value="'+ymd(addMonths(null,12))+'" style="flex:none"></label></div>'+
     '<input type="hidden" id="fpa-wid"><input type="hidden" id="fpa-cn"><div class="fpa-row"><button class="fpa-b p" id="fpa-create">إنشاء الحساب وإرسال رابط كلمة المرور</button><span class="fpa-m" id="fpa-st"></span></div>'+
     '<div class="fpa-m" style="margin-top:6px">الإيميل ده هيبقى «مدير الحساب» للجمعية: هيوصله إيميل يحط منه كلمة المرور بنفسه، ومن لوحته يضيف زمايله (لحد 3 مستخدمين)، وبعدها تدخل من <span dir="ltr">'+esc(PORTAL_URL)+'</span>. انت مش هتعرف كلمة المرور.</div></div>'+
-    '<div class="fpa-row" style="margin:10px 0"><input class="fpa-in" id="fpa-q" placeholder="🔍 ابحث في الحجوزات والحسابات: الاسم، الإيميل، الموبايل، رقم العرض" value="'+esc(S.q)+'"><select class="fpa-in" id="fpa-f" style="flex:none"><option value="">الكل</option><option value="on">نشط</option><option value="soon">ينتهي قريب</option><option value="exp">منتهي</option><option value="off">موقوف</option></select></div>'+
+    '<div class="fpa-row" style="margin:10px 0"><input class="fpa-in" id="fpa-q" placeholder="🔍 ابحث في الحجوزات والحسابات: الاسم، الإيميل، الموبايل، رقم العرض" value="'+esc(S.q)+'"><select class="fpa-in" id="fpa-f" style="flex:none"><option value="">الكل</option><option value="on">نشط</option><option value="soon">ينتهي قريب</option><option value="exp">منتهي</option><option value="off">موقوف</option><option value="trial">🧪 تجريبي</option><option value="hot">🔥 عملاء ساخنين</option></select></div>'+
     '<div id="fpa-wait">'+waitHTML()+'</div>'}
+  // ---------- الحساب التجريبي ----------
+  var waLink=function(p,t){var d=phone(p);return d?'https://wa.me/20'+d+'?text='+encodeURIComponent(t||''):''};
+  function hotHTML(){var tr=S.orgs.filter(function(o){return o.plan==='trial'}),hot=tr.filter(function(o){return o.hot}).sort(function(a,b){return (toD(b.hot.last)||0)-(toD(a.hot.last)||0)});
+    if(!tr.length)return '';
+    var used=tr.filter(function(o){return lastIn(o)}).length;
+    return '<div class="fpa-card" style="border-color:#f1d98e;background:#fffdf5"><div style="font-weight:800;color:#6b4a00;margin-bottom:6px">🧪 الحسابات التجريبية: '+tr.length+' · دخلوا المنصة: '+used+' · 🔥 عملاء ساخنين: '+hot.length+'</div>'+
+      (hot.length?'<div class="fpa-m" style="margin-bottom:6px">دول جمعيات تجريبية حاولت تكتب مقترح أو تستخدم أداة للمشتركين. كلمهم في نفس اليوم.</div>'+hot.slice(0,15).map(function(o){var h=o.hot||{};
+        var t='السلام عليكم، معاك مصطفى من تنمويين مصر. شفت إنكم بتجهزوا مقترح'+(h.opp?' لـ «'+h.opp+'»':'')+' على منصة الفرص. تحبوا نكمل المقترح سوا؟';
+        return '<div class="fpa-row" style="border-top:1px dashed #f1d98e;padding-top:6px;margin-top:6px"><div style="flex:1;min-width:180px"><b>'+esc(o.name)+'</b><div class="fpa-m">🔥 '+(h.count||1)+' مرة · آخر مرة '+fmt(toD(h.last))+(h.feature?' · '+esc(FEAT[h.feature]||h.feature):'')+(h.opp?'<br>الفرصة: '+esc(h.opp):'')+'</div></div>'+
+          (waLink(o.phone)?'<a class="fpa-b g" style="text-decoration:none" target="_blank" rel="noopener" href="'+waLink(o.phone,t)+'">💬 واتساب</a>':'')+'</div>'}).join(''):'<div class="fpa-m">لسه مفيش عملاء ساخنين.</div>')+
+      '<div class="fpa-m" style="margin-top:8px">لما جمعية تجريبية تدفع، دوس «+ شهر» أو «+ سنة» على حسابها وهيتحول لاشتراك عادي بـ 3 مستخدمين.</div></div>'}
+  var FEAT={write:'كتابة المقترح','كتابة المقترح':'كتابة المقترح'};
+  function trialCfgHTML(){var t=S.trial||{};
+    return '<details class="fpa-card" id="fpa-trialcfg"><summary style="font-weight:800;color:#1a3a6e;cursor:pointer">⚙️ إعدادات الحساب التجريبي '+(t.open===false?'(مقفول)':'(مفتوح لحد '+esc(t.until||'2026-11-30')+')')+'</summary>'+
+      '<div class="fpa-row" style="margin-top:10px"><label class="fpa-m" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="fpa-topen"'+(t.open===false?'':' checked')+'> التفعيل الذاتي مفتوح</label>'+
+      '<label class="fpa-m" style="display:flex;gap:6px;align-items:center">التجربة لحد <input class="fpa-in" type="date" id="fpa-tuntil" value="'+esc(t.until||'2026-11-30')+'" style="flex:none"></label>'+
+      '<label class="fpa-m" style="display:flex;gap:6px;align-items:center;flex:1">واتساب المساعدة <input class="fpa-in" id="fpa-twa" dir="ltr" placeholder="201xxxxxxxxx" value="'+esc(t.wa||'')+'"></label>'+
+      '</div><div class="fpa-row" style="margin-top:8px"><label class="fpa-m" style="display:flex;gap:6px;align-items:center;flex:1">عرض السعر اللي بيتبعت للحسابات التجريبية <select class="fpa-in" id="fpa-tq"><option value="">آخر عرض اتبعت (تلقائي)</option>'+
+        (S.qpub||[]).map(function(x){return '<option value="'+esc(x.tok)+'"'+(t.quoteTpl===x.tok?' selected':'')+'>'+esc(x.no||'')+' · '+esc(x.assoc||'')+' · تأسيس '+(+x.setup||0)+' · شهري '+(+x.monthly||0)+'</option>'}).join('')+'</select></label>'+
+      '<button class="fpa-b p" id="fpa-tsave">حفظ</button></div>'+
+      '<div class="fpa-m" style="margin-top:6px">صفحة التفعيل: <a dir="ltr" href="'+PORTAL_URL+'trial.html" target="_blank" rel="noopener">'+esc(PORTAL_URL)+'trial.html</a>. الحساب التجريبي بمستخدم واحد وحد تكلفة دولار، والتاريخ ده بيتطبق على الحسابات الجديدة بس. رقم الواتساب بيظهر للجمعيات في صفحة التفعيل وجوه المنصة. لما جمعية تجريبية تدوس «عرض السعر»: لو حجزها عليه عرض بيتفتحلها هو، ولو مفيش بيتعمل عرض جديد برقم TM-FP-سنة-W### بنفس أسعار وبيانات تحويل العرض المختار هنا، وحالة الحجز بتبقى «العرض اتبعت».</div></details>'}
+  function bindTrial(){var b=g('fpa-tsave');if(!b)return;b.onclick=async function(){var wa=digits(g('fpa-twa').value);if(wa&&wa.indexOf('20')!==0)wa='20'+wa.replace(/^0/,'');
+      var d={open:g('fpa-topen').checked,until:g('fpa-tuntil').value||'2026-11-30',wa:wa,quoteTpl:(g('fpa-tq')||{}).value||'',updatedAt:FV().serverTimestamp()};
+      try{await db.collection('fp_meta').doc('trial').set(d,{merge:true});S.trial=d;T('✅ اتحفظت إعدادات التجربة');var x=g('fpa-trialcfg');if(x)x.outerHTML=trialCfgHTML();bindTrial()}catch(e){T('❌ '+e.message)}}}
   function waitHTML(){var ord={paid:0,accepted:1,quoted:2,contacted:3,pending:4};
     var qq=nq(S.q);
     var ready=S.wait.filter(function(w){return !w.orgUid&&!w.orgId&&w.status!=='rejected'&&w.status!=='active'&&(w.contactEmail||w.orgEmail||w.email)
@@ -81,12 +106,13 @@
       '<div class="fpa-m" style="margin-top:6px">«جهّز الحساب» بيملا بيانات الجمعية في فورم الحساب الجديد فوق، وبعد الإنشاء الحجز بيتحول لـ «مفعّل» ويتربط بالحساب.</div></div>'}
   function nq(x){return String(x||'').toLowerCase().replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[٠-٩]/g,function(c){return '٠١٢٣٤٥٦٧٨٩'.indexOf(c)}).replace(/\s+/g,' ').trim()}
   function hay(o){var w=bk(o)||{};return nq([o.name,o.email,o.phone,o.regNumber,o.gov,o.contactName,o.notes,w.orgName,w.contactName,w.contactEmail,w.orgEmail,w.phone,w.quote&&w.quote.no].concat(mems(o).map(function(m){return m.email+' '+(m.name||'')})).join(' '))}
-  function listHTML(){var q=nq(S.q);var rows=S.orgs.filter(function(o){return (!q||q.split(' ').every(function(t){return hay(o).indexOf(t)>-1}))&&(!S.f||state(o).k===S.f)});
+  function listHTML(){var q=nq(S.q);var rows=S.orgs.filter(function(o){return (!q||q.split(' ').every(function(t){return hay(o).indexOf(t)>-1}))&&(!S.f||(S.f==='trial'?o.plan==='trial':S.f==='hot'?!!(o.plan==='trial'&&o.hot):state(o).k===S.f))});
+    if(S.f==='hot')rows.sort(function(a,b){return (toD(b.hot&&b.hot.last)||0)-(toD(a.hot&&a.hot.last)||0)});
     if(!rows.length)return '<div class="fpa-m" style="text-align:center;padding:20px">مفيش حسابات'+(q||S.f?' بالفلتر ده':' لسه')+'</div>';
     return rows.map(function(o){var st=state(o),until=toD(o.paidUntil);
-      return '<div class="fpa-card" data-org="'+o.id+'"><div class="fpa-row" style="justify-content:space-between"><div><b style="font-size:15px">'+esc(o.name)+'</b> <span class="fpa-pill" style="color:'+st.c+';background:'+st.bg+'">'+st.t+'</span>'+
+      return '<div class="fpa-card" data-org="'+o.id+'"><div class="fpa-row" style="justify-content:space-between"><div><b style="font-size:15px">'+esc(o.name)+'</b> <span class="fpa-pill" style="color:'+st.c+';background:'+st.bg+'">'+st.t+'</span>'+(o.plan==='trial'?' <span class="fpa-pill" style="color:#6b4a00;background:#fff1c7">🧪 تجريبي</span>':'')+(o.plan==='trial'&&o.hot?' <span class="fpa-pill" style="color:#b33a3a;background:#fde8e1">🔥 ساخن</span>':'')+
         '<div class="fpa-m" dir="ltr" style="text-align:right">'+esc(o.email)+(o.phone?' · '+esc(o.phone):'')+'</div></div>'+
-        (function(){var w=bk(o);return w?'<div class="fpa-m">🔗 الحجز: '+esc(WST[w.status]||w.status||'')+(w.quote&&w.quote.no?' · عرض '+esc(w.quote.no):'')+(w._rc?' · مدفوع '+Math.round(w._paid).toLocaleString('en-US')+' ج ('+w._rc.length+' إيصال)':'')+'</div>':''})()+'<div class="fpa-m">الاشتراك حتى: <b style="color:#11243a">'+fmt(until)+'</b><br>آخر دخول: '+fmt(lastIn(o))+'<br>'+useTxt(o)+'</div></div>'+
+        (function(){var w=bk(o);return w?'<div class="fpa-m">🔗 الحجز: '+esc(WST[w.status]||w.status||'')+(w.quote&&w.quote.no?' · عرض '+esc(w.quote.no):'')+(w._rc?' · مدفوع '+Math.round(w._paid).toLocaleString('en-US')+' ج ('+w._rc.length+' إيصال)':'')+'</div>':''})()+'<div class="fpa-m">الاشتراك حتى: <b style="color:#11243a">'+fmt(until)+'</b><br>آخر دخول: '+fmt(lastIn(o))+'<br>'+useTxt(o)+(o.quoteReq?'<br><b style="color:#0a8f6a">📄 طلب عرض السعر '+(o.quoteReq.count||1)+' مرة · آخر مرة '+fmt(toD(o.quoteReq.last))+'</b>':'')+'</div></div>'+
         '<div class="fpa-row" style="margin-top:10px"><button class="fpa-b g" data-ext="1">+ شهر</button><button class="fpa-b g" data-ext="3">+ 3 شهور</button><button class="fpa-b g" data-ext="12">+ سنة</button>'+
         '<input class="fpa-in" type="date" data-date value="'+ymd(until)+'" style="flex:none"><button class="fpa-b" data-set>فعّل حتى التاريخ</button>'+
         (o.status==='active'?'<button class="fpa-b r" data-off>⏸ إيقاف الحساب</button>':'<button class="fpa-b g" data-on>▶ تشغيل الحساب</button>')+
@@ -114,6 +140,9 @@
     var mon=new Date().toISOString().slice(0,7);
     var pOrgs=db.collection('orgs').get(),pMem=db.collectionGroup('members').get().catch(function(e){console.warn('members',e);return null}),
       pWait=db.collection('funding_waitlist').get().catch(function(){return null}),pUse=db.collection('fp_usage').where('month','==',mon).get().catch(function(){return null});
+    Promise.all([db.collection('fp_meta').doc('trial').get(),db.collection('quote_public').get().catch(function(){return null})]).then(function(r){S.trial=(r[0].exists&&r[0].data())||{};
+      S.qpub=r[1]?r[1].docs.map(function(d){var x=d.data();x.tok=d.id;return x}).filter(function(x){return x.status==='open'&&x.source!=='trial'&&+x.monthly>0}).sort(function(a,b){return (toD(b.updatedAt)||0)-(toD(a.updatedAt)||0)}):[];
+      var b=g('fpa-trialcfg');if(b)b.outerHTML=trialCfgHTML();bindTrial()}).catch(function(){});
     try{var s=await pOrgs;S.orgs=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return (toD(b.createdAt)||0)-(toD(a.createdAt)||0)})}
     catch(e){if(l)l.innerHTML='<div style="color:#b33a3a;padding:12px;text-align:center">❌ '+(e.code==='permission-denied'?'محتاج تنشر قواعد Firestore الجديدة (orgs)':esc(e.message))+'</div>';return}
     var r=await Promise.all([pMem,pWait,pUse]);
@@ -138,7 +167,7 @@
           until:u?new Date(u+'T23:59:00'):null,waitlistId:g('fpa-wid').value});
         T(S.lastExisted?'✅ اتعمل حساب الجمعية. الإيميل ده عليه حساب على تنمويين مصر بالفعل، فهيدخلوا المنصة بنفس كلمة المرور بتاعته':'✅ اتعمل الحساب واتبعت للجمعية إيميل تحط منه كلمة المرور');['fpa-name','fpa-email','fpa-reg','fpa-phone','fpa-gov','fpa-wid','fpa-cn'].forEach(function(k){g(k).value=''});c.disabled=false;g('fpa-st').textContent='';await load()}
       catch(e){st.textContent='❌ '+e.message;c.disabled=false}};
-    bindFill();
+    bindFill();bindTrial();
     var q=g('fpa-q');if(q)q.oninput=function(){S.q=q.value;var a=g('adm-search');if(a)a.value=q.value;renderList()};
     // خانة البحث اللي فوق خالص في لوحة الأدمن بتبحث هنا كمان لما تبويب حسابات المنصة مفتوح
     var top=g('adm-search');if(top&&!top._fpa){top._fpa=1;top.addEventListener('input',function(){var b=g('adm-form-fpaccounts');if(!b||b.style.display==='none')return;S.q=top.value;var m=g('fpa-q');if(m)m.value=top.value;renderList()})}var f=g('fpa-f');if(f)f.onchange=function(){S.f=f.value;renderList()};
@@ -146,8 +175,8 @@
   function bindFill(){document.querySelectorAll('[data-fill]').forEach(function(b){b.onclick=function(){var w=S.wait.find(function(x){return x.id===b.dataset.fill});if(!w)return;
       g('fpa-name').value=w.orgName||'';g('fpa-email').value=w.contactEmail||w.email||'';g('fpa-phone').value=w.phone||'';g('fpa-gov').value=w.gov||'';g('fpa-reg').value=w.regNumber||'';g('fpa-cn').value=w.contactName||'';g('fpa-wid').value=w.id;g('fpa-name').scrollIntoView({behavior:'smooth',block:'center'})}});}
   function bindList(){document.querySelectorAll('#fpa-list [data-org]').forEach(function(card){var id=card.dataset.org;var o=S.orgs.find(function(x){return x.id===id});if(!o)return;
-    card.querySelectorAll('[data-ext]').forEach(function(b){b.onclick=function(){var d=addMonths(toD(o.paidUntil),+b.dataset.ext);upd(id,{paidUntil:TS(d),status:'active'},'✅ اتمد الاشتراك حتى '+fmt(d))}});
-    var s=card.querySelector('[data-set]');if(s)s.onclick=function(){var v=card.querySelector('[data-date]').value;if(!v){T('اختار التاريخ');return}var d=new Date(v+'T23:59:00');upd(id,{paidUntil:TS(d),status:'active'},'✅ الحساب شغال حتى '+fmt(d))};
+    card.querySelectorAll('[data-ext]').forEach(function(b){b.onclick=function(){var d=addMonths(toD(o.paidUntil),+b.dataset.ext),x={paidUntil:TS(d),status:'active'};if(o.plan==='trial'){if(!confirm('تحويل «'+o.name+'» من حساب تجريبي لاشتراك مدفوع لحد '+fmt(d)+'؟'))return;x.plan='paid';x.seats=Math.max(3,+o.seats||0)}upd(id,x,o.plan==='trial'?'✅ اتحول لاشتراك لحد '+fmt(d):'✅ اتمد الاشتراك حتى '+fmt(d))}});
+    var s=card.querySelector('[data-set]');if(s)s.onclick=function(){var v=card.querySelector('[data-date]').value;if(!v){T('اختار التاريخ');return}var d=new Date(v+'T23:59:00'),x={paidUntil:TS(d),status:'active'};if(o.plan==='trial'&&confirm('تحوّل «'+o.name+'» لاشتراك مدفوع؟\n\nOK = اشتراك مدفوع بـ 3 مستخدمين\nCancel = يفضل تجريبي ويتمد بس')){x.plan='paid';x.seats=Math.max(3,+o.seats||0)}upd(id,x,'✅ الحساب شغال حتى '+fmt(d))};
     var off=card.querySelector('[data-off]');if(off)off.onclick=function(){if(confirm('إيقاف حساب '+o.name+'؟ الجمعية مش هتقدر تستخدم المنصة لحد ما تشغله تاني.'))upd(id,{status:'suspended'},'⏸ اتوقف الحساب')};
     var on=card.querySelector('[data-on]');if(on)on.onclick=function(){var until=toD(o.paidUntil);if(!until||until<new Date()){T('الاشتراك منتهي: مد الاشتراك أو حدد تاريخ جديد');return}upd(id,{status:'active'},'▶ اتشغل الحساب')};
     var r=card.querySelector('[data-reset]');if(r)r.onclick=async function(){try{auth.languageCode='ar';await auth.sendPasswordResetEmail(o.email,{url:PORTAL_URL});T('📧 اتبعت رابط كلمة المرور لـ '+o.email)}catch(e){T('❌ '+e.message)}};

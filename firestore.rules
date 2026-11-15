@@ -57,9 +57,83 @@ service cloud.firestore {
     function contactsUpdateOk(col) {
       return contactsOk(col, request.resource.data, request.resource.data.diff(resource.data).affectedKeys());
     }
-    // حماية بسيطة للفورمات العامة: عدد حقول معقول
+    // حماية بسيطة للفورمات العامة: عدد حقول معقول (80)، وحد أقصى لطول أهم النصوص في كل فورم
+    // (النص القصير 500 حرف، الطويل 20000، اللينك 2000). الحقول اللي مش نص مش بتتأثر.
+    function strOk(d, k, n) {
+      return !(k in d) || !(d[k] is string) || d[k].size() <= n;
+    }
     function smallForm() {
       return request.resource.data.keys().size() <= 80;
+    }
+    function jobForm() {
+      let d = request.resource.data;
+      return smallForm()
+        && strOk(d, 'title', 500)
+        && strOk(d, 'org', 500)
+        && strOk(d, 'reporter', 500)
+        && strOk(d, 'contact', 500)
+        && strOk(d, 'gov', 500)
+        && strOk(d, 'dl', 500)
+        && strOk(d, 'sal', 500)
+        && strOk(d, 'budget', 500)
+        && strOk(d, 'desc', 20000)
+        && strOk(d, 'req', 20000)
+        && strOk(d, 'link', 2000);
+    }
+    function consultForm() {
+      let d = request.resource.data;
+      return smallForm()
+        && strOk(d, 'orgName', 500)
+        && strOk(d, 'delegate', 500)
+        && strOk(d, 'phone', 500)
+        && strOk(d, 'email', 500)
+        && strOk(d, 'gov', 500)
+        && strOk(d, 'desc', 20000);
+    }
+    function atharForm() {
+      let d = request.resource.data;
+      return smallForm()
+        && strOk(d, 'orgName', 500)
+        && strOk(d, 'contactName', 500)
+        && strOk(d, 'phone', 500)
+        && strOk(d, 'orgEmail', 500)
+        && strOk(d, 'contactEmail', 500)
+        && strOk(d, 'notes', 20000)
+        && strOk(d, 'requests', 20000);
+    }
+    function msgForm() {
+      let d = request.resource.data;
+      return smallForm()
+        && strOk(d, 'name', 500)
+        && strOk(d, 'subject', 500)
+        && strOk(d, 'email', 500)
+        && strOk(d, 'phone', 500)
+        && strOk(d, 'message', 20000)
+        && strOk(d, 'msg', 20000);
+    }
+    function regForm() {
+      let d = request.resource.data;
+      return smallForm()
+        && strOk(d, 'name', 500)
+        && strOk(d, 'phone', 500)
+        && strOk(d, 'email', 500)
+        && strOk(d, 'spec', 500)
+        && strOk(d, 'gov', 500)
+        && strOk(d, 'bio', 20000)
+        && strOk(d, 'notes', 20000)
+        && strOk(d, 'exp', 20000)
+        && strOk(d, 'orgs', 20000)
+        && strOk(d, 'address', 500);
+    }
+    function orgReqForm() {
+      let d = request.resource.data;
+      return smallForm()
+        && strOk(d, 'name', 500)
+        && strOk(d, 'orgName', 500)
+        && strOk(d, 'phone', 500)
+        && strOk(d, 'email', 500)
+        && strOk(d, 'notes', 20000)
+        && strOk(d, 'desc', 20000);
     }
 
     // Public collections: anyone can browse, only admin can write.
@@ -143,14 +217,14 @@ service cloud.firestore {
     // Registered organization accounts must bind ownerUid to their own account.
     // All submissions remain in moderation until the admin approves them.
     match /pending_jobs/{doc} {
-      allow create: if (!isSignedIn() || isNewOwner()) && smallForm();
+      allow create: if (!isSignedIn() || isNewOwner()) && jobForm();
       allow read: if isAdmin() || isOwner(resource);
       allow update: if isAdmin() || isOwnerPendingUpdate(resource);
       allow delete: if isAdmin() || isOwner(resource);
     }
 
     match /pending_tenders/{doc} {
-      allow create: if (!isSignedIn() || isNewOwner()) && smallForm();
+      allow create: if (!isSignedIn() || isNewOwner()) && jobForm();
       allow read: if isAdmin() || isOwner(resource);
       allow update: if isAdmin() || isOwnerPendingUpdate(resource);
       allow delete: if isAdmin() || isOwner(resource);
@@ -159,13 +233,13 @@ service cloud.firestore {
     // Public registration/request forms.
     // These records are not publicly readable.
     match /org_requests/{doc} {
-      allow create: if smallForm();
+      allow create: if orgReqForm();
       allow read, update, delete: if isAdmin();
     }
 
     // طلبات التسجيل: أي حد يسجل. لو مسجل دخول، الطلب بيتربط بحسابه هو بس.
     match /registration_requests/{doc} {
-      allow create: if smallForm() && (!('ownerUid' in request.resource.data)
+      allow create: if regForm() && (!('ownerUid' in request.resource.data)
         || (isSignedIn() && request.resource.data.ownerUid == request.auth.uid));
       allow read: if isAdmin() || ownsDoc();
       allow update: if isAdmin() || (ownerEdit() && resource.data.status == 'pending');
@@ -186,13 +260,13 @@ service cloud.firestore {
     }
 
     match /consultations/{doc} {
-      allow create: if smallForm();
+      allow create: if consultForm();
       allow read, update, delete: if isAdmin();
     }
 
     // طلبات تجربة أثر: أي حد يبعت الطلب، والأدمن بس يشوف ويعدّل
     match /athar_trials/{doc} {
-      allow create: if smallForm();
+      allow create: if atharForm();
       allow read, update, delete: if isAdmin();
     }
 
@@ -265,7 +339,7 @@ service cloud.firestore {
 
     // رسائل "تواصل مع الإدارة": أي حد يبعت، والأدمن بس يقرا
     match /contact_messages/{doc} {
-      allow create: if smallForm();
+      allow create: if msgForm();
       allow read, update, delete: if isAdmin();
     }
 

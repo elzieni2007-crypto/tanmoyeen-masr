@@ -45,6 +45,22 @@ button:disabled{opacity:.6;cursor:wait}
 .wa{background:#e7faf3;color:#00703a}.em{background:#fff3cd;color:#c06010}
 .muted{color:var(--muted);font-size:13px}
 .center{text-align:center}
+.lead{font-size:14.5px;margin:10px 0 0}
+.note{color:#1b6fa8;font-weight:700;font-size:14px;margin:8px 0 0}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}
+.tiles div{background:var(--ice);border-radius:12px;padding:10px;text-align:center}
+.tiles b{display:block;color:var(--navy);font-size:16px}.tiles span{font-size:12.5px;color:var(--muted)}
+h2{font-size:17px;color:var(--navy);margin:0 0 10px}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{position:relative;padding:8px 40px 8px 0;border-bottom:1px solid var(--line);font-size:13.5px;counter-increment:s}
+.steps li:last-child{border-bottom:0}
+.steps li:before{content:counter(s);position:absolute;right:0;top:9px;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.steps b{display:block;font-size:14.5px;color:var(--ink)}
+.cmp{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+.cmp th,.cmp td{border:1px solid var(--line);padding:7px 8px;vertical-align:top;text-align:right}
+.cmp th{background:#f4f8fb;color:var(--navy)}.cmp td.us{background:var(--ice);font-weight:700}
+.terms{margin:0;padding-inline-start:20px;font-size:13px;color:var(--muted)}
+.inc{font-size:12.5px;color:var(--muted);margin:2px 0 0}
 </style>
 </head>
 <body>
@@ -74,13 +90,27 @@ function done(r){if(r.decision==='accepted'){app.innerHTML='<div class="card don
     '<p class="muted">مكان جمعيتكم بيتأكد بعد ما نستلم التحويل وهنرد عليكم بتأكيد الحجز وميعاد التسليم.</p></div>'}
   else{app.innerHTML='<div class="card done"><div class="big">💬</div><h1>وصلنا استفساركم</h1><p class="sub">هنتواصل معاكم قريب. ولو اتفقنا تقدروا ترجعوا لنفس الرابط وتوافقوا على العرض.</p><div class="btns"><button class="go" id="again">نوافق على العرض دلوقتي</button></div></div>';
     document.getElementById('again').onclick=()=>form(r)}}
+const STEPS=[['حساب مستقل وآمن','حساب خاص بالجمعية، بياناتها ومقترحاتها محدش يشوفها غير فريقها المصرح له، وكل عضو بيدخل باسمه.'],['بروفايل الجمعية الكامل','الهوية والخبرات والمشروعات السابقة والفريق والميزانيات والمستندات. البروفايل هو المصدر الوحيد لأي تحليل أو كتابة على المنصة.'],['بحث يومي عن الفرص.. وبحث وقت ما تطلب','كل صباح بتوصلك الدعوات الجديدة من السفارات والجهات المانحة والمنظمات الدولية اللي بتقدم منح فرعية. ولو مستعجل، اطلب بحث جديد في أي وقت وحدد المجال.'],['مصدر ورابط لكل فرصة','كل فرصة معاها اسم مصدر الإعلان ورابطه، ورابط الموقع الرسمي للممول.'],['دليل الممولين','مين بيموّل إيه، وإزاي توصله، وحجم التمويل، وطريق التمويل، ومناسب لأنهي حجم جمعية.'],['نسبة الملاءمة وقرار التقدم','تحليل الفرصة على 6 محاور من بروفايل الجمعية، ومصفوفة امتثال، وقرار «نتقدم ولا لأ» بمعايير واضحة.'],['قراءة دليل الدعوة','ارفع دليل المانح، والمنصة تطلّع منه الأقسام المطلوبة ومعايير التقييم وأوزانها وحدود الطول.'],['مسودة أولى قوية للمقترح','على نموذج المانح نفسه، ومعاها جدول يراجع الالتزام بالدليل، وقابلة للتعديل والتحميل Word.'],['النسخة الإنجليزية وإيميل التقديم','ترجمة بنفس الأقسام والجداول، وإيميل تقديم بالعربي أو الإنجليزي ومعاه قايمة المرفقات.'],['متابعة الفرص','خط تمويل يوضح كل فرصة في أي مرحلة ونتيجتها، مع المواعيد النهائية.']];
+const TERMS=['المنصة أداة مساعدة وفريق الجمعية مسؤول عن مراجعة المسودات واعتمادها قبل التقديم.','المنصة لا تضمن الحصول على تمويل. القرار للجهة المانحة وحدها.','بيانات الجمعية وملفاتها ملكها ومحدش يطلع عليها غير فريقها المصرح له.','دقة التحليل مرتبطة بدقة بيانات البروفايل.','أي تمويل أجنبي يحتاج موافقة وزارة التضامن الاجتماعي وفق القانون 149 لسنة 2019.'];
+function intro(){const cap=f(Q.cap||100);
+  return '<div class="card"><h1>منصة الفرص والمنح</h1><p class="sub">من أول فرصة.. لحد إيميل التقديم ومتابعة النتيجة</p>'+
+  '<p class="lead">الجمعيات بتخسر كل سنة فرص تمويل كتير يا إما لأنها عرفت بيها متأخر يا إما لأن مفيش وقت ولا فريق يكتب مقترح قوي على نموذج المانح. منصة الفرص والمنح من تنمويين مصر بتحل الاتنين: بتدور للجمعية على الفرص كل يوم وتقيس ملاءمتها لإمكانياتها وتجهز مسودة المقترح والإيميل، وفريق الجمعية هو اللي بيراجع ويقرر.</p>'+
+  '<p class="note">إحنا مش شركة استشارية بتكتب بدالك. دي أداة في إيد جمعيتك والقرار دايما للجمعية.</p>'+
+  '<div class="tiles"><div><b>كل يوم</b><span>بحث آلي عن فرص المنح</span></div><div><b>عربي وإنجليزي</b><span>مقترحات وإيميلات تقديم</span></div><div><b>حتى '+cap+'</b><span>مقترح في السنة</span></div><div><b>أول 100</b><span>جمعية في المرحلة الأولى</span></div></div></div>'+
+  '<div class="card"><h2>رحلة جمعيتك على المنصة</h2><ol class="steps">'+STEPS.map(x=>'<li><b>'+x[0]+'</b>'+x[1]+'</li>').join('')+'</ol></div>'}
+function compare(){const cap=f(Q.cap||100);
+  const rows=[['التكلفة','أتعاب على كل مقترح وبتفرق جدا من استشاري للتاني',f(Q.monthly)+' جنيه شهريا ثابتة'],['عدد المقترحات','مقترح واحد لكل تعاقد','حتى '+cap+' مقترح في السنة'],['البحث عن الفرص','غالبا مش جزء من الخدمة','يومي ووقت ما تطلب'],['نموذج المانح ومعاييره','حسب خبرة الاستشاري','يتقرا من دليل الدعوة نفسه'],['الترجمة','غالبا تكلفة إضافية بتدفعها','عربي وإنجليزي من غير تكلفة إضافية'],['القرار والملكية','المقترح عند الاستشاري لحد التسليم','جمعيتك بتراجع وتعتمد والملفات ملكها']];
+  return '<div class="card"><h2>الفرق كبير جدا</h2><p class="lead" style="margin-top:0">اللي هتوفره من أتعاب استشاري في مقترح واحد بس يغطي اشتراك المنصة شهور كتير.. ما بالك وانت معاك أداة تقدم بيها على حتى '+cap+' مقترح في السنة. والنسخة الإنجليزية وإيميل التقديم جزء من الاشتراك، وكل اللي بيتعمل على المنصة ملك جمعيتك.</p>'+
+  '<table class="cmp"><tr><th></th><th>استشاري خارجي</th><th>منصة الفرص والمنح</th></tr>'+rows.map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td class="us">'+r[2]+'</td></tr>').join('')+'</table></div>'+
+  '<div class="card"><h2>شروط وملاحظات</h2><ul class="terms">'+TERMS.map(t=>'<li>'+t+'</li>').join('')+'</ul></div>'}
 function form(prev){const annual=Q.monthly*(Q.annualMonths||10);
-  app.innerHTML='<div class="card"><h1>عرض سعر منصة الفرص والمنح</h1><p class="sub">مقدم إلى '+E(Q.assoc||'الجمعية')+'</p><span class="no">'+E(Q.no)+'</span>'+
+  app.innerHTML=intro()+'<div class="card"><h1>عرض سعر منصة الفرص والمنح</h1><p class="sub">مقدم إلى '+E(Q.assoc||'الجمعية')+'</p><span class="no">'+E(Q.no)+'</span>'+
   '<div class="rows"><div class="row"><span>رسوم التأسيس<small>تدريب الفريق وتشغيل الحساب وتجهيز بيانات الجمعية</small></span><b class="once">'+f(Q.setup)+' جنيه<small class="once">تدفع مرة واحدة</small></b></div>'+
   '<div class="row"><span>الاشتراك الشهري<small>الاستضافة واشتراكات الذكاء الاصطناعي · السداد ربع سنوي مقدما</small></span><b>'+f(Q.monthly)+' جنيه</b></div>'+
   (Q.annualMonths&&Q.annualMonths<12?'<div class="row"><span>لو دفعتم السنة مقدم<small>بدل '+f(Q.monthly*12)+' جنيه</small></span><b>'+f(annual)+' جنيه</b></div>':'')+
   '<div class="row"><span>جدية التعاقد<small>بتتخصم من رسوم التأسيس والباقي بعد تسليم المنصة</small></span><b>'+f(Q.deposit)+' جنيه</b></div></div>'+
-  (Q.validUntil?'<p class="muted">العرض صالح لحد '+E(Q.validUntil)+' أو لحد اكتمال أماكن أول '+f(Q.cap||100)+' جمعية.</p>':'')+'</div>'+
+  '<p class="inc"><b>الجمعية بتدفع مصاريف تشغيل المنصة واشتراكاتها بس.</b> المبالغ دي مش أتعاب استشارية: دي الاستضافة وحفظ البيانات واشتراكات برامج الذكاء الاصطناعي اللي بتعمل البحث الآلي والتحليل والكتابة والترجمة، وتدريب فريقكم في الأول.</p>'+
+  (Q.validUntil?'<p class="muted">العرض صالح لحد '+E(Q.validUntil)+' أو لحد اكتمال أماكن أول '+f(Q.cap||100)+' جمعية.</p>':'')+'</div>'+compare()+
   '<div class="card"><h1 style="font-size:17px">الموافقة على العرض</h1><p class="sub">اكتبوا بيانات المسؤول اللي بيوافق باسم الجمعية.</p>'+
   '<label for="n">الاسم</label><input id="n" autocomplete="name" value="'+E(Q.contact||'')+'">'+
   '<label for="t">الصفة</label><input id="t" placeholder="مثلا رئيس مجلس الإدارة أو المدير التنفيذي">'+

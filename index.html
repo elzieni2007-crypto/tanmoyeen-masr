@@ -598,6 +598,8 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
   <script src="vendor/firebase-app-compat.js"></script>
   <script src="vendor/firebase-firestore-compat.js"></script>
 <script>
+/* ارسال البيانات لـ Google Sheets اتلغى (البيانات كلها في Firebase). الدالة دي مكان fetch القديم عشان مفيش حاجة تتكسر */
+function tmNoSheets(){ return Promise.resolve({ok:true,json:function(){ return Promise.resolve({}); },text:function(){ return Promise.resolve(''); }}); }
 /* ===== حماية من حقن HTML/JavaScript (XSS) =====
    كل بيانات Firestore بتتنضف أول ما تتقري: الرموز اللي ممكن تتحول لكود (< > " ' `) بتتبدل
    برموز شبهها شكلًا ومش بتشتغل كود، واللينكات من نوع javascript: أو data: بتتشال. */
@@ -639,6 +641,7 @@ body.dark-mode input, body.dark-mode select { background: #1a1a2e; color: #e0e0e
 
 </script>
   <script src="vendor/firebase-auth-compat.js"></script>
+<script src="tm-contacts.js?v=20261115a"></script>
 <script src="vendor/firebase-functions-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" async></script>
 </head>
@@ -3902,7 +3905,7 @@ async function doReg(type){
   // 3. Deploy → New deployment → Web App → Execute as Me → Anyone
   // 4. انسخ الـ URL وضعه في SHEETS_URL أدناه
   // ============================================================
-  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzM09ySPqw6b7Oc922YZs_5grSbBuPVV9PW5zLy0MG2EddSR76r_aNxcRhs_0YjejjoUQ/exec'; // ← ضع URL هنا
+  const SHEETS_URL = ''; // ← ضع URL هنا
 
   // جمع بيانات الفورم - بالـ ID مباشرة لكل نوع
   function getVal(id){ const el=document.getElementById(id); return el ? el.value.trim() : ''; }
@@ -3992,7 +3995,7 @@ async function doReg(type){
 
   // إرسال لـ Google Sheets (لو الـ URL متحوط)
   if(SHEETS_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_URL'){
-    fetch(SHEETS_URL, {
+    tmNoSheets(SHEETS_URL, {
       method:'POST',
       mode:'no-cors',
       headers:{'Content-Type':'application/json'},
@@ -4232,8 +4235,8 @@ function submitJobReport(){
   }
 
   // ابعت للـ Sheets
-  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzM09ySPqw6b7Oc922YZs_5grSbBuPVV9PW5zLy0MG2EddSR76r_aNxcRhs_0YjejjoUQ/exec';
-  fetch(SHEETS_URL, {
+  const SHEETS_URL = '';
+  tmNoSheets(SHEETS_URL, {
     method:'POST', mode:'no-cors',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
@@ -4670,7 +4673,7 @@ function submitTenderReport(){
   }
 
   // ابعت للـ Sheets
-  fetch('https://script.google.com/macros/s/AKfycbzM09ySPqw6b7Oc922YZs_5grSbBuPVV9PW5zLy0MG2EddSR76r_aNxcRhs_0YjejjoUQ/exec', {
+  tmNoSheets('', {
     method:'POST', mode:'no-cors',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
@@ -4985,7 +4988,7 @@ async function submitVolunteer(){
   });
 
   // ارسال للـ Sheets
-  fetch('https://script.google.com/macros/s/AKfycbzM09ySPqw6b7Oc922YZs_5grSbBuPVV9PW5zLy0MG2EddSR76r_aNxcRhs_0YjejjoUQ/exec',{
+  tmNoSheets('',{
     method:'POST', mode:'no-cors',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
@@ -5219,7 +5222,7 @@ async function submitConsultation(){
   }
 
   // Send to Sheets
-  fetch(SHEETS_URL, {
+  tmNoSheets(SHEETS_URL, {
     method: 'POST', mode: 'no-cors',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify(data)

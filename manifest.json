@@ -10,7 +10,11 @@
   "orientation": "portrait-primary",
   "lang": "ar",
   "dir": "rtl",
-  "categories": ["business", "productivity", "social"],
+  "categories": [
+    "business",
+    "productivity",
+    "social"
+  ],
   "icons": [
     {
       "src": "https://elzieni2007-crypto.github.io/tanmoyeen-masr/icon-192.png",
@@ -23,13 +27,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "https://elzieni2007-crypto.github.io/tanmoyeen-masr/screenshot1.png",
-      "sizes": "540x720",
-      "type": "image/png"
     }
   ],
   "prefer_related_applications": false,

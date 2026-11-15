@@ -42,6 +42,26 @@ service cloud.firestore {
       return isSignedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
+    // ===== بيانات التواصل في الأدلة (استشاريين/موردين/متطوعين/مؤسسات) =====
+    // الموبايل والإيميل المخفيين (showPhone/showEmail = false) وموبايلات المتطوعين و phoneNorm/emailNorm
+    // مايتكتبوش في الملف العام، ومكانهم contacts_priv. القاعدة بتبص بس على الحقول اللي اتغيرت.
+    function contactsOk(col, d, ch) {
+      return !('phoneNorm' in d && ch.hasAny(['phoneNorm']))
+        && !('emailNorm' in d && ch.hasAny(['emailNorm']))
+        && !('phone' in d && ch.hasAny(['phone','showPhone']) && (col == 'volunteers' || d.get('showPhone', true) == false))
+        && !('email' in d && ch.hasAny(['email','showEmail']) && d.get('showEmail', true) == false);
+    }
+    function contactsCreateOk(col) {
+      return contactsOk(col, request.resource.data, request.resource.data.keys());
+    }
+    function contactsUpdateOk(col) {
+      return contactsOk(col, request.resource.data, request.resource.data.diff(resource.data).affectedKeys());
+    }
+    // حماية بسيطة للفورمات العامة: عدد حقول معقول
+    function smallForm() {
+      return request.resource.data.keys().size() <= 80;
+    }
+
     // Public collections: anyone can browse, only admin can write.
     match /jobs/{doc} {
       allow read: if true;
@@ -59,22 +79,22 @@ service cloud.firestore {
 
     match /consultants/{doc} {
       allow read: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() || ownerEdit();
+      allow create: if isAdmin() && contactsCreateOk('consultants');
+      allow update: if (isAdmin() || ownerEdit()) && contactsUpdateOk('consultants');
       allow delete: if isAdmin() || ownsDoc();
     }
 
     match /suppliers/{doc} {
       allow read: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() || ownerEdit();
+      allow create: if isAdmin() && contactsCreateOk('suppliers');
+      allow update: if (isAdmin() || ownerEdit()) && contactsUpdateOk('suppliers');
       allow delete: if isAdmin() || ownsDoc();
     }
 
     match /volunteers/{doc} {
       allow read: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() || ownerEdit();
+      allow create: if isAdmin() && contactsCreateOk('volunteers');
+      allow update: if (isAdmin() || ownerEdit()) && contactsUpdateOk('volunteers');
       allow delete: if isAdmin() || ownsDoc();
     }
 
@@ -96,23 +116,41 @@ service cloud.firestore {
     // Creation and deletion are controlled by the admin.
     match /organizations/{doc} {
       allow read: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() || ownerEdit();
+      allow create: if isAdmin() && contactsCreateOk('organizations');
+      allow update: if (isAdmin() || ownerEdit()) && contactsUpdateOk('organizations');
       allow delete: if isAdmin() || ownsDoc();
+    }
+
+    // النسخة الخاصة من بيانات التواصل: الأدمن وصاحب الملف بس
+    match /contacts_priv/{col}/docs/{id} {
+      function dirOwner() {
+        return isSignedIn() && col in ['consultants','suppliers','volunteers','organizations']
+          && exists(/databases/$(database)/documents/$(col)/$(id))
+          && get(/databases/$(database)/documents/$(col)/$(id)).data.get('ownerUid', '') == request.auth.uid;
+      }
+      function privShape() {
+        return col in ['consultants','suppliers','volunteers','organizations']
+          && request.resource.data.keys().hasOnly(['phone','email','phoneNorm','emailNorm','at'])
+          && request.resource.data.get('phone', '') is string && request.resource.data.get('phone', '').size() <= 200
+          && request.resource.data.get('email', '') is string && request.resource.data.get('email', '').size() <= 200;
+      }
+      allow read: if isAdmin() || dirOwner();
+      allow create, update: if (isAdmin() || dirOwner()) && privShape();
+      allow delete: if isAdmin() || dirOwner();
     }
 
     // Public submissions are allowed without registration.
     // Registered organization accounts must bind ownerUid to their own account.
     // All submissions remain in moderation until the admin approves them.
     match /pending_jobs/{doc} {
-      allow create: if !isSignedIn() || isNewOwner();
+      allow create: if (!isSignedIn() || isNewOwner()) && smallForm();
       allow read: if isAdmin() || isOwner(resource);
       allow update: if isAdmin() || isOwnerPendingUpdate(resource);
       allow delete: if isAdmin() || isOwner(resource);
     }
 
     match /pending_tenders/{doc} {
-      allow create: if !isSignedIn() || isNewOwner();
+      allow create: if (!isSignedIn() || isNewOwner()) && smallForm();
       allow read: if isAdmin() || isOwner(resource);
       allow update: if isAdmin() || isOwnerPendingUpdate(resource);
       allow delete: if isAdmin() || isOwner(resource);
@@ -121,14 +159,14 @@ service cloud.firestore {
     // Public registration/request forms.
     // These records are not publicly readable.
     match /org_requests/{doc} {
-      allow create: if true;
+      allow create: if smallForm();
       allow read, update, delete: if isAdmin();
     }
 
     // طلبات التسجيل: أي حد يسجل. لو مسجل دخول، الطلب بيتربط بحسابه هو بس.
     match /registration_requests/{doc} {
-      allow create: if !('ownerUid' in request.resource.data)
-        || (isSignedIn() && request.resource.data.ownerUid == request.auth.uid);
+      allow create: if smallForm() && (!('ownerUid' in request.resource.data)
+        || (isSignedIn() && request.resource.data.ownerUid == request.auth.uid));
       allow read: if isAdmin() || ownsDoc();
       allow update: if isAdmin() || (ownerEdit() && resource.data.status == 'pending');
       allow delete: if isAdmin() || (ownsDoc() && resource.data.status == 'pending');
@@ -148,13 +186,13 @@ service cloud.firestore {
     }
 
     match /consultations/{doc} {
-      allow create: if true;
+      allow create: if smallForm();
       allow read, update, delete: if isAdmin();
     }
 
     // طلبات تجربة أثر: أي حد يبعت الطلب، والأدمن بس يشوف ويعدّل
     match /athar_trials/{doc} {
-      allow create: if true;
+      allow create: if smallForm();
       allow read, update, delete: if isAdmin();
     }
 
@@ -227,7 +265,7 @@ service cloud.firestore {
 
     // رسائل "تواصل مع الإدارة": أي حد يبعت، والأدمن بس يقرا
     match /contact_messages/{doc} {
-      allow create: if true;
+      allow create: if smallForm();
       allow read, update, delete: if isAdmin();
     }
 
